@@ -38,5 +38,21 @@
   "features": {},
   "resolve_model_ids": "omit",
   "mode": "interactive",
-  "granularity": "standard"
+  "granularity": "standard",
+  "github": {
+    "owner": "returdex",
+    "repository": "EvidenceLens-MCP",
+    "visibility": "public",
+    "license": "MIT",
+    "push_after_each_change": true
+  },
+  "release_policy": {
+    "scheme": "x.y.z",
+    "major_x": "manual_confirmation_required",
+    "minor_y": "increment_on_milestone_change",
+    "patch_z": "increment_on_each_completed_feature_or_compatible_fix",
+    "release_on_milestone_completion": true,
+    "release_on_post_milestone_fix": true,
+    "current_version": "0.1.0"
+  }
 }
