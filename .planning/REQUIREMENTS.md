@@ -7,9 +7,9 @@
 
 ### MCP Interface
 
-- [ ] **MCP-01**: An MCP client can discover and invoke the EvidenceLens review capability through a documented server interface.
-- [ ] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
-- [ ] **MCP-03**: The interface documents request inputs, supported evidence types, limits, and review output semantics.
+- [x] **MCP-01**: An MCP client can discover and invoke the EvidenceLens review capability through a documented server interface.
+- [x] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
+- [x] **MCP-03**: The interface documents request inputs, supported evidence types, limits, and review output semantics.
 
 ### Evidence Access
 
@@ -63,9 +63,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MCP-01 | Phase 1 | Pending |
-| MCP-02 | Phase 1 | Pending |
-| MCP-03 | Phase 1 | Pending |
+| MCP-01 | Phase 1 | Complete |
+| MCP-02 | Phase 1 | Complete |
+| MCP-03 | Phase 1 | Complete |
 | EVID-01 | Phase 2 | Pending |
 | EVID-02 | Phase 2 | Pending |
 | EVID-03 | Phase 2 | Pending |
