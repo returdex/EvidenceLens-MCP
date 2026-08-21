@@ -26,7 +26,10 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 **Plans**: 2 plans
 
 Plans:
+**Wave 1**
 - [ ] 01-01-PLAN.md — MCP server skeleton and transport contract
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02-PLAN.md — Findings schema, validation, errors, docs, and contract tests
 
 ### Phase 2: Evidence Ingestion and Multimodal Context
