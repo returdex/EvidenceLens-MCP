@@ -183,6 +183,17 @@ describe("review_evidence handler and MCP protocol contract", () => {
     expect(limitPayload).toMatchObject({ ok: false, code: "LIMIT_EXCEEDED" });
   });
 
+  it("returns a stable unsupported-evidence-type error code", async () => {
+    const payload = parseToolPayload(
+      await handleReviewRequest({
+        ...validRequest,
+        evidence: [{ id: "audio-1", role: "other", type: "audio" }]
+      })
+    );
+
+    expect(payload).toMatchObject({ ok: false, code: "UNSUPPORTED_EVIDENCE_TYPE" });
+  });
+
   it("initializes, discovers review_evidence through tools/list, and invokes it with tools/call", async () => {
     await withProtocolClient(async (request) => {
       const initializeResult = await request("initialize", {
