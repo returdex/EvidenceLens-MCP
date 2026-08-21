@@ -27,6 +27,10 @@ function createReviewResponse(request: ReviewRequest): ReviewResponse {
 }
 
 function errorFromValidation(error: ZodError): EvidenceLensError {
+  if (error.issues.some((issue) => issue.path.at(-1) === "type")) {
+    return new EvidenceLensError("UNSUPPORTED_EVIDENCE_TYPE", "Unsupported evidence type");
+  }
+
   const code = error.issues.some((issue) => issue.code === "too_big") ? "LIMIT_EXCEEDED" : "INVALID_REQUEST";
   return new EvidenceLensError(code, "Review request failed validation");
 }
