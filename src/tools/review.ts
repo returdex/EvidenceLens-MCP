@@ -11,6 +11,7 @@ import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.0";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
+const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
 
 function createReviewResponse(request: ReviewRequest): ReviewResponse {
   return {
@@ -26,8 +27,20 @@ function createReviewResponse(request: ReviewRequest): ReviewResponse {
   };
 }
 
-function errorFromValidation(error: ZodError): EvidenceLensError {
-  if (error.issues.some((issue) => issue.path.at(-1) === "type")) {
+function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError {
+  const evidence = typeof input === "object" && input !== null && "evidence" in input
+    ? (input as { evidence?: unknown }).evidence
+    : undefined;
+  const hasUnsupportedEvidenceType = Array.isArray(evidence) && evidence.some((item) => {
+    if (typeof item !== "object" || item === null || !("type" in item)) {
+      return false;
+    }
+
+    const type = (item as { type?: unknown }).type;
+    return typeof type === "string" && !SUPPORTED_EVIDENCE_TYPES.has(type);
+  });
+
+  if (hasUnsupportedEvidenceType) {
     return new EvidenceLensError("UNSUPPORTED_EVIDENCE_TYPE", "Unsupported evidence type");
   }
 
@@ -39,7 +52,7 @@ export async function handleReviewRequest(input: unknown): Promise<ReviewToolRes
   const parsed = reviewRequestSchema.safeParse(input);
 
   if (!parsed.success) {
-    return toToolErrorResult(errorFromValidation(parsed.error));
+    return toToolErrorResult(errorFromValidation(parsed.error, input));
   }
 
   return {
