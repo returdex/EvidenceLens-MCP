@@ -23,11 +23,11 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
   1. An MCP client can discover the server and invoke the review capability through documented inputs.
   2. Successful responses validate against a stable JSON findings schema and rejected requests return machine-readable errors.
   3. The repository contains a runnable local development command and contract-level tests.
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: MCP server skeleton and transport contract
-- [ ] 01-02: Findings schema, validation, errors, and contract tests
+- [ ] 01-01-PLAN.md — MCP server skeleton and transport contract
+- [ ] 01-02-PLAN.md — Findings schema, validation, errors, docs, and contract tests
 
 ### Phase 2: Evidence Ingestion and Multimodal Context
 **Goal**: Text, PDF, image/screenshot, and table evidence are normalized with references and hashes while preserving visual context.
