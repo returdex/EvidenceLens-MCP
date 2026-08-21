@@ -6,7 +6,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 
 ## Phases
 
-- [ ] **Phase 1: MCP Contract and Skeleton** - Establish a discoverable, schema-validated MCP server.
+- [x] **Phase 1: MCP Contract and Skeleton** - Establish a discoverable, schema-validated MCP server.
 - [ ] **Phase 2: Evidence Ingestion and Multimodal Context** - Normalize local evidence with references and hashes.
 - [ ] **Phase 3: Read-Only Filesystem Boundary** - Enforce allowlisted, read-only evidence access.
 - [ ] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings.
@@ -30,7 +30,7 @@ Plans:
 - [x] 01-01-PLAN.md — MCP server skeleton and transport contract
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02-PLAN.md — Findings schema, validation, errors, docs, and contract tests
+- [x] 01-02-PLAN.md — Findings schema, validation, errors, docs, and contract tests
 
 ### Phase 2: Evidence Ingestion and Multimodal Context
 **Goal**: Text, PDF, image/screenshot, and table evidence are normalized with references and hashes while preserving visual context.
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. MCP Contract and Skeleton | 1/2 | In Progress | - |
+| 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
 | 2. Evidence Ingestion and Multimodal Context | 0/TBD | Not started | - |
 | 3. Read-Only Filesystem Boundary | 0/TBD | Not started | - |
 | 4. Review Orchestration and Findings | 0/TBD | Not started | - |
@@ -103,4 +103,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-08-22 after Plan 01-01 execution*
+*Last updated: 2026-08-21 after Plan 01-02 execution*

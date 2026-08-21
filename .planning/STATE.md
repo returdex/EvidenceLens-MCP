@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-last_updated: "2026-08-21T15:45:33.339Z"
+status: ready_for_verification
+last_updated: "2026-08-21T15:56:23.576Z"
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 50
+  completed_plans: 2
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -19,20 +19,20 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 01 — MCP Contract and Skeleton
+**Current focus:** Phase 01 complete — ready for verification
 
 **Version:** 0.1.0
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 01 (MCP Contract and Skeleton) — EXECUTING
+Phase: 01 (MCP Contract and Skeleton) — COMPLETE
 Plan: 2 of 2
 
 - Phase: 1 of 6
-- Status: Ready to execute
-- Progress: 50%
-- Last activity: Plan 01-01 completed and pushed
+- Status: Ready for verification
+- Progress: 100%
+- Last activity: Plan 01-02 completed and pushed
 
 ## Decisions and Assumptions
 
@@ -43,12 +43,14 @@ Plan: 2 of 2
 - GitHub target is the public `returdex/EvidenceLens-MCP` repository under the MIT License.
 - Every intentional modification is expected to be committed and pushed; milestone completion and post-milestone fixes require a GitHub Release.
 - Use `@modelcontextprotocol/server` v2 split package with `serveStdio` and `McpServer`.
-- Keep Phase 1 input schema permissive while exposing contract types for Plan 01-02 validation.
+- Use strict Zod v4 schemas as the Phase 1 runtime validation and TypeScript contract source.
+- Use SDK in-memory transport tests to prove MCP `initialize`, `tools/list`, and `tools/call` behavior.
+- Keep `response.requestId = request.reviewId` explicit and deterministic.
 - Use a fixed `generatedAt` timestamp so skeleton tool output is deterministic.
 
 ## Next Action
 
-Continue with Phase 01 Plan 02.
+Verify Phase 01, then plan Phase 02.
 
 ---
-*Last updated: 2026-08-22 after Plan 01-01 execution*
+*Last updated: 2026-08-21 after Plan 01-02 execution*
