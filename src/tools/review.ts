@@ -1,27 +1,21 @@
 import type { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod/v4";
-import type { ReviewResponse } from "../contracts/review.js";
+import { ZodError } from "zod/v4";
+import {
+  reviewRequestSchema,
+  type ReviewRequest,
+  type ReviewResponse,
+  type ReviewToolResult
+} from "../contracts/review.js";
+import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 
 const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.0";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
-const DEFAULT_REQUEST_ID = "phase-1-review";
 
-const reviewInputSchema = z
-  .object({
-    reviewId: z.string().optional(),
-    objective: z.string().optional(),
-    evidence: z.array(z.unknown()).optional(),
-    limits: z.unknown().optional()
-  })
-  .passthrough();
-
-type ReviewToolInput = z.infer<typeof reviewInputSchema>;
-
-function createReviewResponse(input: ReviewToolInput): ReviewResponse {
+function createReviewResponse(request: ReviewRequest): ReviewResponse {
   return {
     ok: true,
-    requestId: input.reviewId ?? DEFAULT_REQUEST_ID,
+    requestId: request.reviewId,
     status: "accepted",
     findings: [],
     metadata: {
@@ -32,13 +26,35 @@ function createReviewResponse(input: ReviewToolInput): ReviewResponse {
   };
 }
 
+function errorFromValidation(error: ZodError): EvidenceLensError {
+  const code = error.issues.some((issue) => issue.code === "too_big") ? "LIMIT_EXCEEDED" : "INVALID_REQUEST";
+  return new EvidenceLensError(code, "Review request failed validation");
+}
+
+export async function handleReviewRequest(input: unknown): Promise<ReviewToolResult> {
+  const parsed = reviewRequestSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return toToolErrorResult(errorFromValidation(parsed.error));
+  }
+
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(createReviewResponse(parsed.data))
+      }
+    ]
+  };
+}
+
 export function registerReviewTool(server: McpServer): void {
   server.registerTool(
     "review_evidence",
     {
       title: "Review Evidence",
       description: "Accept Phase 1 evidence review metadata and return a deterministic skeleton response.",
-      inputSchema: reviewInputSchema,
+      inputSchema: reviewRequestSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -46,17 +62,6 @@ export function registerReviewTool(server: McpServer): void {
         openWorldHint: false
       }
     },
-    async (input) => {
-      const response = createReviewResponse(input);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(response)
-          }
-        ]
-      };
-    }
+    async (input) => handleReviewRequest(input)
   );
 }
