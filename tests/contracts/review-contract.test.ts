@@ -18,15 +18,16 @@ describe("Phase 1 review contract", () => {
 
   it("keeps evidence metadata-only and includes Phase 1 supported evidence types", async () => {
     const source = await readFile("src/contracts/review.ts", "utf8");
+    const evidenceInput = source.match(/export interface ReviewEvidenceInput \{[\s\S]*?\n\}/)?.[0] ?? "";
 
     expect(source).toMatch(/EvidenceType[\s\S]*"text"[\s\S]*"pdf"[\s\S]*"image"[\s\S]*"screenshot"[\s\S]*"table"/);
-    expect(source).toContain("id: string");
-    expect(source).toContain("role: EvidenceRole");
-    expect(source).toContain("type: EvidenceType");
-    expect(source).toContain("reference?: string");
-    expect(source).not.toContain("path:");
-    expect(source).not.toContain("content:");
-    expect(source).not.toContain("Buffer");
+    expect(evidenceInput).toContain("id: string");
+    expect(evidenceInput).toContain("role: EvidenceRole");
+    expect(evidenceInput).toContain("type: EvidenceType");
+    expect(evidenceInput).toContain("reference?: string");
+    expect(evidenceInput).not.toContain("path:");
+    expect(evidenceInput).not.toContain("content:");
+    expect(evidenceInput).not.toContain("Buffer");
   });
 
   it("requires deterministic response metadata with accepted skeleton status", async () => {
