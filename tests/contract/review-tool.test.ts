@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { InMemoryTransport, LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/server";
 import {
+  reviewResponseSchema,
   reviewRequestSchema,
   reviewToolResultSchema,
   type ReviewToolResult
 } from "../../src/contracts/review.js";
 import { EvidenceLensError, toToolErrorResult } from "../../src/errors.js";
+import { createServer } from "../../src/server.js";
+import { handleReviewRequest } from "../../src/tools/review.js";
 
 const validRequest = {
   reviewId: "review-001",
@@ -98,5 +102,116 @@ describe("review_evidence schema and error contract", () => {
     });
     expect(payload.message).not.toContain("\n");
     expect(payload.message).not.toContain("/Users/example/secret.txt");
+  });
+});
+
+async function withProtocolClient<T>(run: (request: (method: string, params?: Record<string, unknown>) => Promise<unknown>) => Promise<T>) {
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const server = createServer();
+  const pending = new Map<string | number, (message: JSONRPCMessage) => void>();
+  let requestId = 1;
+
+  clientTransport.onmessage = (message) => {
+    if ("id" in message && message.id !== undefined) {
+      pending.get(message.id)?.(message);
+      pending.delete(message.id);
+    }
+  };
+
+  await clientTransport.start();
+  await server.connect(serverTransport);
+
+  const request = async (method: string, params: Record<string, unknown> = {}) => {
+    const id = requestId++;
+    const responsePromise = new Promise<JSONRPCMessage>((resolve) => pending.set(id, resolve));
+
+    await clientTransport.send({ jsonrpc: "2.0", id, method, params });
+    const response = await responsePromise;
+
+    if ("error" in response) {
+      throw new Error(JSON.stringify(response.error));
+    }
+
+    if (!("result" in response)) {
+      throw new Error(`Missing JSON-RPC result for ${method}`);
+    }
+
+    return response.result;
+  };
+
+  try {
+    return await run(request);
+  } finally {
+    await server.close();
+    await clientTransport.close();
+  }
+}
+
+function parseToolPayload(toolResult: unknown) {
+  const parsedToolResult = reviewToolResultSchema.parse(toolResult);
+  return JSON.parse(parsedToolResult.content[0]?.text ?? "{}");
+}
+
+describe("review_evidence handler and MCP protocol contract", () => {
+  it("returns schema-valid deterministic success from the handler", async () => {
+    const first = await handleReviewRequest(validRequest);
+    const second = await handleReviewRequest(validRequest);
+    const firstPayload = parseToolPayload(first);
+
+    expect(first).toEqual(second);
+    expect(firstPayload.ok).toBe(true);
+    expect(firstPayload.requestId).toBe(validRequest.reviewId);
+    expect(firstPayload.metadata.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+    expect(reviewResponseSchema.parse(firstPayload)).toEqual(firstPayload);
+  });
+
+  it("returns machine-readable handler errors for malformed and limit-exceeded requests", async () => {
+    const invalidPayload = parseToolPayload(await handleReviewRequest({ ...validRequest, objective: "" }));
+    const limitPayload = parseToolPayload(
+      await handleReviewRequest({
+        ...validRequest,
+        evidence: Array.from({ length: 2 }, (_, index) => ({
+          id: `evidence-${index}`,
+          role: "other",
+          type: "text"
+        })),
+        limits: { maxEvidenceItems: 1 }
+      })
+    );
+
+    expect(invalidPayload).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+    expect(limitPayload).toMatchObject({ ok: false, code: "LIMIT_EXCEEDED" });
+  });
+
+  it("initializes, discovers review_evidence through tools/list, and invokes it with tools/call", async () => {
+    await withProtocolClient(async (request) => {
+      const initializeResult = await request("initialize", {
+        protocolVersion: LATEST_PROTOCOL_VERSION,
+        capabilities: {},
+        clientInfo: { name: "contract-test", version: "0.0.0" }
+      });
+      expect(initializeResult).toMatchObject({ serverInfo: { name: "evidencelens", version: "0.1.0" } });
+
+      const toolsListResult = (await request("tools/list")) as {
+        tools: Array<{ name: string; annotations?: Record<string, unknown> }>;
+      };
+      const toolNames = toolsListResult.tools.map((tool) => tool.name);
+      expect(toolNames).toEqual(["review_evidence"]);
+      expect(toolNames.some((name) => /write|delete|mutat/i.test(name))).toBe(false);
+      expect(toolsListResult.tools[0]?.annotations).toMatchObject({
+        readOnlyHint: true,
+        destructiveHint: false
+      });
+
+      const toolResult = await request("tools/call", {
+        name: "review_evidence",
+        arguments: validRequest
+      });
+      const payload = parseToolPayload(toolResult);
+
+      expect(payload.ok).toBe(true);
+      expect(payload.requestId).toBe(validRequest.reviewId);
+      expect(reviewResponseSchema.parse(payload)).toEqual(payload);
+    });
   });
 });
