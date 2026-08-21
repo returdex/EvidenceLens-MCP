@@ -20,6 +20,7 @@ type ReviewToolInput = z.infer<typeof reviewInputSchema>;
 
 function createReviewResponse(input: ReviewToolInput): ReviewResponse {
   return {
+    ok: true,
     requestId: input.reviewId ?? DEFAULT_REQUEST_ID,
     status: "accepted",
     findings: [],
