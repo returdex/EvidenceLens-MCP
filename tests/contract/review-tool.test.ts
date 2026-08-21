@@ -194,6 +194,24 @@ describe("review_evidence handler and MCP protocol contract", () => {
     expect(payload).toMatchObject({ ok: false, code: "UNSUPPORTED_EVIDENCE_TYPE" });
   });
 
+  it("keeps malformed evidence type values as invalid requests", async () => {
+    const missingType = parseToolPayload(
+      await handleReviewRequest({
+        ...validRequest,
+        evidence: [{ id: "missing-type", role: "other" }]
+      })
+    );
+    const nonStringType = parseToolPayload(
+      await handleReviewRequest({
+        ...validRequest,
+        evidence: [{ id: "numeric-type", role: "other", type: 42 }]
+      })
+    );
+
+    expect(missingType).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+    expect(nonStringType).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+  });
+
   it("initializes, discovers review_evidence through tools/list, and invokes it with tools/call", async () => {
     await withProtocolClient(async (request) => {
       const initializeResult = await request("initialize", {
