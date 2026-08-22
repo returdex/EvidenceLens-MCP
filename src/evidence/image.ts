@@ -132,6 +132,7 @@ export function normalizeImageEvidence(input: ImageEvidenceInput): NormalizedEvi
   const reference: ImageReference = { kind: "image", width: metadata.width, height: metadata.height, mimeType: metadata.mimeType };
   return {
     source: { id: input.id, type: input.type, reference: input.reference },
+    role: input.role as NormalizedEvidence["role"],
     contentHash,
     extraction: { extractor: "image-normalizer", extractorVersion: "1.0.0", generatedAt: input.generatedAt ?? new Date().toISOString(), partial },
     references: [reference],

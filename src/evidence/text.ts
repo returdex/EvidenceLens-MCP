@@ -33,6 +33,7 @@ export function normalizeTextEvidence(input: TextEvidenceInput): NormalizedEvide
 
   return {
     source: { id: input.id, type: input.type, reference: input.reference },
+    role: input.role as NormalizedEvidence["role"],
     contentHash: sha256Hex(originalBytes),
     extraction: {
       extractor: "text-normalizer",
