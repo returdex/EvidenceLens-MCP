@@ -39,6 +39,7 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
   const warnings: NormalizedEvidence["warnings"] = [];
   let partial = false;
   let visualPayload: NormalizedEvidence["visualPayload"];
+  const visualPayloads: NonNullable<NormalizedEvidence["visualPayloads"]> = [];
   try {
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
@@ -49,7 +50,6 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
 
       partial = true;
       warnings.push({ code: "PDF_PAGE_TEXT_UNAVAILABLE", message: `Page ${pageNumber} has no extractable text; a rendered visual payload was retained.` });
-      if (visualPayload) throw safePdfError();
       const viewport = page.getViewport({ scale: 1 });
       const width = Math.max(1, Math.ceil(viewport.width));
       const height = Math.max(1, Math.ceil(viewport.height));
@@ -58,7 +58,7 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
       await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: canvas.getContext("2d") as unknown as CanvasRenderingContext2D, viewport }).promise;
       const renderedBytes = canvas.toBuffer("image/png");
       if (renderedBytes.byteLength > maxVisualBytes) throw safePdfError();
-      visualPayload = {
+      const pageVisualPayload = {
         mimeType: "image/png",
         byteLength: renderedBytes.byteLength,
         width,
@@ -66,6 +66,8 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
         sha256: sha256Hex(renderedBytes),
         base64: renderedBytes.toString("base64")
       };
+      visualPayload ??= pageVisualPayload;
+      visualPayloads.push({ ...pageVisualPayload, pageNumber });
     }
   } catch (error) {
     if (error instanceof RangeError) throw error;
@@ -80,6 +82,7 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
     extraction: { extractor: "pdfjs-dist", extractorVersion: "6.2.108", generatedAt: input.generatedAt ?? new Date().toISOString(), partial },
     references,
     ...(visualPayload ? { visualPayload } : {}),
+    ...(visualPayloads.length > 0 ? { visualPayloads } : {}),
     warnings
   };
 }
