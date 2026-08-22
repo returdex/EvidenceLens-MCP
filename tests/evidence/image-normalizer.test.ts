@@ -33,7 +33,7 @@ describe("normalizeImageEvidence", () => {
     expect(result.extraction.partial).toBe(false);
   });
 
-  it("rejects unsupported image bytes and oversized or impossible dimensions safely", () => {
+  it("rejects unsupported, corrupted, oversized, or impossible image bytes safely", async () => {
     expect(() => normalizeImageEvidence({
       id: "not-image",
       role: "other",
@@ -62,5 +62,9 @@ describe("normalizeImageEvidence", () => {
 
     const malformedJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0, 11, 8, 0, 1, 0, 1, 1, 1, 0, 0]);
     expect(() => normalizeImageEvidence({ id: "fake-jpeg", role: "other", type: "image", reference: "fake.jpg", bytes: malformedJpeg })).toThrow(/unsupported|invalid/i);
+
+    const corrupted = new Uint8Array(await readFile("tests/fixtures/evidence/images/rubric-screenshot.png"));
+    corrupted[corrupted.length - 20] ^= 0xff;
+    expect(() => normalizeImageEvidence({ id: "corrupt-png", role: "other", type: "image", reference: "corrupt.png", bytes: corrupted })).toThrow(/unsupported|invalid/i);
   });
 });

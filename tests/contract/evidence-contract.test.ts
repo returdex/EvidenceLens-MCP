@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   contentHashSchema,
   extractionMetadataSchema,
@@ -10,6 +11,8 @@ import {
 import { sha256Hex } from "../../src/evidence/hash.js";
 
 const hash = "a".repeat(64);
+const imageBytes = readFileSync("tests/fixtures/evidence/images/rubric-screenshot.png");
+const imageBase64 = imageBytes.toString("base64");
 const extraction = {
   extractor: "text-normalizer",
   extractorVersion: "1.0.0",
@@ -38,11 +41,11 @@ describe("normalized evidence contract", () => {
       references: [{ kind: "pdf", pageNumber: 2, pageCount: 3 }],
       visualPayload: {
         mimeType: "image/png",
-        width: 1200,
-        height: 1600,
-        byteLength: 1,
-        sha256: sha256Hex(new Uint8Array([1])),
-        base64: "AQ=="
+        width: 320,
+        height: 180,
+        byteLength: imageBytes.byteLength,
+        sha256: sha256Hex(imageBytes),
+        base64: imageBase64
       },
       warnings: [{ code: "TEXT_UNAVAILABLE", message: "Page is scanned." }]
     });
@@ -58,12 +61,12 @@ describe("normalized evidence contract", () => {
       extraction: { ...extraction, extractor: "image-extractor" },
       references: [{ kind: "image", width: 800, height: 600, mimeType: "image/jpeg" }],
       visualPayload: {
-        mimeType: "image/jpeg",
-        width: 800,
-        height: 600,
-        byteLength: 1,
-        sha256: sha256Hex(new Uint8Array([1])),
-        base64: "AQ=="
+      mimeType: "image/png",
+      width: 320,
+      height: 180,
+      byteLength: imageBytes.byteLength,
+      sha256: sha256Hex(imageBytes),
+      base64: imageBase64
       },
       warnings: []
     });
@@ -110,16 +113,18 @@ describe("normalized evidence contract", () => {
     ).toBe(false);
     const validVisual = {
       mimeType: "image/png",
-      width: 1,
-      height: 1,
-      byteLength: 1,
-      sha256: sha256Hex(new Uint8Array([1])),
-      base64: "AQ=="
+      width: 320,
+      height: 180,
+      byteLength: imageBytes.byteLength,
+      sha256: sha256Hex(imageBytes),
+      base64: imageBase64
     };
     expect(visualPayloadSchema.safeParse(validVisual).success).toBe(true);
     expect(visualPayloadSchema.safeParse({ ...validVisual, byteLength: 2 }).success).toBe(false);
     expect(visualPayloadSchema.safeParse({ ...validVisual, sha256: hash }).success).toBe(false);
-    expect(visualPayloadSchema.safeParse({ ...validVisual, base64: "Ag==" }).success).toBe(false);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, base64: Buffer.from(imageBytes).subarray(0, -1).toString("base64") }).success).toBe(false);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, mimeType: "image/jpeg" }).success).toBe(false);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, width: 1 }).success).toBe(false);
   });
 
   it("requires normalized evidence on successful responses", () => {

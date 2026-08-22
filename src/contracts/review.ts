@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { sha256Hex } from "../evidence/hash.js";
+import { inspectImageBytes } from "../evidence/image.js";
 import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from "../evidence/limits.js";
 
 const noAsciiControlCharacters = /^[^\u0000-\u001F\u007F]*$/u;
@@ -104,6 +105,14 @@ export const visualPayloadSchema = z
     }
     if (sha256Hex(bytes) !== payload.sha256) {
       ctx.addIssue({ code: "custom", path: ["sha256"], message: "sha256 must match decoded base64 bytes" });
+    }
+    try {
+      const metadata = inspectImageBytes(bytes);
+      if (metadata.mimeType !== payload.mimeType) ctx.addIssue({ code: "custom", path: ["mimeType"], message: "mimeType must match decoded image bytes" });
+      if (metadata.width !== payload.width) ctx.addIssue({ code: "custom", path: ["width"], message: "width must match decoded image bytes" });
+      if (metadata.height !== payload.height) ctx.addIssue({ code: "custom", path: ["height"], message: "height must match decoded image bytes" });
+    } catch {
+      ctx.addIssue({ code: "custom", path: ["base64"], message: "base64 must contain a valid bounded image" });
     }
   });
 

@@ -1,4 +1,5 @@
 import type { ImageReference, NormalizedEvidence } from "../contracts/review.js";
+import { Image } from "@napi-rs/canvas";
 import { sha256Hex } from "./hash.js";
 import { EVIDENCE_LIMITS, type EvidenceParserLimits } from "./limits.js";
 
@@ -100,9 +101,18 @@ function parseJpeg(bytes: Uint8Array): ImageMetadata | undefined {
   return hasEnd ? dimensions : undefined;
 }
 
-function imageMetadata(bytes: Uint8Array): ImageMetadata {
+export function inspectImageBytes(bytes: Uint8Array): ImageMetadata {
   const metadata = parsePng(bytes) ?? parseJpeg(bytes);
   if (!metadata || metadata.width < 1 || metadata.height < 1) throw new TypeError("unsupported or invalid image bytes");
+  try {
+    const image = new Image();
+    image.src = bytes;
+    if (!image.complete || image.width !== metadata.width || image.height !== metadata.height) {
+      throw new Error("decoded dimensions do not match image header");
+    }
+  } catch {
+    throw new TypeError("unsupported or invalid image bytes");
+  }
   return metadata;
 }
 
@@ -112,7 +122,7 @@ export function normalizeImageEvidence(input: ImageEvidenceInput): NormalizedEvi
   const maxVisualBytes = input.limits?.maxVisualPayloadBytes ?? EVIDENCE_LIMITS.maxVisualPayloadBytes;
   if (input.bytes.byteLength > maxBytes) throw new RangeError(`image exceeds the maximum of ${maxBytes} bytes`);
 
-  const metadata = imageMetadata(input.bytes);
+  const metadata = inspectImageBytes(input.bytes);
   if (metadata.width * metadata.height > maxPixels) throw new RangeError(`image dimensions exceed the maximum of ${maxPixels} pixels`);
   const contentHash = sha256Hex(input.bytes);
   const warnings: NormalizedEvidence["warnings"] = [];
