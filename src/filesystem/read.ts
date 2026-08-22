@@ -4,7 +4,7 @@ import type { Stats } from "node:fs";
 import type { EvidenceType, FilesystemSource } from "../contracts/review.js";
 import { EvidenceLensError } from "../errors.js";
 import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from "../evidence/limits.js";
-import { FilesystemAccessDeniedError, type AuthorizedFilesystemTarget, type FilesystemPolicy } from "./policy.js";
+import { FilesystemAccessDeniedError, type AuthorizedFilesystemTarget, type FilesystemPolicy, type FilesystemTargetIdentity } from "./policy.js";
 
 export interface FilesystemStat {
   dev: number | bigint;
@@ -92,8 +92,8 @@ function defaultAdapter(): FilesystemReadAdapter {
   };
 }
 
-function sameIdentity(left: FilesystemStat, right: FilesystemStat): boolean {
-  return left.dev === right.dev && left.ino === right.ino && left.mode === right.mode && left.isFile === right.isFile;
+function sameIdentity(left: FilesystemStat | FilesystemTargetIdentity, right: FilesystemStat | FilesystemTargetIdentity): boolean {
+  return left.dev === right.dev && left.ino === right.ino && left.mode === right.mode && left.size === right.size && left.isFile === right.isFile;
 }
 
 function unsupportedType(type: EvidenceType): never {
@@ -147,6 +147,9 @@ export async function readFilesystemEvidence(
     if (descriptor === undefined) throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
     const beforeRead = await descriptor.fstat();
     if (!beforeRead.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");
+    if (authorized.targetIdentity !== undefined && !sameIdentity(authorized.targetIdentity, beforeRead)) {
+      throw stableError("ACCESS_DENIED", "Filesystem target changed before reading");
+    }
     if (targetStat !== undefined && !sameIdentity(targetStat, beforeRead)) {
       throw stableError("ACCESS_DENIED", "Filesystem target changed before reading");
     }

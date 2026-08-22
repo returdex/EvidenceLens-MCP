@@ -13,8 +13,16 @@ export interface FilesystemRootConfig {
 
 export interface FilesystemPrimitives {
   realpathSync: (path: string) => string;
-  statSync: (path: string) => Pick<Stats, "isDirectory">;
+  statSync: (path: string) => Pick<Stats, "isDirectory"> & Partial<Pick<Stats, "dev" | "ino" | "mode" | "size" | "isFile">>;
   accessSync: (path: string, mode?: number) => void;
+}
+
+export interface FilesystemTargetIdentity {
+  dev: number | bigint;
+  ino: number | bigint;
+  mode: number;
+  size: number;
+  isFile: boolean;
 }
 
 export interface AuthorizedFilesystemTarget {
@@ -23,6 +31,7 @@ export interface AuthorizedFilesystemTarget {
   resolvedPath: string;
   reference: string;
   rootDescriptor?: number;
+  targetIdentity?: FilesystemTargetIdentity;
 }
 
 export interface FilesystemPolicy {
@@ -122,13 +131,23 @@ export function createFilesystemPolicy(
         const lexicalTarget = resolve(root.path, ...parsed.data.relativePath.split("/"));
         const resolvedPath = primitives.realpathSync(lexicalTarget);
         const safeRelativePath = normalizedRelativePath(root.path, resolvedPath);
-        if (primitives.statSync(resolvedPath).isDirectory()) accessDenied();
+        const targetStat = primitives.statSync(resolvedPath);
+        if (targetStat.isDirectory() || targetStat.dev === undefined || targetStat.ino === undefined || targetStat.mode === undefined || targetStat.size === undefined || targetStat.isFile === undefined) {
+          accessDenied();
+        }
         return {
           rootId: root.id,
           relativePath: safeRelativePath,
           resolvedPath,
           reference: `filesystem://${root.id}/${safeRelativePath}`,
-          rootDescriptor: root.descriptor
+          rootDescriptor: root.descriptor,
+          targetIdentity: {
+            dev: targetStat.dev,
+            ino: targetStat.ino,
+            mode: targetStat.mode,
+            size: targetStat.size,
+            isFile: targetStat.isFile()
+          }
         };
       } catch (error) {
         if (error instanceof FilesystemAccessDeniedError) throw error;
