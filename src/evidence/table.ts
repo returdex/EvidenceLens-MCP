@@ -108,7 +108,7 @@ export function normalizeTableEvidence(input: TableEvidenceInput): NormalizedEvi
   }
 
   if (references.length === 0) {
-    throw new RangeError("table evidence contains no cells");
+    throw new TypeError("table evidence contains no cells");
   }
 
   return {

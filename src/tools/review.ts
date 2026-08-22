@@ -47,7 +47,9 @@ function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError
     return new EvidenceLensError("UNSUPPORTED_EVIDENCE_TYPE", "Unsupported evidence type");
   }
 
-  const code = error.issues.some((issue) => issue.code === "too_big") ? "LIMIT_EXCEEDED" : "INVALID_REQUEST";
+  const code = error.issues.some((issue) => issue.code === "too_big" && issue.path.length === 1 && (issue.path[0] === "evidence" || issue.path[0] === "objective"))
+    ? "LIMIT_EXCEEDED"
+    : "INVALID_REQUEST";
   return new EvidenceLensError(code, "Review request failed validation");
 }
 
@@ -65,6 +67,9 @@ export async function handleReviewRequest(input: unknown): Promise<ReviewToolRes
   } catch (error) {
     if (error instanceof RangeError) {
       return toToolErrorResult(new EvidenceLensError("LIMIT_EXCEEDED", "Evidence content exceeds the configured parser limit"));
+    }
+    if (error instanceof TypeError) {
+      return toToolErrorResult(new EvidenceLensError("INVALID_REQUEST", "Evidence content is invalid"));
     }
     return toToolErrorResult(error);
   }
