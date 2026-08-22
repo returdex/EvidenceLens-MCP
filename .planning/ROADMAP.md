@@ -8,7 +8,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 
 - [x] **Phase 1: MCP Contract and Skeleton** - Establish a discoverable, schema-validated MCP server.
 - [x] **Phase 2: Evidence Ingestion and Multimodal Context** - Normalize local evidence with references and hashes. (completed 2026-08-22)
-- [ ] **Phase 3: Read-Only Filesystem Boundary** - Enforce allowlisted, read-only evidence access.
+- [x] **Phase 3: Read-Only Filesystem Boundary** - Enforce allowlisted, read-only evidence access. (completed 2026-08-22)
 - [ ] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings.
 - [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
 - [ ] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review.
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
 | 2. Evidence Ingestion and Multimodal Context | 4/4 | Complete    | 2026-08-22 |
-| 3. Read-Only Filesystem Boundary | 2/3 | In Progress | 2026-08-22 |
+| 3. Read-Only Filesystem Boundary | 3/3 | Complete    | 2026-08-22 |
 | 4. Review Orchestration and Findings | 0/TBD | Not started | - |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 0/TBD | Not started | - |
