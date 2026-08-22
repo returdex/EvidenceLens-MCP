@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-08-22T12:51:26.876Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-08-22T12:56:46.212Z"
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 3 (Read-Only Filesystem Boundary) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 - Phase: 3 of 6
 - Status: Ready for phase execution
-- Progress: [████████░░] 78%
-- Last activity: Phase 03 plans created, checked, committed, and pushed
+- Progress: [█████████░] 89%
+- Last activity: Completed 03-02-PLAN.md
 
 ## Decisions and Assumptions
 
@@ -61,6 +61,9 @@ Plan: 2 of 3
 - [Phase 03]: Keep filesystem as an optional source object and reject ambiguity with inline content, while preserving opaque reference semantics.
 - [Phase 03]: Use the exact id=absolute-path comma/semicolon grammar with no escaping and stable sanitized configuration errors.
 - [Phase 03]: Canonicalize configured roots and candidate targets, then use segment-aware relative containment so escaping symlinks are denied.
+- [Phase 03]: Use dependency-injected filesystem primitives for deterministic read-boundary tests. — This makes authorization ordering and substitution races reproducible without global filesystem patching.
+- [Phase 03]: Validate canonical target and descriptor identity before and after bounded reads; discard mismatches. — This prevents symlink and TOCTOU substitutions from returning bytes outside the authorized identity.
+- [Phase 03]: Normalize client-visible errors to stable generic messages by code. — This suppresses filesystem paths, secrets, errno details, and stack-like content at the response boundary.
 
 ## Performance Metrics
 
@@ -71,11 +74,12 @@ Plan: 2 of 3
 | Phase 02 P03 | 10 min | 3 tasks | 9 files |
 | Phase 02 P04 | 12 min | 3 tasks | 8 files |
 | Phase 03 P01 | 4 min | 2 tasks | 4 files |
+| Phase 03 P02 | 4 min | 2 tasks | 3 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-08-22T12:51:03.471Z
-- **Stopped at:** Completed 03-01-PLAN.md
+- **Last session:** 2026-08-22T12:56:46.031Z
+- **Stopped at:** Completed 03-02-PLAN.md
 - **Resume file:** None
 
 ## Next Action

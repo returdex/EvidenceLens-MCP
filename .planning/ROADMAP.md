@@ -70,7 +70,7 @@ Plans:
 - [x] 03-01-PLAN.md — Filesystem source contract, exact root grammar, and configured-root authorization policy
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — Bounded read-only descriptor reader, deterministic TOCTOU checks, and sanitized filesystem errors
+- [x] 03-02-PLAN.md — Bounded read-only descriptor reader, deterministic TOCTOU checks, and sanitized filesystem errors
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-03-PLAN.md — MCP/server integration, exact configuration, 0.1.1 version alignment, provenance, docs, and safety gates
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
 | 2. Evidence Ingestion and Multimodal Context | 4/4 | Complete    | 2026-08-22 |
-| 3. Read-Only Filesystem Boundary | 0/3 | Not started | - |
+| 3. Read-Only Filesystem Boundary | 2/3 | In Progress | 2026-08-22 |
 | 4. Review Orchestration and Findings | 0/TBD | Not started | - |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 0/TBD | Not started | - |
