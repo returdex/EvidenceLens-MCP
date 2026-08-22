@@ -67,7 +67,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 03-01-PLAN.md — Filesystem source contract, exact root grammar, and configured-root authorization policy
+- [x] 03-01-PLAN.md — Filesystem source contract, exact root grammar, and configured-root authorization policy
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02-PLAN.md — Bounded read-only descriptor reader, deterministic TOCTOU checks, and sanitized filesystem errors
