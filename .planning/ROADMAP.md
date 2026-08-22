@@ -44,7 +44,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 02-01-PLAN.md — Normalized evidence contract, hashes, references, metadata, visual payload descriptors, and warnings
+- [x] 02-01-PLAN.md — Normalized evidence contract, hashes, references, metadata, visual payload descriptors, and warnings
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02-PLAN.md — Text and table normalizers with line and cell context
