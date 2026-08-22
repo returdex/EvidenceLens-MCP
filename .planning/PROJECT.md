@@ -14,12 +14,13 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Validated
 
-(None yet — ship to validate)
+- Evidence normalization contract and provenance pipeline validated in Phase 2.
+- Text, PDF, image/screenshot, and table normalization with hashes and visual context validated in Phase 2.
 
 ### Active
 
 - [ ] Expose an MCP server that clients can call for evidence inspection and review.
-- [ ] Provide controlled read-only tools for text, PDF, image, screenshot, and table evidence.
+- [ ] Provide controlled read-only tools for text, PDF, image, screenshot, and table evidence. (Normalization validated in Phase 2; filesystem access remains active work.)
 - [ ] Support multimodal model review of visual evidence, including charts, scans, screenshots, and image-based text.
 - [ ] Compare assignment briefs, rubrics, teacher instructions, and a current solution for omissions and conflicts.
 - [ ] Return stable JSON findings with file path, page/line references where applicable, hashes, model version, and review metadata.
@@ -78,4 +79,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-22 after initialization*
+*Last updated: 2026-08-22 after Phase 2 completion*

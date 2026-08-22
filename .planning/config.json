@@ -53,6 +53,6 @@
     "patch_z": "increment_on_each_completed_feature_or_compatible_fix",
     "release_on_milestone_completion": true,
     "release_on_post_milestone_fix": true,
-    "current_version": "0.1.0"
+    "current_version": "0.1.1"
   }
 }
