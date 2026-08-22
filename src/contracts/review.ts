@@ -226,6 +226,14 @@ export const reviewRequestSchema = z
   })
   .strict()
   .superRefine((request, ctx) => {
+    const seen = new Set<string>();
+    request.evidence.forEach((evidence, index) => {
+      if (seen.has(evidence.id)) {
+        ctx.addIssue({ code: "custom", path: ["evidence", index, "id"], message: "evidence ids must be unique" });
+      }
+      seen.add(evidence.id);
+    });
+
     if (request.limits?.maxEvidenceItems !== undefined && request.evidence.length > request.limits.maxEvidenceItems) {
       ctx.addIssue({
         code: "too_big",
@@ -251,15 +259,81 @@ export const reviewRequestSchema = z
 
 export const findingSeveritySchema = z.enum(["info", "low", "medium", "high"]);
 
-export const reviewFindingSchema = z
+export const reviewFindingTypeSchema = z.enum(["omission", "contradiction", "requirement_conflict", "evidence_quality"]);
+export const findingConfidenceSchema = z.enum(["high", "medium", "low", "unknown"]);
+
+const boundedReviewText = z.string().min(1).max(4000).regex(noUnsafeContentControlCharacters, "review text must not contain unsafe ASCII control characters");
+
+export const reviewObservationSchema = z
   .object({
-    id: z.string().min(1),
-    severity: findingSeveritySchema,
-    title: z.string().min(1),
-    summary: z.string().min(1),
-    evidenceIds: z.array(z.string().min(1))
+    observation: boundedReviewText,
+    interpretation: boundedReviewText.optional(),
+    uncertainty: boundedReviewText.optional()
   })
   .strict();
+
+const citationSourceReferenceSchema = z
+  .string()
+  .min(1)
+  .max(2048)
+  .regex(noAsciiControlCharacters, "sourceReference must not contain ASCII control characters")
+  .refine((reference) => !reference.startsWith("/") && !/^[A-Za-z]:[\\/]/u.test(reference) && !reference.startsWith("\\\\"), "sourceReference must not be an absolute path")
+  .refine((reference) => !reference.split("/").some((segment) => segment === ".."), "sourceReference must not contain traversal segments");
+
+export const reviewCitationSchema = z
+  .object({
+    evidenceId: z.string().min(1).max(128),
+    role: evidenceRoleSchema,
+    contentHash: contentHashSchema,
+    sourceReference: citationSourceReferenceSchema,
+    location: normalizedEvidenceReferenceSchema,
+    visual: z.boolean(),
+    visualPayloadSha256: contentHashSchema.optional()
+  })
+  .strict()
+  .superRefine((citation, ctx) => {
+    const kind = citation.location.kind;
+    if ((kind === "image") !== citation.visual) {
+      ctx.addIssue({ code: "custom", path: ["visual"], message: "image citations must be visual and text/table citations must not be visual" });
+    }
+    if (kind === "pdf" && citation.visual && citation.visualPayloadSha256 === undefined) {
+      ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual PDF citations require a retained visual payload hash" });
+    }
+    if (kind !== "pdf" && citation.visualPayloadSha256 !== undefined && kind !== "image") {
+      ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual payload hashes require visual citations" });
+    }
+  });
+
+export const reviewFindingSchema = z
+  .object({
+    id: z.string().min(1).max(128),
+    type: reviewFindingTypeSchema,
+    severity: findingSeveritySchema,
+    confidence: findingConfidenceSchema,
+    title: boundedReviewText,
+    summary: boundedReviewText,
+    observation: boundedReviewText,
+    interpretation: boundedReviewText,
+    uncertainty: boundedReviewText.optional(),
+    followUpChecks: z.array(boundedReviewText).min(1).max(10),
+    evidenceIds: z.array(z.string().min(1).max(128)).min(1),
+    citations: z.array(reviewCitationSchema).min(1).max(20)
+  })
+  .strict()
+  .superRefine((finding, ctx) => {
+    const citationIds = finding.citations.map((citation) => citation.evidenceId);
+    const uniqueCitationIds = [...new Set(citationIds)].sort();
+    const uniqueEvidenceIds = [...new Set(finding.evidenceIds)].sort();
+    if (citationIds.length !== uniqueCitationIds.length) {
+      ctx.addIssue({ code: "custom", path: ["citations"], message: "citation evidence ids must be unique" });
+    }
+    if (finding.evidenceIds.length !== uniqueEvidenceIds.length || JSON.stringify(uniqueEvidenceIds) !== JSON.stringify(finding.evidenceIds)) {
+      ctx.addIssue({ code: "custom", path: ["evidenceIds"], message: "evidenceIds must be sorted and unique" });
+    }
+    if (JSON.stringify(uniqueCitationIds) !== JSON.stringify(uniqueEvidenceIds)) {
+      ctx.addIssue({ code: "custom", path: ["evidenceIds"], message: "evidenceIds must equal citation evidence ids" });
+    }
+  });
 
 export const reviewResponseSchema = z
   .object({
@@ -272,11 +346,17 @@ export const reviewResponseSchema = z
       .object({
         serverName: z.string().min(1),
         serverVersion: z.string().min(1),
+        analyzerName: z.string().min(1).max(128),
+        analyzerVersion: z.string().min(1).max(64),
         generatedAt: z.string().datetime()
       })
       .strict()
   })
-  .strict();
+  .strict()
+  .superRefine((response, ctx) => {
+    const ids = response.findings.map((finding) => finding.id);
+    if (ids.length !== new Set(ids).size) ctx.addIssue({ code: "custom", path: ["findings"], message: "finding ids must be unique" });
+  });
 
 export const reviewToolResultSchema = z
   .object({
@@ -311,6 +391,10 @@ export type FilesystemSource = z.infer<typeof filesystemSourceSchema>;
 export type ReviewLimits = z.infer<typeof reviewLimitsSchema>;
 export type ReviewRequest = z.infer<typeof reviewRequestSchema>;
 export type FindingSeverity = z.infer<typeof findingSeveritySchema>;
+export type ReviewFindingType = z.infer<typeof reviewFindingTypeSchema>;
+export type FindingConfidence = z.infer<typeof findingConfidenceSchema>;
+export type ReviewObservation = z.infer<typeof reviewObservationSchema>;
+export type ReviewCitation = z.infer<typeof reviewCitationSchema>;
 export type ReviewFinding = z.infer<typeof reviewFindingSchema>;
 export type ReviewResponse = z.infer<typeof reviewResponseSchema>;
 export type ReviewToolResult = z.infer<typeof reviewToolResultSchema>;
