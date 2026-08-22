@@ -70,7 +70,7 @@ Each TDD task was committed atomically with RED and GREEN gates:
 1. **Task 1: Add strict filesystem source schema and adversarial contract tests** - `484a51b` (test, RED), `a05f4ea` (feat, GREEN)
 2. **Task 2: Implement configured-root canonicalization and authorization** - `75151eb` (test, RED), `fcbabda` (feat, GREEN)
 
-**Plan metadata:** pending
+**Plan metadata:** `2086bf3` (docs: complete read-only filesystem boundary plan)
 
 ## Files Created/Modified
 
