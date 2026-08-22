@@ -40,7 +40,20 @@ Plans:
   1. Each supported evidence type produces a normalized representation with source identity and relevant page, line, cell, or sheet references.
   2. Visual evidence remains available for multimodal processing instead of being reduced to text only.
   3. Every artifact includes a reproducible content hash and extraction metadata.
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+- [ ] 02-01-PLAN.md — Normalized evidence contract, hashes, references, metadata, visual payload descriptors, and warnings
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-02-PLAN.md — Text and table normalizers with line and cell context
+
+**Wave 3** *(blocked on Waves 1-2 completion)*
+- [ ] 02-03-PLAN.md — PDF and image/screenshot normalizers with visual context preservation
+
+**Wave 4** *(blocked on Waves 1-3 completion)*
+- [ ] 02-04-PLAN.md — MCP review tool integration and Phase 2 contract documentation
 
 ### Phase 3: Read-Only Filesystem Boundary
 **Goal**: Evidence access is confined to explicit roots and safe, auditable failure behavior.
@@ -89,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
-| 2. Evidence Ingestion and Multimodal Context | 0/TBD | Not started | - |
+| 2. Evidence Ingestion and Multimodal Context | 0/4 | Not started | - |
 | 3. Read-Only Filesystem Boundary | 0/TBD | Not started | - |
 | 4. Review Orchestration and Findings | 0/TBD | Not started | - |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
