@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
+import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from "../evidence/limits.js";
 
 const noAsciiControlCharacters = /^[^\u0000-\u001F\u007F]*$/u;
+const noUnsafeContentControlCharacters = /^[^\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]*$/u;
 
 export const evidenceRoleSchema = z.enum([
   "assignment_brief",
@@ -109,9 +111,45 @@ export const reviewEvidenceInputSchema = z
     id: z.string().min(1).max(128),
     role: evidenceRoleSchema,
     type: evidenceTypeSchema,
-    reference: z.string().regex(noAsciiControlCharacters, "reference must not contain ASCII control characters").optional()
+    reference: z.string().regex(noAsciiControlCharacters, "reference must not contain ASCII control characters").optional(),
+    content: z.string().regex(noUnsafeContentControlCharacters, "content must not contain unsafe ASCII control characters").optional(),
+    contentBase64: z.string().min(1).optional(),
+    mimeType: z.string().optional()
   })
-  .strict();
+  .strict()
+  .superRefine((evidence, ctx) => {
+    const utf8Bytes = evidence.content === undefined ? 0 : Buffer.byteLength(evidence.content, "utf8");
+    const hasContent = evidence.content !== undefined;
+    const hasBase64 = evidence.contentBase64 !== undefined;
+    const add = (path: string[], message: string) => ctx.addIssue({ code: "custom", path, message });
+
+    if (evidence.type === "text" || evidence.type === "table") {
+      if (hasBase64) add(["contentBase64"], `${evidence.type} evidence does not accept contentBase64`);
+      if (evidence.mimeType !== undefined) add(["mimeType"], `${evidence.type} evidence does not accept mimeType`);
+      const maxBytes = evidence.type === "text" ? MAX_TEXT_BYTES : MAX_TABLE_BYTES;
+      if (utf8Bytes > maxBytes) add(["content"], `${evidence.type} content exceeds the maximum of ${maxBytes} bytes`);
+    } else {
+      if (hasContent) add(["content"], `${evidence.type} evidence does not accept UTF-8 content`);
+      if (hasBase64) {
+        if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(evidence.contentBase64 ?? "")) {
+          add(["contentBase64"], "contentBase64 must be strict canonical base64");
+        } else {
+          const maxBytes = evidence.type === "pdf" ? MAX_PDF_BYTES : MAX_IMAGE_BYTES;
+          if (Buffer.from(evidence.contentBase64 ?? "", "base64").byteLength > maxBytes) {
+            add(["contentBase64"], `${evidence.type} content exceeds the maximum of ${maxBytes} bytes`);
+          }
+        }
+      }
+      if (evidence.type === "pdf") {
+        if (evidence.mimeType !== undefined && evidence.mimeType !== "application/pdf") add(["mimeType"], "PDF mimeType must be application/pdf");
+      } else if (evidence.mimeType !== undefined && evidence.mimeType !== "image/png" && evidence.mimeType !== "image/jpeg") {
+        add(["mimeType"], "image mimeType must be image/png or image/jpeg");
+      }
+      if ((evidence.type === "image" || evidence.type === "screenshot") && hasBase64 && evidence.mimeType === undefined) {
+        add(["mimeType"], "image and screenshot contentBase64 requires mimeType");
+      }
+    }
+  });
 
 export const reviewLimitsSchema = z
   .object({

@@ -6,6 +6,7 @@ import {
   type ReviewResponse,
   type ReviewToolResult
 } from "../contracts/review.js";
+import { normalizeEvidenceItems } from "../evidence/index.js";
 import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 
 const SERVER_NAME = "evidencelens";
@@ -13,13 +14,14 @@ const SERVER_VERSION = "0.1.0";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
 
-function createReviewResponse(request: ReviewRequest): ReviewResponse {
+async function createReviewResponse(request: ReviewRequest): Promise<ReviewResponse> {
+  const normalizedEvidence = await normalizeEvidenceItems(request.evidence);
   return {
     ok: true,
     requestId: request.reviewId,
     status: "accepted",
     findings: [],
-    normalizedEvidence: [],
+    normalizedEvidence,
     metadata: {
       serverName: SERVER_NAME,
       serverVersion: SERVER_VERSION,
@@ -56,14 +58,16 @@ export async function handleReviewRequest(input: unknown): Promise<ReviewToolRes
     return toToolErrorResult(errorFromValidation(parsed.error, input));
   }
 
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(createReviewResponse(parsed.data))
-      }
-    ]
-  };
+  try {
+    return {
+      content: [{ type: "text", text: JSON.stringify(await createReviewResponse(parsed.data)) }]
+    };
+  } catch (error) {
+    if (error instanceof RangeError) {
+      return toToolErrorResult(new EvidenceLensError("LIMIT_EXCEEDED", "Evidence content exceeds the configured parser limit"));
+    }
+    return toToolErrorResult(error);
+  }
 }
 
 export function registerReviewTool(server: McpServer): void {
