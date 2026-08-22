@@ -1,7 +1,7 @@
 ---
-phase: 03-read-only-filesystem-boundary
-fixed_at: 2026-08-22T13:22:00Z
-review_path: .planning/phases/03-read-only-filesystem-boundary/03-REVIEW.md
+phase: 03
+fixed_at: 2026-08-22T23:35:00+10:00
+review_path: .planning/phases/03-read-only-filesystem-boundary/03-SECURITY.md
 iteration: 1
 findings_in_scope: 1
 fixed: 1
@@ -11,8 +11,8 @@ status: all_fixed
 
 # Phase 03: Code Review Fix Report
 
-**Fixed at:** 2026-08-22T13:22:00Z
-**Source review:** `.planning/phases/03-read-only-filesystem-boundary/03-REVIEW.md`
+**Fixed at:** 2026-08-22T23:35:00+10:00  
+**Source review:** `.planning/phases/03-read-only-filesystem-boundary/03-SECURITY.md`  
 **Iteration:** 1
 
 **Summary:**
@@ -22,16 +22,14 @@ status: all_fixed
 
 ## Fixed Issues
 
-### BL-01: macOS fallback is still vulnerable to parent-directory substitution
+### T-03-09: Linux descriptor-relative target substitution
 
-**Files modified:** `src/filesystem/read.ts`, `src/filesystem/policy.ts`, `tests/filesystem/read.test.ts`, `tests/contract/review-filesystem.test.ts`, `README.md`, `docs/mcp-contract.md`
-**Commit:** `453c9d6`
-**Applied fix:** Removed the Darwin pathname `lstat`/`open` fallback and the root-path fallback argument. The default adapter now returns sanitized `ACCESS_DENIED` before any read on macOS, while Linux retains its descriptor-relative component walk. Added a Darwin fail-closed regression test, moved portable integration success coverage to an injected adapter, and documented the platform behavior and continued Phase 2 inline-byte support.
-
-**Verification:** `npm test` (62 tests), `npm run build`, `npm audit --audit-level=high`, `git diff --check`, and filesystem safety/fallback scans all passed.
+**Files modified:** `src/filesystem/policy.ts`, `src/filesystem/read.ts`, `tests/filesystem/read.test.ts`  
+**Commit:** `b2ac35c`  
+**Applied fix:** The policy now snapshots the canonical target identity (`dev`, `ino`, `mode`, `size`, and regular-file state). The reader compares the first opened descriptor `fstat` with that snapshot before allocating or reading bytes for anchored and pathname adapters; mismatches are denied and the descriptor is closed. Added a deterministic Linux regression that replaces the authorized target with another in-root file before open.
 
 ---
 
-_Fixed: 2026-08-22T13:22:00Z_
-_Fixer: the agent (gsd-code-fixer)_
-_Iteration: 1_
+_Fixed: 2026-08-22T23:35:00+10:00_  
+_Fixer: the agent (gsd-code-fixer)_  
+_Iteration: 1
