@@ -7,6 +7,7 @@ import { normalizePdfEvidence } from "./pdf.js";
 import { normalizeTableEvidence } from "./table.js";
 import { normalizeTextEvidence } from "./text.js";
 import type { TransientEvidenceAnalysis, ReviewAnalysisBundle } from "../review/analysis.js";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const sourceReference = (item: ReviewEvidenceInput): string => item.reference ?? `inline://${item.id}`;
 
@@ -19,11 +20,39 @@ export interface NormalizeEvidenceOptions {
 export type NormalizedEvidenceBundle = ReviewAnalysisBundle;
 
 function tableCells(text: string, references: NormalizedEvidence["references"]): NonNullable<TransientEvidenceAnalysis["tableCells"]> {
-  const rows = text.split(/\r\n|\n|\r/u).map((row) => row.split(","));
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      if (quoted && text[index + 1] === '"') { cell += '"'; index += 1; } else quoted = !quoted;
+    } else if (character === "," && !quoted) { row.push(cell); cell = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) { row.push(cell); rows.push(row); row = []; cell = ""; if (character === "\r" && text[index + 1] === "\n") index += 1;
+    } else cell += character;
+  }
+  if (cell !== "" || row.length > 0 || text.endsWith(",")) { row.push(cell); rows.push(row); }
   return references.filter((reference): reference is Extract<typeof reference, { kind: "table" }> => reference.kind === "table").map((reference) => ({
     value: rows[reference.row - 1]?.[reference.column - 1] ?? "",
     location: reference
   }));
+}
+
+async function extractPdfText(bytes: Uint8Array): Promise<string> {
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes) });
+  try {
+    const document = await loadingTask.promise;
+    const pages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const content = await page.getTextContent();
+      pages.push(content.items.filter((item): item is typeof item & { str: string } => "str" in item).map((item) => item.str).join(" "));
+    }
+    return pages.join("\n");
+  } finally {
+    await loadingTask.destroy();
+  }
 }
 
 export async function normalizeEvidenceBundle(items: ReviewEvidenceInput[], options: NormalizeEvidenceOptions = {}): Promise<NormalizedEvidenceBundle> {
@@ -51,6 +80,7 @@ export async function normalizeEvidenceBundle(items: ReviewEvidenceInput[], opti
     const payload: TransientEvidenceAnalysis = { evidenceId: item.id, role: item.role, type: item.type, reference, contentHash: evidence.contentHash, references: evidence.references, byteLength: sourceBytes.byteLength };
     if (item.type === "text") payload.text = new TextDecoder().decode(sourceBytes.slice(0, 1_000_000));
     if (item.type === "table") payload.tableCells = tableCells(new TextDecoder().decode(sourceBytes.slice(0, 5_000_000)), evidence.references);
+    if (item.type === "pdf" && !evidence.extraction.partial) payload.text = (await extractPdfText(sourceBytes)).slice(0, 1_000_000);
     if (item.type === "pdf" || item.type === "image" || item.type === "screenshot") payload.bytes = new Uint8Array(sourceBytes);
     analysisPayloads.push(payload);
   }
