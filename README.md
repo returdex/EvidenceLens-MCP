@@ -1,6 +1,6 @@
 # EvidenceLens MCP
 
-EvidenceLens MCP is a TypeScript Model Context Protocol server for deterministic, read-only evidence review contracts. The single `review_evidence` tool accepts Phase 2 inline content and, when explicitly configured, Phase 3 filesystem sources. It normalizes text, tables, PDFs, images, and screenshots into provenance metadata while keeping findings empty and making no provider calls.
+EvidenceLens MCP is a TypeScript Model Context Protocol server for deterministic, read-only evidence review. The single `review_evidence` tool accepts four distinct required course roles plus optional evidence, normalizes inline and explicitly configured filesystem sources, and returns schema-validated findings with typed provenance. It remains provider-independent and makes no network or provider calls.
 
 ## Local Development
 
@@ -15,7 +15,7 @@ npm run build
 
 ## MCP Contract
 
-See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact inline/filesystem request contract, root configuration grammar, byte limits, `filesystem://` provenance, normalized evidence metadata, stable errors, and the read-only/no-provider/no-findings boundaries.
+See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact four-role request contract, duplicate-ID and stable errors, deterministic finding fields and citation mapping, root configuration grammar, byte limits, `filesystem://` provenance, transient analysis boundary, and read-only/no-provider/no-Docker behavior.
 
 Platform note: the default filesystem reader uses descriptor-relative component walking on Linux. On macOS, where this project has no supported Node `openat`/`openat2` binding, default anchored filesystem reads fail closed with sanitized `ACCESS_DENIED` and no bytes; there is no pathname fallback. Phase 2 inline evidence remains supported, and embedding tests may inject a reviewed safe filesystem adapter for portable filesystem-read coverage.
 
