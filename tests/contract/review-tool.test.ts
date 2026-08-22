@@ -27,6 +27,17 @@ const validRequest = {
   }
 };
 
+const completeFindingRequest = {
+  reviewId: "review-findings-001",
+  objective: "Check the submitted solution against the rubric.",
+  evidence: [
+    { id: "brief-1", role: "assignment_brief", type: "text", content: "The solution must include a conclusion." },
+    { id: "rubric-1", role: "rubric", type: "text", content: "The solution must include a conclusion." },
+    { id: "instructions-1", role: "teacher_instructions", type: "text", content: "The solution must include a conclusion." },
+    { id: "solution-1", role: "solution", type: "text", content: "The solution cannot include a conclusion." }
+  ]
+};
+
 describe("review_evidence schema and error contract", () => {
   it("accepts a valid metadata-only review request schema", () => {
     const parsed = reviewRequestSchema.safeParse(validRequest);
@@ -161,6 +172,52 @@ function parseToolPayload(toolResult: unknown) {
 }
 
 describe("review_evidence handler and MCP protocol contract", () => {
+  it("requires one distinct complete role set before normalization", async () => {
+    const rolePayload = parseToolPayload(await handleReviewRequest({
+      ...completeFindingRequest,
+      evidence: completeFindingRequest.evidence.filter((item) => item.role !== "rubric")
+    }));
+    expect(rolePayload).toEqual({ ok: false, code: "INVALID_REVIEW_ROLES", message: "Review evidence roles are invalid" });
+
+    const duplicatePayload = parseToolPayload(await handleReviewRequest({
+      ...completeFindingRequest,
+      evidence: [...completeFindingRequest.evidence, { id: "brief-1", role: "other", type: "text", content: "duplicate" }]
+    }));
+    expect(duplicatePayload).toEqual({ ok: false, code: "INVALID_REQUEST", message: "Invalid request" });
+  });
+
+  it("returns deterministic actionable findings with unique provenance ids", async () => {
+    const first = parseToolPayload(await handleReviewRequest(completeFindingRequest));
+    const second = parseToolPayload(await handleReviewRequest(completeFindingRequest));
+
+    expect(first).toEqual(second);
+    expect(first.metadata).toMatchObject({ analyzerName: "deterministic-rules", analyzerVersion: "1.0.0" });
+    expect(first.findings.length).toBeGreaterThan(0);
+    expect(first.findings.some((finding: { type: string }) => finding.type === "contradiction")).toBe(true);
+    expect(new Set(first.normalizedEvidence.map((evidence: { source: { id: string } }) => evidence.source.id)).size).toBe(first.normalizedEvidence.length);
+    expect(new Set(first.findings.map((finding: { id: string }) => finding.id)).size).toBe(first.findings.length);
+    for (const finding of first.findings) {
+      expect(finding.evidenceIds).toEqual([...new Set(finding.evidenceIds)].sort());
+      expect(finding.citations.map((citation: { evidenceId: string }) => citation.evidenceId)).toEqual([...new Set(finding.citations.map((citation: { evidenceId: string }) => citation.evidenceId))]);
+    }
+    expect(JSON.stringify(first)).not.toContain("The solution cannot include a conclusion");
+    expect(reviewResponseSchema.parse(first)).toEqual(first);
+  });
+
+  it("exposes the deterministic findings through the MCP tools/call protocol", async () => {
+    await withProtocolClient(async (request) => {
+      const listed = await request("tools/list") as { tools: Array<{ name: string; annotations?: Record<string, unknown> }> };
+      expect(listed.tools.map((tool) => tool.name)).toEqual(["review_evidence"]);
+      expect(listed.tools[0]?.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, idempotentHint: true });
+      const first = parseToolPayload(await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest }));
+      const second = parseToolPayload(await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest }));
+      expect(first).toEqual(second);
+      expect(first.findings.length).toBeGreaterThan(0);
+      expect(first.metadata).not.toHaveProperty("provider");
+      expect(first.metadata).not.toHaveProperty("model");
+    });
+  });
+
   it("returns schema-valid deterministic success from the handler", async () => {
     const first = await handleReviewRequest(validRequest);
     const second = await handleReviewRequest(validRequest);
