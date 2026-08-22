@@ -81,19 +81,20 @@ Plans:
 **Requirements**: [REVW-01, REVW-02, REVW-03, REVW-04]
 **Success Criteria** (what must be TRUE):
   1. Callers can submit assignment brief, rubric, teacher instructions, and current solution as distinct evidence roles.
-  2. Reviews identify omissions, contradictions, and requirement conflicts with source citations.
-  3. Findings distinguish observations, interpretations, uncertainty, and follow-up checks.
+  2. Duplicate evidence ids fail deterministically as `INVALID_REQUEST` before normalization; reviews identify omissions, contradictions, and requirement conflicts with unique source citations and finding ids.
+  3. Authorized normalization passes bounded request-scoped in-memory analysis payloads for inline and filesystem-backed text, tables, PDFs, and images without reopening paths or exposing raw bytes/content in responses.
+  4. Findings distinguish observations, interpretations, uncertainty, and follow-up checks, and response metadata identifies the provider-independent analyzer while provider/model version fields remain deferred to Phase 5.
 **Plans**: 3 plans
 
 Plans:
 **Wave 1**
-- [ ] 04-01-PLAN.md — Findings/citation contract, required-role validation, and stable review errors
+- [ ] 04-01-PLAN.md — Findings/citation contract, duplicate-id gate, analyzer metadata, required-role validation, and stable review errors
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 04-02-PLAN.md — Provider-independent deterministic analysis, comparison rules, and provenance citation resolution
+- [ ] 04-02-PLAN.md — Single-read transient analysis handoff, separate solution-claim extraction, deterministic comparison rules, and provenance citation resolution
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 04-03-PLAN.md — MCP orchestration wiring, regression tests, and Phase 4 contract documentation
+- [ ] 04-03-PLAN.md — Authorized normalization/analyzer wiring, duplicate-id short-circuit, regression tests, and Phase 4 contract documentation
 
 ### Phase 5: Provider Adapter and DeepSeek Integration
 **Goal**: DeepSeek Vision/Flash performs the review through a replaceable provider adapter without changing the MCP contract.
@@ -136,4 +137,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-08-22 after Phase 03 checker revision 1*
+*Last updated: 2026-08-23 after Phase 04 plan revision 1*
