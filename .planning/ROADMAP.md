@@ -103,7 +103,17 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. DeepSeek credentials and model selection are configurable without changing MCP request or response schemas.
   2. A second compatible or local provider can be substituted behind the same adapter interface.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+- [ ] 05-01-PLAN.md — Provider-neutral DTO/interface, provenance validation, fail-closed config, and provider errors
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-02-PLAN.md — DeepSeek multimodal adapter, JSON Output validation, bounded retries, and timeout handling
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 05-03-PLAN.md — MCP wiring, DeepSeek-only runtime registration, substitution/contract tests, and documentation
 
 ### Phase 6: Docker Deployment and End-to-End Validation
 **Goal**: A fresh environment can run the server with read-only mounts and complete a documented multimodal review.
