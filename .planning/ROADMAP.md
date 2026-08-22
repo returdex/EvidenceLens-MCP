@@ -63,7 +63,17 @@ Plans:
   1. Requests outside configured allowlisted roots are rejected before file contents are read.
   2. The service exposes no default write, delete, or mutation operation.
   3. Findings and errors preserve provenance without leaking unintended filesystem details or secrets.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+- [ ] 03-01-PLAN.md — Filesystem source contract and configured-root authorization policy
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — Bounded read-only descriptor reader and sanitized filesystem errors
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03-03-PLAN.md — MCP/server integration, provenance, configuration, documentation, and safety gates
 
 ### Phase 4: Review Orchestration and Findings
 **Goal**: The service compares role-labeled course evidence and a solution, producing actionable findings with uncertainty and visual citations.
@@ -103,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
 | 2. Evidence Ingestion and Multimodal Context | 4/4 | Complete    | 2026-08-22 |
-| 3. Read-Only Filesystem Boundary | 0/TBD | Not started | - |
+| 3. Read-Only Filesystem Boundary | 0/3 | Not started | - |
 | 4. Review Orchestration and Findings | 0/TBD | Not started | - |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 0/TBD | Not started | - |
