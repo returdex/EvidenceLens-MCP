@@ -5,6 +5,8 @@ import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from 
 
 const noAsciiControlCharacters = /^[^\u0000-\u001F\u007F]*$/u;
 const noUnsafeContentControlCharacters = /^[^\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]*$/u;
+const filesystemRootIdPattern = /^[A-Za-z][A-Za-z0-9_-]{0,31}$/u;
+const filesystemRelativePathPattern = /^[^\u0000-\u001F\u007F\\]+(?:\/[^\u0000-\u001F\u007F\\]+)*$/u;
 
 export const evidenceRoleSchema = z.enum([
   "assignment_brief",
@@ -135,12 +137,29 @@ export const normalizedEvidenceSchema = z
     }
   });
 
+export const filesystemSourceSchema = z
+  .object({
+    kind: z.literal("filesystem"),
+    rootId: z.string().regex(filesystemRootIdPattern, "rootId must be a valid configured root id"),
+    relativePath: z
+      .string()
+      .min(1)
+      .max(2048)
+      .regex(filesystemRelativePathPattern, "relativePath must be a control-safe POSIX relative path")
+      .refine((relativePath) => !relativePath.startsWith("/"), "relativePath must not be absolute")
+      .refine((relativePath) => !/^[A-Za-z]:[\\/]/u.test(relativePath), "relativePath must not be a Windows absolute path")
+      .refine((relativePath) => !relativePath.startsWith("\\\\"), "relativePath must not be a UNC path")
+      .refine((relativePath) => !relativePath.split("/").some((segment) => segment === "." || segment === ".."), "relativePath must not contain traversal segments")
+  })
+  .strict();
+
 export const reviewEvidenceInputSchema = z
   .object({
     id: z.string().min(1).max(128),
     role: evidenceRoleSchema,
     type: evidenceTypeSchema,
     reference: z.string().min(1).max(2048).regex(noAsciiControlCharacters, "reference must not contain ASCII control characters").optional(),
+    filesystem: filesystemSourceSchema.optional(),
     format: z.enum(["csv", "tsv"]).optional(),
     content: z.string().regex(noUnsafeContentControlCharacters, "content must not contain unsafe ASCII control characters").optional(),
     contentBase64: z.string().min(1).optional(),
@@ -151,7 +170,15 @@ export const reviewEvidenceInputSchema = z
     const utf8Bytes = evidence.content === undefined ? 0 : Buffer.byteLength(evidence.content, "utf8");
     const hasContent = evidence.content !== undefined;
     const hasBase64 = evidence.contentBase64 !== undefined;
+    const hasFilesystem = evidence.filesystem !== undefined;
     const add = (path: string[], message: string) => ctx.addIssue({ code: "custom", path, message });
+
+    if (hasFilesystem) {
+      if (hasContent) add(["content"], "filesystem evidence does not accept content");
+      if (hasBase64) add(["contentBase64"], "filesystem evidence does not accept contentBase64");
+      if (evidence.format !== undefined) add(["format"], "filesystem evidence does not accept format");
+      if (evidence.mimeType !== undefined) add(["mimeType"], "filesystem evidence does not accept mimeType");
+    }
 
     if (evidence.type === "text" || evidence.type === "table") {
       if (hasBase64) add(["contentBase64"], `${evidence.type} evidence does not accept contentBase64`);
@@ -280,6 +307,7 @@ export type NormalizedEvidenceReference = z.infer<typeof normalizedEvidenceRefer
 export type VisualPayload = z.infer<typeof visualPayloadSchema>;
 export type NormalizedEvidence = z.infer<typeof normalizedEvidenceSchema>;
 export type ReviewEvidenceInput = z.infer<typeof reviewEvidenceInputSchema>;
+export type FilesystemSource = z.infer<typeof filesystemSourceSchema>;
 export type ReviewLimits = z.infer<typeof reviewLimitsSchema>;
 export type ReviewRequest = z.infer<typeof reviewRequestSchema>;
 export type FindingSeverity = z.infer<typeof findingSeveritySchema>;
