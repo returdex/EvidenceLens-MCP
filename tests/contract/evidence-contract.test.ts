@@ -7,6 +7,7 @@ import {
   reviewResponseSchema,
   visualPayloadSchema
 } from "../../src/contracts/review.js";
+import { sha256Hex } from "../../src/evidence/hash.js";
 
 const hash = "a".repeat(64);
 const extraction = {
@@ -39,8 +40,9 @@ describe("normalized evidence contract", () => {
         mimeType: "image/png",
         width: 1200,
         height: 1600,
-        byteLength: 48000,
-        sha256: "b".repeat(64)
+        byteLength: 1,
+        sha256: sha256Hex(new Uint8Array([1])),
+        base64: "AQ=="
       },
       warnings: [{ code: "TEXT_UNAVAILABLE", message: "Page is scanned." }]
     });
@@ -59,8 +61,9 @@ describe("normalized evidence contract", () => {
         mimeType: "image/jpeg",
         width: 800,
         height: 600,
-        byteLength: 12000,
-        sha256: hash
+        byteLength: 1,
+        sha256: sha256Hex(new Uint8Array([1])),
+        base64: "AQ=="
       },
       warnings: []
     });
@@ -105,6 +108,18 @@ describe("normalized evidence contract", () => {
         contentHash: hash
       }).success
     ).toBe(false);
+    const validVisual = {
+      mimeType: "image/png",
+      width: 1,
+      height: 1,
+      byteLength: 1,
+      sha256: sha256Hex(new Uint8Array([1])),
+      base64: "AQ=="
+    };
+    expect(visualPayloadSchema.safeParse(validVisual).success).toBe(true);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, byteLength: 2 }).success).toBe(false);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, sha256: hash }).success).toBe(false);
+    expect(visualPayloadSchema.safeParse({ ...validVisual, base64: "Ag==" }).success).toBe(false);
   });
 
   it("requires normalized evidence on successful responses", () => {
