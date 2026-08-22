@@ -1,6 +1,6 @@
 # EvidenceLens MCP
 
-EvidenceLens MCP is a TypeScript Model Context Protocol server for deterministic, read-only evidence review contracts. Phase 1 exposes a single metadata-only `review_evidence` tool so MCP clients can validate discovery, request shape, response shape, and error semantics before later evidence access or provider integration exists.
+EvidenceLens MCP is a TypeScript Model Context Protocol server for deterministic, read-only evidence review contracts. Phase 2 exposes a single `review_evidence` tool that normalizes explicitly supplied text, table, PDF, image, and screenshot content into provenance metadata while keeping findings empty and making no provider calls or filesystem reads.
 
 ## Local Development
 
@@ -11,8 +11,8 @@ npm test
 npm run build
 ```
 
-`npm run dev` starts the MCP server over stdio from `src/server.ts`. `npm test` runs the contract and smoke tests, including MCP protocol-level discovery and invocation checks.
+`npm run dev` starts the MCP server over stdio from `src/server.ts`. `npm test` runs the full contract, normalizer, fixture, safety, and MCP protocol test suite. `npm run build` type-checks and compiles the server.
 
 ## MCP Contract
 
-See [docs/mcp-contract.md](docs/mcp-contract.md) for the `review_evidence` tool name, stdio transport, request fields, supported evidence roles and types, Phase 1 limits, response mapping, and stable error codes.
+See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact Phase 2 content-bearing request contract, canonical base64 and byte limits, normalizedEvidence response shape, hashes/references/extraction metadata/warnings, and the read-only/no-provider/no-findings boundaries.
