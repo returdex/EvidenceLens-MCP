@@ -83,6 +83,7 @@ export async function readFilesystemEvidence(
   try {
     authorized = await policy.authorize(source);
   } catch (error) {
+    if (error instanceof EvidenceLensError) throw error;
     if (error instanceof FilesystemAccessDeniedError) throw stableError("ACCESS_DENIED", "Filesystem access denied");
     throw stableError("INTERNAL_ERROR", "Filesystem authorization failed");
   }

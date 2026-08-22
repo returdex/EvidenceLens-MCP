@@ -2,9 +2,9 @@
 
 ## Transport and tool
 
-EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`.
+EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.1`.
 
-`review_evidence` is read-only, deterministic for identical explicit input, and returns one MCP text content item containing JSON. The response always maps `response.requestId = request.reviewId`, uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`, and keeps `findings: []` until review orchestration is implemented.
+`review_evidence` is read-only, deterministic for identical input, and returns one MCP text content item containing JSON. The response always maps `response.requestId = request.reviewId`, uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`, and keeps `findings: []` until review orchestration is implemented.
 
 ## Request
 
@@ -40,6 +40,25 @@ Content is accepted only when supplied explicitly in the request. Text and table
 
 Metadata-only evidence is valid and produces no normalized artifact. A content-bearing item without `reference` receives an opaque inline identity derived from its `id`; this does not create filesystem access.
 
+### Phase 3 filesystem sources
+
+Filesystem evidence uses a separate source object and cannot be combined with inline content, base64, MIME type, or table format:
+
+```json
+{
+  "id": "brief-file",
+  "role": "assignment_brief",
+  "type": "text",
+  "filesystem": { "kind": "filesystem", "rootId": "course", "relativePath": "brief/assignment.txt" }
+}
+```
+
+The environment variable `EVIDENCELENS_ALLOWED_ROOTS` is optional and uses exactly `id=absolute-path` entries separated by comma or semicolon. IDs match `[A-Za-z][A-Za-z0-9_-]{0,31}`. There is no escaping syntax, no empty entry, and no separator character in a path. Each root must be an explicit readable directory; duplicate IDs and canonical path collisions are rejected. Unset or empty configuration creates an empty-root policy: filesystem requests fail, while Phase 2 inline content remains valid.
+
+Authorization canonicalizes the configured root and target before opening anything. Relative paths are POSIX, cannot be absolute or contain `.`/`..`, directory targets are rejected, and symlinks resolving outside the selected root are denied. The bounded reader authorizes before stat/open/read, opens read-only, enforces the type-specific limits, and checks descriptor identity before and after reading to reject TOCTOU substitutions. There is no directory indexing.
+
+Successful filesystem provenance uses `filesystem://root-id/relative-path` and never includes the absolute configured root. It retains the source ID, safe logical reference, lowercase SHA-256 hash, typed line/page/cell/image references, extraction metadata, warnings, request ID, and deterministic response metadata. The caller's optional `reference` remains opaque and never grants access.
+
 ## Success response
 
 ```json
@@ -62,7 +81,7 @@ Metadata-only evidence is valid and produces no normalized artifact. A content-b
   }],
   "metadata": {
     "serverName": "evidencelens",
-    "serverVersion": "0.1.0",
+  "serverVersion": "0.1.1",
     "generatedAt": "1970-01-01T00:00:00.000Z"
   }
 }
@@ -78,8 +97,8 @@ Parser limits include `MAX_TEXT_BYTES`, `MAX_TABLE_BYTES`, `MAX_PDF_BYTES`, `MAX
 { "ok": false, "code": "INVALID_REQUEST", "message": "Review request failed validation" }
 ```
 
-Stable codes are `INVALID_REQUEST`, `UNSUPPORTED_EVIDENCE_TYPE`, `LIMIT_EXCEEDED`, and `INTERNAL_ERROR`.
+Stable codes are `INVALID_REQUEST`, `UNSUPPORTED_EVIDENCE_TYPE`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`, `ACCESS_DENIED`, `PROVIDER_FAILURE`, and `INTERNAL_ERROR`. Configuration failures use the stable message `Invalid filesystem root configuration` and are emitted before the server starts. Filesystem access denials, unsupported formats, size limits, parser failures, and provider-shaped read failures use generic messages (`Filesystem access denied`, `Unsupported evidence format`, `Evidence exceeds the configured limit`, `Internal error`, and `Provider failure`) without paths, secrets, errno details, or stacks.
 
 ## Phase 2 non-capabilities
 
-This phase normalizes explicit evidence content only. It provides no allowlisted filesystem enforcement, no unrestricted file access, path reads, writes, deletes, or mutation tools, no review comparison or orchestration, no findings generation, no provider or model calls, and no Docker deployment. These remain later-phase work.
+Phase 2 inline content remains supported unchanged. Phase 3 adds only bounded reads under explicitly configured roots. The server provides no unrestricted file access, writes, deletes, or mutation tools, no review comparison or findings orchestration, no provider or model calls, and no Docker deployment. Those capabilities remain absent and are later-phase work.
