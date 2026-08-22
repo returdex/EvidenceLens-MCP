@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { mkdirSync, mkdtempSync, renameSync, symlinkSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { EvidenceLensError, toToolErrorResult } from "../../src/errors.js";
+import { createFilesystemPolicy } from "../../src/filesystem/policy.js";
 import { readFilesystemEvidence, type FilesystemDescriptor, type FilesystemReadAdapter, type FilesystemStat } from "../../src/filesystem/read.js";
 import type { FilesystemPolicy } from "../../src/filesystem/policy.js";
 
@@ -89,5 +93,37 @@ describe("filesystem byte reader", () => {
     });
     await expect(readFilesystemEvidence(policy, source, "text", after)).rejects.toMatchObject({ code: "INTERNAL_ERROR" });
     expect(after.calls).toContain("close");
+  });
+
+  it("denies a parent-directory swap without returning outside bytes", async () => {
+    const parent = mkdtempSync(join(tmpdir(), "evidencelens-parent-swap-"));
+    const root = join(parent, "course");
+    const nested = join(root, "nested");
+    const outside = join(parent, "outside");
+    mkdirSync(nested, { recursive: true });
+    mkdirSync(outside);
+    writeFileSync(join(nested, "brief.txt"), "inside");
+    writeFileSync(join(outside, "brief.txt"), "outside");
+
+    try {
+      const realPolicy = createFilesystemPolicy([{ id: "course", path: root }]);
+      let swapped = false;
+      const swappingPolicy: FilesystemPolicy = {
+        authorize: (requested) => {
+          const authorized = realPolicy.authorize(requested);
+          if (!swapped) {
+            swapped = true;
+            renameSync(nested, join(root, "nested-original"));
+            symlinkSync(outside, nested);
+          }
+          return authorized;
+        }
+      };
+
+      await expect(readFilesystemEvidence(swappingPolicy, { ...source, relativePath: "nested/brief.txt" }, "text"))
+        .rejects.toMatchObject({ code: "ACCESS_DENIED" });
+    } finally {
+      rmSync(parent, { recursive: true, force: true });
+    }
   });
 });

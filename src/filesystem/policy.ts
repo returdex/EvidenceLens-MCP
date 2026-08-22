@@ -23,6 +23,7 @@ export interface AuthorizedFilesystemTarget {
   resolvedPath: string;
   reference: string;
   rootDescriptor?: number;
+  rootPath?: string;
 }
 
 export interface FilesystemPolicy {
@@ -128,7 +129,8 @@ export function createFilesystemPolicy(
           relativePath: safeRelativePath,
           resolvedPath,
           reference: `filesystem://${root.id}/${safeRelativePath}`,
-          rootDescriptor: root.descriptor
+          rootDescriptor: root.descriptor,
+          rootPath: root.path
         };
       } catch (error) {
         if (error instanceof FilesystemAccessDeniedError) throw error;

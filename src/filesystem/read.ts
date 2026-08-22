@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { open as nodeOpen, stat as nodeStat, type FileHandle } from "node:fs/promises";
+import { lstat as nodeLstat, open as nodeOpen, type FileHandle } from "node:fs/promises";
 import type { Stats } from "node:fs";
 import type { EvidenceType, FilesystemSource } from "../contracts/review.js";
 import { EvidenceLensError } from "../errors.js";
@@ -21,8 +21,9 @@ export interface FilesystemDescriptor {
 }
 
 export interface FilesystemReadAdapter {
-  stat(path: string): Promise<FilesystemStat>;
-  open(path: string, flags: number): Promise<FilesystemDescriptor>;
+  stat?: (path: string) => Promise<FilesystemStat>;
+  open?: (path: string, flags: number) => Promise<FilesystemDescriptor>;
+  openAnchored?: (rootDescriptor: number, relativePath: string, flags: number, rootPath?: string) => Promise<FilesystemDescriptor>;
 }
 
 export interface FilesystemReadResult {
@@ -49,24 +50,60 @@ function defaultStat(stats: Stats): FilesystemStat {
 
 function defaultAdapter(): FilesystemReadAdapter {
   return {
-    stat: async (path) => defaultStat(await nodeStat(path)),
-    open: async (path, flags) => {
-      const handle: FileHandle = await nodeOpen(path, flags);
-      return {
-        fstat: async () => defaultStat(await handle.stat()),
-        read: async (buffer, offset, length, position) => handle.read(buffer, offset, length, position),
-        close: async () => { await handle.close(); }
-      };
+    openAnchored: async (rootDescriptor, relativePath, flags, rootPath) => {
+      const components = relativePath.split("/");
+      if (components.some((component) => component === "" || component === "." || component === "..")) {
+        throw new Error("Invalid anchored filesystem path");
+      }
+
+      if (process.platform === "darwin") {
+        // Darwin's Node API has no openat/openat2 binding. Reject symlinked
+        // components immediately after resolving the already-open root fd;
+        // Linux uses the stronger fd-relative walk below.
+        if (rootPath === undefined) throw new Error("Missing anchored filesystem root");
+        let currentPath = rootPath;
+        for (const component of components) {
+          currentPath = `${currentPath}/${component}`;
+          const componentStat = await nodeLstat(currentPath);
+          if (componentStat.isSymbolicLink()) throw new Error("Symlinked filesystem component");
+        }
+        const file = await nodeOpen(currentPath, flags | (constants.O_NOFOLLOW ?? 0));
+        return {
+          fstat: async () => defaultStat(await file.stat()),
+          read: async (buffer, offset, length, position) => file.read(buffer, offset, length, position),
+          close: async () => { await file.close(); }
+        };
+      }
+      if (process.platform !== "linux") throw new Error("Anchored filesystem reads are unavailable on this platform");
+
+      let directory: FileHandle | undefined;
+      try {
+        directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0));
+        for (const component of components.slice(0, -1)) {
+          const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0));
+          await directory.close();
+          directory = next;
+        }
+
+        const leaf = components[components.length - 1];
+        if (leaf === undefined) throw new Error("Invalid anchored filesystem path");
+        const file = await nodeOpen(`/proc/self/fd/${directory.fd}/${leaf}`, flags | (constants.O_NOFOLLOW ?? 0));
+        await directory.close();
+        directory = undefined;
+        return {
+          fstat: async () => defaultStat(await file.stat()),
+          read: async (buffer, offset, length, position) => file.read(buffer, offset, length, position),
+          close: async () => { await file.close(); }
+        };
+      } finally {
+        if (directory !== undefined) await directory.close();
+      }
     }
   };
 }
 
 function sameIdentity(left: FilesystemStat, right: FilesystemStat): boolean {
   return left.dev === right.dev && left.ino === right.ino && left.mode === right.mode && left.isFile === right.isFile;
-}
-
-function targetOf(authorized: AuthorizedFilesystemTarget): string {
-  return authorized.resolvedPath;
 }
 
 function unsupportedType(type: EvidenceType): never {
@@ -91,26 +128,36 @@ export async function readFilesystemEvidence(
   if (limit === undefined) unsupportedType(evidenceType);
 
   const adapter = injectedAdapter ?? defaultAdapter();
-  const target = targetOf(authorized);
   let descriptor: FilesystemDescriptor | undefined;
+  let targetStat: FilesystemStat | undefined;
   let failure: unknown;
 
   try {
-    const targetStat = await adapter.stat(target);
-    if (!targetStat.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");
-    if (targetStat.size > limit) throw stableError("LIMIT_EXCEEDED", "Filesystem evidence exceeds the configured size limit");
-
-    const noFollow = "O_NOFOLLOW" in constants ? constants.O_NOFOLLOW : 0;
     try {
-      descriptor = await adapter.open(target, constants.O_RDONLY | noFollow);
+      if (authorized.rootDescriptor !== undefined && adapter.openAnchored !== undefined) {
+        descriptor = await adapter.openAnchored(authorized.rootDescriptor, authorized.relativePath, constants.O_RDONLY, authorized.rootPath);
+      } else if (authorized.rootDescriptor === undefined && adapter.stat !== undefined && adapter.open !== undefined) {
+        targetStat = await adapter.stat(authorized.resolvedPath);
+        if (!targetStat.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");
+        if (targetStat.size > limit) throw stableError("LIMIT_EXCEEDED", "Filesystem evidence exceeds the configured size limit");
+        descriptor = await adapter.open(authorized.resolvedPath, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+      } else {
+        throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
+      }
     } catch (error) {
-      if (typeof error === "object" && error !== null && "code" in error && error.code === "ELOOP") {
+      if (error instanceof EvidenceLensError) throw error;
+      if (authorized.rootDescriptor !== undefined) {
+        throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
+      }
+      if (typeof error === "object" && error !== null && "code" in error && ["EACCES", "ELOOP", "ENOENT", "ENOTDIR"].includes(String(error.code))) {
         throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
       }
       throw error;
     }
+    if (descriptor === undefined) throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
     const beforeRead = await descriptor.fstat();
-    if (!beforeRead.isFile || !sameIdentity(targetStat, beforeRead)) {
+    if (!beforeRead.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");
+    if (targetStat !== undefined && !sameIdentity(targetStat, beforeRead)) {
       throw stableError("ACCESS_DENIED", "Filesystem target changed before reading");
     }
     if (beforeRead.size > limit) throw stableError("LIMIT_EXCEEDED", "Filesystem evidence exceeds the configured size limit");
