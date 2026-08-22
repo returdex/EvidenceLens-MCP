@@ -87,7 +87,8 @@ export const visualPayloadSchema = z
     byteLength: z.number().int().min(1).max(100_000_000),
     width: boundedDimension,
     height: boundedDimension,
-    sha256: contentHashSchema
+    sha256: contentHashSchema,
+    base64: z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u).optional()
   })
   .strict()
   .refine((payload) => payload.width * payload.height <= 100_000_000, "visual dimensions exceed the maximum pixel count");
