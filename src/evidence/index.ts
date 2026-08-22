@@ -14,7 +14,7 @@ export async function normalizeEvidenceItems(items: ReviewEvidenceInput[]): Prom
     if (item.type === "text") {
       normalized.push(normalizeTextEvidence({ id: item.id, role: item.role, type: "text", reference, text: item.content }));
     } else if (item.type === "table") {
-      normalized.push(normalizeTableEvidence({ id: item.id, role: item.role, type: "table", reference, text: item.content }));
+      normalized.push(normalizeTableEvidence({ id: item.id, role: item.role, type: "table", reference, format: item.format, text: item.content }));
     } else if (item.type === "pdf") {
       normalized.push(await normalizePdfEvidence({ id: item.id, role: item.role, type: "pdf", reference, bytes: Buffer.from(item.contentBase64 ?? "", "base64") }));
     } else {
