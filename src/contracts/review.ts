@@ -356,6 +356,36 @@ export const reviewResponseSchema = z
   .superRefine((response, ctx) => {
     const ids = response.findings.map((finding) => finding.id);
     if (ids.length !== new Set(ids).size) ctx.addIssue({ code: "custom", path: ["findings"], message: "finding ids must be unique" });
+
+    const normalizedById = new Map(response.normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
+    response.findings.forEach((finding, findingIndex) => {
+      finding.citations.forEach((citation, citationIndex) => {
+        const evidence = normalizedById.get(citation.evidenceId);
+        const path = ["findings", findingIndex, "citations", citationIndex] as (string | number)[];
+        if (evidence === undefined) {
+          ctx.addIssue({ code: "custom", path: [...path, "evidenceId"], message: "citation evidenceId must reference normalized evidence" });
+          return;
+        }
+        if (evidence.contentHash !== citation.contentHash) ctx.addIssue({ code: "custom", path: [...path, "contentHash"], message: "citation contentHash must match normalized evidence" });
+        if (evidence.source.reference !== citation.sourceReference) ctx.addIssue({ code: "custom", path: [...path, "sourceReference"], message: "citation sourceReference must match normalized evidence" });
+        if (!evidence.references.some((reference) => JSON.stringify(reference) === JSON.stringify(citation.location))) {
+          ctx.addIssue({ code: "custom", path: [...path, "location"], message: "citation location must reference normalized evidence" });
+        }
+        if (evidence.source.type === "pdf" && citation.visual) {
+          const page = citation.location.kind === "pdf" ? citation.location.pageNumber : undefined;
+          const payload = page === undefined ? undefined : evidence.visualPayloads?.find((candidate) => candidate.pageNumber === page);
+          if (payload === undefined || citation.visualPayloadSha256 !== payload.sha256) {
+            ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual PDF citation must match a retained page payload" });
+          }
+        }
+        if ((evidence.source.type === "image" || evidence.source.type === "screenshot") && !citation.visual) {
+          ctx.addIssue({ code: "custom", path: [...path, "visual"], message: "image and screenshot citations must be visual" });
+        }
+        if (citation.visualPayloadSha256 !== undefined && evidence.visualPayload?.sha256 !== citation.visualPayloadSha256 && evidence.visualPayloads?.every((payload) => payload.sha256 !== citation.visualPayloadSha256)) {
+          ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual payload hash must match normalized evidence" });
+        }
+      });
+    });
   });
 
 export const reviewToolResultSchema = z
