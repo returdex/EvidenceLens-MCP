@@ -93,6 +93,7 @@ The Phase 4 analyzer is provider-independent `deterministic-rules` version `1.0.
   }],
   "normalizedEvidence": [{
     "source": { "id": "brief-1", "type": "text", "reference": "course/assignment-brief" },
+    "role": "assignment_brief",
     "contentHash": "lowercase-sha256-hex",
     "extraction": {
       "extractor": "text-normalizer",
