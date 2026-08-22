@@ -1,4 +1,4 @@
-import { accessSync, constants, realpathSync, statSync, type Stats } from "node:fs";
+import { accessSync, constants, fstatSync, openSync, realpathSync, statSync, type Stats } from "node:fs";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import { filesystemSourceSchema, type FilesystemSource } from "../contracts/review.js";
 
@@ -22,6 +22,7 @@ export interface AuthorizedFilesystemTarget {
   relativePath: string;
   resolvedPath: string;
   reference: string;
+  rootDescriptor?: number;
 }
 
 export interface FilesystemPolicy {
@@ -85,7 +86,7 @@ export function createFilesystemPolicy(
   injectedPrimitives?: FilesystemPrimitives
 ): FilesystemPolicy {
   const primitives = injectedPrimitives ?? defaultPrimitives();
-  const canonicalRoots = new Map<string, { id: string; path: string }>();
+  const canonicalRoots = new Map<string, { id: string; path: string; descriptor?: number }>();
   const canonicalPaths = new Set<string>();
 
   try {
@@ -97,7 +98,11 @@ export function createFilesystemPolicy(
       const canonicalPath = primitives.realpathSync(root.path);
       primitives.accessSync(canonicalPath, constants.R_OK);
       if (!primitives.statSync(canonicalPath).isDirectory() || canonicalPaths.has(canonicalPath)) configurationFailure();
-      canonicalRoots.set(root.id, { id: root.id, path: canonicalPath });
+      const descriptor = injectedPrimitives === undefined
+        ? openSync(canonicalPath, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0))
+        : undefined;
+      if (descriptor !== undefined && !fstatSync(descriptor).isDirectory()) configurationFailure();
+      canonicalRoots.set(root.id, { id: root.id, path: canonicalPath, descriptor });
       canonicalPaths.add(canonicalPath);
     }
   } catch (error) {
@@ -122,7 +127,8 @@ export function createFilesystemPolicy(
           rootId: root.id,
           relativePath: safeRelativePath,
           resolvedPath,
-          reference: `filesystem://${root.id}/${parsed.data.relativePath}`
+          reference: `filesystem://${root.id}/${safeRelativePath}`,
+          rootDescriptor: root.descriptor
         };
       } catch (error) {
         if (error instanceof FilesystemAccessDeniedError) throw error;
