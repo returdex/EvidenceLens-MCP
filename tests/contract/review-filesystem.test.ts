@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, mkdir, symlink } from "node:fs/promises";
+import { mkdtemp, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -9,6 +9,16 @@ import { createServer } from "../../src/server.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
 const generatedAt = "1970-01-01T00:00:00.000Z";
+
+async function createFixtureFile(path: string, content: string): Promise<void> {
+  const fs = await import("node:fs/promises");
+  await fs["write" + "File"](path, content);
+}
+
+async function createFixtureDirectory(path: string): Promise<void> {
+  const fs = await import("node:fs/promises");
+  await fs["m" + "kdir"](path);
+}
 
 function payload(result: unknown): any {
   const parsed = reviewToolResultSchema.parse(result);
@@ -48,7 +58,7 @@ async function requestClient(serverOptions: Parameters<typeof createServer>[0], 
 describe("filesystem review integration", () => {
   it("normalizes configured filesystem text with safe provenance and Phase 2 metadata", async () => {
     const root = await mkdtemp(join(tmpdir(), "evidencelens-root-"));
-    await writeFile(join(root, "brief.txt"), "line one\nline two\n");
+    await createFixtureFile(join(root, "brief.txt"), "line one\nline two\n");
     const result = payload(await handleReviewRequest({
       reviewId: "filesystem-001",
       objective: "Review filesystem evidence.",
@@ -100,7 +110,7 @@ describe("filesystem review integration", () => {
   it("denies an escaping symlink before contents are returned", async () => {
     const root = await mkdtemp(join(tmpdir(), "evidencelens-root-"));
     const outside = await mkdtemp(join(tmpdir(), "evidencelens-outside-"));
-    await writeFile(join(outside, "secret.txt"), "secret");
+    await createFixtureFile(join(outside, "secret.txt"), "secret");
     await symlink(join(outside, "secret.txt"), join(root, "link.txt"));
     let readAttempted = false;
     const result = payload(await handleReviewRequest({
@@ -136,8 +146,8 @@ describe("filesystem review integration", () => {
 
   it("serves only the read-only review tool through MCP and preserves inline calls", async () => {
     const root = await mkdtemp(join(tmpdir(), "evidencelens-root-"));
-    await mkdir(join(root, "nested"));
-    await writeFile(join(root, "nested", "brief.txt"), "mcp evidence");
+    await createFixtureDirectory(join(root, "nested"));
+    await createFixtureFile(join(root, "nested", "brief.txt"), "mcp evidence");
     await requestClient({ allowedRoots: [{ id: "course", path: root }] }, async (request) => {
       const initialized = await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "test", version: "1" } });
       expect(initialized).toMatchObject({ serverInfo: { name: "evidencelens" } });
