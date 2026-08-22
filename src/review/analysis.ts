@@ -81,7 +81,12 @@ function makeClaim(payload: TransientEvidenceAnalysis, text: string, location: N
 function boundedLines(payload: TransientEvidenceAnalysis): Array<{ text: string; location: NormalizedEvidenceReference }> {
   if (payload.text === undefined) return [];
   const lines = payload.text.slice(0, ANALYSIS_LIMITS.maxPayloadBytes).split(/\r\n|\n|\r/u);
-  return lines.slice(0, ANALYSIS_LIMITS.maxClaims).map((text, index) => ({ text, location: payload.references.find((reference) => reference.kind === "text" && reference.startLine === index + 1) ?? { kind: "text", startLine: index + 1, endLine: index + 1 } }));
+  return lines.slice(0, ANALYSIS_LIMITS.maxClaims).map((text, index) => ({
+    text,
+    location: payload.type === "pdf"
+      ? (payload.references[index] ?? { kind: "pdf", pageNumber: index + 1 })
+      : (payload.references.find((reference) => reference.kind === "text" && reference.startLine === index + 1) ?? { kind: "text", startLine: index + 1, endLine: index + 1 })
+  }));
 }
 
 export function extractRequirementClaims(payload: TransientEvidenceAnalysis): Claim[] {
