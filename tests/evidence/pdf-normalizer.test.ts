@@ -44,6 +44,25 @@ describe("normalizePdfEvidence", () => {
     expect(result.visualPayload?.base64.length).toBeGreaterThan(0);
     expect(result.visualPayload?.byteLength).toBeGreaterThan(0);
     expect(result.visualPayload?.sha256).toBe(sha256Hex(Buffer.from(result.visualPayload?.base64 ?? "", "base64")));
+    expect(result.visualPayloads).toHaveLength(1);
+    expect(result.visualPayloads?.[0]?.pageNumber).toBe(1);
+  });
+
+  it("represents every scanned page with a page-associated visual payload", async () => {
+    const bytes = new Uint8Array(await readFile("tests/fixtures/evidence/pdfs/scanned-pages.pdf"));
+    const result = await normalizePdfEvidence({
+      id: "scanned-pages",
+      role: "rubric",
+      type: "pdf",
+      reference: "fixture://scanned-pages.pdf",
+      bytes,
+      generatedAt
+    });
+
+    expect(result.references).toHaveLength(2);
+    expect(result.visualPayloads?.map((payload) => payload.pageNumber)).toEqual([1, 2]);
+    expect(result.visualPayloads?.every((payload) => payload.base64.length > 0)).toBe(true);
+    expect(normalizedEvidenceSchema.parse(result)).toEqual(result);
   });
 
   it("rejects oversized and unparseable PDF bytes with sanitized errors", async () => {
