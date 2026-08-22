@@ -1,6 +1,13 @@
 import type { ReviewToolResult } from "./contracts/review.js";
 
-export type EvidenceLensErrorCode = "INVALID_REQUEST" | "UNSUPPORTED_EVIDENCE_TYPE" | "LIMIT_EXCEEDED" | "INTERNAL_ERROR";
+export type EvidenceLensErrorCode =
+  | "INVALID_REQUEST"
+  | "UNSUPPORTED_EVIDENCE_TYPE"
+  | "UNSUPPORTED_FORMAT"
+  | "LIMIT_EXCEEDED"
+  | "ACCESS_DENIED"
+  | "PROVIDER_FAILURE"
+  | "INTERNAL_ERROR";
 
 export class EvidenceLensError extends Error {
   readonly code: EvidenceLensErrorCode;
