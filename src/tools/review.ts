@@ -2,14 +2,18 @@ import type { McpServer } from "@modelcontextprotocol/server";
 import { ZodError } from "zod/v4";
 import {
   reviewRequestSchema,
+  reviewResponseSchema,
   type ReviewRequest,
   type ReviewResponse,
   type ReviewToolResult
 } from "../contracts/review.js";
-import { normalizeEvidenceItems } from "../evidence/index.js";
+import { normalizeEvidenceBundle } from "../evidence/index.js";
 import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 import type { FilesystemPolicy } from "../filesystem/policy.js";
 import type { FilesystemReadAdapter } from "../filesystem/read.js";
+import { buildReviewAnalysisInput } from "../review/analysis.js";
+import { orchestrateReview, createDeterministicReviewAnalyzer } from "../review/engine.js";
+import { validateReviewRoles } from "../review/roles.js";
 
 const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.2";
@@ -22,21 +26,28 @@ export interface ReviewHandlerOptions {
 }
 
 async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
-  const normalizedEvidence = await normalizeEvidenceItems(request.evidence, { ...options, generatedAt: GENERATED_AT });
-  return {
+  const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
+  const analysis = buildReviewAnalysisInput(bundle);
+  const analyzer = createDeterministicReviewAnalyzer();
+  try {
+    const response = {
     ok: true,
     requestId: request.reviewId,
     status: "accepted",
-    findings: [],
-    normalizedEvidence,
+    findings: orchestrateReview({ ...analysis, reviewId: request.reviewId, objective: request.objective }),
+    normalizedEvidence: bundle.normalizedEvidence,
     metadata: {
       serverName: SERVER_NAME,
       serverVersion: SERVER_VERSION,
-      analyzerName: "deterministic-rules",
-      analyzerVersion: "1.0.0",
+      analyzerName: analyzer.name,
+      analyzerVersion: analyzer.version,
       generatedAt: GENERATED_AT
     }
-  };
+    } satisfies ReviewResponse;
+    return reviewResponseSchema.parse(response);
+  } finally {
+    analysis.clear();
+  }
 }
 
 function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError {
@@ -67,6 +78,11 @@ export async function handleReviewRequest(input: unknown, options: ReviewHandler
 
   if (!parsed.success) {
     return toToolErrorResult(errorFromValidation(parsed.error, input));
+  }
+
+  const roles = validateReviewRoles(parsed.data);
+  if (!roles.ok) {
+    return toToolErrorResult(new EvidenceLensError("INVALID_REVIEW_ROLES", "Review evidence roles are invalid"));
   }
 
   try {

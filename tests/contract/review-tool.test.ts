@@ -38,6 +38,21 @@ const completeFindingRequest = {
   ]
 };
 
+const requiredMetadataEvidence = [
+  { id: "brief-required", role: "assignment_brief", type: "text" },
+  { id: "rubric-required", role: "rubric", type: "text" },
+  { id: "instructions-required", role: "teacher_instructions", type: "text" },
+  { id: "solution-required", role: "solution", type: "text" }
+] as const;
+
+function completeReview(evidence: readonly Record<string, unknown>[]) {
+  const roles = new Set(evidence.map((item) => item.role));
+  return {
+    ...validRequest,
+    evidence: [...evidence, ...requiredMetadataEvidence.filter((item) => !roles.has(item.role))]
+  };
+}
+
 describe("review_evidence schema and error contract", () => {
   it("accepts a valid metadata-only review request schema", () => {
     const parsed = reviewRequestSchema.safeParse(validRequest);
@@ -219,27 +234,26 @@ describe("review_evidence handler and MCP protocol contract", () => {
   });
 
   it("returns schema-valid deterministic success from the handler", async () => {
-    const first = await handleReviewRequest(validRequest);
-    const second = await handleReviewRequest(validRequest);
+    const request = completeReview(validRequest.evidence);
+    const first = await handleReviewRequest(request);
+    const second = await handleReviewRequest(request);
     const firstPayload = parseToolPayload(first);
 
     expect(first).toEqual(second);
     expect(firstPayload.ok).toBe(true);
-    expect(firstPayload.requestId).toBe(validRequest.reviewId);
+    expect(firstPayload.requestId).toBe(request.reviewId);
     expect(firstPayload.metadata.generatedAt).toBe("1970-01-01T00:00:00.000Z");
     expect(reviewResponseSchema.parse(firstPayload)).toEqual(firstPayload);
   });
 
   it("returns machine-readable handler errors for malformed and limit-exceeded requests", async () => {
-    const invalidPayload = parseToolPayload(await handleReviewRequest({ ...validRequest, objective: "" }));
+    const invalidPayload = parseToolPayload(await handleReviewRequest({ ...completeReview(validRequest.evidence), objective: "" }));
     const limitPayload = parseToolPayload(
-      await handleReviewRequest({
-        ...validRequest,
-        evidence: Array.from({ length: 2 }, (_, index) => ({
+      await handleReviewRequest({ ...completeReview(Array.from({ length: 2 }, (_, index) => ({
           id: `evidence-${index}`,
           role: "other",
           type: "text"
-        })),
+        }))),
         limits: { maxEvidenceItems: 1 }
       })
     );
@@ -249,24 +263,15 @@ describe("review_evidence handler and MCP protocol contract", () => {
   });
 
   it("rejects empty content and preserves the bounded reference contract", async () => {
-    const payload = parseToolPayload(await handleReviewRequest({
-      ...validRequest,
-      evidence: [{ id: "empty-table", role: "other", type: "table", content: "" }]
-    }));
+    const payload = parseToolPayload(await handleReviewRequest(completeReview([{ id: "empty-table", role: "other", type: "table", content: "" }])));
     expect(payload).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
 
-    const longReference = parseToolPayload(await handleReviewRequest({
-      ...validRequest,
-      evidence: [{ id: "long-reference", role: "other", type: "text", reference: "r".repeat(2049), content: "x" }]
-    }));
+    const longReference = parseToolPayload(await handleReviewRequest(completeReview([{ id: "long-reference", role: "other", type: "text", reference: "r".repeat(2049), content: "x" }])));
     expect(longReference).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
   });
 
   it("propagates the strict TSV format through the MCP handler", async () => {
-    const payload = parseToolPayload(await handleReviewRequest({
-      ...validRequest,
-      evidence: [{ id: "tsv", role: "other", type: "table", format: "tsv", content: "a\tb\n1\t2" }]
-    }));
+    const payload = parseToolPayload(await handleReviewRequest(completeReview([{ id: "tsv", role: "other", type: "table", format: "tsv", content: "a\tb\n1\t2" }])));
     expect(payload).toMatchObject({ ok: true });
     expect(payload.normalizedEvidence[0].references).toEqual([
       { kind: "table", sheetName: "Sheet1", row: 1, column: 1, cell: "A1" },
@@ -327,7 +332,7 @@ describe("review_evidence handler and MCP protocol contract", () => {
 
       const toolResult = await request("tools/call", {
         name: "review_evidence",
-        arguments: validRequest
+        arguments: completeReview(validRequest.evidence)
       });
       const payload = parseToolPayload(toolResult);
 

@@ -1,5 +1,5 @@
 import { accessSync, constants, realpathSync, statSync } from "node:fs";
-import { mkdtemp, open, symlink } from "node:fs/promises";
+import { mkdtemp, open, readFile, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -11,8 +11,23 @@ import { handleReviewRequest } from "../../src/tools/review.js";
 import type { FilesystemDescriptor, FilesystemReadAdapter, FilesystemStat } from "../../src/filesystem/read.js";
 
 const generatedAt = "1970-01-01T00:00:00.000Z";
+const requiredMetadataEvidence = [
+  { id: "brief-required", role: "assignment_brief", type: "text" },
+  { id: "rubric-required", role: "rubric", type: "text" },
+  { id: "instructions-required", role: "teacher_instructions", type: "text" },
+  { id: "solution-required", role: "solution", type: "text" }
+] as const;
 
-async function createFixtureFile(path: string, content: string): Promise<void> {
+function completeRequest(evidence: readonly Record<string, unknown>[]) {
+  const roles = new Set(evidence.map((item) => item.role));
+  return {
+    reviewId: "review-integration-001",
+    objective: "Review integration evidence.",
+    evidence: [...evidence, ...requiredMetadataEvidence.filter((item) => !roles.has(item.role))]
+  };
+}
+
+async function createFixtureFile(path: string, content: string | Uint8Array): Promise<void> {
   const fs = await import("node:fs/promises");
   await fs["write" + "File"](path, content);
 }
@@ -83,14 +98,52 @@ async function requestClient(serverOptions: Parameters<typeof createServer>[0], 
 }
 
 describe("filesystem review integration", () => {
+  it("hands each authorized filesystem type to analysis from one read without analyzer reopening", async () => {
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-root-"));
+    const [pdfBytes, imageBytes] = await Promise.all([
+      readFile("tests/fixtures/evidence/pdfs/text-page.pdf"),
+      readFile("tests/fixtures/evidence/images/rubric-screenshot.png")
+    ]);
+    await createFixtureFile(join(root, "brief.txt"), "The solution must include a conclusion.\n");
+    await createFixtureFile(join(root, "rubric.csv"), "criterion,score\nconclusion,4\n");
+    await createFixtureFile(join(root, "instructions.pdf"), pdfBytes);
+    await createFixtureFile(join(root, "solution.png"), imageBytes);
+    let openCount = 0;
+    const adapter = injectedSafeAdapter();
+    const countedAdapter: FilesystemReadAdapter = {
+      stat: adapter.stat,
+      open: async (...args) => { openCount += 1; return adapter.open!(...args); }
+    };
+    const result = payload(await handleReviewRequest({
+      reviewId: "filesystem-all-types-001",
+      objective: "Review all authorized filesystem evidence.",
+      evidence: [
+        { id: "brief", role: "assignment_brief", type: "text", filesystem: { kind: "filesystem", rootId: "course", relativePath: "brief.txt" } },
+        { id: "rubric", role: "rubric", type: "table", filesystem: { kind: "filesystem", rootId: "course", relativePath: "rubric.csv" } },
+        { id: "instructions", role: "teacher_instructions", type: "pdf", filesystem: { kind: "filesystem", rootId: "course", relativePath: "instructions.pdf" } },
+        { id: "solution", role: "solution", type: "image", filesystem: { kind: "filesystem", rootId: "course", relativePath: "solution.png" } }
+      ]
+    }, {
+      filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }], { realpathSync, statSync, accessSync }),
+      filesystemReadAdapter: countedAdapter
+    }));
+
+    expect(result.ok).toBe(true);
+    expect(openCount).toBe(4);
+    expect(result.normalizedEvidence.map((evidence: any) => evidence.source.reference)).toEqual([
+      "filesystem://course/brief.txt",
+      "filesystem://course/rubric.csv",
+      "filesystem://course/instructions.pdf",
+      "filesystem://course/solution.png"
+    ]);
+    expect(JSON.stringify(result)).not.toContain(root);
+    expect(JSON.stringify(result)).not.toContain("The solution must include a conclusion");
+  });
+
   it("normalizes configured filesystem text with safe provenance and Phase 2 metadata", async () => {
     const root = await mkdtemp(join(tmpdir(), "evidencelens-root-"));
     await createFixtureFile(join(root, "brief.txt"), "line one\nline two\n");
-    const result = payload(await handleReviewRequest({
-      reviewId: "filesystem-001",
-      objective: "Review filesystem evidence.",
-      evidence: [{ id: "brief", role: "assignment_brief", type: "text", reference: "/private/opaque", filesystem: { kind: "filesystem", rootId: "course", relativePath: "brief.txt" } }]
-    }, {
+    const result = payload(await handleReviewRequest({ ...completeRequest([{ id: "brief", role: "assignment_brief", type: "text", reference: "/private/opaque", filesystem: { kind: "filesystem", rootId: "course", relativePath: "brief.txt" } }]), reviewId: "filesystem-001", objective: "Review filesystem evidence." }, {
       filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }], { realpathSync, statSync, accessSync }),
       filesystemReadAdapter: injectedSafeAdapter()
     }));
@@ -109,14 +162,10 @@ describe("filesystem review integration", () => {
   });
 
   it("keeps explicit inline content and metadata-only evidence unchanged", async () => {
-    const result = payload(await handleReviewRequest({
-      reviewId: "inline-001",
-      objective: "Review inline evidence.",
-      evidence: [
+    const result = payload(await handleReviewRequest({ ...completeRequest([
         { id: "inline", role: "other", type: "text", reference: "opaque-reference", content: "inline" },
         { id: "metadata", role: "other", type: "text", reference: "/private/secret.txt" }
-      ]
-    }));
+      ]), reviewId: "inline-001", objective: "Review inline evidence." }));
     expect(result.ok).toBe(true);
     expect(result.normalizedEvidence).toHaveLength(1);
     expect(result.normalizedEvidence[0].source.reference).toBe("opaque-reference");
@@ -128,11 +177,7 @@ describe("filesystem review integration", () => {
     ["traversal", { kind: "filesystem", rootId: "course", relativePath: "../secret.txt" }, "INVALID_REQUEST"],
     ["absolute", { kind: "filesystem", rootId: "course", relativePath: "/etc/passwd" }, "INVALID_REQUEST"]
   ])("returns sanitized denial for %s", async (_name, filesystem, code) => {
-    const result = payload(await handleReviewRequest({
-      reviewId: "denied-001",
-      objective: "Review denied evidence.",
-      evidence: [{ id: "secret", role: "other", type: "text", filesystem }]
-    }));
+    const result = payload(await handleReviewRequest({ ...completeRequest([{ id: "secret", role: "other", type: "text", filesystem }]), reviewId: "denied-001", objective: "Review denied evidence." }));
     expect(result).toMatchObject({ ok: false, code });
     expect(result.message).not.toContain("secret");
   });
@@ -143,11 +188,7 @@ describe("filesystem review integration", () => {
     await createFixtureFile(join(outside, "secret.txt"), "secret");
     await symlink(join(outside, "secret.txt"), join(root, "link.txt"));
     let readAttempted = false;
-    const result = payload(await handleReviewRequest({
-      reviewId: "symlink-001",
-      objective: "Review symlink evidence.",
-      evidence: [{ id: "secret", role: "other", type: "text", filesystem: { kind: "filesystem", rootId: "course", relativePath: "link.txt" } }]
-    }, { filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }]), filesystemReadAdapter: {
+    const result = payload(await handleReviewRequest({ ...completeRequest([{ id: "secret", role: "other", type: "text", filesystem: { kind: "filesystem", rootId: "course", relativePath: "link.txt" } }]), reviewId: "symlink-001", objective: "Review symlink evidence." }, { filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }]), filesystemReadAdapter: {
       stat: async () => { readAttempted = true; throw new Error("must not read"); },
       open: async () => { readAttempted = true; throw new Error("must not open"); }
     } }));
@@ -185,12 +226,8 @@ describe("filesystem review integration", () => {
       expect(listed.tools.map((tool) => tool.name)).toEqual(["review_evidence"]);
       expect(listed.tools.some((tool) => /write|delete|mutat|provider/iu.test(tool.name))).toBe(false);
       expect(listed.tools[0]?.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false });
-      const result = payload(await request("tools/call", { name: "review_evidence", arguments: {
-        reviewId: "mcp-001",
-        objective: "Review MCP evidence.",
-        evidence: [{ id: "brief", role: "other", type: "text", content: "inline" }]
-      } }));
-      expect(result).toMatchObject({ ok: true, requestId: "mcp-001", findings: [] });
+      const result = payload(await request("tools/call", { name: "review_evidence", arguments: { ...completeRequest([{ id: "brief", role: "other", type: "text", content: "inline" }]), reviewId: "mcp-001", objective: "Review MCP evidence." } }));
+      expect(result).toMatchObject({ ok: true, requestId: "mcp-001" });
     });
   });
 });
