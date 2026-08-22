@@ -40,4 +40,18 @@ describe("deterministic review engine", () => {
     const findings = orchestrateReview(buildReviewAnalysisInput({ normalizedEvidence: [...requirement.normalizedEvidence, ...solution.normalizedEvidence], analysisPayloads: [...requirement.analysisPayloads, ...solution.analysisPayloads] }));
     expect(findings).toHaveLength(0);
   });
+
+  it.each(["The conclusion is absent.", "The report does not include a conclusion.", "The report lacks a conclusion.", "There is no conclusion."])("detects negative predicate: %s", (solutionText) => {
+    const requirement = evidence("brief", "assignment_brief", "Students must include a conclusion.");
+    const solution = evidence("solution", "solution", solutionText);
+    const findings = orchestrateReview(buildReviewAnalysisInput({ normalizedEvidence: [...requirement.normalizedEvidence, ...solution.normalizedEvidence], analysisPayloads: [...requirement.analysisPayloads, ...solution.analysisPayloads] }));
+    expect(findings.map((finding) => finding.type)).toEqual(["contradiction"]);
+  });
+
+  it("does not match unrelated claims with one shared token", () => {
+    const requirement = evidence("brief", "assignment_brief", "Students must include a conclusion.");
+    const solution = evidence("solution", "solution", "The conclusion discusses unrelated historical context.");
+    const findings = orchestrateReview(buildReviewAnalysisInput({ normalizedEvidence: [...requirement.normalizedEvidence, ...solution.normalizedEvidence], analysisPayloads: [...requirement.analysisPayloads, ...solution.analysisPayloads] }));
+    expect(findings.map((finding) => finding.type)).toEqual(["omission"]);
+  });
 });

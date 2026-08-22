@@ -16,7 +16,10 @@ function overlap(left: Claim, right: Claim): number {
 }
 
 function sameKey(left: Claim, right: Claim): boolean {
-  return left.key === right.key || overlap(left, right) >= Math.max(1, Math.min(2, Math.ceil(Math.min(left.tokens.length, right.tokens.length) / 3)));
+  if (left.key === right.key) return true;
+  const shared = overlap(left, right);
+  const longerClaim = Math.max(left.tokens.length, right.tokens.length);
+  return shared >= 2 && shared / longerClaim >= 0.5;
 }
 
 function conflicting(left: Claim, right: Claim): boolean {
