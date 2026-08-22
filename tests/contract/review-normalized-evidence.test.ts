@@ -84,6 +84,26 @@ describe("review_evidence normalized evidence contract", () => {
     }
   });
 
+  it("analyzes TSV cells using their validated format and cites the matching cells", async () => {
+    const payload = parseToolPayload(await handleReviewRequest({
+      reviewId: "review-tsv-001",
+      objective: "Review TSV evidence.",
+      evidence: [
+        { id: "brief", role: "assignment_brief", type: "text", content: "Brief" },
+        { id: "rubric", role: "rubric", type: "table", format: "tsv", content: "criterion\trequirement\nsummary\tStudents must include a conclusion." },
+        { id: "instructions", role: "teacher_instructions", type: "text", content: "Instructions" },
+        { id: "solution", role: "solution", type: "table", format: "tsv", content: "criterion\tanswer\nsummary\tThe conclusion is absent." }
+      ]
+    }));
+
+    expect(payload.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: "contradiction", citations: expect.arrayContaining([
+        expect.objectContaining({ evidenceId: "rubric", location: expect.objectContaining({ row: 2, column: 2, cell: "B2" }) }),
+        expect.objectContaining({ evidenceId: "solution", location: expect.objectContaining({ row: 2, column: 2, cell: "B2" }) })
+      ]) })
+    ]));
+  });
+
   it("keeps metadata-only evidence normalizedEvidence empty and reference opaque", async () => {
     const payload = parseToolPayload(await handleReviewRequest(requestWithEvidence([
       { id: "metadata", role: "other", type: "text", reference: "/private/secret.txt" }

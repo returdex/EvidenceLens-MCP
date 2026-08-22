@@ -21,7 +21,7 @@ function inputBytes(input: TableEvidenceInput): Uint8Array {
   throw new TypeError("table evidence requires bytes or text");
 }
 
-function parseDelimited(text: string, delimiter: string): string[][] {
+export function parseDelimited(text: string, delimiter: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -113,6 +113,7 @@ export function normalizeTableEvidence(input: TableEvidenceInput): NormalizedEvi
 
   return {
     source: { id: input.id, type: input.type, reference: input.reference },
+    role: input.role as NormalizedEvidence["role"],
     contentHash: sha256Hex(originalBytes),
     extraction: {
       extractor: "table-normalizer",
