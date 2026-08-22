@@ -29,9 +29,21 @@ function sanitizeMessage(message: string): string {
     .slice(0, 500);
 }
 
+function stableMessage(code: EvidenceLensErrorCode): string {
+  switch (code) {
+    case "ACCESS_DENIED": return "Filesystem access denied";
+    case "UNSUPPORTED_FORMAT": return "Unsupported evidence format";
+    case "PROVIDER_FAILURE": return "Provider failure";
+    case "LIMIT_EXCEEDED": return "Evidence exceeds the configured limit";
+    case "UNSUPPORTED_EVIDENCE_TYPE": return "Unsupported evidence type";
+    case "INVALID_REQUEST": return "Invalid request";
+    case "INTERNAL_ERROR": return "Internal error";
+  }
+}
+
 function normalizeError(error: unknown): EvidenceLensError {
   if (error instanceof EvidenceLensError) {
-    return error;
+    return new EvidenceLensError(error.code, stableMessage(error.code));
   }
 
   if (error instanceof Error) {

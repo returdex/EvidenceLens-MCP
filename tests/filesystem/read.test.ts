@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { EvidenceLensError, toToolErrorResult } from "../../src/errors.js";
-import { readFilesystemEvidence, type FilesystemDescriptor, type FilesystemReadAdapter } from "../../src/filesystem/read.js";
+import { readFilesystemEvidence, type FilesystemDescriptor, type FilesystemReadAdapter, type FilesystemStat } from "../../src/filesystem/read.js";
 import type { FilesystemPolicy } from "../../src/filesystem/policy.js";
 
 const source = { kind: "filesystem" as const, rootId: "course", relativePath: "brief.txt" };
 
-function stats(overrides: Partial<FilesystemDescriptor["stat"]> = {}): FilesystemDescriptor["stat"] {
+function stats(overrides: Partial<FilesystemStat> = {}): FilesystemStat {
   return { dev: 1, ino: 2, mode: 0o100644, size: 5, isFile: true, ...overrides };
 }
 
-function adapter(overrides: Partial<FilesystemReadAdapter> = {}): FilesystemReadAdapter & { calls: string[] } {
+function adapter(overrides: Partial<FilesystemReadAdapter> & { descriptorFstat?: () => Promise<FilesystemStat> } = {}): FilesystemReadAdapter & { calls: string[] } {
   const calls: string[] = [];
   const descriptor: FilesystemDescriptor = {
-    stat: stats(),
+    fstat: overrides.descriptorFstat ?? (async () => stats()),
     read: async (buffer, offset, length) => {
       calls.push(`read:${length}`);
       Buffer.from("hello").copy(buffer, offset, 0, length);
@@ -84,7 +84,8 @@ describe("filesystem byte reader", () => {
 
     let statCount = 0;
     const after = adapter({
-      stat: async () => { statCount += 1; return statCount === 1 ? stats() : stats({ ino: 9 }); }
+      stat: async () => stats(),
+      descriptorFstat: async () => { statCount += 1; return statCount === 1 ? stats() : stats({ ino: 9 }); }
     });
     await expect(readFilesystemEvidence(policy, source, "text", after)).rejects.toMatchObject({ code: "INTERNAL_ERROR" });
     expect(after.calls).toContain("close");
