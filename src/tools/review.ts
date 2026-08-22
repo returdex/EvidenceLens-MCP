@@ -8,14 +8,21 @@ import {
 } from "../contracts/review.js";
 import { normalizeEvidenceItems } from "../evidence/index.js";
 import { EvidenceLensError, toToolErrorResult } from "../errors.js";
+import type { FilesystemPolicy } from "../filesystem/policy.js";
+import type { FilesystemReadAdapter } from "../filesystem/read.js";
 
 const SERVER_NAME = "evidencelens";
-const SERVER_VERSION = "0.1.0";
+const SERVER_VERSION = "0.1.1";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
 
-async function createReviewResponse(request: ReviewRequest): Promise<ReviewResponse> {
-  const normalizedEvidence = await normalizeEvidenceItems(request.evidence);
+export interface ReviewHandlerOptions {
+  filesystemPolicy?: FilesystemPolicy;
+  filesystemReadAdapter?: FilesystemReadAdapter;
+}
+
+async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
+  const normalizedEvidence = await normalizeEvidenceItems(request.evidence, { ...options, generatedAt: GENERATED_AT });
   return {
     ok: true,
     requestId: request.reviewId,
@@ -53,7 +60,7 @@ function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError
   return new EvidenceLensError(code, "Review request failed validation");
 }
 
-export async function handleReviewRequest(input: unknown): Promise<ReviewToolResult> {
+export async function handleReviewRequest(input: unknown, options: ReviewHandlerOptions = {}): Promise<ReviewToolResult> {
   const parsed = reviewRequestSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -62,7 +69,7 @@ export async function handleReviewRequest(input: unknown): Promise<ReviewToolRes
 
   try {
     return {
-      content: [{ type: "text", text: JSON.stringify(await createReviewResponse(parsed.data)) }]
+      content: [{ type: "text", text: JSON.stringify(await createReviewResponse(parsed.data, options)) }]
     };
   } catch (error) {
     if (error instanceof RangeError) {
@@ -75,7 +82,7 @@ export async function handleReviewRequest(input: unknown): Promise<ReviewToolRes
   }
 }
 
-export function registerReviewTool(server: McpServer): void {
+export function registerReviewTool(server: McpServer, options: ReviewHandlerOptions = {}): void {
   server.registerTool(
     "review_evidence",
     {
@@ -89,6 +96,6 @@ export function registerReviewTool(server: McpServer): void {
         openWorldHint: false
       }
     },
-    async (input) => handleReviewRequest(input)
+    async (input) => handleReviewRequest(input, options)
   );
 }

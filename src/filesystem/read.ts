@@ -4,7 +4,7 @@ import type { Stats } from "node:fs";
 import type { EvidenceType, FilesystemSource } from "../contracts/review.js";
 import { EvidenceLensError } from "../errors.js";
 import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from "../evidence/limits.js";
-import type { AuthorizedFilesystemTarget, FilesystemPolicy } from "./policy.js";
+import { FilesystemAccessDeniedError, type AuthorizedFilesystemTarget, type FilesystemPolicy } from "./policy.js";
 
 export interface FilesystemStat {
   dev: number | bigint;
@@ -79,7 +79,13 @@ export async function readFilesystemEvidence(
   evidenceType: EvidenceType,
   injectedAdapter?: FilesystemReadAdapter
 ): Promise<FilesystemReadResult> {
-  const authorized = await policy.authorize(source);
+  let authorized: AuthorizedFilesystemTarget;
+  try {
+    authorized = await policy.authorize(source);
+  } catch (error) {
+    if (error instanceof FilesystemAccessDeniedError) throw stableError("ACCESS_DENIED", "Filesystem access denied");
+    throw stableError("INTERNAL_ERROR", "Filesystem authorization failed");
+  }
   const limit = MAX_BYTES[evidenceType];
   if (limit === undefined) unsupportedType(evidenceType);
 
@@ -127,7 +133,7 @@ export async function readFilesystemEvidence(
       bytes,
       rootId: authorized.rootId,
       relativePath: authorized.relativePath,
-      provenanceReference: ("reference" in authorized ? authorized.reference : (authorized as AuthorizedFilesystemTarget & { provenanceReference: string }).provenanceReference) as `filesystem://${string}`
+      provenanceReference: `filesystem://${authorized.rootId}/${authorized.relativePath}`
     };
   } catch (error) {
     failure = error;
