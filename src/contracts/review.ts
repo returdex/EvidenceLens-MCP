@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { sha256Hex } from "../evidence/hash.js";
 import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, MAX_TABLE_BYTES, MAX_TEXT_BYTES } from "../evidence/limits.js";
 
 const noAsciiControlCharacters = /^[^\u0000-\u001F\u007F]*$/u;
@@ -90,10 +91,23 @@ export const visualPayloadSchema = z
     width: boundedDimension,
     height: boundedDimension,
     sha256: contentHashSchema,
-    base64: z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u).optional()
+    base64: z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u)
   })
   .strict()
-  .refine((payload) => payload.width * payload.height <= 100_000_000, "visual dimensions exceed the maximum pixel count");
+  .superRefine((payload, ctx) => {
+    if (payload.width * payload.height > 100_000_000) {
+      ctx.addIssue({ code: "custom", message: "visual dimensions exceed the maximum pixel count" });
+    }
+    const bytes = Buffer.from(payload.base64, "base64");
+    if (bytes.byteLength !== payload.byteLength) {
+      ctx.addIssue({ code: "custom", path: ["byteLength"], message: "byteLength must match decoded base64 bytes" });
+    }
+    if (sha256Hex(bytes) !== payload.sha256) {
+      ctx.addIssue({ code: "custom", path: ["sha256"], message: "sha256 must match decoded base64 bytes" });
+    }
+  });
+
+export const pdfVisualPayloadSchema = visualPayloadSchema.extend({ pageNumber: positiveInt });
 
 export const normalizedEvidenceSchema = z
   .object({
@@ -102,16 +116,23 @@ export const normalizedEvidenceSchema = z
     extraction: extractionMetadataSchema,
     references: z.array(normalizedEvidenceReferenceSchema).min(1),
     visualPayload: visualPayloadSchema.optional(),
+    visualPayloads: z.array(pdfVisualPayloadSchema).min(1).optional(),
     warnings: z.array(extractionWarningSchema)
   })
-  .strict();
+  .strict()
+  .superRefine((evidence, ctx) => {
+    if (evidence.visualPayloads !== undefined && evidence.source.type !== "pdf") {
+      ctx.addIssue({ code: "custom", path: ["visualPayloads"], message: "visualPayloads are only valid for PDF evidence" });
+    }
+  });
 
 export const reviewEvidenceInputSchema = z
   .object({
     id: z.string().min(1).max(128),
     role: evidenceRoleSchema,
     type: evidenceTypeSchema,
-    reference: z.string().regex(noAsciiControlCharacters, "reference must not contain ASCII control characters").optional(),
+    reference: z.string().min(1).max(2048).regex(noAsciiControlCharacters, "reference must not contain ASCII control characters").optional(),
+    format: z.enum(["csv", "tsv"]).optional(),
     content: z.string().regex(noUnsafeContentControlCharacters, "content must not contain unsafe ASCII control characters").optional(),
     contentBase64: z.string().min(1).optional(),
     mimeType: z.string().optional()
@@ -128,7 +149,9 @@ export const reviewEvidenceInputSchema = z
       if (evidence.mimeType !== undefined) add(["mimeType"], `${evidence.type} evidence does not accept mimeType`);
       const maxBytes = evidence.type === "text" ? MAX_TEXT_BYTES : MAX_TABLE_BYTES;
       if (utf8Bytes > maxBytes) add(["content"], `${evidence.type} content exceeds the maximum of ${maxBytes} bytes`);
+      if (evidence.type === "text" && evidence.format !== undefined) add(["format"], "text evidence does not accept format");
     } else {
+      if (evidence.format !== undefined) add(["format"], `${evidence.type} evidence does not accept format`);
       if (hasContent) add(["content"], `${evidence.type} evidence does not accept UTF-8 content`);
       if (hasBase64) {
         if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(evidence.contentBase64 ?? "")) {
