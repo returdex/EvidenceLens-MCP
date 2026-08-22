@@ -50,7 +50,7 @@ Plans:
 - [x] 02-02-PLAN.md — Text and table normalizers with line and cell context
 
 **Wave 3** *(blocked on Waves 1-2 completion)*
-- [ ] 02-03-PLAN.md — PDF and image/screenshot normalizers with visual context preservation
+- [x] 02-03-PLAN.md — PDF and image/screenshot normalizers with visual context preservation
 
 **Wave 4** *(blocked on Waves 1-3 completion)*
 - [ ] 02-04-PLAN.md — MCP review tool integration and Phase 2 contract documentation

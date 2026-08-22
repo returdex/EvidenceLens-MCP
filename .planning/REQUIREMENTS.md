@@ -14,8 +14,8 @@
 ### Evidence Access
 
 - [x] **EVID-01**: A review can read text evidence from configured local files while preserving source path and line references where available.
-- [ ] **EVID-02**: A review can inspect PDF evidence and report page-level references, including scanned pages when visual processing is required.
-- [ ] **EVID-03**: A review can inspect image and screenshot evidence while retaining the source identity and visual context.
+- [x] **EVID-02**: A review can inspect PDF evidence and report page-level references, including scanned pages when visual processing is required.
+- [x] **EVID-03**: A review can inspect image and screenshot evidence while retaining the source identity and visual context.
 - [x] **EVID-04**: A review can inspect table evidence without silently losing cell, row, column, or sheet context.
 - [x] **EVID-05**: Each evidence artifact is fingerprinted with a content hash and relevant extraction metadata before it is sent to the model.
 
@@ -67,8 +67,8 @@
 | MCP-02 | Phase 1 | Complete |
 | MCP-03 | Phase 1 | Complete |
 | EVID-01 | Phase 2 | Complete |
-| EVID-02 | Phase 2 | Pending |
-| EVID-03 | Phase 2 | Pending |
+| EVID-02 | Phase 2 | Complete |
+| EVID-03 | Phase 2 | Complete |
 | EVID-04 | Phase 2 | Complete |
 | EVID-05 | Phase 2 | Complete |
 | SAFE-01 | Phase 3 | Pending |
