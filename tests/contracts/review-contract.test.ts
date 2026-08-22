@@ -15,6 +15,7 @@ describe("Phase 1 review contract", () => {
       requestId: "r1",
       status: "accepted",
       findings: [],
+      normalizedEvidence: [],
       metadata: {
         serverName: "evidencelens",
         serverVersion: "0.1.0",
@@ -58,6 +59,7 @@ describe("Phase 1 review contract", () => {
       requestId: "review-001",
       status: "accepted",
       findings: [],
+      normalizedEvidence: [],
       metadata: {
         serverName: "evidencelens",
         serverVersion: "0.1.0",
@@ -68,6 +70,7 @@ describe("Phase 1 review contract", () => {
     expect(parsed.status).toBe("accepted");
     expect(parsed.requestId).toBe("review-001");
     expect(parsed.findings).toEqual([]);
+    expect(parsed.normalizedEvidence).toEqual([]);
     expect(parsed.metadata).toEqual({
       serverName: "evidencelens",
       serverVersion: "0.1.0",
