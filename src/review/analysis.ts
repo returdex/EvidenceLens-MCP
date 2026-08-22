@@ -51,9 +51,9 @@ export interface ReviewAnalysisInput {
   clear: () => void;
 }
 
-const stopWords = new Set("a an and are be by for from has have in is it of on or that the their this to was with must shall should required requirement needs need criteria solution submit provide students student".split(" "));
+const stopWords = new Set("a an and are be by for from has have in is it of on or that the their this to was with must shall should required requirement needs need criteria solution submit provide students student include includes included contain contains containing report reports paragraph achieve achieves achieved absent missing lack lacks no not does do without cannot can't unable discusses discussed there".split(" "));
 const obligation = /\b(?:must|shall|required|needs? to|criteria)\b/iu;
-const negation = /\b(?:not|must not|cannot|can't|unable to|without)\b/iu;
+const negation = /\b(?:not|no|absent|missing|lacks?|does\s+not|do\s+not|doesn't|don't|cannot|can't|unable\s+to|without)\b/iu;
 const assignment = /^\s*([A-Za-z][\w .-]{0,80})\s*(?:=|:)\s*(.+?)\s*$/u;
 
 function tokens(text: string): string[] {
