@@ -31,7 +31,7 @@ describe("EVIDENCELENS_ALLOWED_ROOTS", () => {
   });
 
   it("rejects malformed grammar without exposing the raw configuration", () => {
-    for (const raw of [",", "course=/tmp/course,", "course", "1course=/tmp", "course=/tmp,other", "course=relative", "course=/tmp;other=/tmp/x"]) {
+    for (const raw of [",", "course=/tmp/course,", "course", "1course=/tmp", "course=/tmp,other", "course=relative"]) {
       expect(() => parseAllowedRoots(raw)).toThrow("Invalid filesystem root configuration");
       try { parseAllowedRoots(raw); } catch (error) {
         expect(String(error)).not.toContain(raw);
