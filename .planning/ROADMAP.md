@@ -67,13 +67,13 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 03-01-PLAN.md — Filesystem source contract and configured-root authorization policy
+- [ ] 03-01-PLAN.md — Filesystem source contract, exact root grammar, and configured-root authorization policy
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — Bounded read-only descriptor reader and sanitized filesystem errors
+- [ ] 03-02-PLAN.md — Bounded read-only descriptor reader, deterministic TOCTOU checks, and sanitized filesystem errors
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-03-PLAN.md — MCP/server integration, provenance, configuration, documentation, and safety gates
+- [ ] 03-03-PLAN.md — MCP/server integration, exact configuration, 0.1.1 version alignment, provenance, docs, and safety gates
 
 ### Phase 4: Review Orchestration and Findings
 **Goal**: The service compares role-labeled course evidence and a solution, producing actionable findings with uncertainty and visual citations.
@@ -126,4 +126,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-08-21 after Plan 01-02 execution*
+*Last updated: 2026-08-22 after Phase 03 checker revision 1*
