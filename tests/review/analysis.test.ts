@@ -19,7 +19,7 @@ describe("review analysis handoff", () => {
     const input = buildReviewAnalysisInput({ normalizedEvidence: [], analysisPayloads: [payload] });
     expect(extractSolutionClaims(payload)).toEqual(expect.arrayContaining([
       expect.objectContaining({ key: "coverage", location: { kind: "text", startLine: 1, endLine: 1 } }),
-      expect.objectContaining({ key: "report includes conclusion", location: { kind: "text", startLine: 2, endLine: 2 } })
+      expect.objectContaining({ key: "conclusion includes report", location: { kind: "text", startLine: 2, endLine: 2 } })
     ]));
     expect(input.payloads).toHaveLength(1);
   });
