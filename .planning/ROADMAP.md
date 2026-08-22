@@ -73,7 +73,7 @@ Plans:
 - [x] 03-02-PLAN.md — Bounded read-only descriptor reader, deterministic TOCTOU checks, and sanitized filesystem errors
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-03-PLAN.md — MCP/server integration, exact configuration, 0.1.1 version alignment, provenance, docs, and safety gates
+- [x] 03-03-PLAN.md — MCP/server integration, exact configuration, 0.1.1 version alignment, provenance, docs, and safety gates
 
 ### Phase 4: Review Orchestration and Findings
 **Goal**: The service compares role-labeled course evidence and a solution, producing actionable findings with uncertainty and visual citations.
