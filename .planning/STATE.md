@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
 stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-08-22T11:43:09.063Z"
+last_updated: "2026-08-22T11:51:15.156Z"
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -37,6 +37,8 @@ Plan: 4 of 4
 
 ## Decisions and Assumptions
 
+### Decisions
+
 - Greenfield repository; no existing implementation was detected.
 - Standard phase granularity and sequential execution are configured.
 - Planning documents are tracked in Git.
@@ -53,6 +55,9 @@ Plan: 4 of 4
 - Use PDF.js 6.2.108 with @napi-rs/canvas for explicit-byte PDF parsing and scanned-page rendering.
 - Avoid the archived image-size dependency; parse bounded PNG/JPEG headers directly.
 - Extend visualPayload with bounded base64 bytes so scanned-page success never becomes metadata-only.
+- [Phase 02]: Keep reference opaque and derive inline identity only for explicit content without a reference; never read paths from requests.
+- [Phase 02]: Allow line-oriented text/table content while rejecting unsafe control characters, and enforce decoded byte caps before parser fan-out.
+- [Phase 02]: Return normalized evidence metadata only; findings, provider calls, filesystem access, writes, and review orchestration remain out of scope.
 
 ## Performance Metrics
 
@@ -61,10 +66,11 @@ Plan: 4 of 4
 | 02 | 01 | 4 min | 2 | 5 | 2026-08-22 |
 | Phase 02 P02 | 4 min | 3 tasks | 8 files |
 | Phase 02 P03 | 10 min | 3 tasks | 9 files |
+| Phase 02 P04 | 12 min | 3 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-08-22T11:43:08.904Z
+- **Last session:** 2026-08-22T11:50:26.124Z
 - **Stopped at:** Completed 02-03-PLAN.md
 - **Resume file:** None
 
