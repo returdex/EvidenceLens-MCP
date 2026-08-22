@@ -25,7 +25,7 @@ describe("Phase 1 review contract", () => {
     expect(reviewToolResultSchema.safeParse({ content: [{ type: "text", text: "{}" }] }).success).toBe(true);
   });
 
-  it("keeps evidence metadata-only and includes Phase 1 supported evidence types", () => {
+  it("preserves supported evidence types and accepts bounded Phase 2 content", () => {
     expect(evidenceTypeSchema.options).toEqual(["text", "pdf", "image", "screenshot", "table"]);
     expect(
       reviewEvidenceInputSchema.safeParse({
@@ -50,7 +50,7 @@ describe("Phase 1 review contract", () => {
         type: "text",
         content: "raw evidence"
       }).success
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("requires deterministic response metadata with accepted skeleton status", () => {
