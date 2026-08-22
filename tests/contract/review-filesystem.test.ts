@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { InMemoryTransport, LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/server";
 import { normalizedEvidenceSchema, reviewToolResultSchema } from "../../src/contracts/review.js";
-import { createFilesystemPolicy } from "../../src/filesystem/policy.js";
+import { createFilesystemPolicy, FilesystemConfigurationError, parseAllowedRoots } from "../../src/filesystem/policy.js";
 import { createServer } from "../../src/server.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
@@ -102,13 +102,36 @@ describe("filesystem review integration", () => {
     const outside = await mkdtemp(join(tmpdir(), "evidencelens-outside-"));
     await writeFile(join(outside, "secret.txt"), "secret");
     await symlink(join(outside, "secret.txt"), join(root, "link.txt"));
+    let readAttempted = false;
     const result = payload(await handleReviewRequest({
       reviewId: "symlink-001",
       objective: "Review symlink evidence.",
       evidence: [{ id: "secret", role: "other", type: "text", filesystem: { kind: "filesystem", rootId: "course", relativePath: "link.txt" } }]
-    }, { filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }]) }));
+    }, { filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }]), filesystemReadAdapter: {
+      stat: async () => { readAttempted = true; throw new Error("must not read"); },
+      open: async () => { readAttempted = true; throw new Error("must not open"); }
+    } }));
     expect(result).toMatchObject({ ok: false, code: "ACCESS_DENIED", message: "Filesystem access denied" });
+    expect(readAttempted).toBe(false);
     expect(JSON.stringify(result)).not.toContain(outside);
+  });
+
+  it("uses the exact root grammar and sanitized configuration failures", async () => {
+    expect(parseAllowedRoots("course=/tmp/course;notes=/tmp/notes")).toEqual([
+      { id: "course", path: "/tmp/course" },
+      { id: "notes", path: "/tmp/notes" }
+    ]);
+    expect(parseAllowedRoots(undefined)).toEqual([]);
+    for (const raw of ["bad", "course=/tmp/a=secret", "course=/tmp/a,", "1course=/tmp/a", "course=relative"]) {
+      expect(() => parseAllowedRoots(raw)).toThrow(FilesystemConfigurationError);
+    }
+    expect(() => createFilesystemPolicy([{ id: "course", path: "/path/that/does/not/exist" }])).toThrow(FilesystemConfigurationError);
+    try {
+      parseAllowedRoots("course=/private/secret");
+    } catch (error) {
+      expect((error as Error).message).toBe("Invalid filesystem root configuration");
+      expect((error as Error).message).not.toContain("secret");
+    }
   });
 
   it("serves only the read-only review tool through MCP and preserves inline calls", async () => {
