@@ -71,6 +71,14 @@ describe("review_evidence schema and error contract", () => {
         evidence: [{ id: "bad-reference", role: "other", type: "text", reference: "safe\nunsafe" }]
       }).success
     ).toBe(false);
+    expect(reviewRequestSchema.safeParse({
+      ...validRequest,
+      evidence: [{ id: "empty-reference", role: "other", type: "text", reference: "" }]
+    }).success).toBe(false);
+    expect(reviewRequestSchema.safeParse({
+      ...validRequest,
+      evidence: [{ id: "long-reference", role: "other", type: "text", reference: "r".repeat(2049) }]
+    }).success).toBe(false);
   });
 
   it("parses MCP text-content wrappers returned by success and error helpers", () => {
@@ -181,6 +189,34 @@ describe("review_evidence handler and MCP protocol contract", () => {
 
     expect(invalidPayload).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
     expect(limitPayload).toMatchObject({ ok: false, code: "LIMIT_EXCEEDED" });
+  });
+
+  it("rejects empty content and preserves the bounded reference contract", async () => {
+    const payload = parseToolPayload(await handleReviewRequest({
+      ...validRequest,
+      evidence: [{ id: "empty-table", role: "other", type: "table", content: "" }]
+    }));
+    expect(payload).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+
+    const longReference = parseToolPayload(await handleReviewRequest({
+      ...validRequest,
+      evidence: [{ id: "long-reference", role: "other", type: "text", reference: "r".repeat(2049), content: "x" }]
+    }));
+    expect(longReference).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+  });
+
+  it("propagates the strict TSV format through the MCP handler", async () => {
+    const payload = parseToolPayload(await handleReviewRequest({
+      ...validRequest,
+      evidence: [{ id: "tsv", role: "other", type: "table", format: "tsv", content: "a\tb\n1\t2" }]
+    }));
+    expect(payload).toMatchObject({ ok: true });
+    expect(payload.normalizedEvidence[0].references).toEqual([
+      { kind: "table", sheetName: "Sheet1", row: 1, column: 1, cell: "A1" },
+      { kind: "table", sheetName: "Sheet1", row: 1, column: 2, cell: "B1" },
+      { kind: "table", sheetName: "Sheet1", row: 2, column: 1, cell: "A2" },
+      { kind: "table", sheetName: "Sheet1", row: 2, column: 2, cell: "B2" }
+    ]);
   });
 
   it("returns a stable unsupported-evidence-type error code", async () => {
