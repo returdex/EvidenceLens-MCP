@@ -9,6 +9,12 @@ import { handleReviewRequest } from "../../src/tools/review.js";
 const generatedAt = "1970-01-01T00:00:00.000Z";
 const textContent = "Assignment brief\n\nUse the rubric.";
 const tableContent = "criterion,score,notes\nclarity,4,=literal";
+const requiredMetadataEvidence = [
+  { id: "brief-required", role: "assignment_brief", type: "text" },
+  { id: "rubric-required", role: "rubric", type: "text" },
+  { id: "instructions-required", role: "teacher_instructions", type: "text" },
+  { id: "solution-required", role: "solution", type: "text" }
+] as const;
 
 function parseToolPayload(toolResult: unknown): Record<string, any> {
   const parsed = reviewToolResultSchema.parse({
@@ -18,10 +24,11 @@ function parseToolPayload(toolResult: unknown): Record<string, any> {
 }
 
 function requestWithEvidence(evidence: unknown[]) {
+  const roles = new Set(evidence.map((item) => (item as { role?: unknown }).role));
   return {
     reviewId: "review-content-001",
     objective: "Normalize explicit evidence content.",
-    evidence
+    evidence: [...evidence, ...requiredMetadataEvidence.filter((item) => !roles.has(item.role))]
   };
 }
 
