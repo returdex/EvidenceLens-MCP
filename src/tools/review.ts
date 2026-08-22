@@ -105,7 +105,7 @@ export function registerReviewTool(server: McpServer, options: ReviewHandlerOpti
     "review_evidence",
     {
       title: "Review Evidence",
-      description: "Accept Phase 1 evidence review metadata and return a deterministic skeleton response.",
+      description: "Analyze bounded evidence deterministically and return role-aware omissions, contradictions, and requirement conflicts with typed citations, uncertainty, and follow-up checks.",
       inputSchema: reviewRequestSchema,
       annotations: {
         readOnlyHint: true,
