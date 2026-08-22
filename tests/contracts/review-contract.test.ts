@@ -148,4 +148,21 @@ describe("Phase 1 review contract", () => {
       expect(parsed.error.issues.map((issue) => issue.path)).toEqual([["evidence", 1, "id"], ["evidence", 2, "id"]]);
     }
   });
+
+  it("binds response citations to normalized evidence provenance", () => {
+    const citation = {
+      evidenceId: "brief-1", role: "assignment_brief", contentHash: "a".repeat(64),
+      sourceReference: "inline://brief-1", location: { kind: "text", startLine: 1, endLine: 1 }, visual: false
+    };
+    const response = {
+      ok: true as const, requestId: "r1", status: "accepted" as const,
+      findings: [{ id: "f1", type: "omission" as const, severity: "low" as const, confidence: "unknown" as const,
+        title: "T", summary: "S", observation: "O", interpretation: "I", followUpChecks: ["F"], evidenceIds: ["brief-1"], citations: [citation] }],
+      normalizedEvidence: [{ source: { id: "brief-1", type: "text" as const, reference: "inline://brief-1" }, contentHash: "b".repeat(64),
+        extraction: { extractor: "test", extractorVersion: "1", generatedAt: "1970-01-01T00:00:00.000Z", partial: false },
+        references: [citation.location], warnings: [] }],
+      metadata: { serverName: "evidencelens", serverVersion: "0.1.2", analyzerName: "deterministic-rules", analyzerVersion: "1.0.0", generatedAt: "1970-01-01T00:00:00.000Z" }
+    };
+    expect(reviewResponseSchema.safeParse(response).success).toBe(false);
+  });
 });
