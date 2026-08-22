@@ -24,6 +24,7 @@ describe("normalized evidence contract", () => {
   it("parses text evidence with provenance, line references, and warnings", () => {
     const artifact = normalizedEvidenceSchema.parse({
       source: { id: "brief-1", type: "text", reference: "course/brief" },
+      role: "assignment_brief",
       contentHash: hash,
       extraction,
       references: [{ kind: "text", startLine: 1, endLine: 4 }],
@@ -36,6 +37,7 @@ describe("normalized evidence contract", () => {
   it("parses PDF page references and scanned-page visual descriptors", () => {
     const artifact = normalizedEvidenceSchema.parse({
       source: { id: "scan-1", type: "pdf", reference: "course/scan.pdf" },
+      role: "rubric",
       contentHash: hash,
       extraction: { ...extraction, extractor: "pdf-extractor", partial: true },
       references: [{ kind: "pdf", pageNumber: 2, pageCount: 3 }],
@@ -57,6 +59,7 @@ describe("normalized evidence contract", () => {
   it("parses image and screenshot visual metadata", () => {
     const result = normalizedEvidenceSchema.safeParse({
       source: { id: "shot-1", type: "screenshot", reference: "submission.png" },
+      role: "solution",
       contentHash: hash,
       extraction: { ...extraction, extractor: "image-extractor" },
       references: [{ kind: "image", width: 800, height: 600, mimeType: "image/jpeg" }],
@@ -77,6 +80,7 @@ describe("normalized evidence contract", () => {
   it("parses table cell references", () => {
     const result = normalizedEvidenceSchema.safeParse({
       source: { id: "rubric-1", type: "table", reference: "rubric.csv" },
+      role: "rubric",
       contentHash: hash,
       extraction: { ...extraction, extractor: "table-extractor" },
       references: [

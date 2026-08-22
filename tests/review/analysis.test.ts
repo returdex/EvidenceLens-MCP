@@ -19,7 +19,7 @@ describe("review analysis handoff", () => {
     const input = buildReviewAnalysisInput({ normalizedEvidence: [], analysisPayloads: [payload] });
     expect(extractSolutionClaims(payload)).toEqual(expect.arrayContaining([
       expect.objectContaining({ key: "coverage", location: { kind: "text", startLine: 1, endLine: 1 } }),
-      expect.objectContaining({ key: "conclusion includes report", location: { kind: "text", startLine: 2, endLine: 2 } })
+      expect.objectContaining({ key: "conclusion", location: { kind: "text", startLine: 2, endLine: 2 } })
     ]));
     expect(input.payloads).toHaveLength(1);
   });
@@ -31,7 +31,7 @@ describe("review analysis handoff", () => {
       references: [{ kind: "pdf", pageNumber: 1, pageCount: 1 }]
     };
     const input = buildReviewAnalysisInput({
-      normalizedEvidence: [{ source: { id: "scan", type: "pdf", reference: "inline://scan" }, contentHash: "b".repeat(64), extraction: { extractor: "x", extractorVersion: "1", generatedAt: "1970-01-01T00:00:00.000Z", partial: true }, references: payload.references, visualPayloads: [{ mimeType: "image/png", byteLength: 1, width: 1, height: 1, sha256: "c".repeat(64), base64: "AA==", pageNumber: 1 }], warnings: [] }],
+      normalizedEvidence: [{ source: { id: "scan", type: "pdf", reference: "inline://scan" }, role: "rubric", contentHash: "b".repeat(64), extraction: { extractor: "x", extractorVersion: "1", generatedAt: "1970-01-01T00:00:00.000Z", partial: true }, references: payload.references, visualPayloads: [{ mimeType: "image/png", byteLength: 1, width: 1, height: 1, sha256: "c".repeat(64), base64: "AA==", pageNumber: 1 }], warnings: [] }],
       analysisPayloads: [payload]
     });
     expect(input.resolveCitation("scan", { kind: "pdf", pageNumber: 1, pageCount: 1 }, true)).toMatchObject({ visual: true, visualPayloadSha256: "c".repeat(64) });

@@ -123,6 +123,7 @@ export const pdfVisualPayloadSchema = visualPayloadSchema.extend({ pageNumber: p
 export const normalizedEvidenceSchema = z
   .object({
     source: evidenceSourceIdentitySchema,
+    role: evidenceRoleSchema,
     contentHash: contentHashSchema,
     extraction: extractionMetadataSchema,
     references: z.array(normalizedEvidenceReferenceSchema).min(1),
@@ -367,6 +368,7 @@ export const reviewResponseSchema = z
           return;
         }
         if (evidence.contentHash !== citation.contentHash) ctx.addIssue({ code: "custom", path: [...path, "contentHash"], message: "citation contentHash must match normalized evidence" });
+        if (evidence.role !== citation.role) ctx.addIssue({ code: "custom", path: [...path, "role"], message: "citation role must match normalized evidence" });
         if (evidence.source.reference !== citation.sourceReference) ctx.addIssue({ code: "custom", path: [...path, "sourceReference"], message: "citation sourceReference must match normalized evidence" });
         if (!evidence.references.some((reference) => JSON.stringify(reference) === JSON.stringify(citation.location))) {
           ctx.addIssue({ code: "custom", path: [...path, "location"], message: "citation location must reference normalized evidence" });

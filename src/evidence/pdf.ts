@@ -78,6 +78,7 @@ export async function normalizePdfEvidence(input: PdfEvidenceInput): Promise<Nor
 
   return {
     source: { id: input.id, type: input.type, reference: input.reference },
+    role: input.role as NormalizedEvidence["role"],
     contentHash: sha256Hex(input.bytes),
     extraction: { extractor: "pdfjs-dist", extractorVersion: "6.2.108", generatedAt: input.generatedAt ?? new Date().toISOString(), partial },
     references,
