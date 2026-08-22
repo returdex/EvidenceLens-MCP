@@ -21,10 +21,10 @@
 
 ### Review Quality
 
-- [ ] **REVW-01**: A caller can submit assignment brief, rubric, teacher instructions, and current solution evidence as distinct review roles.
+- [x] **REVW-01**: A caller can submit assignment brief, rubric, teacher instructions, and current solution evidence as distinct review roles.
 - [ ] **REVW-02**: The reviewer identifies omissions, contradictions, and requirement conflicts across the supplied evidence and solution.
-- [ ] **REVW-03**: Visual claims can cite the originating image/PDF page/screenshot rather than only extracted text.
-- [ ] **REVW-04**: Findings distinguish evidence-backed observations, model interpretations, uncertainty, and recommended follow-up checks.
+- [x] **REVW-03**: Visual claims can cite the originating image/PDF page/screenshot rather than only extracted text.
+- [x] **REVW-04**: Findings distinguish evidence-backed observations, model interpretations, uncertainty, and recommended follow-up checks.
 
 ### Provenance and Safety
 
@@ -75,10 +75,10 @@
 | SAFE-02 | Phase 3 | Complete |
 | SAFE-03 | Phase 3 | Complete |
 | SAFE-04 | Phase 3 | Complete |
-| REVW-01 | Phase 4 | Pending |
+| REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Pending |
-| REVW-03 | Phase 4 | Pending |
-| REVW-04 | Phase 4 | Pending |
+| REVW-03 | Phase 4 | Complete |
+| REVW-04 | Phase 4 | Complete |
 | PROV-01 | Phase 5 | Pending |
 | PROV-02 | Phase 5 | Pending |
 | DEPL-01 | Phase 6 | Pending |
