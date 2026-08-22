@@ -140,7 +140,7 @@ describe("normalized evidence contract", () => {
       normalizedEvidence: [],
       metadata: {
         serverName: "evidencelens",
-        serverVersion: "0.1.2",
+        serverVersion: "0.1.3",
         analyzerName: "deterministic-rules",
         analyzerVersion: "1.0.0",
         generatedAt: "2026-08-22T00:00:00.000Z"
