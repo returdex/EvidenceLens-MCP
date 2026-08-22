@@ -2,6 +2,7 @@ import type { ReviewToolResult } from "./contracts/review.js";
 
 export type EvidenceLensErrorCode =
   | "INVALID_REQUEST"
+  | "INVALID_REVIEW_ROLES"
   | "UNSUPPORTED_EVIDENCE_TYPE"
   | "UNSUPPORTED_FORMAT"
   | "LIMIT_EXCEEDED"
@@ -37,6 +38,7 @@ function stableMessage(code: EvidenceLensErrorCode): string {
     case "LIMIT_EXCEEDED": return "Evidence exceeds the configured limit";
     case "UNSUPPORTED_EVIDENCE_TYPE": return "Unsupported evidence type";
     case "INVALID_REQUEST": return "Invalid request";
+    case "INVALID_REVIEW_ROLES": return "Review evidence roles are invalid";
     case "INTERNAL_ERROR": return "Internal error";
   }
 }
