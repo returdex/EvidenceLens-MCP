@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { lstat as nodeLstat, open as nodeOpen, type FileHandle } from "node:fs/promises";
+import { open as nodeOpen, type FileHandle } from "node:fs/promises";
 import type { Stats } from "node:fs";
 import type { EvidenceType, FilesystemSource } from "../contracts/review.js";
 import { EvidenceLensError } from "../errors.js";
@@ -23,7 +23,7 @@ export interface FilesystemDescriptor {
 export interface FilesystemReadAdapter {
   stat?: (path: string) => Promise<FilesystemStat>;
   open?: (path: string, flags: number) => Promise<FilesystemDescriptor>;
-  openAnchored?: (rootDescriptor: number, relativePath: string, flags: number, rootPath?: string) => Promise<FilesystemDescriptor>;
+  openAnchored?: (rootDescriptor: number, relativePath: string, flags: number) => Promise<FilesystemDescriptor>;
 }
 
 export interface FilesystemReadResult {
@@ -50,29 +50,19 @@ function defaultStat(stats: Stats): FilesystemStat {
 
 function defaultAdapter(): FilesystemReadAdapter {
   return {
-    openAnchored: async (rootDescriptor, relativePath, flags, rootPath) => {
+    openAnchored: async (rootDescriptor, relativePath, flags) => {
       const components = relativePath.split("/");
       if (components.some((component) => component === "" || component === "." || component === "..")) {
         throw new Error("Invalid anchored filesystem path");
       }
 
       if (process.platform === "darwin") {
-        // Darwin's Node API has no openat/openat2 binding. Reject symlinked
-        // components immediately after resolving the already-open root fd;
-        // Linux uses the stronger fd-relative walk below.
-        if (rootPath === undefined) throw new Error("Missing anchored filesystem root");
-        let currentPath = rootPath;
-        for (const component of components) {
-          currentPath = `${currentPath}/${component}`;
-          const componentStat = await nodeLstat(currentPath);
-          if (componentStat.isSymbolicLink()) throw new Error("Symlinked filesystem component");
-        }
-        const file = await nodeOpen(currentPath, flags | (constants.O_NOFOLLOW ?? 0));
-        return {
-          fstat: async () => defaultStat(await file.stat()),
-          read: async (buffer, offset, length, position) => file.read(buffer, offset, length, position),
-          close: async () => { await file.close(); }
-        };
+        // Node does not expose a supported Darwin openat/openat2 binding.
+        // Never substitute an absolute-path lstat/open sequence: it is
+        // vulnerable to parent-directory replacement between the operations.
+        void rootDescriptor;
+        void flags;
+        throw stableError("ACCESS_DENIED", "Filesystem access denied");
       }
       if (process.platform !== "linux") throw new Error("Anchored filesystem reads are unavailable on this platform");
 
@@ -135,7 +125,7 @@ export async function readFilesystemEvidence(
   try {
     try {
       if (authorized.rootDescriptor !== undefined && adapter.openAnchored !== undefined) {
-        descriptor = await adapter.openAnchored(authorized.rootDescriptor, authorized.relativePath, constants.O_RDONLY, authorized.rootPath);
+        descriptor = await adapter.openAnchored(authorized.rootDescriptor, authorized.relativePath, constants.O_RDONLY);
       } else if (authorized.rootDescriptor === undefined && adapter.stat !== undefined && adapter.open !== undefined) {
         targetStat = await adapter.stat(authorized.resolvedPath);
         if (!targetStat.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");

@@ -1,4 +1,5 @@
-import { mkdtemp, symlink } from "node:fs/promises";
+import { accessSync, constants, realpathSync, statSync } from "node:fs";
+import { mkdtemp, open, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -7,6 +8,7 @@ import { normalizedEvidenceSchema, reviewToolResultSchema } from "../../src/cont
 import { createFilesystemPolicy, FilesystemConfigurationError, parseAllowedRoots } from "../../src/filesystem/policy.js";
 import { createServer } from "../../src/server.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
+import type { FilesystemDescriptor, FilesystemReadAdapter, FilesystemStat } from "../../src/filesystem/read.js";
 
 const generatedAt = "1970-01-01T00:00:00.000Z";
 
@@ -18,6 +20,31 @@ async function createFixtureFile(path: string, content: string): Promise<void> {
 async function createFixtureDirectory(path: string): Promise<void> {
   const fs = await import("node:fs/promises");
   await fs["m" + "kdir"](path);
+}
+
+function injectedSafeAdapter(): FilesystemReadAdapter {
+  return {
+    stat: async (path): Promise<FilesystemStat> => {
+      const file = await open(path, constants.O_RDONLY);
+      try {
+        const stats = await file.stat();
+        return { dev: stats.dev, ino: stats.ino, mode: stats.mode, size: stats.size, isFile: stats.isFile() };
+      } finally {
+        await file.close();
+      }
+    },
+    open: async (path, flags): Promise<FilesystemDescriptor> => {
+      const file = await open(path, flags);
+      return {
+        fstat: async () => {
+          const stats = await file.stat();
+          return { dev: stats.dev, ino: stats.ino, mode: stats.mode, size: stats.size, isFile: stats.isFile() };
+        },
+        read: async (buffer, offset, length, position) => file.read(buffer, offset, length, position),
+        close: async () => { await file.close(); }
+      };
+    }
+  };
 }
 
 function payload(result: unknown): any {
@@ -63,7 +90,10 @@ describe("filesystem review integration", () => {
       reviewId: "filesystem-001",
       objective: "Review filesystem evidence.",
       evidence: [{ id: "brief", role: "assignment_brief", type: "text", reference: "/private/opaque", filesystem: { kind: "filesystem", rootId: "course", relativePath: "brief.txt" } }]
-    }, { filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }]) }));
+    }, {
+      filesystemPolicy: createFilesystemPolicy([{ id: "course", path: root }], { realpathSync, statSync, accessSync }),
+      filesystemReadAdapter: injectedSafeAdapter()
+    }));
 
     expect(result.ok).toBe(true);
     expect(result.requestId).toBe("filesystem-001");
