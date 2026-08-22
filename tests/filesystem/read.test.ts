@@ -126,4 +126,20 @@ describe("filesystem byte reader", () => {
       rmSync(parent, { recursive: true, force: true });
     }
   });
+
+  it("fails closed on macOS without attempting a pathname fallback", async () => {
+    if (process.platform !== "darwin") return;
+
+    const root = mkdtempSync(join(tmpdir(), "evidencelens-darwin-"));
+    writeFileSync(join(root, "brief.txt"), "must not be read");
+    try {
+      const realPolicy = createFilesystemPolicy([{ id: "course", path: root }]);
+      await expect(readFilesystemEvidence(realPolicy, source, "text")).rejects.toMatchObject({
+        code: "ACCESS_DENIED",
+        message: "Filesystem access denied"
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });

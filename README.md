@@ -17,6 +17,8 @@ npm run build
 
 See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact inline/filesystem request contract, root configuration grammar, byte limits, `filesystem://` provenance, normalized evidence metadata, stable errors, and the read-only/no-provider/no-findings boundaries.
 
+Platform note: the default filesystem reader uses descriptor-relative component walking on Linux. On macOS, where this project has no supported Node `openat`/`openat2` binding, default anchored filesystem reads fail closed with sanitized `ACCESS_DENIED` and no bytes; there is no pathname fallback. Phase 2 inline evidence remains supported, and embedding tests may inject a reviewed safe filesystem adapter for portable filesystem-read coverage.
+
 ## Optional filesystem roots
 
 Filesystem access is disabled when no roots are configured; the server never falls back to the current directory, home directory, repository, or another broad default. Configure explicit roots with repeated `id=absolute-path` entries separated by commas or semicolons:
