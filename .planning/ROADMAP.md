@@ -88,7 +88,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 04-01-PLAN.md — Findings/citation contract, duplicate-id gate, analyzer metadata, required-role validation, and stable review errors
+- [x] 04-01-PLAN.md — Findings/citation contract, duplicate-id gate, analyzer metadata, required-role validation, and stable review errors
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 04-02-PLAN.md — Single-read transient analysis handoff, separate solution-claim extraction, deterministic comparison rules, and provenance citation resolution
