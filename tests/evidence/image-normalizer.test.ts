@@ -53,5 +53,14 @@ describe("normalizeImageEvidence", () => {
       limits: { maxImageBytes: 25 },
       generatedAt
     })).toThrow(/maximum|size/i);
+
+    const malformedPng = new Uint8Array([
+      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,
+      0, 0, 0, 1, 0, 0, 0, 1
+    ]);
+    expect(() => normalizeImageEvidence({ id: "fake-png", role: "other", type: "image", reference: "fake.png", bytes: malformedPng })).toThrow(/unsupported|invalid/i);
+
+    const malformedJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0, 11, 8, 0, 1, 0, 1, 1, 1, 0, 0]);
+    expect(() => normalizeImageEvidence({ id: "fake-jpeg", role: "other", type: "image", reference: "fake.jpg", bytes: malformedJpeg })).toThrow(/unsupported|invalid/i);
   });
 });
