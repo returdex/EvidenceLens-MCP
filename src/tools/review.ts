@@ -19,6 +19,7 @@ function createReviewResponse(request: ReviewRequest): ReviewResponse {
     requestId: request.reviewId,
     status: "accepted",
     findings: [],
+    normalizedEvidence: [],
     metadata: {
       serverName: SERVER_NAME,
       serverVersion: SERVER_VERSION,
