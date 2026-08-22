@@ -83,7 +83,17 @@ Plans:
   1. Callers can submit assignment brief, rubric, teacher instructions, and current solution as distinct evidence roles.
   2. Reviews identify omissions, contradictions, and requirement conflicts with source citations.
   3. Findings distinguish observations, interpretations, uncertainty, and follow-up checks.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+- [ ] 04-01-PLAN.md — Findings/citation contract, required-role validation, and stable review errors
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-02-PLAN.md — Provider-independent deterministic analysis, comparison rules, and provenance citation resolution
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 04-03-PLAN.md — MCP orchestration wiring, regression tests, and Phase 4 contract documentation
 
 ### Phase 5: Provider Adapter and DeepSeek Integration
 **Goal**: DeepSeek Vision/Flash performs the review through a replaceable provider adapter without changing the MCP contract.
@@ -114,7 +124,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. MCP Contract and Skeleton | 2/2 | Complete | 2026-08-21 |
 | 2. Evidence Ingestion and Multimodal Context | 4/4 | Complete    | 2026-08-22 |
 | 3. Read-Only Filesystem Boundary | 3/3 | Complete    | 2026-08-22 |
-| 4. Review Orchestration and Findings | 0/TBD | Not started | - |
+| 4. Review Orchestration and Findings | 0/3 | Not started | - |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 0/TBD | Not started | - |
 
