@@ -34,18 +34,18 @@ describe("normalized evidence contract", () => {
       source: { id: "scan-1", type: "pdf", reference: "course/scan.pdf" },
       contentHash: hash,
       extraction: { ...extraction, extractor: "pdf-extractor", partial: true },
-      references: [{ kind: "pdf", page: 2, pageCount: 3 }],
+      references: [{ kind: "pdf", pageNumber: 2, pageCount: 3 }],
       visualPayload: {
         mimeType: "image/png",
         width: 1200,
         height: 1600,
         byteLength: 48000,
-        contentHash: "b".repeat(64)
+        sha256: "b".repeat(64)
       },
       warnings: [{ code: "TEXT_UNAVAILABLE", message: "Page is scanned." }]
     });
 
-    expect(artifact.references[0]).toMatchObject({ kind: "pdf", page: 2, pageCount: 3 });
+    expect(artifact.references[0]).toMatchObject({ kind: "pdf", pageNumber: 2, pageCount: 3 });
     expect(artifact.visualPayload?.mimeType).toBe("image/png");
   });
 
@@ -60,7 +60,7 @@ describe("normalized evidence contract", () => {
         width: 800,
         height: 600,
         byteLength: 12000,
-        contentHash: hash
+        sha256: hash
       },
       warnings: []
     });
@@ -74,7 +74,7 @@ describe("normalized evidence contract", () => {
       contentHash: hash,
       extraction: { ...extraction, extractor: "table-extractor" },
       references: [
-        { kind: "table", sheet: "Rubric", row: 3, column: 2, cell: "B3" }
+        { kind: "table", sheetName: "Rubric", row: 3, column: 2, cell: "B3" }
       ],
       warnings: []
     });
