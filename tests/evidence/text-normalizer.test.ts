@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { normalizedEvidenceSchema } from "../../src/contracts/review.js";
 import { sha256Hex } from "../../src/evidence/hash.js";
 import { EVIDENCE_LIMITS } from "../../src/evidence/limits.js";
 import { normalizeTextEvidence } from "../../src/evidence/text.js";
@@ -7,6 +8,11 @@ import { normalizeTextEvidence } from "../../src/evidence/text.js";
 const fixturePath = new URL("../fixtures/evidence/text/assignment.txt", import.meta.url);
 
 describe("text evidence normalizer", () => {
+  it("returns a lowercase SHA-256 digest for strings and bytes", () => {
+    expect(sha256Hex("EvidenceLens")).toBe("166ad753f37a5073179be4293a7010f433040784cbe05718b72b62b1c8d8b9bf");
+    expect(sha256Hex(new TextEncoder().encode("EvidenceLens"))).toBe("166ad753f37a5073179be4293a7010f433040784cbe05718b72b62b1c8d8b9bf");
+  });
+
   it("normalizes fixture lines with source identity and the original-byte hash", async () => {
     const bytes = await readFile(fixturePath);
     const artifact = normalizeTextEvidence({
@@ -38,6 +44,7 @@ describe("text evidence normalizer", () => {
       partial: false
     });
     expect(artifact.warnings).toEqual([]);
+    expect(normalizedEvidenceSchema.safeParse(artifact).success).toBe(true);
   });
 
   it("accepts strings and reports oversized input as partial with a warning", () => {

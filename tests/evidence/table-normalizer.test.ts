@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { normalizedEvidenceSchema } from "../../src/contracts/review.js";
 import { sha256Hex } from "../../src/evidence/hash.js";
 import { EVIDENCE_LIMITS } from "../../src/evidence/limits.js";
 import { normalizeTableEvidence } from "../../src/evidence/table.js";
@@ -38,6 +39,7 @@ describe("table evidence normalizer", () => {
       { code: "CELL_FORMULA_LITERAL", message: "Sheet1!D2 begins with a formula-like character and was preserved as literal text." },
       { code: "CELL_FORMULA_LITERAL", message: "Sheet1!D4 begins with a formula-like character and was preserved as literal text." }
     ]);
+    expect(normalizedEvidenceSchema.safeParse(artifact).success).toBe(true);
   });
 
   it("reports row and column limits instead of silently returning truncated success", () => {
