@@ -32,6 +32,8 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
     metadata: {
       serverName: SERVER_NAME,
       serverVersion: SERVER_VERSION,
+      analyzerName: "deterministic-rules",
+      analyzerVersion: "1.0.0",
       generatedAt: GENERATED_AT
     }
   };

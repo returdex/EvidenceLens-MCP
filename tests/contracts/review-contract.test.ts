@@ -81,7 +81,9 @@ describe("Phase 1 review contract", () => {
     expect(parsed.normalizedEvidence).toEqual([]);
     expect(parsed.metadata).toEqual({
       serverName: "evidencelens",
-      serverVersion: "0.1.0",
+      serverVersion: "0.1.2",
+      analyzerName: "deterministic-rules",
+      analyzerVersion: "1.0.0",
       generatedAt: "1970-01-01T00:00:00.000Z"
     });
   });
