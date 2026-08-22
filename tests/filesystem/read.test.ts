@@ -33,7 +33,7 @@ function adapter(overrides: Partial<FilesystemReadAdapter> & { descriptorFstat?:
 }
 
 const policy: FilesystemPolicy = {
-  authorize: () => ({ rootId: "course", relativePath: "brief.txt", resolvedPath: "/private/secret/brief.txt", reference: "filesystem://course/brief.txt" })
+  authorize: () => ({ rootId: "course", relativePath: "brief.txt", resolvedPath: "/private/secret/brief.txt", reference: "filesystem://course/brief.txt", targetIdentity: stats() })
 };
 
 describe("filesystem byte reader", () => {
@@ -122,6 +122,39 @@ describe("filesystem byte reader", () => {
 
       await expect(readFilesystemEvidence(swappingPolicy, { ...source, relativePath: "nested/brief.txt" }, "text"))
         .rejects.toMatchObject({ code: "ACCESS_DENIED" });
+    } finally {
+      rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
+  it("denies replacement of the authorized target before an anchored open", async () => {
+    if (process.platform !== "linux") return;
+
+    const parent = mkdtempSync(join(tmpdir(), "evidencelens-target-swap-"));
+    const root = join(parent, "course");
+    mkdirSync(root);
+    writeFileSync(join(root, "brief.txt"), "inside");
+    writeFileSync(join(root, "replacement.txt"), "other");
+
+    try {
+      const realPolicy = createFilesystemPolicy([{ id: "course", path: root }]);
+      let replaced = false;
+      const swappingPolicy: FilesystemPolicy = {
+        authorize: (requested) => {
+          const authorized = realPolicy.authorize(requested);
+          if (!replaced) {
+            replaced = true;
+            renameSync(join(root, "brief.txt"), join(root, "original.txt"));
+            renameSync(join(root, "replacement.txt"), join(root, "brief.txt"));
+          }
+          return authorized;
+        }
+      };
+
+      await expect(readFilesystemEvidence(swappingPolicy, source, "text")).rejects.toMatchObject({
+        code: "ACCESS_DENIED",
+        message: "Filesystem target changed before reading"
+      });
     } finally {
       rmSync(parent, { recursive: true, force: true });
     }
