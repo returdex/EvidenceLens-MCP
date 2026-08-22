@@ -4,7 +4,7 @@ import type { FilesystemPolicy } from "../filesystem/policy.js";
 import { EvidenceLensError } from "../errors.js";
 import { normalizeImageEvidence } from "./image.js";
 import { normalizePdfEvidence } from "./pdf.js";
-import { normalizeTableEvidence } from "./table.js";
+import { normalizeTableEvidence, parseDelimited } from "./table.js";
 import { normalizeTextEvidence } from "./text.js";
 import type { TransientEvidenceAnalysis, ReviewAnalysisBundle } from "../review/analysis.js";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
@@ -19,20 +19,8 @@ export interface NormalizeEvidenceOptions {
 
 export type NormalizedEvidenceBundle = ReviewAnalysisBundle;
 
-function tableCells(text: string, references: NormalizedEvidence["references"]): NonNullable<TransientEvidenceAnalysis["tableCells"]> {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cell = "";
-  let quoted = false;
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    if (character === '"') {
-      if (quoted && text[index + 1] === '"') { cell += '"'; index += 1; } else quoted = !quoted;
-    } else if (character === "," && !quoted) { row.push(cell); cell = "";
-    } else if ((character === "\n" || character === "\r") && !quoted) { row.push(cell); rows.push(row); row = []; cell = ""; if (character === "\r" && text[index + 1] === "\n") index += 1;
-    } else cell += character;
-  }
-  if (cell !== "" || row.length > 0 || text.endsWith(",")) { row.push(cell); rows.push(row); }
+function tableCells(text: string, references: NormalizedEvidence["references"], format: "csv" | "tsv" = "csv"): NonNullable<TransientEvidenceAnalysis["tableCells"]> {
+  const rows = parseDelimited(text, format === "tsv" ? "\t" : ",");
   return references.filter((reference): reference is Extract<typeof reference, { kind: "table" }> => reference.kind === "table").map((reference) => ({
     value: rows[reference.row - 1]?.[reference.column - 1] ?? "",
     location: reference
@@ -77,9 +65,9 @@ export async function normalizeEvidenceBundle(items: ReviewEvidenceInput[], opti
     else if (item.type === "pdf") evidence = await normalizePdfEvidence({ id: item.id, role: item.role, type: "pdf", reference, bytes: sourceBytes, generatedAt: options.generatedAt });
     else evidence = normalizeImageEvidence({ id: item.id, role: item.role, type: item.type, reference, bytes: sourceBytes, generatedAt: options.generatedAt });
     normalizedEvidence.push(evidence);
-    const payload: TransientEvidenceAnalysis = { evidenceId: item.id, role: item.role, type: item.type, reference, contentHash: evidence.contentHash, references: evidence.references, byteLength: sourceBytes.byteLength };
+    const payload: TransientEvidenceAnalysis = { evidenceId: item.id, role: item.role, type: item.type, reference, contentHash: evidence.contentHash, references: evidence.references, byteLength: sourceBytes.byteLength, ...(item.type === "table" && item.format !== undefined ? { format: item.format } : {}) };
     if (item.type === "text") payload.text = new TextDecoder().decode(sourceBytes.slice(0, 1_000_000));
-    if (item.type === "table") payload.tableCells = tableCells(new TextDecoder().decode(sourceBytes.slice(0, 5_000_000)), evidence.references);
+    if (item.type === "table") payload.tableCells = tableCells(new TextDecoder().decode(sourceBytes.slice(0, 5_000_000)), evidence.references, item.format);
     if (item.type === "pdf" && !evidence.extraction.partial) payload.text = (await extractPdfText(sourceBytes)).slice(0, 1_000_000);
     if (item.type === "pdf" || item.type === "image" || item.type === "screenshot") payload.bytes = new Uint8Array(sourceBytes);
     analysisPayloads.push(payload);

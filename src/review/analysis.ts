@@ -20,6 +20,7 @@ export interface TransientEvidenceAnalysis {
   contentHash: string;
   references: NormalizedEvidenceReference[];
   byteLength: number;
+  format?: "csv" | "tsv";
   text?: string;
   tableCells?: AnalysisTableCell[];
   bytes?: Uint8Array;
