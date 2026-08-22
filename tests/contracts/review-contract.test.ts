@@ -22,7 +22,7 @@ describe("Phase 1 review contract", () => {
       normalizedEvidence: [],
       metadata: {
         serverName: "evidencelens",
-        serverVersion: "0.1.2",
+        serverVersion: "0.1.3",
         analyzerName: "deterministic-rules",
         analyzerVersion: "1.0.0",
         generatedAt: "1970-01-01T00:00:00.000Z"
@@ -68,7 +68,7 @@ describe("Phase 1 review contract", () => {
       normalizedEvidence: [],
       metadata: {
         serverName: "evidencelens",
-        serverVersion: "0.1.2",
+        serverVersion: "0.1.3",
         analyzerName: "deterministic-rules",
         analyzerVersion: "1.0.0",
         generatedAt: "1970-01-01T00:00:00.000Z"
@@ -81,7 +81,7 @@ describe("Phase 1 review contract", () => {
     expect(parsed.normalizedEvidence).toEqual([]);
     expect(parsed.metadata).toEqual({
       serverName: "evidencelens",
-      serverVersion: "0.1.2",
+      serverVersion: "0.1.3",
       analyzerName: "deterministic-rules",
       analyzerVersion: "1.0.0",
       generatedAt: "1970-01-01T00:00:00.000Z"
@@ -161,7 +161,7 @@ describe("Phase 1 review contract", () => {
       normalizedEvidence: [{ source: { id: "brief-1", type: "text" as const, reference: "inline://brief-1" }, role: "assignment_brief" as const, contentHash: "b".repeat(64),
         extraction: { extractor: "test", extractorVersion: "1", generatedAt: "1970-01-01T00:00:00.000Z", partial: false },
         references: [citation.location], warnings: [] }],
-      metadata: { serverName: "evidencelens", serverVersion: "0.1.2", analyzerName: "deterministic-rules", analyzerVersion: "1.0.0", generatedAt: "1970-01-01T00:00:00.000Z" }
+        metadata: { serverName: "evidencelens", serverVersion: "0.1.3", analyzerName: "deterministic-rules", analyzerVersion: "1.0.0", generatedAt: "1970-01-01T00:00:00.000Z" }
     };
     expect(reviewResponseSchema.safeParse(response).success).toBe(false);
     expect(reviewResponseSchema.safeParse({ ...response, findings: [{ ...response.findings[0], citations: [{ ...citation, role: "rubric" as const, contentHash: "b".repeat(64) }] }] }).success).toBe(false);

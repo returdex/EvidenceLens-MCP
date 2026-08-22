@@ -2,9 +2,9 @@
 
 ## Transport and tool
 
-EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.2`.
+EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.3`.
 
-`review_evidence` is read-only, idempotent, deterministic for identical input, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.1.2`.
+`review_evidence` is read-only, idempotent, deterministic for identical input, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.1.3`.
 
 ## Request
 
@@ -106,7 +106,7 @@ The Phase 4 analyzer is provider-independent `deterministic-rules` version `1.0.
   }],
   "metadata": {
     "serverName": "evidencelens",
-    "serverVersion": "0.1.2",
+    "serverVersion": "0.1.3",
     "analyzerName": "deterministic-rules",
     "analyzerVersion": "1.0.0",
     "generatedAt": "1970-01-01T00:00:00.000Z"

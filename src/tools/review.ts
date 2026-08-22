@@ -16,7 +16,7 @@ import { orchestrateReview, createDeterministicReviewAnalyzer } from "../review/
 import { validateReviewRoles } from "../review/roles.js";
 
 const SERVER_NAME = "evidencelens";
-const SERVER_VERSION = "0.1.2";
+const SERVER_VERSION = "0.1.3";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
 

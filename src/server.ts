@@ -9,7 +9,7 @@ export interface ServerOptions {
 }
 
 export function createServer(options: ServerOptions = {}): McpServer {
-  const server = new McpServer({ name: "evidencelens", version: "0.1.2" });
+  const server = new McpServer({ name: "evidencelens", version: "0.1.3" });
 
   registerReviewTool(server, { filesystemPolicy: createFilesystemPolicy(options.allowedRoots ?? []) });
 
