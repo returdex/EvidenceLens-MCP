@@ -94,7 +94,7 @@ Plans:
 - [x] 04-02-PLAN.md — Single-read transient analysis handoff, separate solution-claim extraction, deterministic comparison rules, and provenance citation resolution
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 04-03-PLAN.md — Authorized normalization/analyzer wiring, duplicate-id short-circuit, regression tests, and Phase 4 contract documentation
+- [x] 04-03-PLAN.md — Authorized normalization/analyzer wiring, duplicate-id short-circuit, regression tests, and Phase 4 contract documentation
 
 ### Phase 5: Provider Adapter and DeepSeek Integration
 **Goal**: DeepSeek Vision/Flash performs the review through a replaceable provider adapter without changing the MCP contract.
