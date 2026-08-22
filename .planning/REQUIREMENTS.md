@@ -17,7 +17,7 @@
 - [ ] **EVID-02**: A review can inspect PDF evidence and report page-level references, including scanned pages when visual processing is required.
 - [ ] **EVID-03**: A review can inspect image and screenshot evidence while retaining the source identity and visual context.
 - [ ] **EVID-04**: A review can inspect table evidence without silently losing cell, row, column, or sheet context.
-- [ ] **EVID-05**: Each evidence artifact is fingerprinted with a content hash and relevant extraction metadata before it is sent to the model.
+- [x] **EVID-05**: Each evidence artifact is fingerprinted with a content hash and relevant extraction metadata before it is sent to the model.
 
 ### Review Quality
 
@@ -70,7 +70,7 @@
 | EVID-02 | Phase 2 | Pending |
 | EVID-03 | Phase 2 | Pending |
 | EVID-04 | Phase 2 | Pending |
-| EVID-05 | Phase 2 | Pending |
+| EVID-05 | Phase 2 | Complete |
 | SAFE-01 | Phase 3 | Pending |
 | SAFE-02 | Phase 3 | Pending |
 | SAFE-03 | Phase 3 | Pending |
