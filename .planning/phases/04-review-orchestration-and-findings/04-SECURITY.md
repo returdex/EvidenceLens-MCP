@@ -2,7 +2,7 @@
 phase: 04-review-orchestration-and-findings
 audited: 2026-08-23
 asvs_level: 1
-block_on: open
+block_on: none
 threats_total: 17
 threats_closed: 17
 threats_open: 0
