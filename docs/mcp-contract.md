@@ -2,7 +2,7 @@
 
 ## Transport and tool
 
-EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.1`.
+EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.2`.
 
 `review_evidence` is read-only, deterministic for identical input, and returns one MCP text content item containing JSON. The response always maps `response.requestId = request.reviewId`, uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`, and keeps `findings: []` until review orchestration is implemented.
 
@@ -83,7 +83,7 @@ Successful filesystem provenance uses `filesystem://root-id/relative-path` and n
   }],
   "metadata": {
     "serverName": "evidencelens",
-  "serverVersion": "0.1.1",
+  "serverVersion": "0.1.2",
     "generatedAt": "1970-01-01T00:00:00.000Z"
   }
 }

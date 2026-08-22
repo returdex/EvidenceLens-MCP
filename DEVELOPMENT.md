@@ -14,7 +14,7 @@ EvidenceLens MCP uses `x.y.z` version numbers:
 - `y` (minor): incremented when the GSD milestone changes.
 - `z` (patch): incremented for each individually completed, user-visible feature or compatible fix.
 
-The current pre-release development version is `0.1.1`. Version changes must update `VERSION` and the relevant planning state in the same commit.
+The current pre-release development version is `0.1.2`. Version changes must update `VERSION` and the relevant planning state in the same commit.
 
 ## Releases
 

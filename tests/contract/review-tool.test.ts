@@ -255,7 +255,7 @@ describe("review_evidence handler and MCP protocol contract", () => {
         capabilities: {},
         clientInfo: { name: "contract-test", version: "0.0.0" }
       });
-      expect(initializeResult).toMatchObject({ serverInfo: { name: "evidencelens", version: "0.1.1" } });
+      expect(initializeResult).toMatchObject({ serverInfo: { name: "evidencelens", version: "0.1.2" } });
 
       const toolsListResult = (await request("tools/list")) as {
         tools: Array<{ name: string; annotations?: Record<string, unknown> }>;

@@ -16,6 +16,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - Evidence normalization contract and provenance pipeline validated in Phase 2.
 - Text, PDF, image/screenshot, and table normalization with hashes and visual context validated in Phase 2.
+- Read-only allowlisted filesystem boundary, bounded reads, provenance, and sanitized failures validated in Phase 3.
 
 ### Active
 
@@ -79,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-22 after Phase 2 completion*
+*Last updated: 2026-08-22 after Phase 3 completion*
