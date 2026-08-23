@@ -12,8 +12,13 @@ import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 import type { FilesystemPolicy } from "../filesystem/policy.js";
 import type { FilesystemReadAdapter } from "../filesystem/read.js";
 import { buildReviewAnalysisInput } from "../review/analysis.js";
-import { orchestrateReview, createDeterministicReviewAnalyzer } from "../review/engine.js";
+import { createDeterministicReviewAnalyzer } from "../review/engine.js";
 import { validateReviewRoles } from "../review/roles.js";
+import { computeProviderInputFingerprint } from "../providers/deepseek.js";
+import { PROVIDER_PROMPT_VERSION, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
+import type { ProviderConfig } from "../providers/config.js";
+import { ProviderError } from "../providers/errors.js";
+import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
 
 const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.3";
@@ -23,6 +28,94 @@ const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", 
 export interface ReviewHandlerOptions {
   filesystemPolicy?: FilesystemPolicy;
   filesystemReadAdapter?: FilesystemReadAdapter;
+  provider?: ReviewProvider;
+  providerConfig?: Pick<ProviderConfig, "model" | "temperature" | "maxTokens">;
+}
+
+const DEFAULT_PROVIDER_INFERENCE = {
+  model: "deepseek-v4-flash-vision-exp",
+  temperature: 0.2,
+  maxTokens: 4_000
+} as const;
+
+function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>): ProviderEvidenceItem[] {
+  const normalizedById = new Map(analysis.normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
+  return analysis.payloads.map((payload) => {
+    const normalized = normalizedById.get(payload.evidenceId);
+    const visualPayloads = normalized?.source.type === "pdf"
+      ? (normalized.visualPayloads ?? []).map((visual) => ({
+          mimeType: visual.mimeType as "image/png" | "image/jpeg",
+          base64: visual.base64,
+          byteLength: visual.byteLength,
+          sha256: visual.sha256,
+          width: visual.width,
+          height: visual.height,
+          evidenceId: payload.evidenceId,
+          location: { kind: "pdf", pageNumber: visual.pageNumber } as const
+        }))
+      : normalized?.visualPayload
+        ? [{
+            mimeType: normalized.visualPayload.mimeType as "image/png" | "image/jpeg",
+            base64: normalized.visualPayload.base64,
+            byteLength: normalized.visualPayload.byteLength,
+            sha256: normalized.visualPayload.sha256,
+            width: normalized.visualPayload.width,
+            height: normalized.visualPayload.height,
+            evidenceId: payload.evidenceId,
+            location: { kind: "image" } as const
+          }]
+        : undefined;
+    return {
+      evidenceId: payload.evidenceId,
+      role: payload.role,
+      type: payload.type,
+      contentHash: payload.contentHash,
+      sourceReference: payload.reference,
+      references: payload.references,
+      ...(payload.text !== undefined ? { text: payload.text } : {}),
+      ...(payload.tableCells !== undefined ? {
+        tableCells: payload.tableCells.map((cell) => ({
+          value: cell.value,
+          evidenceId: payload.evidenceId,
+          role: payload.role,
+          location: cell.location
+        }))
+      } : {}),
+      ...(visualPayloads?.length ? { visualPayloads } : {})
+    };
+  });
+}
+
+function providerRequest(analysis: ReturnType<typeof buildReviewAnalysisInput>, request: ReviewRequest, options: ReviewHandlerOptions): ProviderReviewRequest {
+  const inference = options.providerConfig ?? DEFAULT_PROVIDER_INFERENCE;
+  const withoutFingerprint = {
+    evidence: providerEvidence(analysis),
+    requirements: analysis.requirements.map(({ text, evidenceId, role, location, kind }) => ({ text, evidenceId, role, location, kind })),
+    solutionClaims: analysis.solutionClaims.map(({ text, evidenceId, role, location, kind }) => ({ text, evidenceId, role, location, kind })),
+    objective: request.objective,
+    promptVersion: PROVIDER_PROMPT_VERSION,
+    inference
+  } satisfies Omit<ProviderReviewRequest, "inputFingerprint">;
+  return { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
+}
+
+function namespaceProviderFindings(result: ProviderReviewResult, deterministic: readonly ReviewFinding[]): ReviewFinding[] {
+  if (!result.provider || !/^[a-z][a-z0-9-]{0,31}$/u.test(result.provider)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  const deterministicIds = new Set(deterministic.map((finding) => finding.id));
+  const namespaced = result.modelFindings.map((finding) => {
+    const id = `provider:${result.provider}:${finding.id}`;
+    const parsed = reviewFindingSchema.safeParse({ ...finding, id });
+    if (!parsed.success || deterministicIds.has(id)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    return parsed.data;
+  });
+  if (new Set(namespaced.map((finding) => finding.id)).size !== namespaced.length) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  return namespaced;
+}
+
+interface InternalReviewResult {
+  deterministicFindings: readonly ReviewFinding[];
+  providerResult?: ProviderReviewResult;
+  providerFindings: readonly ReviewFinding[];
 }
 
 async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
@@ -30,11 +123,20 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
   const analysis = buildReviewAnalysisInput(bundle);
   const analyzer = createDeterministicReviewAnalyzer();
   try {
+    const deterministicFindings = analyzer.analyze(analysis);
+    const providerResult = options.provider
+      ? await options.provider.review(providerRequest(analysis, request, options))
+      : undefined;
+    const internal: InternalReviewResult = {
+      deterministicFindings,
+      providerResult,
+      providerFindings: providerResult ? namespaceProviderFindings(providerResult, deterministicFindings) : []
+    };
     const response = {
     ok: true,
     requestId: request.reviewId,
     status: "accepted",
-    findings: orchestrateReview({ ...analysis, reviewId: request.reviewId, objective: request.objective }),
+    findings: [...internal.deterministicFindings, ...internal.providerFindings],
     normalizedEvidence: bundle.normalizedEvidence,
     metadata: {
       serverName: SERVER_NAME,

@@ -1,4 +1,5 @@
 import type { ReviewToolResult } from "./contracts/review.js";
+import { ProviderError } from "./providers/errors.js";
 
 export type EvidenceLensErrorCode =
   | "INVALID_REQUEST"
@@ -44,6 +45,9 @@ function stableMessage(code: EvidenceLensErrorCode): string {
 }
 
 function normalizeError(error: unknown): EvidenceLensError {
+  if (error instanceof ProviderError) {
+    return new EvidenceLensError("PROVIDER_FAILURE", "Provider failure");
+  }
   if (error instanceof EvidenceLensError) {
     return new EvidenceLensError(error.code, stableMessage(error.code));
   }
