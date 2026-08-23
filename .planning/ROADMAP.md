@@ -123,7 +123,14 @@ Plans:
   1. Docker starts the MCP server with evidence mounted read-only and configured environment variables.
   2. Documentation demonstrates a fresh local setup and one complete multimodal review.
   3. Automated checks cover the documented end-to-end path and report failures clearly.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [ ] 06-01-PLAN.md — Single-stage Docker image, read-only Compose profiles, and deployment configuration tests
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 06-02-PLAN.md — Offline stdio smoke, injected-provider multimodal E2E, and deployment runbook
 
 ## Progress
 
