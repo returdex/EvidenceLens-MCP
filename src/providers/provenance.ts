@@ -9,14 +9,10 @@ import {
   type ReviewCitation,
   type ReviewFinding
 } from "../contracts/review.js";
+import { ProviderError } from "./errors.js";
 
-export class ProviderValidationError extends Error {
-  readonly code = "PROVIDER_INVALID_RESPONSE" as const;
-
-  constructor(message = "Provider response failed local validation") {
-    super(message);
-    this.name = "ProviderValidationError";
-  }
+export class ProviderValidationError extends ProviderError {
+  constructor(_message?: string) { super("PROVIDER_INVALID_RESPONSE", { retryable: false }); }
 }
 
 const providerCitationDraftSchema = z.object({

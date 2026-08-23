@@ -1,0 +1,10 @@
+{
+  "apiKey": "REPLACE_WITH_DEEPSEEK_API_KEY",
+  "baseUrl": "https://api.deepseek.com",
+  "model": "deepseek-v4-flash-vision-exp",
+  "timeoutMs": 30000,
+  "maxRetries": 2,
+  "maxTotalWaitMs": 10000,
+  "temperature": 0.2,
+  "maxTokens": 4000
+}
