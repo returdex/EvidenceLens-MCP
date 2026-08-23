@@ -17,6 +17,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - Evidence normalization contract and provenance pipeline validated in Phase 2.
 - Text, PDF, image/screenshot, and table normalization with hashes and visual context validated in Phase 2.
 - Read-only allowlisted filesystem boundary, bounded reads, provenance, and sanitized failures validated in Phase 3.
+- Replaceable provider boundary, DeepSeek configuration/adapter, provenance validation, bounded retries, and unchanged MCP contract validated in Phase 5.
 
 ### Active
 
@@ -58,7 +59,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 |----------|-----------|---------|
 | Treat EvidenceLens as an independent second reviewer | Keeps primary-agent reasoning and external evidence checking separate | — Pending |
 | Make read-only, allowlisted access the default | Reduces accidental disclosure and mutation risk | — Pending |
-| Use a model-provider adapter | Allows DeepSeek first while preserving local/compatible model options | — Pending |
+| Use a model-provider adapter | Allows DeepSeek first while preserving local/compatible model options | Validated in Phase 5 |
 | Make provenance part of the finding contract | Enables auditability, merging, cross-model comparison, and final checks | — Pending |
 | Use MCP as the integration boundary | Lets Codex, Dify, Claude, and other clients call the same service | — Pending |
 
@@ -80,4 +81,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-22 after Phase 3 completion*
+*Last updated: 2026-08-23 after Phase 5 completion*
