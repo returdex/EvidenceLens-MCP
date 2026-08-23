@@ -138,7 +138,7 @@ Stable codes are `INVALID_REQUEST`, `INVALID_REVIEW_ROLES`, `UNSUPPORTED_EVIDENC
 
 Internal provider failures are classified as `PROVIDER_CONFIGURATION`, `PROVIDER_REQUEST_FAILED`, `PROVIDER_TIMEOUT`, `PROVIDER_RETRY_EXHAUSTED`, or `PROVIDER_INVALID_RESPONSE`; the MCP boundary maps all of them to the stable sanitized `PROVIDER_FAILURE` response and never forwards URLs, response bodies, credentials, paths, request details, or stack traces.
 
-The default `npm test` command is credential-free and no-network and excludes the real provider test. To intentionally call DeepSeek, run exactly `npm run test:deepseek-live`; this command requires `DEEPSEEK_API_KEY` and network access and may incur API cost. It performs a clear missing-key preflight skip only under that named command. Live assertions allow natural-language output to vary and check structural findings and local provenance instead.
+The default `npm test` command is credential-free and no-network and excludes the real provider test. It sets `EVIDENCELENS_DISABLE_PROVIDER=1`, which makes `createServer()` skip automatic provider configuration loading and built-in registration for test isolation; explicit injected providers remain available to tests and embedders. To intentionally call DeepSeek, run exactly `npm run test:deepseek-live`; this command requires `DEEPSEEK_API_KEY` and network access and may incur API cost. It performs a clear missing-key preflight skip only under that named command. Live assertions allow natural-language output to vary and check structural findings and local provenance instead.
 
 ## Phase 2 non-capabilities
 

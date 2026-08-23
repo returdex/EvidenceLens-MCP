@@ -19,14 +19,15 @@ export function createServer(options: ServerOptions = {}): McpServer {
 
   let provider = options.provider;
   let providerConfig = options.providerConfig;
-  if (!provider && !providerConfig) {
+  const providerDisabled = process.env.EVIDENCELENS_DISABLE_PROVIDER === "1";
+  if (!provider && !providerConfig && !providerDisabled) {
     try {
       providerConfig = loadProviderConfig();
     } catch (error) {
       if (!(error instanceof ProviderError) || error.code !== "PROVIDER_CONFIGURATION") throw error;
     }
   }
-  if (!provider && providerConfig) provider = createDeepSeekProvider(providerConfig);
+  if (!provider && providerConfig && !providerDisabled) provider = createDeepSeekProvider(providerConfig);
 
   registerReviewTool(server, {
     filesystemPolicy: createFilesystemPolicy(options.allowedRoots ?? []),

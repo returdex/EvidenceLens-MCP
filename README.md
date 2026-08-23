@@ -12,7 +12,7 @@ npm run test:deepseek-live # opt-in real API test
 npm run build
 ```
 
-`npm run dev` starts the MCP server over stdio from `src/server.ts`. `npm test` runs the full credential-free, no-network contract, normalizer, fixture, safety, and MCP protocol suite; it excludes the live provider test. `npm run build` type-checks and compiles the server.
+`npm run dev` starts the MCP server over stdio from `src/server.ts`. `npm test` runs the full credential-free, no-network contract, normalizer, fixture, safety, and MCP protocol suite; it excludes the live provider test and sets `EVIDENCELENS_DISABLE_PROVIDER=1` so ambient DeepSeek credentials cannot enable provider calls. `npm run build` type-checks and compiles the server.
 
 ## Optional DeepSeek provider
 
