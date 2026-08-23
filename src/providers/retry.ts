@@ -40,6 +40,7 @@ function timeoutError(requestId: string | undefined): ProviderError {
 
 export async function fetchWithRetry(options: RetryOptions): Promise<Response> {
   const clock = options.clock ?? systemRetryClock;
+  const maxRetries = Math.min(2, Math.max(0, Math.floor(options.maxRetries)));
   const started = clock.now();
   let retries = 0;
 
@@ -53,14 +54,14 @@ export async function fetchWithRetry(options: RetryOptions): Promise<Response> {
         if (!response.ok) throw new ProviderError("PROVIDER_REQUEST_FAILED", { retryable: false, requestId: options.requestId });
         return response;
       }
-      if (retries >= options.maxRetries) throw new ProviderError("PROVIDER_RETRY_EXHAUSTED", { retryable: true, retryCount: retries, requestId: options.requestId });
+      if (retries >= maxRetries) throw new ProviderError("PROVIDER_RETRY_EXHAUSTED", { retryable: true, retryCount: retries, requestId: options.requestId });
     } catch (error) {
       if (error instanceof ProviderError) throw error;
       if (timedOut) {
-        if (retries >= options.maxRetries) throw new ProviderError("PROVIDER_RETRY_EXHAUSTED", { retryable: true, retryCount: retries, requestId: options.requestId });
+        if (retries >= maxRetries) throw new ProviderError("PROVIDER_RETRY_EXHAUSTED", { retryable: true, retryCount: retries, requestId: options.requestId });
       } else if (!isTransientTransportError(error)) {
         throw new ProviderError("PROVIDER_REQUEST_FAILED", { retryable: false, requestId: options.requestId });
-      } else if (retries >= options.maxRetries) {
+      } else if (retries >= maxRetries) {
         throw new ProviderError("PROVIDER_RETRY_EXHAUSTED", { retryable: true, retryCount: retries, requestId: options.requestId });
       }
     } finally {
@@ -75,4 +76,3 @@ export async function fetchWithRetry(options: RetryOptions): Promise<Response> {
     await clock.sleep(delay);
   }
 }
-

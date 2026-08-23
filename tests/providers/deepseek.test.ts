@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekTransport } from "../../src/providers/deepseek.js";
-import { ProviderError } from "../../src/providers/errors.js";
+import { serializeProviderError } from "../../src/providers/errors.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
 
 const hash = "a".repeat(64);
@@ -22,17 +22,20 @@ const config = { apiKey: "secret-key", baseUrl: "https://api.deepseek.com", mode
 
 describe("DeepSeek provider adapter", () => {
   it("sends an ordered JSON multimodal request and validates returned provenance", async () => {
+    const visualRequestWithoutFingerprint = { ...requestWithoutFingerprint, evidence: [...requestWithoutFingerprint.evidence, { evidenceId: "screenshot", role: "other" as const, type: "screenshot" as const, contentHash: "b".repeat(64), sourceReference: "inline://screenshot", references: [{ kind: "image" as const, width: 1, height: 1 }], visualPayloads: [{ mimeType: "image/png" as const, base64: "iVBORw0KGgo=", byteLength: 8, sha256: "b".repeat(64), width: 1, height: 1, evidenceId: "screenshot", location: { kind: "image" as const, width: 1, height: 1 } }] }] };
+    const visualRequest: ProviderReviewRequest = { ...visualRequestWithoutFingerprint, inputFingerprint: computeProviderInputFingerprint(visualRequestWithoutFingerprint) };
     const transport = transportFor(draft);
     const provider = createDeepSeekProvider(config, transport);
-    const result = await provider.review(request);
+    const result = await provider.review(visualRequest);
     const init = transport.calls[0]!;
     const sent = JSON.parse(String(init.body)) as Record<string, unknown>;
     expect(sent).toMatchObject({ model: request.inference.model, response_format: { type: "json_object" } });
+    expect(JSON.stringify(sent)).toContain("data:image/png;base64,iVBORw0KGgo=");
     expect(init.method).toBe("POST");
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer secret-key");
     expect(String(init.body)).not.toContain("Files");
     expect(String(init.body)).not.toContain("/Users/");
-    expect(result).toMatchObject({ provider: "deepseek", model: request.inference.model, inputFingerprint: request.inputFingerprint });
+    expect(result).toMatchObject({ provider: "deepseek", model: visualRequest.inference.model, inputFingerprint: visualRequest.inputFingerprint });
     expect(result.modelFindings).toHaveLength(1);
   });
 
@@ -46,6 +49,6 @@ describe("DeepSeek provider adapter", () => {
   it("maps non-transient HTTP failures without leaking upstream details", async () => {
     const provider = createDeepSeekProvider(config, transportFor(draft, 401));
     await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" });
-    try { await provider.review(request); } catch (error) { expect(JSON.stringify(new ProviderError("PROVIDER_REQUEST_FAILED"))).not.toContain("secret-key"); }
+    try { await provider.review(request); } catch (error) { expect(serializeProviderError(error)).toEqual(expect.objectContaining({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" })); expect(JSON.stringify(serializeProviderError(error))).not.toMatch(/secret-key|api\.deepseek|upstream secret body|stack/iu); }
   });
 });

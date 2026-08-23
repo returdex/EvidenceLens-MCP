@@ -24,4 +24,19 @@ describe("bounded provider retries", () => {
     await expect(fetchWithRetry({ maxRetries: 2, timeoutMs: 100, maxTotalWaitMs: 100, clock: injected, operation: async () => { calls += 1; throw new TypeError("network secret"); } })).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED", retryCount: 0 });
     expect(calls).toBe(1); expect(injected.sleeps).toHaveLength(0);
   });
+
+  it("retries a configured request timeout but never more than twice", async () => {
+    let calls = 0;
+    await expect(fetchWithRetry({ maxRetries: 2, timeoutMs: 5, maxTotalWaitMs: 10_000, operation: async (signal) => new Promise<Response>((_resolve, reject) => {
+      calls += 1;
+      signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true });
+    }) })).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED", retryCount: 2 });
+    expect(calls).toBe(3);
+  });
+
+  it("keeps jittered delays within the bounded exponential range", async () => {
+    let calls = 0; const injected = clock();
+    await expect(fetchWithRetry({ maxRetries: 1, timeoutMs: 100, maxTotalWaitMs: 10_000, clock: { ...injected, random: () => 1 }, operation: async () => { calls += 1; return new Response("", { status: 500 }); } })).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED" });
+    expect(calls).toBe(2); expect(injected.sleeps[0]).toBeGreaterThanOrEqual(125); expect(injected.sleeps[0]).toBeLessThanOrEqual(375);
+  });
 });
