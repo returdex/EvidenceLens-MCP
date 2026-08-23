@@ -17,7 +17,8 @@ describe("project configuration", () => {
       dev: "tsx src/server.ts",
       build: "tsc -p tsconfig.json",
       start: "node dist/server.js",
-      test: "vitest run"
+      test: "vitest run --exclude tests/providers/deepseek-live.test.ts",
+      "test:deepseek-live": "vitest run tests/providers/deepseek-live.test.ts"
     });
     expect(packageJson.dependencies["@modelcontextprotocol/server"]).toBe("^2.0.0");
   });
