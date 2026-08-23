@@ -1,0 +1,15 @@
+.git
+.planning
+node_modules
+dist
+.evidencelens.local.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+.DS_Store
+coverage
+.idea
+.vscode
