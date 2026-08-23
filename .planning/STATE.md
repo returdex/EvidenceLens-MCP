@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
 stopped_at: Phase 5 context gathered
-last_updated: "2026-08-23T04:55:52.663Z"
+last_updated: "2026-08-23T05:25:57.905Z"
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 17
-  completed_plans: 16
-  percent: 94
+  completed_plans: 18
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -20,15 +20,15 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 05 — provider-adapter-and-deepseek-integration
+**Current focus:** Phase 06 — docker-deployment-and-end-to-end-validation
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (docker-deployment-and-end-to-end-validation) — EXECUTING
+Plan: 2 of 2
 
 - Phase: 6 of 6
 - Status: Ready to plan
@@ -75,6 +75,8 @@ Plan: Not started
 - [Phase 04]: Integrate review_evidence as parse, duplicate-id gate, required-role gate, authorized normalization, deterministic analysis, schema validation, and sanitized error pipeline.
 - [Phase 04]: Expose deterministic-rules/1.0.0 analyzer identity only; defer provider/model version fields to Phase 5.
 - [Phase 04]: Keep analyzer request-scoped and pathless: authorized bounded payloads are cleared after analysis and filesystem paths are never reopened.
+- [Phase 06]: Keep routine Docker smoke and semantic E2E credential-free; reserve DeepSeek for the explicit real client. — Routine validation must not send external requests or incur provider cost.
+- [Phase 06]: Preserve complete normalized image and PDF citation locations across the provider adapter. — Provider findings must remain compatible with the public citation schema.
 
 ## Performance Metrics
 
@@ -90,12 +92,13 @@ Plan: Not started
 | Phase 04 P01 | 4 min | 2 tasks | 7 files |
 | Phase 04 P02 | 12 min | 2 tasks | 5 files |
 | Phase 04 P03 | 6 min | 2 tasks | 6 files |
+| Phase 06 P02 | 11min | 2 tasks | 9 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-08-22T19:17:06.291Z
+- **Last session:** 2026-08-23T05:25:39.868Z
 - **Stopped at:** Phase 5 context gathered
-- **Resume file:** .planning/phases/05-provider-adapter-and-deepseek-integration/05-CONTEXT.md
+- **Resume file:** None
 
 ## Next Action
 

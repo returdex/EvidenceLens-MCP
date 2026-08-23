@@ -11,7 +11,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 3: Read-Only Filesystem Boundary** - Enforce allowlisted, read-only evidence access. (completed 2026-08-22)
 - [x] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings. (completed 2026-08-22)
 - [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
-- [ ] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review.
+- [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
 
 ## Phase Details
 
@@ -127,10 +127,10 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 06-01-PLAN.md — Single-stage Docker image, read-only Compose profiles, and deployment configuration tests
+- [x] 06-01-PLAN.md — Single-stage Docker image, read-only Compose profiles, and deployment configuration tests
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 06-02-PLAN.md — Offline stdio smoke, injected-provider multimodal E2E, and deployment runbook
+- [x] 06-02-PLAN.md — Offline stdio smoke, injected-provider multimodal E2E, and deployment runbook
 
 ## Progress
 
@@ -144,7 +144,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Read-Only Filesystem Boundary | 3/3 | Complete    | 2026-08-22 |
 | 4. Review Orchestration and Findings | 3/3 | Complete    | 2026-08-22 |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
-| 6. Docker Deployment and End-to-End Validation | 0/TBD | Not started | - |
+| 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 
 ## Dependencies
 
