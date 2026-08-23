@@ -21,7 +21,10 @@ describe("project configuration", () => {
       build: "tsc -p tsconfig.json",
       start: "node dist/server.js",
       test: "EVIDENCELENS_DISABLE_PROVIDER=1 vitest run --exclude tests/providers/deepseek-live.test.ts",
-      "test:deepseek-live": "vitest run tests/providers/deepseek-live.test.ts"
+      "test:deepseek-live": "vitest run tests/providers/deepseek-live.test.ts",
+      "docker:smoke": "bash scripts/docker-smoke.sh",
+      "docker:review:real": "node scripts/docker-review-real.mjs",
+      "test:e2e": "EVIDENCELENS_DISABLE_PROVIDER=1 vitest run tests/e2e/docker-review.test.ts"
     });
     expect(packageJson.dependencies["@modelcontextprotocol/server"]).toBe("^2.0.0");
   });

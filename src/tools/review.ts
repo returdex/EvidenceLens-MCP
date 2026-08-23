@@ -51,7 +51,8 @@ function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>)
           width: visual.width,
           height: visual.height,
           evidenceId: payload.evidenceId,
-          location: { kind: "pdf", pageNumber: visual.pageNumber } as const
+          location: normalized.references.find((reference): reference is Extract<typeof reference, { kind: "pdf" }> => reference.kind === "pdf" && reference.pageNumber === visual.pageNumber)
+            ?? { kind: "pdf", pageNumber: visual.pageNumber }
         }))
       : normalized?.visualPayload
         ? [{
@@ -62,7 +63,8 @@ function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>)
             width: normalized.visualPayload.width,
             height: normalized.visualPayload.height,
             evidenceId: payload.evidenceId,
-            location: { kind: "image" } as const
+            location: normalized.references.find((reference): reference is Extract<typeof reference, { kind: "image" }> => reference.kind === "image")
+              ?? { kind: "image" }
           }]
         : undefined;
     return {
