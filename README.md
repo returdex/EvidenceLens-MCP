@@ -14,6 +14,20 @@ npm run build
 
 `npm run dev` starts the MCP server over stdio from `src/server.ts`. `npm test` runs the full credential-free, no-network contract, normalizer, fixture, safety, and MCP protocol suite; it excludes the live provider test and sets `EVIDENCELENS_DISABLE_PROVIDER=1` so ambient DeepSeek credentials cannot enable provider calls. `npm run build` type-checks and compiles the server.
 
+## Docker deployment and offline validation
+
+The canonical fresh-checkout Docker runbook is [docs/docker-deployment.md](docs/docker-deployment.md). It covers the hardened direct-stdio image, the whole-project read-only `/workspace` mount, the exact `course=/workspace` allowlist, the four fixed evidence fixtures, and the explicit credentialed DeepSeek path.
+
+The routine commands are credential-free and no-network:
+
+```bash
+docker compose --profile smoke build
+npm run docker:smoke
+npm run test:e2e
+```
+
+The smoke path validates MCP `initialize`, `tools/list`, and `tools/call` over stdio. The E2E path injects an offline-compatible provider and checks schemas, findings, typed citations, hashes, and logical `filesystem://course/...` provenance without asserting model prose. It does not call DeepSeek.
+
 ## Optional DeepSeek provider
 
 Runtime reads the ignored `.evidencelens.local.json` file (or explicitly supplied `DEEPSEEK_*` environment values) and registers only the built-in DeepSeek provider. Start from the redacted [.evidencelens.local.example.json](.evidencelens.local.example.json):
@@ -37,7 +51,7 @@ The real API test is opt-in only: `npm run test:deepseek-live`. It requires `DEE
 
 ## MCP Contract
 
-See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact four-role request contract, duplicate-ID and stable errors, deterministic finding fields and citation mapping, root configuration grammar, byte limits, `filesystem://` provenance, transient analysis boundary, and read-only/no-provider/no-Docker behavior.
+See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact four-role request contract, duplicate-ID and stable errors, deterministic finding fields and citation mapping, root configuration grammar, byte limits, `filesystem://` provenance, transient analysis boundary, and read-only/no-provider behavior. See [docs/docker-deployment.md](docs/docker-deployment.md) for container-specific mounts, profiles, and startup preflight behavior.
 
 Platform note: the default filesystem reader uses descriptor-relative component walking on Linux. On macOS, where this project has no supported Node `openat`/`openat2` binding, default anchored filesystem reads fail closed with sanitized `ACCESS_DENIED` and no bytes; there is no pathname fallback. Phase 2 inline evidence remains supported, and embedding tests may inject a reviewed safe filesystem adapter for portable filesystem-read coverage.
 

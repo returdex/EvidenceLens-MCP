@@ -2,7 +2,7 @@
 
 ## Transport and tool
 
-EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.3`.
+EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.3`. For the hardened container profiles, read-only `/workspace` mount, offline smoke path, and explicit DeepSeek deployment command, see [Docker deployment](docker-deployment.md).
 
 `review_evidence` is read-only, idempotent, deterministic for identical input, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.1.3`.
 
