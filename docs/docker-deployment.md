@@ -53,7 +53,7 @@ Missing `DEEPSEEK_API_KEY`, malformed settings, and conflicting environment/conf
 
 ## Read-only configuration-file compatibility
 
-The optional `review-file` profile mounts a project-local configuration file read-only at exactly `/app/.evidencelens.local.json`. The image working directory is `/app`, and the entrypoint sets `EVIDENCELENS_CONFIG_FILE=./.evidencelens.local.json` so the existing typed loader retains conflict detection:
+The optional `review-file` profile mounts a project-local configuration file read-only at exactly `/app/.evidencelens.local.json`. Compose uses that documented filename as a parse-time default so unrelated profiles such as `smoke` can be rendered without the variable; before running `review-file`, set the variable to an existing project-local file. The image working directory is `/app`, and the entrypoint sets `EVIDENCELENS_CONFIG_FILE=./.evidencelens.local.json` so the existing typed loader retains conflict detection:
 
 ```bash
 export EVIDENCELENS_CONFIG_FILE=./.evidencelens.local.json

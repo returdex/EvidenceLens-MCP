@@ -74,7 +74,10 @@ services:
         target: /workspace
         read_only: true
       - type: bind
-        source: "${EVIDENCELENS_CONFIG_FILE:?Set EVIDENCELENS_CONFIG_FILE to a project-local config file}"
+        # Compose interpolates inactive profiles too; use the documented local
+        # filename as a parse-time default, while review-file still fails at
+        # mount time if the caller has not supplied a real project-local file.
+        source: "${EVIDENCELENS_CONFIG_FILE:-./.evidencelens.local.json}"
         target: /app/.evidencelens.local.json
         read_only: true
     read_only: true

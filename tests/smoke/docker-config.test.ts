@@ -53,6 +53,7 @@ describe("Docker deployment configuration", () => {
     expect(compose).toContain("network_mode: none");
     expect(compose).toContain("target: /app/.evidencelens.local.json");
     expect(compose).toContain("EVIDENCELENS_CONFIG_FILE=./.evidencelens.local.json");
+    expect(compose).toContain('source: "${EVIDENCELENS_CONFIG_FILE:-./.evidencelens.local.json}"');
     expect(compose).toContain("working_dir: /app");
     expect(compose).not.toMatch(/privileged\s*:\s*true/iu);
     expect(compose).not.toMatch(/network_mode:\s*host/iu);
