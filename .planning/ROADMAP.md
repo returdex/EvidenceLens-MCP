@@ -158,7 +158,11 @@ Plans:
   1. `npm run docker:smoke` builds and runs the offline profile successfully.
   2. The container completes MCP initialize/tools/list/tools/call and rejects writes to `/workspace`.
   3. Missing provider credentials fail closed with sanitized `PROVIDER_CONFIGURATION` output.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+**Wave 1**
+- [ ] 08-01-PLAN.md — Execute Docker offline runtime smoke and record auditable DEPL-01 verification
 
 ## Progress
 
