@@ -13,7 +13,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
 - [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
-- [ ] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification.
+- [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 
 ## Phase Details
 
@@ -162,7 +162,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 08-01-PLAN.md — Execute Docker offline runtime smoke and record auditable DEPL-01 verification
+- [x] 08-01-PLAN.md — Execute Docker offline runtime smoke and record auditable DEPL-01 verification
 
 ## Progress
 
@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
-| 8. Docker Runtime Verification Closure | 0/TBD | Planned | - |
+| 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 
 ## Dependencies
 

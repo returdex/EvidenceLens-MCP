@@ -22,6 +22,8 @@ npm run test:e2e
 
 `npm run docker:smoke` renders the offline Compose profile, builds the image, starts the `smoke` service, and sends exactly `initialize`, `tools/list`, and `tools/call` through stdin/stdout. It checks that only the read-only `review_evidence` tool is advertised, the four fixed files are read, the response is schema-shaped, hashes are lowercase SHA-256, citations use logical references, and raw fixture text or absolute paths are absent. It also attempts a marker write under `/workspace` and checks credentialed startup fails closed when no key is present. Failures include a phase name and return non-zero.
 
+This command is the authoritative container-runtime gate for DEPL-01; `npm test` and `tests/smoke/docker-config.test.ts` protect declarations but do not substitute for an image build or a live container boundary check. On Linux, the anchored reader uses the already-authorized root descriptor and keeps no-follow protection on evidence path components, so the same smoke command covers the container filesystem path used in production.
+
 The default smoke profile is offline: it sets `EVIDENCELENS_DISABLE_PROVIDER=1`, uses Compose `network_mode: none`, and never sends a DeepSeek request. `npm run test:e2e` is the routine semantic check; it injects a compatible offline `ReviewProvider` and uses a macOS-safe filesystem adapter backed by `node:fs/promises` for the same fixed fixtures. Both paths use structural assertions, not exact model prose.
 
 ## Runtime boundary

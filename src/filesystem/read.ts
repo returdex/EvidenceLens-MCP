@@ -68,9 +68,14 @@ function defaultAdapter(): FilesystemReadAdapter {
 
       let directory: FileHandle | undefined;
       try {
-        directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0));
+        // The proc descriptor path is itself a kernel-managed symlink. The
+        // root descriptor was already opened with O_NOFOLLOW during policy
+        // construction, so refusing this trusted proc hop would reject every
+        // Linux container read with ELOOP. Keep O_NOFOLLOW on each untrusted
+        // evidence path component below.
+        directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0));
         for (const component of components.slice(0, -1)) {
-          const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0));
+          const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0));
           await directory.close();
           directory = next;
         }
