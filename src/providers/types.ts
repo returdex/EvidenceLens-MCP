@@ -46,7 +46,7 @@ export interface ProviderEvidenceItem {
 }
 
 export interface ProviderInferenceSettings {
-  model: "deepseek-v4-flash-vision-exp" | "deepseek-v4-flash" | "deepseek-v4-pro";
+  model: "deepseek-v4-pro" | "deepseek-v4-flash" | "deepseek-v4-flash-vision-exp";
   temperature: number;
   maxTokens: number;
 }

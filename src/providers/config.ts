@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { ProviderError } from "./errors.js";
 
 export const PROVIDER_CONFIG_FILE = ".evidencelens.local.json" as const;
-export const DEEPSEEK_MODELS = ["deepseek-v4-flash-vision-exp", "deepseek-v4-flash", "deepseek-v4-pro"] as const;
-const DEFAULTS = { baseUrl: "https://api.deepseek.com", model: "deepseek-v4-flash-vision-exp", timeoutMs: 30_000, maxRetries: 2, maxTotalWaitMs: 10_000, temperature: 0.2, maxTokens: 4_000 } as const;
+export const DEEPSEEK_MODELS = ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v4-flash-vision-exp"] as const;
+const DEFAULTS = { baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro", timeoutMs: 30_000, maxRetries: 2, maxTotalWaitMs: 10_000, temperature: 0.2, maxTokens: 4_000 } as const;
 const CONFIG_KEYS = ["apiKey", "baseUrl", "model", "timeoutMs", "maxRetries", "maxTotalWaitMs", "temperature", "maxTokens"] as const;
 type ConfigKey = typeof CONFIG_KEYS[number];
 

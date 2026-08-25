@@ -25,6 +25,12 @@ const providerCitationDraftSchema = z.object({
   visualPayloadSha256: contentHashSchema.optional()
 }).strict();
 
+const providerCitationReferenceSchema = z.object({
+  evidenceId: z.string().min(1).max(128),
+  location: normalizedEvidenceReferenceSchema,
+  visual: z.boolean()
+}).strict();
+
 const providerFindingDraftSchema = z.object({
   id: z.string().min(1).max(128),
   type: z.enum(["omission", "contradiction", "requirement_conflict", "evidence_quality"]),
@@ -37,10 +43,10 @@ const providerFindingDraftSchema = z.object({
   uncertainty: z.string().min(1).max(4000).optional(),
   followUpChecks: z.array(z.string().min(1).max(4000)).min(1).max(10),
   evidenceIds: z.array(z.string().min(1).max(128)).min(1),
-  citations: z.array(providerCitationDraftSchema).min(1).max(20)
+  citations: z.array(z.union([providerCitationDraftSchema, providerCitationReferenceSchema])).min(1).max(20)
 }).strict();
 
-export type ProviderCitationDraft = z.infer<typeof providerCitationDraftSchema>;
+export type ProviderCitationDraft = z.infer<typeof providerCitationDraftSchema> | z.infer<typeof providerCitationReferenceSchema>;
 export type ProviderFindingDraft = z.infer<typeof providerFindingDraftSchema>;
 
 function sameReference(left: NormalizedEvidenceReference, right: NormalizedEvidenceReference): boolean {
@@ -65,19 +71,22 @@ export function resolveProviderCitation(
   normalizedEvidence: readonly NormalizedEvidence[],
   draft: ProviderCitationDraft
 ): ReviewCitation {
-  const parsed = providerCitationDraftSchema.safeParse(draft);
+  const parsed = z.union([providerCitationDraftSchema, providerCitationReferenceSchema]).safeParse(draft);
   if (!parsed.success) fail("Provider citation draft is malformed");
 
   const evidence = normalizedEvidence.find((candidate) => candidate.source.id === parsed.data.evidenceId);
   if (!evidence) fail("Provider citation evidence is not present in normalized evidence");
-  if (evidence.role !== parsed.data.role) fail("Provider citation role does not match normalized evidence");
-  if (evidence.contentHash !== parsed.data.contentHash) fail("Provider citation content hash does not match normalized evidence");
-  if (evidence.source.reference !== parsed.data.sourceReference) fail("Provider citation source reference does not match normalized evidence");
   if (!evidence.references.some((reference) => sameReference(reference, parsed.data.location))) fail("Provider citation location is not present in normalized evidence");
+
+  if ("role" in parsed.data) {
+    if (evidence.role !== parsed.data.role) fail("Provider citation role does not match normalized evidence");
+    if (evidence.contentHash !== parsed.data.contentHash) fail("Provider citation content hash does not match normalized evidence");
+    if (evidence.source.reference !== parsed.data.sourceReference) fail("Provider citation source reference does not match normalized evidence");
+  }
 
   const payloadHash = visualPayloadHash(evidence, parsed.data.location);
   if (parsed.data.visual && payloadHash === undefined) fail("Provider visual citation has no retained payload");
-  if (parsed.data.visualPayloadSha256 !== undefined && parsed.data.visualPayloadSha256 !== payloadHash) fail("Provider visual payload hash does not match normalized evidence");
+  if ("visualPayloadSha256" in parsed.data && parsed.data.visualPayloadSha256 !== undefined && parsed.data.visualPayloadSha256 !== payloadHash) fail("Provider visual payload hash does not match normalized evidence");
   if ((evidence.source.type === "image" || evidence.source.type === "screenshot") && !parsed.data.visual) fail("Image citations must be visual");
 
   return {

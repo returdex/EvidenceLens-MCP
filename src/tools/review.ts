@@ -33,7 +33,7 @@ export interface ReviewHandlerOptions {
 }
 
 const DEFAULT_PROVIDER_INFERENCE = {
-  model: "deepseek-v4-flash-vision-exp",
+  model: "deepseek-v4-pro",
   temperature: 0.2,
   maxTokens: 4_000
 } as const;

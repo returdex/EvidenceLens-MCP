@@ -36,7 +36,7 @@ Runtime reads the ignored `.evidencelens.local.json` file (or explicitly supplie
 {
   "apiKey": "REPLACE_WITH_DEEPSEEK_API_KEY",
   "baseUrl": "https://api.deepseek.com",
-  "model": "deepseek-v4-flash-vision-exp",
+  "model": "deepseek-v4-pro",
   "timeoutMs": 30000,
   "maxRetries": 2,
   "maxTotalWaitMs": 10000,
@@ -45,9 +45,9 @@ Runtime reads the ignored `.evidencelens.local.json` file (or explicitly supplie
 }
 ```
 
-The default model is `deepseek-v4-flash-vision-exp`; the allowlist is `deepseek-v4-flash-vision-exp`, `deepseek-v4-flash`, and `deepseek-v4-pro`. Timeouts are bounded to 1–120 seconds, retries to 0–2, total retry wait to 1–60 seconds, and inference tokens to 1–20,000. Configuration is typed and fail-closed; arbitrary provider names or npm modules are never loaded.
+The default model is `deepseek-v4-pro`; the allowlist is `deepseek-v4-pro`, `deepseek-v4-flash`, and `deepseek-v4-flash-vision-exp`. Thinking mode is enabled with `reasoning_effort: high` for the V4 text models; the vision model uses the official base64 `image_url` Chat Completions format. Timeouts are bounded to 1–120 seconds, retries to 0–2, total retry wait to 1–60 seconds, and inference tokens to 1–20,000. Configuration is typed and fail-closed; arbitrary provider names or npm modules are never loaded.
 
-The real API test is opt-in only: `npm run test:deepseek-live`. It requires `DEEPSEEK_API_KEY`, network access, and may incur API cost. It preflight-skips only when that key is absent under this named command; the default `npm test` command never invokes it. Live output is variable, so structural findings/provenance are asserted rather than exact wording. Local normalized evidence remains authoritative for citation binding and provenance.
+The real API test is opt-in only: `npm run test:deepseek-live`. It requires `DEEPSEEK_API_KEY`, network access, and may incur API cost. It preflight-skips only when that key is absent under this named command; the default `npm test` command never invokes it. The live screenshot check uses `deepseek-v4-flash-vision-exp`; V4 text models use thinking mode, while the vision request uses the official base64 `image_url` format without thinking parameters. Live output is variable, so structural findings/provenance are asserted rather than exact wording. The model returns compact evidence references; local normalized evidence remains authoritative for citation binding and provenance. Credential-free fixtures remain the required regression gate.
 
 ## MCP Contract
 

@@ -1,0 +1,39 @@
+{
+  "reviewId": "fit5032-week4-library-review-001",
+  "objective": "Review the FIT5032 Week 3 and Week 4 Library application against the assignment requirements, focusing on Bootstrap responsiveness, form validation, PrimeVue DataTable, evidence completeness, and accessibility.",
+  "evidence": [
+    {
+      "id": "fit5032-requirements",
+      "role": "assignment_brief",
+      "type": "text",
+      "reference": "FIT5032/eFolio-Tasks-3-4/assignment-requirements",
+      "content": "Students must demonstrate Bootstrap 5 responsive layout using breakpoint classes such as col-12 col-md-6.\nStudents must include evidence for the required CSS styling activities.\nStudents must include minlength maxlength attributes.\nStudents must implement Australian Resident validation.\nStudents must demonstrate the submitted user information in a PrimeVue DataTable.\nStudents must include evidence of the GitHub commit history."
+    },
+    {
+      "id": "fit5032-rubric",
+      "role": "rubric",
+      "type": "table",
+      "format": "csv",
+      "reference": "FIT5032/eFolio-Tasks-3-4/rubric",
+      "content": "Criterion,Requirement,Evidence expectation\nResponsive layout,Students must use Bootstrap breakpoint classes such as col-12 col-md-6,Show mobile and tablet layouts\nCSS activities,Students must include evidence for tag class ID and attribute selectors,Show CSS code and rendered result\nHTML validation,Students must include required minlength and maxlength validation,Show source code and browser validation feedback\nVue validation,Students must implement Australian Resident validation,Show validation logic and front-end feedback\nDataTable,Students must demonstrate submitted records in a PrimeVue DataTable,Show the rendered table\nGitHub,Students must include GitHub commit history evidence,Show the commit history page"
+    },
+    {
+      "id": "fit5032-teacher-instructions",
+      "role": "teacher_instructions",
+      "type": "text",
+      "reference": "FIT5032/eFolio-Tasks-3-4/studio-instructions",
+      "content": "Students must provide multiple screenshots for separate activities.\nStudents must show the original HTML validation before replacing it with custom Vue validation.\nStudents must show extra validation cases for username and password.\nStudents must validate Australian Resident, Gender, and Reason for joining.\nStudents must show the GitHub commit history rather than a single commit diff.\nStudents must ensure that screenshots are readable and not cropped."
+    },
+    {
+      "id": "fit5032-solution",
+      "role": "solution",
+      "type": "text",
+      "reference": "FIT5032/week4/ywang-library/src/components/LibraryRegistrationForm.vue",
+      "content": "The form uses Bootstrap classes col-12 col-md-6 for responsive layout.\nThe username input validates a minimum length of 3 characters and allows only letters numbers and underscores.\nThe password validates a minimum length of 8 characters and checks uppercase lowercase number and special character rules.\nThe gender field is validated with validateGender.\nThe reason field is validated with validateReason and requires at least 10 characters.\nThe form uses required attributes and novalidate.\nAustralian Resident validation is not implemented.\nThe errors object contains username password gender and reason but does not contain Australian Resident.\nThe submitted information is displayed using a PrimeVue DataTable.\nPasswords are masked with bullet characters.\nThe DataTable currently supports submitted records but the evidence shows only one submitted record.\nThe implementation does not contain the Week 3 pure CSS selector evidence.\nThe implementation does not contain minlength maxlength attributes.\nThe available GitHub screenshot shows a single commit diff rather than the GitHub commit history."
+    }
+  ],
+  "limits": {
+    "maxEvidenceItems": 20,
+    "maxObjectiveLength": 4000
+  }
+}

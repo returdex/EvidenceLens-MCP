@@ -65,7 +65,7 @@ describe("provider review MCP boundary", () => {
   it("injects a compatible provider while preserving the public response schema", async () => {
     const result = payload(await handleReviewRequest(request, {
       provider: fakeProvider(),
-      providerConfig: { model: "deepseek-v4-flash-vision-exp", temperature: 0.2, maxTokens: 4000 }
+      providerConfig: { model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 4000 }
     }));
     const parsed = reviewResponseSchema.parse(result);
     expect(parsed.findings.some((finding) => finding.id === "provider:local-reviewer:finding-1")).toBe(true);

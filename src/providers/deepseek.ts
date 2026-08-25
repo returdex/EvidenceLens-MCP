@@ -46,7 +46,6 @@ function evidenceForPrompt(item: ProviderEvidenceItem): Record<string, unknown> 
     evidenceId: item.evidenceId,
     role: item.role,
     type: item.type,
-    contentHash: item.contentHash,
     references: item.references,
     ...(item.text !== undefined ? { text: safeText(item.text) } : {}),
     ...(item.tableCells !== undefined ? { tableCells: item.tableCells.slice(0, 10_000) } : {})
@@ -68,7 +67,17 @@ function normalizedFromProviderEvidence(evidence: readonly ProviderEvidenceItem[
 }
 
 function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
-  const content: Record<string, unknown>[] = [{ type: "text", text: JSON.stringify({ objective: safeText(request.objective), promptVersion: request.promptVersion, evidence: request.evidence.map(evidenceForPrompt), requirements: request.requirements, solutionClaims: request.solutionClaims }) }];
+  const content: Record<string, unknown>[] = [{ type: "text", text: JSON.stringify({
+    instruction: "Return valid JSON with a findings array. Each citation must contain only evidenceId, an exact location copied from that evidence item's references, and visual. Do not include or invent role, contentHash, sourceReference, or visualPayloadSha256. Citations must be unique and sorted by evidenceId; evidenceIds must exactly match citation evidenceIds.",
+    objective: safeText(request.objective),
+    promptVersion: request.promptVersion,
+    evidence: request.evidence.map(evidenceForPrompt),
+    requirements: request.requirements,
+    solutionClaims: request.solutionClaims
+  }) }];
+  const thinking = request.inference.model !== "deepseek-v4-flash-vision-exp"
+    ? { thinking: { type: "enabled" }, reasoning_effort: "high" }
+    : {};
   let bytes = 0;
   for (const item of request.evidence) for (const payload of item.visualPayloads ?? []) {
     const decoded = Buffer.from(payload.base64, "base64");
@@ -77,18 +86,39 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
     if (bytes > MAX_REQUEST_BYTES) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
     content.push({ type: "image_url", image_url: { url: `data:${payload.mimeType};base64,${payload.base64}` } });
   }
-  return { model: request.inference.model, messages: [{ role: "user", content }], temperature: request.inference.temperature, max_tokens: request.inference.maxTokens, response_format: { type: "json_object" }, stream: false };
+  return {
+    model: request.inference.model,
+    messages: [{ role: "user", content }],
+    temperature: request.inference.temperature,
+    max_tokens: request.inference.maxTokens,
+    ...thinking,
+    response_format: { type: "json_object" },
+    stream: false
+  };
 }
 
 function parseDrafts(response: unknown): ProviderFindingDraft[] {
   if (typeof response !== "object" || response === null || !Array.isArray((response as { choices?: unknown }).choices)) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
-  const content = (response as { choices: Array<{ message?: { content?: unknown } }> }).choices[0]?.message?.content;
-  if (typeof content !== "string" || content.length > 1_000_000) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
-  try {
-    const parsed: unknown = JSON.parse(content);
-    if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as { findings?: unknown }).findings)) throw new Error();
-    return (parsed as { findings: ProviderFindingDraft[] }).findings;
-  } catch { throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false }); }
+  const message = (response as { choices: Array<{ message?: { content?: unknown; reasoning_content?: unknown } }> }).choices[0]?.message;
+  const content = message?.content;
+  const reasoningContent = message?.reasoning_content;
+  const candidates = [content, ...(typeof content === "string" && content.length === 0 ? [reasoningContent] : [])];
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" || candidate.length > 1_000_000 || candidate.length === 0) continue;
+    const jsonCandidates = [candidate];
+    const firstObject = candidate.indexOf("{");
+    const lastObject = candidate.lastIndexOf("}");
+    if (firstObject >= 0 && lastObject > firstObject) jsonCandidates.push(candidate.slice(firstObject, lastObject + 1));
+    for (const jsonCandidate of jsonCandidates) {
+      try {
+        const parsed: unknown = JSON.parse(jsonCandidate);
+        if (typeof parsed === "object" && parsed !== null && Array.isArray((parsed as { findings?: unknown }).findings)) {
+          return (parsed as { findings: ProviderFindingDraft[] }).findings;
+        }
+      } catch { /* Try the next bounded JSON candidate, then fail closed. */ }
+      }
+  }
+  throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
 }
 
 export function createDeepSeekProvider(config: ProviderConfig, transport: DeepSeekTransport = { fetch: (input, init) => fetch(input, init) }): ReviewProvider {

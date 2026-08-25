@@ -12,7 +12,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings. (completed 2026-08-22)
 - [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
 - [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
-- [ ] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract.
+- [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [ ] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification.
 
 ## Phase Details
@@ -147,7 +147,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 07-01-PLAN.md — Locally resolve DeepSeek vision citation references and add credential-free/live provenance regression coverage
+- [x] 07-01-PLAN.md — Locally resolve DeepSeek vision citation references and add credential-free/live provenance regression coverage
 
 ### Phase 8: Docker Runtime Verification Closure
 **Goal**: A Docker-enabled environment verifies the deployed image, Compose profiles, read-only evidence mount, stdio protocol, and sanitized provider preflight.
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Review Orchestration and Findings | 3/3 | Complete    | 2026-08-22 |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
-| 7. DeepSeek Vision Provenance Closure | 0/TBD | Planned | - |
+| 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 0/TBD | Planned | - |
 
 ## Dependencies

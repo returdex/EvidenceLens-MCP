@@ -14,7 +14,7 @@ const normalizedEvidence = [{
 
 const request: ProviderReviewRequest = {
   evidence: [], requirements: [], solutionClaims: [], objective: "review", promptVersion: "v1",
-  inference: { model: "deepseek-v4-flash-vision-exp", temperature: 0, maxTokens: 100 }, inputFingerprint: "b".repeat(64)
+  inference: { model: "deepseek-v4-pro", temperature: 0, maxTokens: 100 }, inputFingerprint: "b".repeat(64)
 };
 
 describe("provider contract", () => {
@@ -36,6 +36,13 @@ describe("provider contract", () => {
     for (const forged of [{ ...base, evidenceId: "missing" }, { ...base, role: "solution" as const }, { ...base, contentHash: "c".repeat(64) }, { ...base, sourceReference: "inline://other" }, { ...base, location: { kind: "text" as const, startLine: 2, endLine: 2 } }]) {
       expect(() => resolveProviderCitation(normalizedEvidence, forged)).toThrowError(ProviderValidationError);
     }
+  });
+
+  it("enriches compact citation references from normalized evidence", () => {
+    expect(resolveProviderCitation(normalizedEvidence, { evidenceId: "brief", location: { kind: "text", startLine: 1, endLine: 1 }, visual: false })).toEqual({
+      evidenceId: "brief", role: "assignment_brief", contentHash: hash, sourceReference: "inline://brief",
+      location: { kind: "text", startLine: 1, endLine: 1 }, visual: false
+    });
   });
 
   it("rejects duplicate, unsorted, and incomplete findings", () => {
