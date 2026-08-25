@@ -12,6 +12,8 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings. (completed 2026-08-22)
 - [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
 - [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
+- [ ] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract.
+- [ ] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification.
 
 ## Phase Details
 
@@ -132,6 +134,28 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 06-02-PLAN.md — Offline stdio smoke, injected-provider multimodal E2E, and deployment runbook
 
+### Phase 7: DeepSeek Vision Provenance Closure
+**Goal**: Credentialed DeepSeek vision requests return findings that pass strict local provenance validation without weakening the public MCP contract.
+**Depends on**: Phase 6
+**Requirements**: [PROV-01]
+**Gap Closure**: Closes the v1.0 milestone audit gap where the vision API request succeeds but model-generated findings fail citation/provenance validation.
+**Success Criteria** (what must be TRUE):
+  1. The configured DeepSeek vision model can process the official base64 `image_url` request format through the provider adapter.
+  2. Vision output is constrained or normalized so every public finding has valid evidence IDs, hashes, typed locations, and sorted citations bound to local normalized evidence.
+  3. A credential-free regression fixture covers malformed and representative vision responses without storing secrets or raw sensitive course content.
+**Plans**: TBD
+
+### Phase 8: Docker Runtime Verification Closure
+**Goal**: A Docker-enabled environment verifies the deployed image, Compose profiles, read-only evidence mount, stdio protocol, and sanitized provider preflight.
+**Depends on**: Phase 7
+**Requirements**: [DEPL-01]
+**Gap Closure**: Closes the v1.0 milestone audit gap where Docker CLI/daemon was unavailable during Phase 6 verification.
+**Success Criteria** (what must be TRUE):
+  1. `npm run docker:smoke` builds and runs the offline profile successfully.
+  2. The container completes MCP initialize/tools/list/tools/call and rejects writes to `/workspace`.
+  3. Missing provider credentials fail closed with sanitized `PROVIDER_CONFIGURATION` output.
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -145,6 +169,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Review Orchestration and Findings | 3/3 | Complete    | 2026-08-22 |
 | 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
+| 7. DeepSeek Vision Provenance Closure | 0/TBD | Planned | - |
+| 8. Docker Runtime Verification Closure | 0/TBD | Planned | - |
 
 ## Dependencies
 
