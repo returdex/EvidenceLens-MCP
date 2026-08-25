@@ -143,7 +143,11 @@ Plans:
   1. The configured DeepSeek vision model can process the official base64 `image_url` request format through the provider adapter.
   2. Vision output is constrained or normalized so every public finding has valid evidence IDs, hashes, typed locations, and sorted citations bound to local normalized evidence.
   3. A credential-free regression fixture covers malformed and representative vision responses without storing secrets or raw sensitive course content.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+**Wave 1**
+- [ ] 07-01-PLAN.md — Locally resolve DeepSeek vision citation references and add credential-free/live provenance regression coverage
 
 ### Phase 8: Docker Runtime Verification Closure
 **Goal**: A Docker-enabled environment verifies the deployed image, Compose profiles, read-only evidence mount, stdio protocol, and sanitized provider preflight.
