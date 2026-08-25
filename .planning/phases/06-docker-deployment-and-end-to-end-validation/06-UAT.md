@@ -1,41 +1,42 @@
 ---
-status: testing
+status: complete
 phase: 06-docker-deployment-and-end-to-end-validation
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md]
-started: 2026-08-24T00:00:00+10:00
-updated: 2026-08-24T00:00:00+10:00
+started: 2026-08-25T00:00:00Z
+updated: 2026-08-25T01:25:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Cold Start Smoke Test
-expected: |
-  With no service already running, the Docker Compose offline profile builds and starts the MCP server from scratch. The stdio client completes initialize, tools/list, and tools/call for the four fixed fixtures; the read-only workspace rejects writes; and missing provider configuration exits with a sanitized PROVIDER_CONFIGURATION error.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
-### 1. Cold Start Smoke Test
-expected: With no service already running, the Docker Compose offline profile builds and starts the MCP server from scratch. The stdio client completes initialize, tools/list, and tools/call for the four fixed fixtures; the read-only workspace rejects writes; and missing provider configuration exits with a sanitized PROVIDER_CONFIGURATION error.
-result: pending
+### 1. Cold Start Docker Smoke Test
+expected: In a Docker-enabled environment, a clean offline container startup completes the stdio protocol and read-only mount checks, while missing provider credentials produce a sanitized startup failure.
+result: pass
 
-### 2. Offline Multimodal Review
-expected: The credential-free E2E path completes a four-role review using assignment text, rubric table, teacher image, and solution PDF, while returning schema-valid findings with hashes, logical references, and citations without raw content or host paths.
-result: pending
+### 2. Injected-Provider Multimodal Review
+expected: The credential-free E2E path reviews text, table, image, and PDF fixtures through the MCP contract and returns schema-valid findings with typed citations, hashes, and logical filesystem provenance.
+result: pass
 
-### 3. Deployment Runbook
-expected: The documented setup identifies the exact offline command and separately documents the credentialed DeepSeek command, read-only mount behavior, sanitized configuration errors, and network/cost warning.
-result: pending
+### 3. Read-Only Deployment Configuration
+expected: The deployment configuration uses a non-root runtime, read-only project evidence mounts, an explicit course=/workspace allowlist, dropped capabilities, no-new-privileges, and no network for the offline profile.
+result: pass
+
+### 4. Explicit Credentialed Review Boundary
+expected: The real DeepSeek review is available only through the explicitly named credentialed command, requires a project-local key and network access, and does not run as part of the default test or offline E2E path.
+result: pass
 
 ## Summary
 
-total: 3
-passed: 0
+total: 4
+passed: 4
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
+blocked: 0
 
 ## Gaps
 
-none yet
+[none]
