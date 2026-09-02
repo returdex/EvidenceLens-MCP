@@ -8,7 +8,7 @@
 ### MCP Interface
 
 - [x] **MCP-01**: An MCP client can discover and invoke the EvidenceLens review capability through a documented server interface.
-- [x] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
+- [ ] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
 - [x] **MCP-03**: The interface documents request inputs, supported evidence types, limits, and review output semantics.
 
 ### Evidence Access
@@ -28,14 +28,14 @@
 
 ### Provenance and Safety
 
-- [x] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
+- [ ] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
 - [x] **SAFE-02**: Default requests cannot write, delete, or mutate local files.
-- [x] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
-- [x] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
+- [ ] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
+- [ ] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
 
 ### Provider and Deployment
 
-- [x] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract.
+- [ ] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract.
 - [x] **PROV-02**: The model provider is isolated behind an adapter that can later support a local model or another compatible API.
 - [x] **DEPL-01**: The service runs from a documented Docker image/configuration with read-only evidence mounts.
 - [x] **DEPL-02**: A local development path and a minimal end-to-end review example are documented.
@@ -64,22 +64,22 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MCP-01 | Phase 1 | Complete |
-| MCP-02 | Phase 1 | Complete |
+| MCP-02 | Phase 9 | Pending |
 | MCP-03 | Phase 1 | Complete |
 | EVID-01 | Phase 2 | Complete |
 | EVID-02 | Phase 2 | Complete |
 | EVID-03 | Phase 2 | Complete |
 | EVID-04 | Phase 2 | Complete |
 | EVID-05 | Phase 2 | Complete |
-| SAFE-01 | Phase 3 | Complete |
+| SAFE-01 | Phase 11 | Pending |
 | SAFE-02 | Phase 3 | Complete |
-| SAFE-03 | Phase 3 | Complete |
-| SAFE-04 | Phase 3 | Complete |
+| SAFE-03 | Phase 9 | Pending |
+| SAFE-04 | Phase 10 | Pending |
 | REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Complete |
 | REVW-03 | Phase 4 | Complete |
 | REVW-04 | Phase 4 | Complete |
-| PROV-01 | Phase 7 | Complete |
+| PROV-01 | Phase 10 | Pending |
 | PROV-02 | Phase 5 | Complete |
 | DEPL-01 | Phase 8 | Complete |
 | DEPL-02 | Phase 6 | Complete |
@@ -91,4 +91,4 @@
 
 ---
 *Requirements defined: 2026-08-22*
-*Last updated: 2026-08-22 after initialization*
+*Last updated: 2026-09-03 after v1.0 milestone gap planning*

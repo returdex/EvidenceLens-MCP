@@ -10,10 +10,13 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 2: Evidence Ingestion and Multimodal Context** - Normalize local evidence with references and hashes. (completed 2026-08-22)
 - [x] **Phase 3: Read-Only Filesystem Boundary** - Enforce allowlisted, read-only evidence access. (completed 2026-08-22)
 - [x] **Phase 4: Review Orchestration and Findings** - Compare role-labeled evidence and produce actionable findings. (completed 2026-08-22)
-- [ ] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary.
+- [x] **Phase 5: Provider Adapter and DeepSeek Integration** - Connect DeepSeek through a replaceable provider boundary. (completed 2026-08-23)
 - [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
+- [ ] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics.
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path.
+- [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
 
@@ -164,10 +167,43 @@ Plans:
 **Wave 1**
 - [x] 08-01-PLAN.md — Execute Docker offline runtime smoke and record auditable DEPL-01 verification
 
+### Phase 9: Public Provider Attribution and Determinism Contract
+**Goal**: Public review responses expose stable, non-secret analyzer/provider attribution and accurately distinguish deterministic offline behavior from variable provider-backed findings.
+**Depends on**: Phase 8
+**Requirements**: [MCP-02, SAFE-03]
+**Gap Closure**: Closes the v1.0 audit gaps where provider/model attribution is discarded and credentialed responses conflict with the documented byte-for-byte deterministic promise.
+**Success Criteria** (what must be TRUE):
+  1. Public responses identify deterministic and provider-backed analyzers with stable provider/model version metadata without exposing keys, upstream envelopes, or internal fingerprints.
+  2. Existing citation, hash, request identifier, and timestamp provenance remains schema-valid and backwards-compatible through an explicit contract evolution.
+  3. Documentation and tests scope byte-for-byte determinism to deterministic/offline output and describe provider-backed variability accurately.
+**Plans**: TBD
+
+### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
+**Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
+**Depends on**: Phase 9
+**Requirements**: [SAFE-04, PROV-01]
+**Gap Closure**: Closes the v1.0 audit gaps for silent local fallback, missing Phase 7 verification, and adapter-only credentialed test coverage; also corrects the DEPL-02 local-run documentation boundary.
+**Success Criteria** (what must be TRUE):
+  1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
+  2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
+  3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
+**Plans**: TBD
+
+### Phase 11: Linux Filesystem Traversal Hardening
+**Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
+**Depends on**: Phase 10
+**Requirements**: [SAFE-01]
+**Gap Closure**: Closes the v1.0 audit warning about intermediate path-component symlink handling and removes stale roadmap/state evidence before re-audit.
+**Success Criteria** (what must be TRUE):
+  1. Every untrusted Linux evidence path component is opened or validated with an equivalent no-follow guarantee without breaking the trusted proc-descriptor hop.
+  2. Deterministic Linux-focused regression tests reject intermediate symlink substitution and preserve valid read-only fixture access.
+  3. ROADMAP, REQUIREMENTS, STATE, and verification artifacts consistently reflect completed and pending work before the next milestone audit.
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -175,17 +211,20 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Evidence Ingestion and Multimodal Context | 4/4 | Complete    | 2026-08-22 |
 | 3. Read-Only Filesystem Boundary | 3/3 | Complete    | 2026-08-22 |
 | 4. Review Orchestration and Findings | 3/3 | Complete    | 2026-08-22 |
-| 5. Provider Adapter and DeepSeek Integration | 0/TBD | Not started | - |
+| 5. Provider Adapter and DeepSeek Integration | 3/3 | Complete | 2026-08-23 |
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
+| 9. Public Provider Attribution and Determinism Contract | 0/TBD | Not started | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/TBD | Not started | - |
+| 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
 
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11
 
 Security and provenance are introduced before external model calls so later phases inherit the safe boundary.
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-08-23 after Phase 04 plan revision 1*
+*Last updated: 2026-09-03 after v1.0 milestone gap planning*
