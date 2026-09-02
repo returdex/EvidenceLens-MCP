@@ -4,7 +4,7 @@
 
 EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.1.3`. For the hardened container profiles, read-only `/workspace` mount, offline smoke path, and explicit DeepSeek deployment command, see [Docker deployment](docker-deployment.md).
 
-`review_evidence` is read-only, idempotent, deterministic for identical input, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.1.3`.
+`review_evidence` is read-only and idempotent, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.1.3`.
 
 ## Request
 
@@ -63,9 +63,11 @@ Successful filesystem provenance uses `filesystem://root-id/relative-path` and n
 
 ## Deterministic analysis and success response
 
-The analyzer is provider-independent `deterministic-rules` version `1.0.0`. It compares bounded normalized claims from authoritative roles with solution claims. It recognizes requirement statements containing `must`, `shall`, `required`, `needs to`, or criteria language, ordinary solution statements, assignments and scalars such as `threshold: 4` or `mode = strict`, and table-cell claims. Stable precedence is requirement conflicts, solution contradictions, then omissions. Identical requests produce byte-for-byte equal deterministic JSON.
+The analyzer is provider-independent `deterministic-rules` version `1.0.0`. It compares bounded normalized claims from authoritative roles with solution claims. It recognizes requirement statements containing `must`, `shall`, `required`, `needs to`, or criteria language, ordinary solution statements, assignments and scalars such as `threshold: 4` or `mode = strict`, and table-cell claims. Stable precedence is requirement conflicts, solution contradictions, then omissions. For identical inputs, deterministic-only offline results are byte-for-byte equal, including the `requestId` mapping and fixed `generatedAt` value.
 
-When configured, the runtime also invokes the built-in DeepSeek provider through an internal replaceable `ReviewProvider` seam. The provider receives only bounded normalized evidence, role-labelled claims, the objective, fixed prompt version, allowlisted model/inference settings, and an input fingerprint. Deterministic and provider findings remain separate internally with provider/model/prompt/fingerprint attribution; provider findings are validated, namespaced, and then exposed only as existing public finding elements. Provider metadata and envelopes are never serialized. A fake or local compatible provider may be injected by embedders/tests without changing this MCP request or response contract. No arbitrary npm module or provider name is loaded.
+When configured, the runtime also invokes the built-in DeepSeek provider through an internal replaceable `ReviewProvider` seam. The provider receives only bounded normalized evidence, role-labelled claims, the objective, fixed prompt version, allowlisted model/inference settings, and an input fingerprint. Deterministic and provider findings remain separate internally; provider findings are validated, namespaced, and then exposed as public finding elements. Provider-backed finding content may vary between calls. Provider-backed responses guarantee only strict schema validation, safe attribution, provider finding namespacing, and locally validated citation/hash provenance.
+
+The optional additive `metadata.provider` child contains exactly provider `name` and `model`, and is present if and only if provider findings are returned. The deterministic analyzer fields remain present on every successful response. All prior fields and deterministic-only response bytes are retained; consumers should tolerate the optional provider child on provider-backed responses. Only provider `name` and `model` are public attribution. Credentials/API keys, endpoint/base URL, prompt text/version, input fingerprint, provider request/result envelope, raw upstream response, and retry/transport internals are never public and never serialized. A fake or local compatible provider may be injected by embedders/tests without changing the MCP request contract. No arbitrary npm module or provider name is loaded.
 
 DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed `DEEPSEEK_*` environment values. The redacted example is [.evidencelens.local.example.json](../.evidencelens.local.example.json). Defaults are `https://api.deepseek.com` and `deepseek-v4-pro`; allowed models are `deepseek-v4-pro`, `deepseek-v4-flash`, and `deepseek-v4-flash-vision-exp`. Chat Completions requests enable thinking mode and use `reasoning_effort: high` for V4 text models; `deepseek-v4-flash-vision-exp` instead receives visual evidence as official base64 `image_url` content and no thinking parameters. The provider asks the model for compact evidence references only; citation roles, hashes, source references, and retained visual payload hashes are enriched from local normalized evidence and are never trusted from model output. Timeout, retry, total-wait, temperature, and token bounds are enforced before provider construction. Transport retries are limited to transient 429/5xx/network/timeout failures, with at most two retries and bounded total wait. Missing credentials/configuration fail closed. The opt-in live test uses a placeholder fixture image and may incur provider cost; credential-free contract fixtures are the regression gate.
 
@@ -113,7 +115,11 @@ DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed
     "serverVersion": "0.1.3",
     "analyzerName": "deterministic-rules",
     "analyzerVersion": "1.0.0",
-    "generatedAt": "1970-01-01T00:00:00.000Z"
+    "generatedAt": "1970-01-01T00:00:00.000Z",
+    "provider": {
+      "name": "deepseek",
+      "model": "deepseek-v4-pro"
+    }
   }
 }
 ```
@@ -142,4 +148,4 @@ The default `npm test` command is credential-free and no-network and excludes th
 
 ## Phase 2 non-capabilities
 
-Phase 2 inline content rules and Phase 3 exact filesystem grammar, authorization, TOCTOU checks, and fail-closed behavior remain in force. The server provides no unrestricted file access, writes, deletes, or mutation tools. Provider calls use bounded, configured DeepSeek transport only; no persistent Files API upload, arbitrary endpoint, process, or Docker artifact is introduced. Public provider/model fields remain absent from the response contract.
+Phase 2 inline content rules and Phase 3 exact filesystem grammar, authorization, TOCTOU checks, and fail-closed behavior remain in force. The server provides no unrestricted file access, writes, deletes, or mutation tools. Provider calls use bounded, configured DeepSeek transport only; no persistent Files API upload, arbitrary endpoint, process, or Docker artifact is introduced.

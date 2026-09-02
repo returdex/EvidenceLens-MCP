@@ -53,6 +53,10 @@ The real API test is opt-in only: `npm run test:deepseek-live`. It requires `DEE
 
 See [docs/mcp-contract.md](docs/mcp-contract.md) for the exact four-role request contract, duplicate-ID and stable errors, deterministic finding fields and citation mapping, root configuration grammar, byte limits, `filesystem://` provenance, transient analysis boundary, and read-only/no-provider behavior. See [docs/docker-deployment.md](docs/docker-deployment.md) for container-specific mounts, profiles, and startup preflight behavior.
 
+For identical inputs, deterministic-only offline results are byte-for-byte equal and retain the fixed request/timestamp mapping. Provider-backed finding content may vary between calls. Provider-backed responses guarantee only strict schema validation, safe attribution, provider finding namespacing, and locally validated citation/hash provenance.
+
+Provider-backed responses add an optional `metadata.provider` child only when provider findings are returned. Only provider `name` and `model` are public attribution. Credentials/API keys, endpoint/base URL, prompt text/version, input fingerprint, provider request/result envelope, raw upstream response, and retry/transport internals are never public and never serialized. Existing deterministic analyzer metadata and deterministic-only response bytes remain unchanged.
+
 Platform note: the default filesystem reader uses descriptor-relative component walking on Linux. On macOS, where this project has no supported Node `openat`/`openat2` binding, default anchored filesystem reads fail closed with sanitized `ACCESS_DENIED` and no bytes; there is no pathname fallback. Phase 2 inline evidence remains supported, and embedding tests may inject a reviewed safe filesystem adapter for portable filesystem-read coverage.
 
 ## Optional filesystem roots
