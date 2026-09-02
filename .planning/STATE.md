@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 planned and independently verified; ready to execute
-last_updated: "2026-09-02T14:46:07.857Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-09-02T15:58:05.088Z"
 progress:
   total_phases: 11
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 20
-  completed_plans: 19
-  percent: 73
+  completed_plans: 21
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract)
-Plan: 01 of 01
+Phase: 09 (public-provider-attribution-and-determinism-contract) — READY FOR VERIFICATION
+Plan: 1 of 1
 
 - Phase: 9 of 11
-- Status: Ready to execute
-- Progress: 73%
-- Last activity: Planned Phase 09 and passed independent plan verification with 0 issues
+- Status: Phase complete — ready for verification
+- Progress: 82%
+- Last activity: Completed Phase 09 Plan 01 with all verification commands passing
 
 ## Decisions and Assumptions
 
@@ -77,6 +77,9 @@ Plan: 01 of 01
 - [Phase 04]: Keep analyzer request-scoped and pathless: authorized bounded payloads are cleared after analysis and filesystem paths are never reopened.
 - [Phase 06]: Keep routine Docker smoke and semantic E2E credential-free; reserve DeepSeek for the explicit real client. — Routine validation must not send external requests or incur provider cost.
 - [Phase 06]: Preserve complete normalized image and PDF citation locations across the provider adapter. — Provider findings must remain compatible with the public citation schema.
+- [Phase 09]: Expose only metadata.provider.name and metadata.provider.model when validated provider findings are public. — Preserves deterministic-only response bytes and minimizes disclosure.
+- [Phase 09]: Bind provider, model, prompt version, and input fingerprint to the provider request before projection. — Prevents provider-result spoofing and request substitution.
+- [Phase 09]: Reserve byte-for-byte equality for deterministic-only offline results. — Provider-backed prose may vary while schema, attribution, namespacing, and local provenance remain guaranteed.
 
 ## Performance Metrics
 
@@ -93,11 +96,12 @@ Plan: 01 of 01
 | Phase 04 P02 | 12 min | 2 tasks | 5 files |
 | Phase 04 P03 | 6 min | 2 tasks | 6 files |
 | Phase 06 P02 | 11min | 2 tasks | 9 files |
+| Phase 09 P01 | 8 min | 3 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-03
-- **Stopped at:** Phase 09 planned and independently verified; ready to execute
+- **Last session:** 2026-09-02T15:56:10.123Z
+- **Stopped at:** Completed 09-01-PLAN.md
 - **Resume file:** None
 
 ## Next Action
