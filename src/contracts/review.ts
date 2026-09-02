@@ -299,8 +299,8 @@ export const reviewCitationSchema = z
     if ((kind === "image") !== citation.visual) {
       ctx.addIssue({ code: "custom", path: ["visual"], message: "image citations must be visual and text/table citations must not be visual" });
     }
-    if (kind === "pdf" && citation.visual && citation.visualPayloadSha256 === undefined) {
-      ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual PDF citations require a retained visual payload hash" });
+    if ((kind === "image" || (kind === "pdf" && citation.visual)) && citation.visualPayloadSha256 === undefined) {
+      ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual citations require a retained visual payload hash" });
     }
     if (kind !== "pdf" && citation.visualPayloadSha256 !== undefined && kind !== "image") {
       ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual payload hashes require visual citations" });
@@ -368,6 +368,22 @@ export const reviewResponseSchema = z
     const ids = response.findings.map((finding) => finding.id);
     if (ids.length !== new Set(ids).size) ctx.addIssue({ code: "custom", path: ["findings"], message: "finding ids must be unique" });
 
+    const providerFindingIds = ids.filter((id) => id.startsWith("provider:"));
+    if (providerFindingIds.length === 0 && response.metadata.provider !== undefined) {
+      ctx.addIssue({ code: "custom", path: ["metadata", "provider"], message: "provider attribution requires provider findings" });
+    }
+    if (providerFindingIds.length > 0 && response.metadata.provider === undefined) {
+      ctx.addIssue({ code: "custom", path: ["metadata", "provider"], message: "provider findings require provider attribution" });
+    }
+    if (response.metadata.provider !== undefined) {
+      const expectedPrefix = `provider:${response.metadata.provider.name}:`;
+      providerFindingIds.forEach((id) => {
+        if (!id.startsWith(expectedPrefix)) {
+          ctx.addIssue({ code: "custom", path: ["findings", ids.indexOf(id), "id"], message: "provider finding namespace must match provider attribution" });
+        }
+      });
+    }
+
     const normalizedById = new Map(response.normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
     response.findings.forEach((finding, findingIndex) => {
       finding.citations.forEach((citation, citationIndex) => {
@@ -390,8 +406,13 @@ export const reviewResponseSchema = z
             ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual PDF citation must match a retained page payload" });
           }
         }
-        if ((evidence.source.type === "image" || evidence.source.type === "screenshot") && !citation.visual) {
-          ctx.addIssue({ code: "custom", path: [...path, "visual"], message: "image and screenshot citations must be visual" });
+        if (evidence.source.type === "image" || evidence.source.type === "screenshot") {
+          if (!citation.visual) {
+            ctx.addIssue({ code: "custom", path: [...path, "visual"], message: "image and screenshot citations must be visual" });
+          }
+          if (evidence.visualPayload === undefined || citation.visualPayloadSha256 !== evidence.visualPayload.sha256) {
+            ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "image and screenshot citations must match a retained visual payload" });
+          }
         }
         if (citation.visualPayloadSha256 !== undefined && evidence.visualPayload?.sha256 !== citation.visualPayloadSha256 && evidence.visualPayloads?.every((payload) => payload.sha256 !== citation.visualPayloadSha256)) {
           ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual payload hash must match normalized evidence" });

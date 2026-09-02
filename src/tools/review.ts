@@ -12,7 +12,7 @@ import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 import type { FilesystemPolicy } from "../filesystem/policy.js";
 import type { FilesystemReadAdapter } from "../filesystem/read.js";
 import { buildReviewAnalysisInput } from "../review/analysis.js";
-import { createDeterministicReviewAnalyzer } from "../review/engine.js";
+import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../review/engine.js";
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
@@ -30,6 +30,7 @@ export interface ReviewHandlerOptions {
   filesystemReadAdapter?: FilesystemReadAdapter;
   provider?: ReviewProvider;
   providerConfig?: Pick<ProviderConfig, "model" | "temperature" | "maxTokens">;
+  analyzer?: ReviewAnalyzer;
 }
 
 const DEFAULT_PROVIDER_INFERENCE = {
@@ -138,9 +139,25 @@ interface InternalReviewResult {
 async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
   const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
   const analysis = buildReviewAnalysisInput(bundle);
-  const analyzer = createDeterministicReviewAnalyzer();
+  const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
   try {
     const deterministicFindings = analyzer.analyze(analysis);
+    const deterministicResponse = reviewResponseSchema.parse({
+      ok: true,
+      requestId: request.reviewId,
+      status: "accepted",
+      findings: deterministicFindings,
+      normalizedEvidence: bundle.normalizedEvidence,
+      metadata: {
+        serverName: SERVER_NAME,
+        serverVersion: SERVER_VERSION,
+        analyzerName: analyzer.name,
+        analyzerVersion: analyzer.version,
+        generatedAt: GENERATED_AT
+      }
+    });
+    if (options.provider === undefined) return deterministicResponse;
+
     const expectedProviderRequest = options.provider
       ? providerRequest(analysis, request, options)
       : undefined;
@@ -155,22 +172,25 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       providerResult,
       providerFindings: providerResult ? namespaceProviderFindings(providerResult, deterministicFindings) : []
     };
-    const response = {
-    ok: true,
-    requestId: request.reviewId,
-    status: "accepted",
-    findings: [...internal.deterministicFindings, ...internal.providerFindings],
-    normalizedEvidence: bundle.normalizedEvidence,
-    metadata: {
-      serverName: SERVER_NAME,
-      serverVersion: SERVER_VERSION,
-      analyzerName: analyzer.name,
-      analyzerVersion: analyzer.version,
-      generatedAt: GENERATED_AT,
-      ...(internal.providerResult && internal.providerFindings.length > 0
-        ? { provider: { name: internal.providerResult.provider, model: internal.providerResult.model } }
-        : {})
+    if (internal.providerResult === undefined) return deterministicResponse;
+
+    const providerMetadata = internal.providerFindings.length > 0
+      ? { provider: { name: internal.providerResult.provider, model: internal.providerResult.model } }
+      : {};
+    try {
+      reviewResponseSchema.parse({
+        ...deterministicResponse,
+        findings: internal.providerFindings,
+        metadata: { ...deterministicResponse.metadata, ...providerMetadata }
+      });
+    } catch {
+      throw new ProviderError("PROVIDER_INVALID_RESPONSE");
     }
+
+    const response = {
+      ...deterministicResponse,
+      findings: [...internal.deterministicFindings, ...internal.providerFindings],
+      metadata: { ...deterministicResponse.metadata, ...providerMetadata }
     } satisfies ReviewResponse;
     return reviewResponseSchema.parse(response);
   } finally {
