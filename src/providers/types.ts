@@ -1,11 +1,25 @@
-import type {
+import { z } from "zod/v4";
+import {
+  reviewFindingSchema,
+  type ReviewFinding,
   EvidenceRole,
   EvidenceType,
-  NormalizedEvidenceReference,
-  ReviewFinding
+  NormalizedEvidenceReference
 } from "../contracts/review.js";
 
 export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v1" as const;
+export const MAX_PROVIDER_FINDINGS = 100;
+
+export const providerReviewResultSchema = z
+  .object({
+    provider: z.string().regex(/^[a-z][a-z0-9-]{0,31}$/u),
+    model: z.string().min(1).max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/u),
+    promptVersion: z.string().min(1).max(128),
+    inputFingerprint: z.string().regex(/^[a-f0-9]{64}$/u),
+    modelFindings: z.array(reviewFindingSchema).max(MAX_PROVIDER_FINDINGS),
+    deterministicFindings: z.array(reviewFindingSchema).max(MAX_PROVIDER_FINDINGS)
+  })
+  .strict();
 
 export interface ProviderTextClaim {
   text: string;
