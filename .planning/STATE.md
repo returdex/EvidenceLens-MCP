@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Phase 5 context gathered
-last_updated: "2026-08-25T12:27:21.085Z"
+status: active
+stopped_at: Gap closure phases 9-11 created
+last_updated: "2026-09-02T14:10:51.365Z"
 progress:
-  total_phases: 8
+  total_phases: 11
   completed_phases: 8
   total_plans: 19
   completed_plans: 19
-  percent: 100
+  percent: 73
 ---
 
 # EvidenceLens MCP — Project State
@@ -20,20 +20,20 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Milestone v1.0 complete
+**Current focus:** Phase 09 — public-provider-attribution-and-determinism-contract
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 08 (complete)
-Plan: 01 (complete)
+Phase: 09 (public-provider-attribution-and-determinism-contract)
+Plan: Not started
 
-- Phase: 8 of 8
-- Status: Milestone complete
-- Progress: 100%
-- Last activity: Completed Phase 08 Docker runtime verification closure
+- Phase: 9 of 11
+- Status: Ready to discuss
+- Progress: 73%
+- Last activity: Added v1.0 gap-closure Phases 9-11 after milestone re-audit
 
 ## Decisions and Assumptions
 
@@ -96,13 +96,13 @@ Plan: 01 (complete)
 
 ## Session Continuity
 
-- **Last session:** 2026-08-23T05:25:39.868Z
-- **Stopped at:** Phase 5 context gathered
+- **Last session:** 2026-09-03
+- **Stopped at:** Gap closure phases 9-11 created
 - **Resume file:** None
 
 ## Next Action
 
-Milestone v1.0 is complete. Use `$gsd-progress` for the final status or `$gsd-new-milestone` to begin the next cycle.
+Run `$gsd-discuss-phase 9` to gather context for the first v1.0 gap-closure phase.
 
 ---
-*Last updated: 2026-08-22 after Phase 03 completion*
+*Last updated: 2026-09-03 after v1.0 milestone gap planning*
