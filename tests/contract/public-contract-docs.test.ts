@@ -15,7 +15,43 @@ function containsAll(clause: string, terms: readonly string[]): boolean {
   return terms.every((term) => clause.includes(term));
 }
 
+function findForbiddenDeterminismClaims(markdown: string): string[] {
+  const withoutFencedCode = markdown.replace(/```[\s\S]*?```/gu, "");
+  return clauses(withoutFencedCode).filter((clause) =>
+    /(?:^|\b)(?:all |every |whole )?findings?[^.;]*(?:deterministic(?:ally)? ordered|stable order)/u.test(clause)
+    || /(?:all|every) responses?[^.;]*(?:deterministic (?:order|content)|stable order|byte-for-byte)/u.test(clause)
+    || /provider-backed[^.;]*(?:byte-for-byte|deterministic(?:ally)? ordered|stable order|deterministic order)/u.test(clause)
+    || /provider findings?[^.;]*(?:deterministic(?:ally)? ordered|stable order|deterministic order)/u.test(clause)
+  );
+}
+
 describe("public attribution and determinism documentation contract", () => {
+  it("detects forbidden guarantees while allowing scoped deterministic-analyzer language", () => {
+    const forbidden = [
+      "Findings are deterministically ordered.",
+      "The whole findings list has stable order.",
+      "All responses have deterministic content.",
+      "Every response is byte-for-byte stable.",
+      "Provider-backed results are byte-for-byte equal.",
+      "Provider-backed findings have stable order.",
+      "Provider findings are deterministically ordered."
+    ];
+    for (const clause of forbidden) expect(findForbiddenDeterminismClaims(clause)).toEqual(clauses(clause));
+
+    const allowed = [
+      "Deterministic analyzer finding order/content is stable for identical offline inputs.",
+      "Provider findings use a provider namespace.",
+      "Provider attribution includes name and model.",
+      "Provider-backed responses receive strict schema validation.",
+      "```text\nProvider-backed findings are deterministically ordered.\n```"
+    ];
+    for (const clause of allowed) expect(findForbiddenDeterminismClaims(clause)).toEqual([]);
+  });
+
+  it.each(documents)("contains no contradictory determinism guarantees in %s", async (path) => {
+    expect(findForbiddenDeterminismClaims(await readFile(path, "utf8"))).toEqual([]);
+  });
+
   it.each(documents)("scopes identical-input equality in %s to deterministic-only output", async (path) => {
     const text = await readFile(path, "utf8");
     const normalized = text.replace(/[`*#]/gu, "").replace(/\s+/gu, " ").toLowerCase();

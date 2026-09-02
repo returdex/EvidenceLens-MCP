@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding } from "../../src/contracts/review.js";
+import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
@@ -18,6 +18,14 @@ const request = {
 } as const;
 
 const deterministicFixtureUrl = new URL("../fixtures/reviews/deterministic-only-mcp-text.fixture.json", import.meta.url);
+const deterministicRequestUrl = new URL("../fixtures/reviews/fit5032-week4-library-review.json", import.meta.url);
+
+const EXPECTED_DETERMINISTIC_FINDINGS = [{
+  id: "pending-manual-capture",
+  type: "omission",
+  title: "Pending manual capture",
+  summary: "Pending manual capture"
+}] as const;
 
 function fakeProviderFinding(evidence: { evidenceId: string; role: ReviewFinding["citations"][number]["role"]; contentHash: string; sourceReference: string; location: ReviewFinding["citations"][number]["location"] }): ReviewFinding {
   return {
@@ -81,12 +89,27 @@ function unsafeProvider(value: unknown): ReviewProvider {
 describe("provider review MCP boundary", () => {
   it("keeps deterministic-only MCP text byte-for-byte compatible", async () => {
     const frozen = JSON.parse(await readFile(deterministicFixtureUrl, "utf8")) as string;
-    const first = rawText(await handleReviewRequest(request));
-    const second = rawText(await handleReviewRequest(request));
+    const deterministicRequest = JSON.parse(await readFile(deterministicRequestUrl, "utf8")) as ReviewRequest;
+    const first = rawText(await handleReviewRequest(deterministicRequest));
+    const second = rawText(await handleReviewRequest(deterministicRequest));
+    const actual = reviewResponseSchema.parse(JSON.parse(first));
+    const fixture = reviewResponseSchema.parse(JSON.parse(frozen));
+    const project = (finding: ReviewFinding) => ({
+      id: finding.id,
+      type: finding.type,
+      title: finding.title,
+      summary: finding.summary
+    });
 
     expect(first).toBe(second);
     expect(first).toBe(frozen);
-    expect(Object.keys(reviewResponseSchema.parse(JSON.parse(first)).metadata)).toEqual([
+    expect(actual.findings.length).toBeGreaterThan(0);
+    expect(fixture.findings.length).toBeGreaterThan(0);
+    expect(actual.findings.map(project)).toEqual(EXPECTED_DETERMINISTIC_FINDINGS);
+    expect(fixture.findings.map(project)).toEqual(EXPECTED_DETERMINISTIC_FINDINGS);
+    expect(actual.metadata).not.toHaveProperty("provider");
+    expect(fixture.metadata).not.toHaveProperty("provider");
+    expect(Object.keys(actual.metadata)).toEqual([
       "serverName",
       "serverVersion",
       "analyzerName",
