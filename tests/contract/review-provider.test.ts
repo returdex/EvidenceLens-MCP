@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
@@ -14,6 +15,8 @@ const request = {
     { id: "solution-1", role: "solution", type: "text", content: "The solution includes a conclusion." }
   ]
 } as const;
+
+const deterministicFixtureUrl = new URL("../fixtures/reviews/deterministic-only-mcp-text.fixture.json", import.meta.url);
 
 function fakeProviderFinding(evidence: { evidenceId: string; role: ReviewFinding["citations"][number]["role"]; contentHash: string; sourceReference: string; location: ReviewFinding["citations"][number]["location"] }): ReviewFinding {
   return {
@@ -61,7 +64,27 @@ function payload(result: unknown): Record<string, unknown> {
   return JSON.parse(wrapped.content[0]!.text) as Record<string, unknown>;
 }
 
+function rawText(result: unknown): string {
+  return reviewToolResultSchema.parse(result).content[0]!.text;
+}
+
 describe("provider review MCP boundary", () => {
+  it("keeps deterministic-only MCP text byte-for-byte compatible", async () => {
+    const frozen = JSON.parse(await readFile(deterministicFixtureUrl, "utf8")) as string;
+    const first = rawText(await handleReviewRequest(request));
+    const second = rawText(await handleReviewRequest(request));
+
+    expect(first).toBe(second);
+    expect(first).toBe(frozen);
+    expect(Object.keys(reviewResponseSchema.parse(JSON.parse(first)).metadata)).toEqual([
+      "serverName",
+      "serverVersion",
+      "analyzerName",
+      "analyzerVersion",
+      "generatedAt"
+    ]);
+  });
+
   it("accepts additive provider attribution while retaining deterministic metadata compatibility", async () => {
     const deterministic = payload(await handleReviewRequest(request));
     const parsedDeterministic = reviewResponseSchema.parse(deterministic);
@@ -127,10 +150,126 @@ describe("provider review MCP boundary", () => {
     }));
     const parsed = reviewResponseSchema.parse(result);
     expect(parsed.findings.some((finding) => finding.id === "provider:local-reviewer:finding-1")).toBe(true);
-    expect(parsed.metadata).not.toHaveProperty("provider");
+    expect(parsed.metadata.analyzerName).toBe("deterministic-rules");
+    expect(parsed.metadata.analyzerVersion).toBe("1.0.0");
+    expect(parsed.metadata.provider).toEqual({ name: "local-reviewer", model: "deepseek-v4-pro" });
     expect(parsed.metadata).not.toHaveProperty("model");
     expect(JSON.stringify(parsed)).not.toContain("inputFingerprint");
     expect(JSON.stringify(parsed)).not.toContain("promptVersion");
+  });
+
+  it("omits provider attribution when the provider returns no findings", async () => {
+    const provider = fakeProvider();
+    const result = payload(await handleReviewRequest(request, {
+      provider: {
+        ...provider,
+        async review(providerRequest) {
+          return { ...(await provider.review(providerRequest)), modelFindings: [] };
+        }
+      }
+    }));
+    expect(reviewResponseSchema.parse(result).metadata).not.toHaveProperty("provider");
+  });
+
+  it("allows provider prose to vary while preserving schema and local provenance", async () => {
+    let call = 0;
+    const base = fakeProvider();
+    const varyingProvider: ReviewProvider = {
+      ...base,
+      async review(providerRequest) {
+        call += 1;
+        const result = await base.review(providerRequest);
+        return {
+          ...result,
+          modelFindings: result.modelFindings.map((finding) => ({
+            ...finding,
+            summary: `Provider wording ${call}`
+          }))
+        };
+      }
+    };
+
+    const first = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { provider: varyingProvider })));
+    const second = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { provider: varyingProvider })));
+    const firstProviderFinding = first.findings.find((finding) => finding.id.startsWith("provider:"))!;
+    const secondProviderFinding = second.findings.find((finding) => finding.id.startsWith("provider:"))!;
+
+    expect(firstProviderFinding.summary).not.toBe(secondProviderFinding.summary);
+    expect(first.requestId).toBe(request.reviewId);
+    expect(first.metadata.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+    expect(firstProviderFinding.citations[0]).toMatchObject({
+      contentHash: first.normalizedEvidence[0]!.contentHash,
+      sourceReference: first.normalizedEvidence[0]!.source.reference,
+      location: first.normalizedEvidence[0]!.references[0]
+    });
+  });
+
+  it("rejects mismatched provider result identity with one sanitized error", async () => {
+    const mismatches: Array<(result: ProviderReviewResult) => ProviderReviewResult> = [
+      (result) => ({ ...result, provider: "spoofed-provider" }),
+      (result) => ({ ...result, model: "deepseek-v4-flash" }),
+      (result) => ({ ...result, promptVersion: "spoofed-prompt" }),
+      (result) => ({ ...result, inputFingerprint: "0".repeat(64) })
+    ];
+
+    for (const mutate of mismatches) {
+      const base = fakeProvider();
+      const result = payload(await handleReviewRequest(request, {
+        provider: {
+          ...base,
+          async review(providerRequest) {
+            return mutate(await base.review(providerRequest));
+          }
+        }
+      }));
+      expect(result).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    }
+  });
+
+  it("never serializes provider configuration or internal result envelopes", async () => {
+    const sentinels = [
+      "secret-api-key-value",
+      "https://private.endpoint.invalid/v1",
+      "private prompt text",
+      "private-prompt-version",
+      "private-input-fingerprint",
+      "private-provider-request-envelope",
+      "private-provider-result-envelope",
+      "private-raw-upstream-response",
+      "private-retry-transport-state"
+    ];
+    const base = fakeProvider();
+    const provider = {
+      ...base,
+      apiKey: sentinels[0],
+      baseUrl: sentinels[1],
+      async review(providerRequest: Parameters<ReviewProvider["review"]>[0]) {
+        return {
+          ...(await base.review(providerRequest)),
+          promptText: sentinels[2],
+          privatePromptVersion: sentinels[3],
+          privateInputFingerprint: sentinels[4],
+          providerRequestEnvelope: sentinels[5],
+          providerResultEnvelope: sentinels[6],
+          rawResponse: sentinels[7],
+          retryTransport: sentinels[8]
+        };
+      }
+    } satisfies ReviewProvider & Record<string, unknown>;
+    const successText = rawText(await handleReviewRequest(request, { provider }));
+    const errorText = rawText(await handleReviewRequest(request, {
+      provider: {
+        name: "local-reviewer",
+        async review() {
+          throw new ProviderError("PROVIDER_REQUEST_FAILED", Object.fromEntries(sentinels.map((sentinel, index) => [`detail${index}`, sentinel])));
+        }
+      }
+    }));
+
+    for (const sentinel of sentinels) {
+      expect(successText).not.toContain(sentinel);
+      expect(errorText).not.toContain(sentinel);
+    }
   });
 
   it("maps provider failures to stable sanitized MCP errors", async () => {
