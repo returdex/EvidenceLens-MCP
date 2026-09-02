@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
+import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
 const request = {
@@ -85,7 +86,7 @@ describe("provider review MCP boundary", () => {
     ]);
   });
 
-  it("accepts additive provider attribution while retaining deterministic metadata compatibility", async () => {
+  it("enforces provider attribution iff and namespace integrity", async () => {
     const deterministic = payload(await handleReviewRequest(request));
     const parsedDeterministic = reviewResponseSchema.parse(deterministic);
     expect(Object.keys(parsedDeterministic.metadata)).toEqual([
@@ -96,15 +97,25 @@ describe("provider review MCP boundary", () => {
       "generatedAt"
     ]);
 
-    const attributed = structuredClone(deterministic);
-    (attributed.metadata as Record<string, unknown>).provider = {
-      name: "deepseek",
-      model: "deepseek-v4-flash-vision-exp"
-    };
-    expect(reviewResponseSchema.parse(attributed).metadata).toHaveProperty("provider", {
-      name: "deepseek",
-      model: "deepseek-v4-flash-vision-exp"
-    });
+    const attributed = payload(await handleReviewRequest(request, { provider: fakeProvider() }));
+    expect(reviewResponseSchema.safeParse(attributed).success).toBe(true);
+
+    const missingAttribution = structuredClone(attributed);
+    delete (missingAttribution.metadata as Record<string, unknown>).provider;
+    expect(reviewResponseSchema.safeParse(missingAttribution).success).toBe(false);
+
+    const extraneousAttribution = structuredClone(deterministic);
+    (extraneousAttribution.metadata as Record<string, unknown>).provider = { name: "deepseek", model: "deepseek-v4-pro" };
+    expect(reviewResponseSchema.safeParse(extraneousAttribution).success).toBe(false);
+
+    const wrongNamespace = structuredClone(attributed);
+    ((wrongNamespace.metadata as Record<string, unknown>).provider as Record<string, unknown>).name = "deepseek";
+    expect(reviewResponseSchema.safeParse(wrongNamespace).success).toBe(false);
+
+    const mixedNamespaces = structuredClone(attributed);
+    const providerFinding = ((mixedNamespaces.findings as Record<string, unknown>[]).find((finding) => String(finding.id).startsWith("provider:")))!;
+    (mixedNamespaces.findings as Record<string, unknown>[]).push({ ...providerFinding, id: "provider:other-reviewer:finding-2" });
+    expect(reviewResponseSchema.safeParse(mixedNamespaces).success).toBe(false);
 
     const invalidProviders = [
       { name: "DeepSeek", model: "deepseek-v4-pro" },
@@ -121,6 +132,72 @@ describe("provider review MCP boundary", () => {
       (candidate.metadata as Record<string, unknown>).provider = provider;
       expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
     }
+  });
+
+  for (const evidenceType of ["image", "screenshot"] as const) {
+    it(`requires ${evidenceType} provider citations to match retained visual payload hashes`, async () => {
+      const imageBytes = await readFile(new URL("../fixtures/evidence/images/rubric-screenshot.png", import.meta.url));
+      const visualRequest = {
+        ...request,
+        reviewId: `${evidenceType}-provider-citation`,
+        evidence: [
+          ...request.evidence,
+          { id: "visual-1", role: "other", type: evidenceType, reference: `fixture://${evidenceType}.png`, mimeType: "image/png", contentBase64: imageBytes.toString("base64") }
+        ]
+      } as const;
+      const base = fakeProvider();
+      const providerWithHash = (visualPayloadSha256?: string): ReviewProvider => ({
+        ...base,
+        async review(providerRequest) {
+          const result = await base.review(providerRequest);
+          const source = providerRequest.evidence.find((evidence) => evidence.evidenceId === "visual-1")!;
+          const visual = source.visualPayloads![0]!;
+          return {
+            ...result,
+            modelFindings: [{
+              ...result.modelFindings[0]!,
+              id: "visual-finding",
+              evidenceIds: [source.evidenceId],
+              citations: [{
+                evidenceId: source.evidenceId,
+                role: source.role,
+                contentHash: source.contentHash,
+                sourceReference: source.sourceReference,
+                location: visual.location,
+                visual: true,
+                ...(visualPayloadSha256 === undefined ? {} : { visualPayloadSha256 })
+              }]
+            }]
+          };
+        }
+      });
+      const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
+      expect(payload(await handleReviewRequest(visualRequest, { provider: providerWithHash() }))).toEqual(failure);
+      expect(payload(await handleReviewRequest(visualRequest, { provider: providerWithHash("0".repeat(64)) }))).toEqual(failure);
+
+      const normalized = payload(await handleReviewRequest(visualRequest));
+      const expectedHash = ((normalized.normalizedEvidence as Array<{ source: { id: string }; visualPayload?: { sha256: string } }>).find((evidence) => evidence.source.id === "visual-1"))!.visualPayload!.sha256;
+      const matching = payload(await handleReviewRequest(visualRequest, { provider: providerWithHash(expectedHash) }));
+      const parsed = reviewResponseSchema.parse(matching);
+      const citation = parsed.findings.find((finding) => finding.id.startsWith("provider:"))!.citations[0]!;
+      const evidence = parsed.normalizedEvidence.find((item) => item.source.id === citation.evidenceId)!;
+      expect(citation.visualPayloadSha256).toBe(evidence.visualPayload!.sha256);
+    });
+  }
+
+  it("does not classify invalid local analyzer output as a provider failure", async () => {
+    const invalidAnalyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze() {
+        return [{ id: "invalid-local-finding" }] as unknown as ReviewFinding[];
+      }
+    };
+    expect(payload(await handleReviewRequest(request, { analyzer: invalidAnalyzer }))).toEqual({
+      ok: false,
+      code: "INTERNAL_ERROR",
+      message: "Internal error"
+    });
   });
 
   it("retains citation bindings to normalized evidence", async () => {
