@@ -196,7 +196,7 @@ describe("Docker fixture review E2E contract", () => {
         expect(serialized).not.toContain("Criterion,Excellent");
         expect(serialized).not.toContain("inputFingerprint");
         expect(serialized).not.toContain("promptVersion");
-        expect(parsed.metadata).not.toHaveProperty("provider");
+        expect(parsed.metadata.provider).toEqual({ name: "offline-mock", model: "deepseek-v4-pro" });
         expect(parsed.metadata).not.toHaveProperty("model");
       });
     } finally {

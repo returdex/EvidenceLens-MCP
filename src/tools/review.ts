@@ -114,6 +114,21 @@ function namespaceProviderFindings(result: ProviderReviewResult, deterministic: 
   return namespaced;
 }
 
+function validateProviderResultIdentity(
+  provider: ReviewProvider,
+  request: ProviderReviewRequest,
+  result: ProviderReviewResult
+): void {
+  if (
+    result.provider !== provider.name
+    || result.model !== request.inference.model
+    || result.promptVersion !== request.promptVersion
+    || result.inputFingerprint !== request.inputFingerprint
+  ) {
+    throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  }
+}
+
 interface InternalReviewResult {
   deterministicFindings: readonly ReviewFinding[];
   providerResult?: ProviderReviewResult;
@@ -126,9 +141,15 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
   const analyzer = createDeterministicReviewAnalyzer();
   try {
     const deterministicFindings = analyzer.analyze(analysis);
-    const providerResult = options.provider
-      ? await options.provider.review(providerRequest(analysis, request, options))
+    const expectedProviderRequest = options.provider
+      ? providerRequest(analysis, request, options)
       : undefined;
+    const providerResult = options.provider && expectedProviderRequest
+      ? await options.provider.review(expectedProviderRequest)
+      : undefined;
+    if (options.provider && expectedProviderRequest && providerResult) {
+      validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
+    }
     const internal: InternalReviewResult = {
       deterministicFindings,
       providerResult,
@@ -145,7 +166,10 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       serverVersion: SERVER_VERSION,
       analyzerName: analyzer.name,
       analyzerVersion: analyzer.version,
-      generatedAt: GENERATED_AT
+      generatedAt: GENERATED_AT,
+      ...(internal.providerResult && internal.providerFindings.length > 0
+        ? { provider: { name: internal.providerResult.provider, model: internal.providerResult.model } }
+        : {})
     }
     } satisfies ReviewResponse;
     return reviewResponseSchema.parse(response);
@@ -209,7 +233,7 @@ export function registerReviewTool(server: McpServer, options: ReviewHandlerOpti
     "review_evidence",
     {
       title: "Review Evidence",
-      description: "Analyze bounded evidence deterministically and return role-aware omissions, contradictions, and requirement conflicts with typed citations, uncertainty, and follow-up checks.",
+      description: "Apply deterministic review rules with optional provider-backed findings, returning role-aware results with typed citations, uncertainty, and follow-up checks.",
       inputSchema: reviewRequestSchema,
       annotations: {
         readOnlyHint: true,
