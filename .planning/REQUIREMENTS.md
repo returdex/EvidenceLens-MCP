@@ -8,7 +8,7 @@
 ### MCP Interface
 
 - [x] **MCP-01**: An MCP client can discover and invoke the EvidenceLens review capability through a documented server interface.
-- [x] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
+- [ ] **MCP-02**: The server returns deterministic, schema-valid JSON for successful reviews and machine-readable errors for rejected requests.
 - [x] **MCP-03**: The interface documents request inputs, supported evidence types, limits, and review output semantics.
 
 ### Evidence Access
@@ -30,7 +30,7 @@
 
 - [ ] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
 - [x] **SAFE-02**: Default requests cannot write, delete, or mutate local files.
-- [x] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
+- [ ] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
 - [ ] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
 
 ### Provider and Deployment
@@ -64,7 +64,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MCP-01 | Phase 1 | Complete |
-| MCP-02 | Phase 9 | Complete |
+| MCP-02 | Phase 9 | Pending |
 | MCP-03 | Phase 1 | Complete |
 | EVID-01 | Phase 2 | Complete |
 | EVID-02 | Phase 2 | Complete |
@@ -73,7 +73,7 @@
 | EVID-05 | Phase 2 | Complete |
 | SAFE-01 | Phase 11 | Pending |
 | SAFE-02 | Phase 3 | Complete |
-| SAFE-03 | Phase 9 | Complete |
+| SAFE-03 | Phase 9 | Pending |
 | SAFE-04 | Phase 10 | Pending |
 | REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Complete |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Completed 09-01-PLAN.md
+stopped_at: Phase 09 verification found gaps; gap-closure planning required
 last_updated: "2026-09-02T15:58:05.088Z"
 progress:
   total_phases: 11
-  completed_phases: 9
+  completed_phases: 8
   total_plans: 20
-  completed_plans: 21
-  percent: 100
+  completed_plans: 20
+  percent: 73
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY FOR VERIFICATION
+Phase: 09 (public-provider-attribution-and-determinism-contract) — GAPS FOUND
 Plan: 1 of 1
 
 - Phase: 9 of 11
-- Status: Phase complete — ready for verification
-- Progress: 82%
-- Last activity: Completed Phase 09 Plan 01 with all verification commands passing
+- Status: Verification found gaps — gap-closure planning required
+- Progress: 73%
+- Last activity: Independent verification reproduced four blocking defects; score 1/5 must-haves
 
 ## Decisions and Assumptions
 
@@ -101,12 +101,12 @@ Plan: 1 of 1
 ## Session Continuity
 
 - **Last session:** 2026-09-02T15:56:10.123Z
-- **Stopped at:** Completed 09-01-PLAN.md
+- **Stopped at:** Phase 09 verification found gaps; gap-closure planning required
 - **Resume file:** None
 
 ## Next Action
 
-Run `$gsd-execute-phase 9` to implement the public provider attribution and determinism contract.
+Run `$gsd-plan-phase 9 --gaps` to create gap-closure plans from 09-VERIFICATION.md.
 
 ---
-*Last updated: 2026-09-03 after Phase 09 planning and independent verification*
+*Last updated: 2026-09-03 after Phase 09 verification found gaps*
