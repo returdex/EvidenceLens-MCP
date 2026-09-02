@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
-import { PROVIDER_PROMPT_VERSION, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
+import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
@@ -67,6 +67,15 @@ function payload(result: unknown): Record<string, unknown> {
 
 function rawText(result: unknown): string {
   return reviewToolResultSchema.parse(result).content[0]!.text;
+}
+
+function unsafeProvider(value: unknown): ReviewProvider {
+  return {
+    name: "local-reviewer",
+    async review() {
+      return value as ProviderReviewResult;
+    }
+  };
 }
 
 describe("provider review MCP boundary", () => {
@@ -358,6 +367,74 @@ describe("provider review MCP boundary", () => {
     }));
     expect(result).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
     expect(JSON.stringify(result)).not.toContain("/Users/private/secret");
+  });
+
+  it("rejects every nullish or structurally incomplete configured-provider result", async () => {
+    const invalidResults: unknown[] = [
+      null,
+      undefined,
+      {},
+      { provider: "local-reviewer" },
+      { provider: "local-reviewer", model: "deepseek-v4-pro", promptVersion: PROVIDER_PROMPT_VERSION, inputFingerprint: "0".repeat(64) },
+      { provider: "local-reviewer", model: 42, promptVersion: PROVIDER_PROMPT_VERSION, inputFingerprint: "0".repeat(64), modelFindings: [], deterministicFindings: [] }
+    ];
+    for (const invalid of invalidResults) {
+      const result = payload(await handleReviewRequest(request, { provider: unsafeProvider(invalid) }));
+      expect(result).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    }
+  });
+
+  it("wraps native and non-Error provider throws without leaking or misclassification", async () => {
+    const sentinels: unknown[] = [
+      new TypeError("type-sentinel"),
+      new RangeError("range-sentinel"),
+      new Error("error-sentinel"),
+      "non-error-sentinel"
+    ];
+    for (const sentinel of sentinels) {
+      const result = payload(await handleReviewRequest(request, {
+        provider: {
+          name: "local-reviewer",
+          async review() { throw sentinel; }
+        }
+      }));
+      expect(result).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+      expect(result.code).not.toBe("INVALID_REQUEST");
+      expect(result.code).not.toBe("LIMIT_EXCEEDED");
+      expect(result.code).not.toBe("INTERNAL_ERROR");
+      expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|local-reviewer/iu);
+    }
+  });
+
+  it("bounds both provider finding arrays at one hundred before projection", async () => {
+    const base = fakeProvider();
+    let validResult: ProviderReviewResult | undefined;
+    const captureProvider: ReviewProvider = {
+      ...base,
+      async review(providerRequest) {
+        validResult = await base.review(providerRequest);
+        return validResult;
+      }
+    };
+    await handleReviewRequest(request, { provider: captureProvider });
+    const finding = validResult!.modelFindings[0]!;
+    const findings = Array.from({ length: MAX_PROVIDER_FINDINGS }, (_, index) => ({ ...finding, id: `finding-${index}` }));
+    for (const field of ["modelFindings", "deterministicFindings"] as const) {
+      expect(providerReviewResultSchema.safeParse({ ...validResult, [field]: findings }).success).toBe(true);
+      expect(providerReviewResultSchema.safeParse({ ...validResult, [field]: [...findings, { ...finding, id: "finding-100" }] }).success).toBe(false);
+
+      const oversized = payload(await handleReviewRequest(request, {
+        provider: {
+          ...base,
+          async review(providerRequest) {
+            const result = await base.review(providerRequest);
+            return { ...result, [field]: [...findings, { ...finding, id: "finding-100" }] };
+          }
+        }
+      }));
+      expect(oversized).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+      expect(JSON.stringify(oversized)).not.toMatch(/finding-100|inputFingerprint|promptVersion|stack/iu);
+    }
   });
 
   it("rejects duplicate or oversized namespaced provider ids without dropping findings", async () => {
