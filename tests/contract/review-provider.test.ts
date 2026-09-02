@@ -62,6 +62,64 @@ function payload(result: unknown): Record<string, unknown> {
 }
 
 describe("provider review MCP boundary", () => {
+  it("accepts additive provider attribution while retaining deterministic metadata compatibility", async () => {
+    const deterministic = payload(await handleReviewRequest(request));
+    const parsedDeterministic = reviewResponseSchema.parse(deterministic);
+    expect(Object.keys(parsedDeterministic.metadata)).toEqual([
+      "serverName",
+      "serverVersion",
+      "analyzerName",
+      "analyzerVersion",
+      "generatedAt"
+    ]);
+
+    const attributed = structuredClone(deterministic);
+    (attributed.metadata as Record<string, unknown>).provider = {
+      name: "deepseek",
+      model: "deepseek-v4-flash-vision-exp"
+    };
+    expect(reviewResponseSchema.parse(attributed).metadata).toHaveProperty("provider", {
+      name: "deepseek",
+      model: "deepseek-v4-flash-vision-exp"
+    });
+
+    const invalidProviders = [
+      { name: "DeepSeek", model: "deepseek-v4-pro" },
+      { name: "deepseek", model: "deepseek v4" },
+      { name: "deepseek", model: "deepseek\n-v4" },
+      { name: "deepseek", model: "https://provider.invalid/model" },
+      { name: "deepseek", model: "models/deepseek-v4" },
+      { name: "deepseek", model: "models\\deepseek-v4" },
+      { name: "deepseek", model: "x".repeat(129) },
+      { name: "deepseek", model: "deepseek-v4-pro", promptVersion: "secret" }
+    ];
+    for (const provider of invalidProviders) {
+      const candidate = structuredClone(deterministic);
+      (candidate.metadata as Record<string, unknown>).provider = provider;
+      expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
+    }
+  });
+
+  it("retains citation bindings to normalized evidence", async () => {
+    const result = payload(await handleReviewRequest(request, {
+      provider: fakeProvider(),
+      providerConfig: { model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 4000 }
+    }));
+
+    for (const citationPatch of [
+      { contentHash: "0".repeat(64) },
+      { sourceReference: "different-reference" },
+      { location: { kind: "text", startLine: 2, endLine: 2 } }
+    ]) {
+      const candidate = structuredClone(result);
+      Object.assign(
+        ((candidate.findings as Record<string, unknown>[])[0]!.citations as Record<string, unknown>[])[0],
+        citationPatch
+      );
+      expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
+    }
+  });
+
   it("injects a compatible provider while preserving the public response schema", async () => {
     const result = payload(await handleReviewRequest(request, {
       provider: fakeProvider(),
