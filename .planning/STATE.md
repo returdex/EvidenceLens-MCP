@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Completed 09-02-PLAN.md; awaiting Phase 09 verifier
-last_updated: "2026-09-02T18:16:31.093Z"
+stopped_at: Phase 09 re-verification found gaps; further gap-closure planning required
+last_updated: "2026-09-03T00:00:00+10:00"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — IMPLEMENTATION COMPLETE, AWAITING VERIFICATION
+Phase: 09 (public-provider-attribution-and-determinism-contract) — GAPS FOUND
 Plan: 2 of 2
 
 - Phase: 9 of 11
-- Status: Gap-closure implementation complete; phase verifier pending
+- Status: Re-verification found gaps; further gap-closure planning required
 - Progress: 73%
-- Last activity: Executed all 09-02 tasks with focused/full tests, build, and scope checks passing
+- Last activity: Re-verification confirmed 8/11 must-haves; three blockers and two warnings remain
 
 ## Decisions and Assumptions
 
@@ -104,13 +104,13 @@ Plan: 2 of 2
 
 ## Session Continuity
 
-- **Last session:** 2026-09-02T18:16:31.088Z
-- **Stopped at:** Completed 09-02-PLAN.md; awaiting Phase 09 verifier
+- **Last session:** 2026-09-03
+- **Stopped at:** Phase 09 re-verification found gaps; further gap-closure planning required
 - **Resume file:** None
 
 ## Next Action
 
-Run the Phase 09 verifier before marking the phase complete or advancing to Phase 10.
+Run `$gsd-plan-phase 9 --gaps` to plan closure of the remaining verification and review findings.
 
 ---
-*Last updated: 2026-09-03 after Phase 09 gap-closure implementation; verifier pending*
+*Last updated: 2026-09-03 after Phase 09 re-verification found remaining gaps*
