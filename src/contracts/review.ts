@@ -7,6 +7,8 @@ const noAsciiControlCharacters = /^[^\u0000-\u001F\u007F]*$/u;
 const noUnsafeContentControlCharacters = /^[^\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]*$/u;
 const filesystemRootIdPattern = /^[A-Za-z][A-Za-z0-9_-]{0,31}$/u;
 const filesystemRelativePathPattern = /^[^\u0000-\u001F\u007F\\]+(?:\/[^\u0000-\u001F\u007F\\]+)*$/u;
+const providerNamePattern = /^[a-z][a-z0-9-]{0,31}$/u;
+const providerModelPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
 
 export const evidenceRoleSchema = z.enum([
   "assignment_brief",
@@ -336,6 +338,13 @@ export const reviewFindingSchema = z
     }
   });
 
+export const reviewProviderAttributionSchema = z
+  .object({
+    name: z.string().regex(providerNamePattern, "provider name must be a lowercase provider slug"),
+    model: z.string().regex(providerModelPattern, "provider model must be a bounded safe identifier")
+  })
+  .strict();
+
 export const reviewResponseSchema = z
   .object({
     ok: z.literal(true),
@@ -349,7 +358,8 @@ export const reviewResponseSchema = z
         serverVersion: z.string().min(1),
         analyzerName: z.string().min(1).max(128),
         analyzerVersion: z.string().min(1).max(64),
-        generatedAt: z.string().datetime()
+        generatedAt: z.string().datetime(),
+        provider: reviewProviderAttributionSchema.optional()
       })
       .strict()
   })
