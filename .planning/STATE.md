@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 gap-closure plan 09-02 verified; ready to execute
-last_updated: "2026-09-02T17:23:38.158Z"
+stopped_at: Completed 09-02-PLAN.md; awaiting Phase 09 verifier
+last_updated: "2026-09-02T18:16:31.093Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 21
-  completed_plans: 20
+  completed_plans: 21
   percent: 73
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY TO EXECUTE GAPS
+Phase: 09 (public-provider-attribution-and-determinism-contract) — IMPLEMENTATION COMPLETE, AWAITING VERIFICATION
 Plan: 2 of 2
 
 - Phase: 9 of 11
-- Status: Gap-closure plan ready to execute
+- Status: Gap-closure implementation complete; phase verifier pending
 - Progress: 73%
-- Last activity: Planned 09-02 gap closure and passed independent plan verification with 0 issues
+- Last activity: Executed all 09-02 tasks with focused/full tests, build, and scope checks passing
 
 ## Decisions and Assumptions
 
@@ -80,6 +80,9 @@ Plan: 2 of 2
 - [Phase 09]: Expose only metadata.provider.name and metadata.provider.model when validated provider findings are public. — Preserves deterministic-only response bytes and minimizes disclosure.
 - [Phase 09]: Bind provider, model, prompt version, and input fingerprint to the provider request before projection. — Prevents provider-result spoofing and request substitution.
 - [Phase 09]: Reserve byte-for-byte equality for deterministic-only offline results. — Provider-backed prose may vary while schema, attribution, namespacing, and local provenance remain guaranteed.
+- [Phase 09]: Validate local deterministic output before provider translation, provider-owned projection inside its own boundary, and the final merged response outside that boundary.
+- [Phase 09]: Treat every configured-provider return as unknown and cap modelFindings and deterministicFindings independently at 100 entries.
+- [Phase 09]: Lock deterministic behavior with complete raw MCP bytes plus a separately hand-maintained ordered finding projection.
 
 ## Performance Metrics
 
@@ -97,16 +100,17 @@ Plan: 2 of 2
 | Phase 04 P03 | 6 min | 2 tasks | 6 files |
 | Phase 06 P02 | 11min | 2 tasks | 9 files |
 | Phase 09 P01 | 8 min | 3 tasks | 8 files |
+| Phase 09 P02 | 7 min | 3 tasks | 7 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-02T15:56:10.123Z
-- **Stopped at:** Phase 09 gap-closure plan 09-02 verified; ready to execute
+- **Last session:** 2026-09-02T18:16:31.088Z
+- **Stopped at:** Completed 09-02-PLAN.md; awaiting Phase 09 verifier
 - **Resume file:** None
 
 ## Next Action
 
-Run `$gsd-execute-phase 9 --gaps-only` to execute verified gap-closure plan 09-02.
+Run the Phase 09 verifier before marking the phase complete or advancing to Phase 10.
 
 ---
-*Last updated: 2026-09-03 after Phase 09 gap-closure planning and verification*
+*Last updated: 2026-09-03 after Phase 09 gap-closure implementation; verifier pending*

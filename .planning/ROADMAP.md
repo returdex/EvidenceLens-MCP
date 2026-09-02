@@ -183,7 +183,7 @@ Plans:
 - [x] 09-01-PLAN.md — Additive public provider/model attribution, scoped determinism contract, regression tests, and documentation
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 09-02-PLAN.md — Close provider attribution, fail-closed result/error, visual provenance, deterministic fixture, and documentation gaps
+- [x] 09-02-PLAN.md — Close provider attribution, fail-closed result/error, visual provenance, deterministic fixture, and documentation gaps
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
@@ -222,7 +222,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
-| 9. Public Provider Attribution and Determinism Contract | 1/2 | Gap closure planned | - |
+| 9. Public Provider Attribution and Determinism Contract | 2/2 | Implementation complete; verification pending | - |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/TBD | Not started | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
