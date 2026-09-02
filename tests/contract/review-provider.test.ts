@@ -20,12 +20,23 @@ const request = {
 const deterministicFixtureUrl = new URL("../fixtures/reviews/deterministic-only-mcp-text.fixture.json", import.meta.url);
 const deterministicRequestUrl = new URL("../fixtures/reviews/fit5032-week4-library-review.json", import.meta.url);
 
-const EXPECTED_DETERMINISTIC_FINDINGS = [{
-  id: "pending-manual-capture",
-  type: "omission",
-  title: "Pending manual capture",
-  summary: "Pending manual capture"
-}] as const;
+const EXPECTED_DETERMINISTIC_FINDINGS = [
+  { id: "contradiction-00d17cb0b688fe200fba0671", type: "contradiction", title: "Solution contradicts a requirement", summary: "The solution claim has an opposing negation or incompatible scalar value." },
+  { id: "contradiction-3a1ad120495174fc0b9b3368", type: "contradiction", title: "Solution contradicts a requirement", summary: "The solution claim has an opposing negation or incompatible scalar value." },
+  { id: "contradiction-985eac0b927db735c7ad9e85", type: "contradiction", title: "Solution contradicts a requirement", summary: "The solution claim has an opposing negation or incompatible scalar value." },
+  { id: "contradiction-d3b5b45f1977ef2b9dd9a8c3", type: "contradiction", title: "Solution contradicts a requirement", summary: "The solution claim has an opposing negation or incompatible scalar value." },
+  { id: "contradiction-e50b4ff5b2d14475163b719d", type: "contradiction", title: "Solution contradicts a requirement", summary: "The solution claim has an opposing negation or incompatible scalar value." },
+  { id: "omission-12497d4bfe8bccf275ab3155", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-1d321a5aa1dcb42b6affcd70", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-55ebc7f281308203a8eeff3d", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-6fa3ab6eac33eb1ae7f4e02a", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-80e3e472d8a3bdb12f425261", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-883e8766546249b1204f8129", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-991bb8a3384f6f34e7bb7f7a", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-9c0d354245262d7082e26de8", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "omission-cac99a802a2ff8ff9f71c934", type: "omission", title: "Required claim may be omitted", summary: "No sufficiently overlapping solution claim was found for this obligation." },
+  { id: "requirement_conflict-7e7df131c5bab5cafcd50177", type: "requirement_conflict", title: "Conflicting requirement", summary: "Authoritative course sources state incompatible obligations or values." }
+] as const;
 
 function fakeProviderFinding(evidence: { evidenceId: string; role: ReviewFinding["citations"][number]["role"]; contentHash: string; sourceReference: string; location: ReviewFinding["citations"][number]["location"] }): ReviewFinding {
   return {
