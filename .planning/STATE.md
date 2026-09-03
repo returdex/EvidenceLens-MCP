@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Completed 09-04-PLAN.md; awaiting Phase 09 verification
-last_updated: "2026-09-03T12:54:48.529Z"
+stopped_at: Phase 09 re-verification found gaps; further gap-closure planning required
+last_updated: "2026-09-03T13:10:00Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 23
   completed_plans: 23
-  percent: 100
+  percent: 73
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — AWAITING VERIFICATION
+Phase: 09 (public-provider-attribution-and-determinism-contract) — GAPS FOUND
 Plan: 4 of 4
 
 - Phase: 9 of 11
-- Status: Plan 09-04 complete; awaiting orchestrator-owned Phase 09 verification
-- Progress: 100%
-- Last activity: Completed 09-04 and passed focused/full verification without marking Phase 09 complete
+- Status: Re-verification found gaps; further gap-closure planning required
+- Progress: 73%
+- Last activity: Re-verification confirmed 12/16 must-haves; four blockers and two warnings remain
 
 ## Decisions and Assumptions
 
@@ -113,12 +113,12 @@ Plan: 4 of 4
 ## Session Continuity
 
 - **Last session:** 2026-09-03T12:54:10.158Z
-- **Stopped at:** Completed 09-04-PLAN.md; awaiting Phase 09 verification
+- **Stopped at:** Phase 09 re-verification found gaps; further gap-closure planning required
 - **Resume file:** None
 
 ## Next Action
 
-Run the orchestrator-owned final Phase 09 verification.
+Run `$gsd-plan-phase 9 --gaps` to plan closure of the remaining verification and review findings.
 
 ---
-*Last updated: 2026-09-03 after plan 09-04 execution; Phase 09 awaits final verification*
+*Last updated: 2026-09-03 after Phase 09 re-verification found remaining gaps*

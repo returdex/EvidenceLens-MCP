@@ -1,200 +1,239 @@
 ---
 phase: 09-public-provider-attribution-and-determinism-contract
-verified: 2026-09-03T10:43:17Z
+verified: 2026-09-03T13:08:21Z
 status: gaps_found
-score: 10/13 must-haves verified
+score: 12/16 must-haves verified
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
-  previous_score: 8/11
+  previous_score: 10/13
   gaps_closed:
-    - "Non-visual PDF citations now reject visualPayloadSha256, and visual PDF citations require an exact retained page/hash payload."
-    - "Provider-return object parse/getter/Proxy failures now remain inside the provider-owned boundary and return exact PROVIDER_FAILURE."
-    - "Exceptions thrown directly by analyzer.analyze now return exact INTERNAL_ERROR while request and limit controls retain their codes."
-    - "Provider attribution grammar tests now isolate name/model grammar from a valid provider-backed response."
-    - "The documented INVALID_REQUEST example now exactly matches runtime output."
+    - "09-04 closes the original success-shaped inputFingerprint/promptVersion prose-echo reproduction with exact sanitized PROVIDER_FAILURE."
+    - "09-04 closes direct analyzer analyze/name/version getter and saved-cleanup throw classification reproductions with exact sanitized INTERNAL_ERROR."
+    - "The former failure-only envelope test is now explicit and a valid success-shaped prose echo matrix exists."
+    - "The PDF wrong-page regression now reaches the retained-page refinement rather than failing location validation first."
+    - "The documented success object now passes reviewResponseSchema."
   gaps_remaining:
-    - "Forbidden provider-internal values can be serialized through allowed provider finding text fields."
-    - "Analyzer metadata access and cleanup failures remain outside the analyzer-owned boundary and are misclassified."
-  regressions: []
+    - "The provider token guard rejects legitimate locally-bound provenance that equals promptVersion."
+    - "Injected analyzer success metadata can spoof identity and serialize sentinel values."
+    - "Analyzer mutation of shared analysis can corrupt provider input and escape as INVALID_REQUEST."
+    - "A cleanup exception leaves transient text/buffers uncleared even though the response is INTERNAL_ERROR."
+  regressions:
+    - "The recursive 09-04 token guard introduced a valid-provenance false positive by scanning locally-bound citation/evidence strings."
 gaps:
-  - truth: "Public provider-backed responses never serialize forbidden provider-internal metadata through any public path."
+  - truth: "Valid provider-backed responses preserve locally-bound provenance even when a legitimate provenance value equals a private-token value."
     status: failed
-    reason: "A schema-valid provider can copy the current inputFingerprint or promptVersion into allowed finding prose; handleReviewRequest returns ok:true and serializes both values."
+    reason: "The recursive token walker scans the whole finding, including evidenceIds and citations. A valid local evidence ID equal to evidencelens-review-v1 is rejected as PROVIDER_FAILURE."
     artifacts:
       - path: "src/tools/review.ts"
-        issue: "Provider findings are projected without checking provider-controlled public strings for known forbidden request tokens."
+        issue: "assertNoForbiddenProviderStrings scans local provenance without distinguishing provider-authored prose from schema-bound local values."
       - path: "tests/contract/review-provider.test.ts"
-        issue: "The non-serialization test uses strict-schema extra fields, produces PROVIDER_FAILURE, and never tests a valid success-shaped finding-text echo."
+        issue: "Echo tests cover six prose fields but contain no valid collision controls for evidenceId, sourceReference, or typed-location strings."
+    missing:
+      - "Validate complete local provenance first, then scan only provider-authored public string fields for exact current private tokens."
+      - "Add valid promptVersion collision controls for evidenceId, sourceReference, and table sheet/location strings; document how an exact inputFingerprint collision is treated."
+  - truth: "Every successful response exposes the fixed built-in deterministic analyzer identity and cannot serialize analyzer-controlled sentinel metadata."
+    status: failed
+    reason: "Runtime injection can return any non-empty analyzer name/version; analyzer-secret-sentinel and 9.9.9 are emitted in an ok:true response."
+    artifacts:
+      - path: "src/tools/review.ts"
+        issue: "analyzer.name/version are snapshotted but not checked against deterministic-rules/1.0.0."
+      - path: "src/contracts/review.ts"
+        issue: "The generic metadata schema only checks string length and cannot enforce the runtime analyzer identity."
+      - path: "tests/contract/review-provider.test.ts"
+        issue: "Getter-throw tests exist, but valid-shaped spoofed values, changing getters, and sentinel success exposure are untested."
+    missing:
+      - "Runtime-validate the analyzer name/version as deterministic-rules/1.0.0 inside the analyzer-owned boundary."
+      - "Add spoof, changing-getter, exact INTERNAL_ERROR, and no-sentinel-serialization/logging regressions."
+  - truth: "Analyzer-caused mutation and later access failures remain analyzer-owned and cannot alter provider input or become client errors."
+    status: failed
+    reason: "providerRequest reads the same mutable analysis after analyze returns. A throwing evidenceId getter installed by the analyzer produces INVALID_REQUEST and prevents the provider call."
+    artifacts:
+      - path: "src/tools/review.ts"
+        issue: "Provider request construction at line 196 occurs after analyzer execution and outside the analyzer catch."
+      - path: "src/review/analysis.ts"
+        issue: "ReviewAnalysisInput is mutable at runtime and shares payload/claim objects with later orchestration."
+      - path: "tests/contract/review-provider.test.ts"
+        issue: "No mutation matrix covers payloads, requirements, solutionClaims, normalizedEvidence, or throwing getters after analyze."
+    missing:
+      - "Construct provider input from a trusted pre-analyzer snapshot, or isolate/deep-freeze the analyzer view."
+      - "Map all analyzer-originated mutation/access failures to exact sanitized INTERNAL_ERROR and prove provider input remains unchanged."
+  - truth: "Cleanup faults still perform best-effort clearing of every transient text/buffer while preserving any more specific pending error."
+    status: failed
+    reason: "The saved cleanup preserves error precedence but aborts on the first throwing bytes access. The independent probe observed all four transient text values still present after INTERNAL_ERROR."
+    artifacts:
+      - path: "src/review/analysis.ts"
+        issue: "clear marks cleared before traversal and has no per-field/per-payload best-effort guards."
+      - path: "src/tools/review.ts"
+        issue: "The cleanup catch changes classification but cannot resume or independently wipe trusted original payload references."
+      - path: "tests/contract/review-provider.test.ts"
+        issue: "Tests assert error code and pending-error precedence, but never inspect retained text or zeroed byte buffers after cleanup failure."
       - path: "docs/mcp-contract.md"
-        issue: "The absolute never-public/never-serialized promise is stronger than the implemented public finding path."
+        issue: "The unconditional claim that transient raw text/buffers are cleared after analysis is false on the cleanup-fault path."
     missing:
-      - "Reject known forbidden request/provider tokens in every provider-controlled public string before projection, including inputFingerprint and promptVersion."
-      - "Add success-shaped echo regressions across all public finding text fields, asserting exact sanitized PROVIDER_FAILURE and no sentinel serialization."
-      - "Make the documented guarantee match an enforceable non-secret implementation."
-  - truth: "All analyzer implementation exceptions are owned by the analyzer boundary and return the exact sanitized INTERNAL_ERROR response."
-    status: failed
-    reason: "Only analyzer.analyze is caught. TypeError/RangeError from analyzer.name/version getters or analyzer-mutated analysis.clear become INVALID_REQUEST/LIMIT_EXCEEDED."
-    artifacts:
-      - path: "src/tools/review.ts"
-        issue: "Analyzer metadata is read after the analyzer catch, and finally invokes the mutable analysis.clear property."
-      - path: "tests/contract/review-provider.test.ts"
-        issue: "Tests cover direct analyze throws but omit metadata getter failures and cleanup mutation/failure."
-    missing:
-      - "Snapshot analyzer name/version inside the analyzer-owned catch and use those snapshots in metadata."
-      - "Save a trusted cleanup function before exposing analysis to the analyzer; classify cleanup faults as INTERNAL_ERROR without overriding a more specific pending error."
-      - "Add TypeError, RangeError, Error, and non-Error metadata/cleanup tests with exact INTERNAL_ERROR and redaction assertions."
+      - "Perform per-field, per-payload best-effort clearing against trusted original payload references and record the first cleanup error only after all wipe attempts."
+      - "Assert all clearable text/table fields are undefined and every captured original byte buffer is zero after cleanup faults, while pending provider/request/limit errors keep precedence."
 deferred:
   - truth: "A credentialed full MCP/filesystem/provider/public-response E2E runs through the real provider."
     addressed_in: "Phase 10"
-    evidence: "ROADMAP Phase 10 success criterion 2 owns the complete opt-in stdio/filesystem/provider/public-schema path; routine Phase 09 tests are intentionally no-network."
+    evidence: "Phase 10 success criterion 2 explicitly owns the opt-in stdio, four-role filesystem, provider DTO, merge, and final public-schema path; routine Phase 09 tests remain no-network."
 ---
 
 # Phase 09：Public Provider Attribution and Determinism Contract 验证报告
 
 **Phase Goal:** Public review responses expose stable, non-secret analyzer/provider attribution and accurately distinguish deterministic offline behavior from variable provider-backed findings.
-**Verified:** 2026-09-03T10:43:17Z
+**Verified:** 2026-09-03T13:08:21Z
 **Status:** gaps_found
-**Re-verification:** Yes — after execution of gap plan 09-03
+**Re-verification:** Yes — after execution of 09-04
 
 ## Goal Achievement
 
 ### Observable Truths
 
-ROADMAP 的 3 条 success criteria、旧验证的 11 条 observable truths 与 09-03 新增 truth 合并去重。SUMMARY 仅用于定位，所有判定来自当前代码、测试和独立探针。
+本次以 ROADMAP 的 3 条 success criteria、前次验证的 13 条 truth，以及 09-04 新增的 cleanup-precedence 和 executable-success-doc truths 合并去重。对前次通过项做回归检查；对旧 gaps、09-04 新边界和最新 REVIEW 的每个 CR/WR 做完整验证。
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | 公开响应稳定标识 deterministic analyzer 与 provider/model，且任何公开路径均不暴露 keys、envelopes、fingerprints、prompt/version 或其他禁止的 provider 内部值。 | ✗ FAILED | `metadata.provider` 是 strict `{name,model}`，但实际 `inputFingerprint` 和 `promptVersion` 可由 provider 放入 finding 文本并随 `ok:true` MCP text 公开。 |
-| 2 | citation、hash、requestId、generatedAt provenance 在显式兼容演进后仍完整且本地绑定。 | ✓ VERIFIED | response schema 将 citation 的 evidenceId/role/hash/reference/location 与 normalized evidence 逐项绑定，视觉 hash 也绑定 retained payload。 |
-| 3 | 文档与测试只对 deterministic/offline 输出承诺 byte-for-byte 稳定，并准确允许 provider 内容与顺序变化。 | ✓ VERIFIED | README 与 `docs/mcp-contract.md:64-70,127` 正确限定；语义测试通过。 |
-| 4 | 两个相同 offline/deterministic 请求产生 byte-for-byte 相同且包含有意义 findings 的 MCP text。 | ✓ VERIFIED | 两次 raw text 与 21,592-byte frozen fixture 精确相等；fixture 含 15 个独立 pinned findings。 |
-| 5 | Provider-backed 响应只保证 strict schema、安全 attribution、namespacing 与本地 citation/hash provenance。 | ✗ FAILED | schema、namespace、provenance 成立，但允许的 finding 文本能回显明确禁止公开的 request fingerprint/prompt version。 |
-| 6 | Provider attribution 当且仅当 provider-prefixed findings 存在，且所有 namespace 匹配 `metadata.provider.name`。 | ✓ VERIFIED | `src/contracts/review.ts:374-388` 双向约束和完整 mutation matrix 均有效。 |
-| 7 | 配置 provider 后，null、undefined、结构缺失和超限结果 fail closed。 | ✓ VERIFIED | strict runtime schema 在投影前执行；测试返回精确 `PROVIDER_FAILURE`。 |
-| 8 | Provider 调用及返回对象 parse/read/validate/namespace/projection 异常统一成为精确 sanitized `PROVIDER_FAILURE`。 | ✓ VERIFIED | `src/tools/review.ts:169-198` 覆盖 provider-owned 路径；getter/Proxy 与 direct-throw 回归通过。 |
-| 9 | Image/screenshot 与 PDF provider citation 的视觉 hash 精确绑定 retained payload。 | ✓ VERIFIED | image/screenshot 与 PDF 双向规则存在；独立合法 page-2/no-payload 探针命中目标 PDF 约束。 |
-| 10 | Provider result 两个 finding arrays 分别最多 100 条，超限在 projection 前拒绝。 | ✓ VERIFIED | runtime schema 对两数组各自 `.max(100)`，handler/schema tests 通过。 |
-| 11 | Frozen deterministic baseline 非空且由独立 ordered projection 锁定，文档不承诺 provider order/content determinism。 | ✓ VERIFIED | fixture、手写 oracle 与 fenced-code-aware 文档 matcher 均通过。 |
-| 12 | Analyzer implementation exceptions 成为精确 sanitized `INTERNAL_ERROR`，真实 request/limit 失败保留原代码。 | ✗ FAILED | direct `analyze()` throws 已正确；name getter TypeError → `INVALID_REQUEST`，RangeError → `LIMIT_EXCEEDED`，cleanup TypeError → `INVALID_REQUEST`。 |
-| 13 | 发布的 `INVALID_REQUEST` 示例精确等于 stable runtime payload，并由 executable docs test 锁定。 | ✓ VERIFIED | 文档 JSON、handler 实际结果、literal 均为 `{ok:false,code:"INVALID_REQUEST",message:"Invalid request"}`。 |
+| 1 | 公开响应稳定标识 deterministic analyzer 与 provider/model，且不暴露非公开内部值。 | ✗ FAILED | 独立探针以注入 analyzer 返回 `name: analyzer-secret-sentinel, version: 9.9.9`，实际得到 `ok:true` 且 sentinel 原样进入 metadata。 |
+| 2 | citation、hash、requestId、generatedAt provenance 在显式兼容演进后仍完整且本地绑定。 | ✓ VERIFIED | `reviewResponseSchema` 在 `src/contracts/review.ts:390-430` 逐项绑定 evidence ID、role、hash、reference、location 和视觉 payload；相关 provider/PDF/image tests 通过。 |
+| 3 | 文档与测试只对 deterministic/offline 输出承诺 byte-for-byte 稳定，并准确允许 provider 内容与顺序变化。 | ✓ VERIFIED | `docs/mcp-contract.md:64-70,123` 与 semantic docs tests 正确限定；没有 whole-tool/provider byte determinism 承诺。 |
+| 4 | 两个相同 offline/deterministic 请求产生 byte-for-byte 相同且包含有意义 findings 的 MCP text。 | ✓ VERIFIED | 聚焦测试两次 raw text 与 frozen fixture 精确相等，并以独立 ordered projection 锁定 15 个 findings。 |
+| 5 | 合法 provider-backed 响应维持 strict schema、安全 attribution、namespacing 和本地 provenance，不因合法本地 provenance 与私有 token 碰撞而误拒。 | ✗ FAILED | evidence ID 合法设为当前 `promptVersion` 后，provider 返回完全匹配的本地 citation，实际却得到 exact `PROVIDER_FAILURE`。全树 walker 同样会拒绝任何恰好等于 fingerprint 的本地字符串；该值难以预构造，但控制流是确定的。 |
+| 6 | Provider attribution 当且仅当 provider-prefixed findings 存在，且 namespace 匹配 `metadata.provider.name`。 | ✓ VERIFIED | `src/contracts/review.ts:374-388` 双向约束；有效/无 findings/错 namespace mutation matrix 通过。 |
+| 7 | 配置 provider 后，null、undefined、结构缺失和超限结果 fail closed。 | ✓ VERIFIED | strict provider result schema 和两个 100-entry bounds 在投影前执行；测试返回 exact `PROVIDER_FAILURE`。 |
+| 8 | Provider 调用及返回对象 parse/read/validate/namespace/projection 异常统一成为 sanitized `PROVIDER_FAILURE`。 | ✓ VERIFIED | `src/tools/review.ts:199-234` 包住 provider-owned 路径；direct throw、getter、Proxy 和 invalid result tests 通过。 |
+| 9 | Image/screenshot 与 PDF provider citation 的视觉 hash 精确绑定 retained payload。 | ✓ VERIFIED | image/screenshot 和 PDF 双向 schema refinement 仍在；wrong-page 测试明确命中 `visual PDF citation must match a retained page payload`。 |
+| 10 | Provider result 两个 finding arrays 分别最多 100 条，超限在 projection 前拒绝。 | ✓ VERIFIED | `providerReviewResultSchema` bounds 与 handler regressions 通过。 |
+| 11 | Frozen deterministic baseline 非空且由独立 ordered projection 锁定，文档不承诺 provider order/content determinism。 | ✓ VERIFIED | fixture、15-finding oracle、docs semantic tests 和全套回归均通过。 |
+| 12 | 所有 analyzer-origin implementation failures 都成为 exact `INTERNAL_ERROR`，真实 request/limit 失败保留其代码。 | ✗ FAILED | direct analyze/name/version/cleanup throws 已修复；但 analyzer 替换 shared payload getter 后，后续 provider request 访问返回 `INVALID_REQUEST`，provider call count 为 0。 |
+| 13 | 发布的 `INVALID_REQUEST` 示例精确等于 stable runtime payload。 | ✓ VERIFIED | docs/runtime/literal 三方均为 `{ok:false,code:"INVALID_REQUEST",message:"Invalid request"}`。 |
+| 14 | 当前 fingerprint/promptVersion 出现在 provider-authored prose 时，以 exact sanitized `PROVIDER_FAILURE` 拒绝且不记录 token。 | ✓ VERIFIED | 六个 prose/follow-up 字段 × 两种 token 的 valid-shaped matrix 通过；响应严格等于三字段 failure。覆盖范围与碰撞控制仍有 WR-01。 |
+| 15 | analyzer 不能替换 orchestrator 保存的 cleanup；cleanup fault 不覆盖更具体 pending provider/request/limit error。 | ✓ VERIFIED | saved bound cleanup 未调用 analyzer replacement；provider pending error + cleanup fault 仍返回 exact `PROVIDER_FAILURE`。 |
+| 16 | cleanup fault 仍实际清除全部 transient text/buffers。 | ✗ FAILED | 独立探针触发首 payload `bytes` getter TypeError；返回 exact `INTERNAL_ERROR`，但捕获的四个 payload text 全部仍保留。 |
 
-**Score:** 10/13 truths verified
+**Score:** 12/16 truths verified
 
-## Prior Verification Gaps and 09-03 Closure
+### 09-04 对上一轮 2 Blockers / 3 Warnings 的关闭情况
 
-| 旧 gap | 09-03 结果 | 当前证据 |
+| 上一轮项目 | 09-04 原始复现 | 当前结论 |
 | --- | --- | --- |
-| 非视觉 PDF 任意 hash；视觉 PDF 未严格 page/hash 绑定 | ✓ CLOSED | child schema 禁止 non-visual PDF hash；response refinement 要求 cited page 对应 retained payload 且 hash 相等。 |
-| Provider 返回对象 getter/Proxy 异常逃逸 | ✓ CLOSED | parse、identity、namespace、provider-only projection 均在 provider-owned catch；hostile-object tests 精确返回 `PROVIDER_FAILURE`。 |
-| `analyzer.analyze()` TypeError/RangeError 误分类 | ✓ CLOSED（原始场景） | direct throws 均成为 `INTERNAL_ERROR`；metadata/cleanup 相邻路径仍失败，形成新 blocker。 |
-| Attribution grammar 假阳性 | ✓ CLOSED | name mutation 同步 namespace，model mutation 仅改 model，child/full valid controls 均存在。 |
-| INVALID_REQUEST 文档漂移 | ✓ CLOSED | 示例、runtime 与 exact literal 三方一致。 |
+| Blocker：fingerprint/promptVersion 可通过合法 finding prose 泄漏 | 六个 provider prose/follow-up 字段均返回 exact sanitized `PROVIDER_FAILURE` | ✓ CLOSED；但全树修复引入合法 provenance false positive（新 CR-01）。 |
+| Blocker：analyzer metadata/cleanup throws 误分类 | analyze/name/version getter 与 saved cleanup 的 TypeError/RangeError/Error/non-Error 均返回 exact `INTERNAL_ERROR` | ✓ CLOSED；但身份 spoof、共享 mutation 和实际擦除仍失败（新 CR-02/03/04）。 |
+| Warning：non-serialization test 实为 failure-only | 现明确断言 invalid envelope，并新增 valid-shaped prose echo matrix | ✓ CLOSED；完整 surface 与 collision controls 仍不足（新 WR-01）。 |
+| Warning：PDF wrong-page 被 location 校验短路 | page 2 是合法 retained reference，非视觉 control 成功，视觉 case 命中目标 issue 且排除 location issue | ✓ CLOSED。 |
+| Warning：success docs example schema-invalid | fenced JSON 现在通过 `reviewResponseSchema` | ✓ CLOSED（schema 层）；示例仍非 built-in runtime 可生成（新 WR-02）。 |
 
-09-03 的旧直接复现场景全部关闭；新问题是同一公开安全边界和 analyzer ownership 的未覆盖相邻路径。
+### Latest 09-REVIEW Findings
 
-## New 09-REVIEW Findings Assessment
+| Finding | Status | Concrete evidence | Phase impact |
+| --- | --- | --- | --- |
+| CR-01 全树 walker 误拒合法本地 provenance | ✗ FAILED / BLOCKER | 独立 built-handler probe：`evidence[0].id = evidencelens-review-v1`，schema-valid local citation → exact `PROVIDER_FAILURE`。 | 合法 provider-backed 请求不可用，provider public boundary 不准确。 |
+| CR-02 analyzer metadata identity spoof / sentinel exposure | ✗ FAILED / BLOCKER | `analyzer-secret-sentinel` + `9.9.9` → `ok:true`，两值原样公开。 | 直接违反 phase goal 的 stable、non-secret analyzer attribution。 |
+| CR-03 analyzer mutation escapes ownership | ✗ FAILED / BLOCKER | analyzer 安装 throwing `evidenceId` Proxy；结果 `INVALID_REQUEST`，provider calls = 0。 | 服务端故障误归因客户端，且 provider input/fingerprint 可被 analyzer 修改。 |
+| CR-04 cleanup failure does not clear transient data | ✗ FAILED / BLOCKER | cleanup 返回 `INTERNAL_ERROR`，但四份 captured text 均非 undefined；`analysis.ts:126-135` 首异常中止。 | 违反 transient data 清理安全承诺。 |
+| WR-01 echo coverage/collision controls | ? WARNING CONFIRMED | 测试只 mutation title/summary/observation/interpretation/uncertainty/followUpChecks；无 evidenceId/sourceReference/table-sheet success controls。 | 现有 37 个聚焦测试无法发现 CR-01，也未锁定 promised public-surface 边界。 |
+| WR-02 success documentation runtime fidelity | ? WARNING CONFIRMED | docs test 仅 schema-parse。文档 request 直接运行返回 `INVALID_REVIEW_ROLES`；示例 contradiction 只有 assignment citation 和手写 ID，而 built-in engine 要求 requirement+solution citations并生成 hash-suffixed ID。 | 示例 schema-valid，但不是 built-in deterministic runtime 可产生的响应。 |
 
-| Finding | 独立结论 | 是否阻止 Phase goal / requirement completion |
-| --- | --- | --- |
-| CR-01 Provider finding 文本回显禁止内部值 | 🛑 BLOCKER，已复现 | 是。违反 non-secret phase goal 与 09-01 never-serialize truth，击穿公开 provider-backed 安全边界。 |
-| CR-02 Analyzer metadata/cleanup 异常误分类 | 🛑 BLOCKER，已复现 | 是。违反 09-03 analyzer ownership truth，并使 MCP-02 的稳定错误语义不准确。 |
-| WR-01 non-serialization test 实为 failure-only | ⚠ WARNING，确认 | 不单独阻止，但是假阳性覆盖并直接掩盖 CR-01。 |
-| WR-02 PDF wrong-page 被 location 校验短路 | ⚠ WARNING，确认 | 不阻止当前 goal；独立目标分支探针证明实现有效，但测试必须隔离正确分支。 |
-| WR-03 success response 文档示例不符合 schema | ⚠ WARNING，确认 | 不单独改变 MCP-02/SAFE-03 运行时行为，但 executable contract documentation 不完整，应修复并加入 schema test。 |
-
-## Deferred Items
+### Deferred Items
 
 | # | Item | Addressed In | Evidence |
 | --- | --- | --- | --- |
-| 1 | Credentialed full MCP/filesystem/provider/public-response E2E | Phase 10 | ROADMAP Phase 10 SC2 明确拥有完整 opt-in 路径；routine suite 应保持 no-network。 |
+| 1 | Credentialed full MCP/filesystem/provider/public-response E2E | Phase 10 | Phase 10 SC2 明确拥有该 opt-in 完整路径；routine Phase 09 suite 应保持 credential-free/no-network。 |
 
-两个新 blocker 未在 Phase 10/11 的 goal 或 success criteria 中被明确承接，不能 defer。
+最新 4 个 CR 没有被 Phase 10 或 Phase 11 的 goal/success criteria 明确承接，不能 defer。
 
 ## Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `src/contracts/review.ts` | Strict attribution、namespace、citation/hash contract | ✓ VERIFIED | 473 lines；provider child strict，iff/namespace 与本地 provenance 均 substantive、wired。 |
-| `src/providers/types.ts` | Untrusted provider result schema and bounds | ✓ VERIFIED | Strict result shape、grammar 与两个 100-entry bounds 被 handler 使用。 |
-| `src/tools/review.ts` | Safe attribution projection and source-owned errors | ✗ BEHAVIOR FAILED | Provider data flow真实接线，但 finding prose 无 forbidden-token boundary，analyzer metadata/cleanup 不在 source-owned catch。 |
-| `tests/contract/review-provider.test.ts` | Credential-free Phase 09 regression matrix | ⚠ INCOMPLETE | 20 tests 执行，但缺 success-path echo、analyzer metadata/cleanup 和真正 wrong-page branch 覆盖。 |
-| `tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json` | Frozen meaningful offline bytes | ✓ VERIFIED | Raw fixture 与两次输出相等；15 findings 有独立 oracle。 |
-| `tests/contract/public-contract-docs.test.ts` | Executable docs examples and semantic gate | ⚠ PARTIAL | Error example executable；success JSON 未提取或 schema-parse。 |
-| `docs/mcp-contract.md` | Accurate public contract | ⚠ INACCURATE EXAMPLE | Determinism/error prose正确；success JSON 有假 hash、citation/evidenceIds 与 provider namespace 漂移。 |
-| `README.md` | User-facing semantics/exclusions/no-network policy | ✓ VERIFIED | Scoped semantics与 no-network default 均存在并受测试读取。 |
+| `src/contracts/review.ts` | Strict additive attribution、namespace、citation/hash contract | ✓ VERIFIED | 473 lines；strict provider child、iff/namespace 与本地 provenance refinements substantive 且由 tool 使用。 |
+| `src/providers/types.ts` | Untrusted provider result schema and bounds | ✓ VERIFIED | Strict result identity、finding arrays 和 100-entry bounds 在 handler 投影前解析。 |
+| `src/tools/review.ts` | Stable safe attribution、provider projection、source-owned errors/cleanup | ✗ BEHAVIOR FAILED | 文件 substantive/wired，但 token guard 过宽、analyzer identity 未验证、provider input 使用 analyzer-mutated state、cleanup 仅改错误码。 |
+| `src/review/analysis.ts` | Trusted analysis input and complete transient cleanup | ✗ BEHAVIOR FAILED | shared input 可变；`clear()` 在遍历前设置 `cleared=true` 且首异常中止。 |
+| `tests/contract/review-provider.test.ts` | Credential-free Phase 09 regression matrix | ⚠ PARTIAL | 25 tests 全过；缺 4 个 CR 的有效控制/复现，尤其未检查 cleanup 后内存状态。 |
+| `tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json` | Frozen meaningful offline bytes | ✓ VERIFIED | raw fixture 与两次输出精确相等，15 findings 有独立 oracle。 |
+| `tests/contract/public-contract-docs.test.ts` | Executable error/success docs contract | ⚠ PARTIAL | error example 与 runtime exact equality；success example 仅 schema parse，不执行 built-in runtime。 |
+| `docs/mcp-contract.md` | Accurate public contract and executable examples | ⚠ INACCURATE | determinism scope正确；success example 不可由所示 request/runtime 产生，cleanup 的无条件保证在 fault path 不成立。 |
+| `README.md` | User-facing semantics and no-network policy | ✓ VERIFIED | scoped determinism、provider variability、public allowlist 和 routine no-network policy 均受 docs tests 读取。 |
 
 ## Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| `src/providers/types.ts` | `src/tools/review.ts` | `providerReviewResultSchema.safeParse` | ✓ WIRED | 每个 configured-provider return 在身份读取/投影前解析；SDK escaped-pattern false negative 经源码纠正。 |
-| `src/tools/review.ts` | `src/providers/errors.ts` | Provider-owned translation | ✓ WIRED | Direct throws 与 returned-object access errors 公开为 exact `PROVIDER_FAILURE`。 |
-| `src/tools/review.ts` | `src/contracts/review.ts` | three `reviewResponseSchema.parse` calls | ✓ WIRED | Lines 150、190、205 分别验证 deterministic、provider-only 与 merged response。 |
-| `src/tools/review.ts` | `src/errors.ts` | Analyzer error ownership | ⚠ PARTIAL | `analyze()` catch 已接线；metadata getter 与 mutable cleanup 落入 outer native-type guessing。 |
-| `src/contracts/review.ts` | normalized visual payloads | citation page/hash refinement | ✓ WIRED | PDF/image/screenshot 均由 full response 的 normalized data 验证。 |
-| Public docs | docs contract test | `readFile` + executable assertions | ⚠ PARTIAL | Error JSON 可执行；success JSON 未验证。 |
+| `src/providers/types.ts` | `src/tools/review.ts` | `providerReviewResultSchema.safeParse` | ✓ WIRED | 每个 configured-provider return 在 identity/projection 前解析。 |
+| `src/tools/review.ts` | `src/providers/errors.ts` | Provider-owned error translation | ✓ WIRED | provider throws、hostile reads、identity/namespace/schema failures统一转为 `ProviderError`。 |
+| `src/tools/review.ts` | `src/contracts/review.ts` | `reviewResponseSchema.parse` | ✓ WIRED | deterministic、provider-only 和 merged response 均验证。 |
+| `src/tools/review.ts` | fixed analyzer identity | runtime name/version validation | ✗ NOT WIRED | metadata getter 被 catch，但值未与 `deterministic-rules/1.0.0` 比较。 |
+| Analyzer output | provider request | shared `analysis` after `analyze()` | ⚠ UNSAFE | 连接存在但使用 analyzer 可变对象，导致 CR-03。 |
+| Saved cleanup | transient payloads | `analysis.clear.bind(analysis)` | ⚠ PARTIAL | replacement 防护和 precedence 正确，best-effort 全量擦除缺失。 |
+| `docs/mcp-contract.md` | `public-contract-docs.test.ts` | fenced JSON extraction | ⚠ PARTIAL | success JSON 仅 schema-parse；未与 `handleReviewRequest` actual output 对比。 |
 
 ## Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | --- | --- | --- | --- | --- |
-| `metadata.provider` | name/model | parsed provider result + invoked request identity | Yes | ✓ FLOWING；仅两个 allowlisted fields。 |
-| Provider findings | public prose | `ReviewProvider.review().modelFindings` → schema → namespace → merge | Yes | ✗ UNSAFE FLOW；known internal tokens 可进入 JSON。 |
-| Deterministic metadata/findings | analyzer identity + findings | `ReviewAnalyzer` | Yes | ⚠ FLOWING；normal path 正常，hostile metadata/cleanup 错误归属失败。 |
-| Citation provenance | references/hashes/visual payload | locally normalized evidence | Yes | ✓ FLOWING；provider citation 必须匹配本地数据。 |
-| Frozen offline response | raw MCP text | fixture request through handler | Yes | ✓ FLOWING；稳定、非空、无 provider/network。 |
+| Public analyzer metadata | analyzerName/version | injected/default `ReviewAnalyzer` getters | Yes | ✗ UNSAFE FLOW：任意 valid-length injected values 可成功公开。 |
+| Public provider metadata | provider name/model | strict provider result + invoked provider/request identity | Yes | ✓ FLOWING：only `{name, model}`，iff provider findings。 |
+| Provider findings | modelFindings | provider → strict schema → namespace → local provenance schema → merge | Yes | ⚠ OVER-BLOCKED：prose token echoes被拒，但 locally-bound strings也被扫描。 |
+| Provider request/fingerprint | evidence/claims | shared `analysis` after analyzer | Yes | ✗ MUTABLE FLOW：analyzer 可篡改或安装 throwing getters。 |
+| Citation provenance | normalized evidence | local normalization + response refinement | Yes | ✓ FLOWING：role/hash/reference/location/visual payload 均绑定本地数据。 |
+| Transient cleanup | payload text/table/bytes | saved `analysis.clear` | Partial | ✗ HOLLOW ON ERROR：首个 getter/fill throw 后其余字段不清除。 |
+| Frozen offline response | deterministic request | handler + built-in analyzer + fixture | Yes | ✓ FLOWING：稳定、非空、无 provider/network。 |
 
 ## Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Focused provider/docs suite | `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts` | 2 files / 31 tests passed | ✓ PASS |
 | Strict TypeScript build | `npm run build` | exit 0 | ✓ PASS |
-| Full routine suite | `npm test` | 26 files / 158 tests passed；live test excluded | ✓ PASS |
-| Forbidden-token provider echo | Independent built-handler probe | `ok:true`；fingerprint in summary、prompt version in observation | ✗ FAIL |
-| Analyzer name getter TypeError | Independent probe | exact public code is `INVALID_REQUEST` | ✗ FAIL |
-| Analyzer name getter RangeError | Independent probe | exact public code is `LIMIT_EXCEEDED` | ✗ FAIL |
-| Analyzer-mutated cleanup TypeError | Independent probe | exact public code is `INVALID_REQUEST` | ✗ FAIL |
-| PDF legal-page/no-retained-payload | Independent schema probe | Rejected specifically by retained-page binding | ✓ PASS |
-| Documented success response | Extract JSON + `reviewResponseSchema.safeParse` | Four schema issue classes; parse fails | ✗ FAIL (WARNING) |
+| Focused provider/docs suite | `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts` | 2 files / 37 tests passed | ✓ PASS |
+| Full routine suite | `npm test` | 26 files / 164 tests passed; live provider excluded | ✓ PASS |
+| Legitimate local promptVersion collision | Independent built-handler probe | schema-valid local citation returned `PROVIDER_FAILURE` | ✗ FAIL |
+| Analyzer identity spoof and sentinel | Independent built-handler probe | `ok:true`; sentinel and `9.9.9` serialized | ✗ FAIL |
+| Analyzer mutation classification | Independent built-handler probe | `INVALID_REQUEST`; provider calls = 0 | ✗ FAIL |
+| Cleanup clearing and error precedence | Independent built-handler probe + existing test | exact `INTERNAL_ERROR`, but all 4 texts retained; pending provider failure precedence test passes | ✗ FAIL |
+| Documented request/example runtime fidelity | Run documented one-role request + engine inspection | `INVALID_REVIEW_ROLES`; contradiction shape cannot be produced by built-in engine | ✗ FAIL (WARNING) |
+
+## Exact Errors, Determinism, Provenance, and No-Network Coverage
+
+- Exact sanitized errors: invalid provider envelopes, provider throws/getters, prose echoes, analyzer direct/getter/cleanup throws, malformed request, and recognized limits have exact payload assertions. CR-03 remains wrong (`INVALID_REQUEST` instead of `INTERNAL_ERROR`), and CR-02 bypasses error handling entirely with `ok:true` sentinel exposure.
+- Determinism: identical offline requests equal each other and the frozen byte fixture; findings are non-empty and independently ordered. Provider prose variation is explicitly allowed and tested.
+- Provenance: schema and tests bind evidence ID, role, content hash, source reference, typed location, and image/PDF payload hashes. The guard's collision false positive harms availability but does not permit forged provenance.
+- No-network: `npm test` sets `EVIDENCELENS_DISABLE_PROVIDER=1` and excludes `tests/providers/deepseek-live.test.ts`; `tests/smoke/project-config.test.ts` replaces global fetch with a throwing function even under dummy credentials, and the injected-provider E2E similarly forbids fetch. The full 164-test routine suite passed without live provider access.
 
 ## Requirements Coverage
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| MCP-02 | 09-01, 09-02, 09-03 | Deterministic/schema-valid successes and machine-readable rejected-request errors. | ✗ BLOCKED | Offline determinism/schema pass，但 analyzer-owned metadata/cleanup faults 被公开误分为 caller/limit errors，违反本阶段稳定错误合同。 |
-| SAFE-03 | 09-01, 09-02, 09-03 | Findings retain source location/hash, provider/model version, and request/timestamp provenance. | ✓ SATISFIED | Source/hash/location/visual payload、provider/model、requestId/generatedAt 均存在并受 schema/handler tests 绑定。 |
+| MCP-02 | 09-01, 09-02, 09-03, 09-04 | Deterministic, schema-valid success JSON and machine-readable rejected-request errors. | ✗ BLOCKED | Offline bytes/schema pass，但 analyzer mutation 的服务端故障被错误公开为 `INVALID_REQUEST`，且 spoofed analyzer identity 可在 success path 公开。 |
+| SAFE-03 | 09-01, 09-02, 09-03, 09-04 | Findings retain source path/reference, line/page/cell, hashes, model/provider version, and request/timestamp provenance. | ✓ SATISFIED | 正常 deterministic/provider paths 的 source/hash/location、provider/model、requestId/generatedAt 均存在并由 schema/tests绑定。合法碰撞误拒与 cleanup 是独立 blocker。 |
 
-ROADMAP/REQUIREMENTS 对 Phase 09 仅映射 MCP-02、SAFE-03，三个计划均声明两者；无 orphaned requirement。REQUIREMENTS.md 的勾选状态不是通过证据。
-
-## No-Live-Provider / Network Independence
-
-`package.json` 的默认 `npm test` 设置 `EVIDENCELENS_DISABLE_PROVIDER=1` 并排除 `tests/providers/deepseek-live.test.ts`。focused/full suite 均在该命令下通过；Phase 09 provider 行为由 injected fake providers 验证，没有凭据、真实 provider 或网络依赖。真正 credentialed/full-boundary E2E 依 ROADMAP 留给 Phase 10。
+ROADMAP/REQUIREMENTS 对 Phase 09 只映射 MCP-02、SAFE-03，四个计划均声明二者；无 orphaned requirement。`REQUIREMENTS.md` 的勾选状态不是验证证据。
 
 ## Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `src/tools/review.ts` | 177-205 | Provider-controlled allowed strings直接公开 | 🛑 Blocker | strict object allowlist 无法阻止内部值经 finding prose 回显。 |
-| `src/tools/review.ts` | 145-160, 206-207 | Analyzer boundary只包 `analyze()` | 🛑 Blocker | Metadata/cleanup TypeError/RangeError 被误判。 |
-| `tests/contract/review-provider.test.ts` | 516-559 | `successText` 实际来自 invalid strict result | ⚠ Warning | 非泄漏断言可在无成功投影时通过。 |
-| `tests/contract/review-provider.test.ts` | 285-286, 315 | wrong-page 使用不存在 location | ⚠ Warning | 更早 location validation 掩盖目标 branch。 |
-| `docs/mcp-contract.md` | 74-124 | Success JSON 不符合 runtime schema | ⚠ Warning | 示例不可执行，测试未锁定。 |
+| `src/tools/review.ts` | 119-137, 212-216 | 全树 private-token scan 不区分 provider prose 与本地 provenance | 🛑 Blocker | 合法 provider-backed response 被误拒。 |
+| `src/tools/review.ts` | 169-190 | analyzer identity 仅取值，不验证固定身份 | 🛑 Blocker | success metadata spoof / sentinel exposure。 |
+| `src/tools/review.ts` | 172-196 | analyzer 后继续读取共享 mutable analysis | 🛑 Blocker | provider input 可被篡改，异常误分为 client error。 |
+| `src/review/analysis.ts` | 126-135 | cleanup 首异常中止且提前标记 cleared | 🛑 Blocker | transient text/buffers 残留。 |
+| `tests/contract/review-provider.test.ts` | 719-762 | echo matrix 无 locally-bound collision controls | ⚠ Warning | 37/37 passing 未发现 CR-01。 |
+| `tests/contract/public-contract-docs.test.ts` | 152-158 | success docs test 只做 schema parse | ⚠ Warning | schema-valid 手写对象被误当 runtime-synchronized example。 |
+| `docs/mcp-contract.md` | 74-120 | success object 不可由所示 request/built-in analyzer 产生 | ⚠ Warning | public example runtime fidelity 不成立。 |
 
-除文档明确说明的 opt-in live fixture placeholder 外，未发现 TODO/FIXME、空 handler、orphaned core artifact 或其他 stub。`git diff --check` 通过。
+未发现 TODO/FIXME、空 handler、orphaned core artifact 或新增 source stub；`git diff --check` 通过。
 
 ## Human Verification Required
 
-None. 所有 goal-impacting failures、PDF 分支、文档漂移与 no-network 属性均可程序化验证。
+None. 所有 goal-impacting failures、文档可生成性、error classification、cleanup residue、provenance 和 no-network 行为都可程序化或由确定性代码路径验证。
 
 ## Gaps Summary
 
-Phase 09 尚未达成。09-03 已关闭旧验证的 PDF provenance、provider returned-object boundary、direct analyzer throw、grammar 假阳性和 INVALID_REQUEST 文档漂移；但公开安全边界仍允许 provider 将内部 fingerprint/prompt version 放进合法 finding 文本并成功序列化，analyzer metadata/cleanup 的 TypeError/RangeError 仍被错误归因。前者违反 non-secret phase goal，后者阻断 MCP-02 的稳定错误语义。
+Phase 09 尚未达成。09-04 对上一轮 2 个 blocker 和 3 个 warning 的原始复现均有实质修复，但最新 REVIEW 的 4 个 CR 全部成立：provider token guard 对合法本地 provenance 产生 false positive；analyzer identity 可在成功响应中 spoof 并泄漏 sentinel；analyzer 可变 shared analysis 导致 provider 输入受污染和错误分类；cleanup failure 只产生正确错误码，却没有真正清除 transient data。两个 WR 也成立：测试缺 promised-surface 的 collision controls，成功文档示例仅 schema-valid、不是 built-in deterministic runtime 的真实输出。
 
-新 REVIEW 的 2 个 BLOCKER 与 3 个 WARNING 均成立。PDF warning 不代表当前实现失效；另外两个 warning 暴露测试与文档合同可靠性缺口。Phase 10/11 未明确承接两个 blocker，因此必须先关闭。
+这些 blocker 直接破坏 stable/non-secret attribution 与准确错误边界，且未被后续 roadmap phase 明确承接。MCP-02 因此仍 blocked；SAFE-03 的正常路径 provenance 已满足。必须通过 Escalation Gate 返回开发者，不能进入下一阶段。
 
 ---
 
-_Verified: 2026-09-03T10:43:17Z_
+_Verified: 2026-09-03T13:08:21Z_
 _Verifier: the agent (gsd-verifier)_
