@@ -312,7 +312,6 @@ describe("provider review MCP boundary", () => {
       { label: "non-visual PDF arbitrary hash", input: textPdfRequest, spec: { visual: false, pageNumber: 1, visualPayloadSha256: "0".repeat(64) } },
       { label: "non-visual PDF retained hash", input: scannedPdfRequest, spec: { visual: false, pageNumber: 1, visualPayloadSha256: pageOneHash } },
       { label: "visual PDF missing payload", input: textPdfRequest, spec: { visual: true, pageNumber: 1, visualPayloadSha256: pageOneHash } },
-      { label: "visual PDF wrong page", input: scannedPdfRequest, spec: { visual: true, pageNumber: 2, visualPayloadSha256: pageOneHash } },
       { label: "visual PDF missing hash", input: scannedPdfRequest, spec: { visual: true, pageNumber: 1 } },
       { label: "visual PDF wrong hash", input: scannedPdfRequest, spec: { visual: true, pageNumber: 1, visualPayloadSha256: "0".repeat(64) } }
     ] as const;
@@ -358,6 +357,36 @@ describe("provider review MCP boundary", () => {
       expect(reviewResponseSchema.safeParse(candidate).success, testCase.label).toBe(false);
     }
     expect(reviewResponseSchema.safeParse(exactMatch).success, "direct visual PDF exact page/hash match").toBe(true);
+
+    const validPageTwoCitation = structuredClone(exactMatch);
+    const pageTwoEvidence = validPageTwoCitation.normalizedEvidence.find((evidence) => evidence.source.id === "pdf-1")!;
+    const pageTwoLocation = { kind: "pdf" as const, pageNumber: 2, pageCount: 2 };
+    pageTwoEvidence.references = [
+      { kind: "pdf", pageNumber: 1, pageCount: 2 },
+      pageTwoLocation
+    ];
+    const pageTwoFinding = validPageTwoCitation.findings.find((finding) => finding.id === "provider:local-reviewer:pdf-finding")!;
+    pageTwoFinding.citations[0] = {
+      ...pageTwoFinding.citations[0]!,
+      location: pageTwoLocation,
+      visual: false
+    };
+    delete pageTwoFinding.citations[0].visualPayloadSha256;
+    expect(reviewResponseSchema.safeParse(validPageTwoCitation).success, "non-visual citation to retained page-two reference").toBe(true);
+
+    const visualWrongPage = structuredClone(validPageTwoCitation);
+    const wrongPageFinding = visualWrongPage.findings.find((finding) => finding.id === "provider:local-reviewer:pdf-finding")!;
+    wrongPageFinding.citations[0] = {
+      ...wrongPageFinding.citations[0]!,
+      visual: true,
+      visualPayloadSha256: pageOneHash
+    };
+    const wrongPageResult = reviewResponseSchema.safeParse(visualWrongPage);
+    expect(wrongPageResult.success, "visual PDF wrong retained page").toBe(false);
+    if (wrongPageResult.success) throw new Error("visual PDF wrong-page fixture unexpectedly parsed");
+    const wrongPageIssues = wrongPageResult.error.issues.map((issue) => issue.message);
+    expect(wrongPageIssues).toContain("visual PDF citation must match a retained page payload");
+    expect(wrongPageIssues).not.toContain("citation location must reference normalized evidence");
   });
 
   it("does not classify invalid local analyzer output as a provider failure", async () => {

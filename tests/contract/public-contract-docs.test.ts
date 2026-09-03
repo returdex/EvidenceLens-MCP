@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { reviewToolResultSchema } from "../../src/contracts/review.js";
+import { reviewResponseSchema, reviewToolResultSchema } from "../../src/contracts/review.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
 const documents = ["docs/mcp-contract.md", "README.md"] as const;
@@ -148,5 +148,14 @@ describe("public attribution and determinism documentation contract", () => {
     expect(documented).toEqual(expected);
     expect(actual).toEqual(expected);
     expect(documented).toEqual(actual);
+  });
+
+  it("keeps the documented success response executable against the public schema", async () => {
+    const documented = firstJsonBlockUnderHeading(
+      await readFile("docs/mcp-contract.md", "utf8"),
+      "Deterministic analysis and success response"
+    );
+
+    expect(() => reviewResponseSchema.parse(documented)).not.toThrow();
   });
 });
