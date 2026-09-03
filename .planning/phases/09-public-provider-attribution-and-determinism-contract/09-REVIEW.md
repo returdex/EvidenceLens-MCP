@@ -1,154 +1,137 @@
 ---
 phase: 09-public-provider-attribution-and-determinism-contract
-reviewed: 2026-09-02T18:21:36Z
+reviewed: 2026-09-03T10:36:01Z
 depth: standard
-files_reviewed: 7
+files_reviewed: 5
 files_reviewed_list:
-  - docs/mcp-contract.md
   - src/contracts/review.ts
-  - src/providers/types.ts
   - src/tools/review.ts
-  - tests/contract/public-contract-docs.test.ts
   - tests/contract/review-provider.test.ts
-  - tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json
+  - tests/contract/public-contract-docs.test.ts
+  - docs/mcp-contract.md
 findings:
-  critical: 3
-  warning: 2
+  critical: 2
+  warning: 3
   info: 0
   total: 5
 status: issues_found
 ---
 
-# Phase 09: Code Review Report
+# Phase 09：代码审查报告
 
-**Reviewed:** 2026-09-02T18:21:36Z
+**Reviewed:** 2026-09-03T10:36:01Z
 **Depth:** standard
-**Files Reviewed:** 7
+**Files Reviewed:** 5
 **Status:** issues_found
 
-## Summary
+## 摘要
 
-本次在 Phase 09 gap closure 后重新审查 7 个明确列入范围的文件，并独立复核 provider 结果边界、公开 attribution、citation/hash provenance、错误映射、确定性 fixture 与文档契约。现有 focused suite（5 个测试文件、35 个测试）和 TypeScript build 均通过，但最小复现实验仍证明 3 个发布阻断缺陷：非视觉 PDF citation 可携带任意未绑定 hash；带异常 getter 的不可信 provider 结果会被误报为客户端 `INVALID_REQUEST`；新增 analyzer seam 抛出的原生异常仍被误报为 `INVALID_REQUEST` 或 `LIMIT_EXCEEDED`。另有 2 个契约/测试可靠性警告。
+本轮只审查配置指定的五个文件，并以 `1902251..HEAD` 的 09-03 变更为重点。此前 3 个 blocker 与 2 个 warning 的直接复现场景均已关闭：PDF 非视觉/视觉 hash 双向约束生效；provider 返回对象的 getter/Proxy 异常进入 `PROVIDER_FAILURE`；`analyzer.analyze()` 抛出的四类值进入 `INTERNAL_ERROR`；attribution grammar 测试已从真实 provider-backed response 出发；文档中的 `INVALID_REQUEST` 示例已与运行时一致。
 
-旧报告中 CR-01、CR-02、CR-03、WR-01、WR-02 的原始场景已关闭；CR-04 的 image/screenshot 场景已关闭，但其修复要求包含的非视觉 PDF hash 约束仍未实现，因此只能判定为部分关闭。WR-03 明确归属 Phase 10，不计入本报告 findings，也不阻断 Phase 09。
+但实现仍不能发布：provider 可把明确声明为非公开的 fingerprint/prompt version 嵌入允许的 finding 文本并成功序列化；analyzer 的元数据访问和被 analyzer 篡改的清理函数仍位于 source-specific 边界之外，TypeError/RangeError 会再次被误报为客户端错误。另有三个测试/文档可靠性问题。聚焦测试 31/31 与严格 TypeScript 构建均通过，但这些结果没有覆盖下述缺陷。
 
-## 旧报告逐项复核
+## 既有问题独立复核
 
-| 旧项 | 结论 | 复核证据 |
+| 既有项 | 结论 | 独立证据 |
 | --- | --- | --- |
-| CR-01 | 已关闭 | `reviewResponseSchema` 现强制 attribution iff，并拒绝缺失、额外、错误及混合 namespace；对应 contract matrix 已覆盖。 |
-| CR-02 | 已关闭 | 配置 provider 后所有返回值先经严格 `providerReviewResultSchema.safeParse`；null、undefined 与结构不完整值均返回稳定 `PROVIDER_FAILURE`。 |
-| CR-03 | 已关闭（原始场景） | `ReviewProvider.review()` 抛出的 TypeError、RangeError、Error 与非 Error 值均在调用边界包装为 `ProviderError`；测试覆盖完整错误对象。CR-02（本报告）记录返回对象读取阶段仍存在的相邻缺口。 |
-| CR-04 | 部分关闭 | image/screenshot citation 现在必须携带并匹配 retained payload hash；但旧修复建议同时要求拒绝非视觉 PDF citation 的 hash，该路径仍可通过完整响应 schema，见本报告 CR-01。 |
-| WR-01 | 已关闭 | 文档已把稳定顺序/内容限定到 deterministic analyzer，明确 provider finding 内容与顺序可变化；负向文档 matcher 覆盖旧矛盾措辞。 |
-| WR-02 | 已关闭 | frozen MCP fixture 现有 15 个 finding，覆盖 contradiction、omission、requirement_conflict；测试同时锁定完整 bytes 与独立手写 ordered projection。 |
-| WR-03 | Phase 10 deferred | Docker full-boundary 不属于 Phase 09 blocker；本轮未审查或修改该 E2E 路径。 |
+| BLOCKER：非视觉 PDF hash / 视觉 PDF page-hash 绑定 | 已关闭 | `reviewCitationSchema` 明确拒绝 non-visual PDF hash；完整响应校验要求 visual PDF 的页码与 retained payload hash 精确匹配。聚焦 handler/schema 回归通过。 |
+| BLOCKER：provider 返回对象访问异常逃逸 | 已关闭 | `safeParse`、identity、namespacing、metadata 与 provider-only projection 均在 lines 169-198 的 provider-owned catch 内；getter/Proxy 四类异常均得到精确 `PROVIDER_FAILURE`。 |
+| BLOCKER：`analyzer.analyze()` 原生异常误分类 | 已关闭（原始场景） | lines 145-149 将 TypeError、RangeError、Error 与非 Error 值统一转换为 `INTERNAL_ERROR`；独立测试通过。相邻的 metadata/cleanup 路径仍失败，见 CR-02。 |
+| WARNING：attribution grammar 假阳性 | 已关闭 | name 变体同步更新 provider finding namespace；model 变体只更新 model；child schema 与完整响应均有有效/无效控制。 |
+| WARNING：`INVALID_REQUEST` 文档漂移 | 已关闭 | Error response JSON、运行时结果与精确 literal 三者均为 `{ok:false, code:"INVALID_REQUEST", message:"Invalid request"}`。 |
 
 ## Critical Issues
 
-### CR-01: [BLOCKER] 非视觉 PDF citation 可公开任意未绑定的 payload hash
+### CR-01：[BLOCKER] Provider 可通过公开 finding 字段回显明确禁止公开的内部值
 
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/contracts/review.ts:302-307`
-**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/contracts/review.ts:417-418`; `/Users/yifeng/Documents/EvidenceLens-MCP/docs/mcp-contract.md:129`
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:177-194`
+**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:516-559`; `/Users/yifeng/Documents/EvidenceLens-MCP/docs/mcp-contract.md:68-70`
 
-**Issue:** `reviewCitationSchema` 仅在 PDF citation 的 `visual === true` 时要求 hash，却没有在 `visual === false` 时禁止 `visualPayloadSha256`。response-level 通用检查又使用 `evidence.visualPayloads?.every(...)`；当 PDF 没有 retained visual payloads 时，该表达式得到 `undefined`，不会添加 issue。实测一个 `visual:false`、携带任意 64 位 hash、且 PDF 没有 visual payload 的完整 provider-backed response 被 `reviewResponseSchema.safeParse` 接受。该行为违反文档“PDF page citation is visual only when ... and then carries visualPayloadSha256”以及本地 citation/hash provenance 保证。
+**Issue:** provider 结果经 schema 验证后，其 `title`、`summary`、`observation`、`interpretation`、`uncertainty` 和 `followUpChecks` 等 provider-controlled 字符串会直接进入公开响应。严格 object schema 只能拒绝额外字段，不能阻止 provider 把内部值放入允许字段。独立复现令 provider 将 `request.inputFingerprint` 写入 `summary`、将 `request.promptVersion` 写入 `observation`；handler 返回 `ok:true`，两个值均原样出现在 MCP text。该行为直接违背文档中 input fingerprint 与 prompt text/version “never public and never serialized”的保证，并使被攻陷或行为异常的 provider 可绕过字段 allowlist 泄露内部细节。
 
-**Fix:** 在 citation schema 中建立 PDF 的双向约束，并让 response-level 检查显式处理不存在的 payload 集合。
+现有“never serializes”测试没有覆盖此攻击：它只把 sentinel 放在额外字段里，结果被 strict schema 整体拒绝，见 WR-01。
 
-```ts
-if (kind === "pdf" && !citation.visual && citation.visualPayloadSha256 !== undefined) {
-  ctx.addIssue({
-    code: "custom",
-    path: ["visualPayloadSha256"],
-    message: "non-visual PDF citations must not carry a visual payload hash"
-  });
-}
-```
-
-同时增加完整 response 与 injected-provider 回归：非视觉 PDF + 任意/真实 hash 必须失败；视觉 PDF 仅在 page/hash 与 retained payload 精确匹配时成功。
-
-### CR-02: [BLOCKER] 不可信 provider 结果的读取异常仍被误报为客户端输入错误
-
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:169-176`
-**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:243-249`
-
-**Issue:** 新的 provider try/catch 只包围 `await options.provider.review(...)`。返回值随后作为“不可信 unknown”传给 Zod；若返回对象是 Proxy、访问器属性或其他在读取字段时抛出 TypeError/RangeError 的对象，`safeParse` 本身会抛出，而不是返回 `success:false`。异常落到外层按异常类猜测来源，TypeError 被映射为 `INVALID_REQUEST`，RangeError 被映射为 `LIMIT_EXCEEDED`。实测 provider 返回一个仅在读取 `provider` 字段时抛 TypeError 的 Proxy，MCP 得到 `{ok:false, code:"INVALID_REQUEST", message:"Invalid request"}`，违反所有 provider boundary failure 都应成为稳定 `PROVIDER_FAILURE` 的契约。
-
-**Fix:** 将 provider 返回后的 schema parse、identity validation、namespacing 和 provider-only projection 一并放入 provider-owned error boundary；已有 `ProviderError` 原样重抛，其余异常统一转换为不携带 cause/message 的 `ProviderError("PROVIDER_INVALID_RESPONSE")`。最终 merged-response parse 仍应留在该边界之外，以免掩盖本地错误。
+**Fix:** 在 provider-owned boundary 内、公开投影前，对所有 provider-controlled 公共字符串做递归检查；至少拒绝包含当前 `expectedProviderRequest.inputFingerprint` 或 `expectedProviderRequest.promptVersion` 的结果，并由实际 provider 配置向边界提供需要阻止的其他私密 token。若无法对任意 provider prose 给出绝对不泄漏保证，应同步收窄文档契约。增加把 fingerprint/prompt version 嵌入每类允许文本字段的成功形状回归，并断言精确 sanitized `PROVIDER_FAILURE`。
 
 ```ts
-try {
-  const parsed = providerReviewResultSchema.safeParse(untrustedProviderResult);
-  if (!parsed.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
-  validateProviderResultIdentity(options.provider, expectedProviderRequest, parsed.data);
-  // namespace and validate provider-only projection here
-} catch (error) {
-  if (error instanceof ProviderError) throw error;
+const forbidden = [
+  expectedProviderRequest.inputFingerprint,
+  expectedProviderRequest.promptVersion
+];
+if (providerControlledStrings(providerResult.modelFindings)
+  .some((value) => forbidden.some((token) => value.includes(token)))) {
   throw new ProviderError("PROVIDER_INVALID_RESPONSE");
 }
 ```
 
-增加 Proxy/throwing-getter 回归，分别覆盖 TypeError 与 RangeError，并断言完整 sanitized `PROVIDER_FAILURE` payload。
+### CR-02：[BLOCKER] Analyzer 元数据与清理阶段异常仍被误报为客户端输入/限额错误
 
-### CR-03: [BLOCKER] Analyzer 原生异常仍被归因于请求或证据限额
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:145-160`
+**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:206-207`; `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:250-256`
 
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:142-145`
-**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:243-248`
+**Issue:** 新增 analyzer boundary 只包住 `analyzer.analyze(analysis)`。紧接着读取 `analyzer.name` / `analyzer.version` 时，getter 抛出的 TypeError 或 RangeError 会落入全局 native-type classifier，分别返回 `INVALID_REQUEST` 和 `LIMIT_EXCEEDED`。独立复现结果为：name getter TypeError → `INVALID_REQUEST / Invalid request`，name getter RangeError → `LIMIT_EXCEEDED / Evidence exceeds the configured limit`。
 
-**Issue:** Phase 09 新增了可注入的 `ReviewHandlerOptions.analyzer`，但 `analyzer.analyze()` 仍位于全链路 TypeError/RangeError 映射之内。实测 injected analyzer 抛 TypeError 时返回 `INVALID_REQUEST`，抛 RangeError 时返回 `LIMIT_EXCEEDED`。这两者都是服务端/analyzer 实现故障，不是客户端输入或已识别的 evidence parser limit，错误分类会误导调用方的修复与重试行为。现有测试只覆盖 analyzer 返回 schema-invalid finding，没有覆盖 analyzer 抛异常。
+同一问题还存在于 `finally { analysis.clear(); }`：injected analyzer 能修改其收到的可变 `analysis.clear`，返回后由 cleanup 抛出 TypeError/RangeError，并得到相同的错误误分类。两者都是 analyzer/server implementation failure，不是客户端请求或证据限额；错误分类会误导调用方采取无效的请求修复或缩减措施。
 
-**Fix:** 在 analyzer 边界把所有实现异常转换为 `INTERNAL_ERROR`，或移除外层按原生异常类型进行全链路归因，改由 normalization/parser 在其实际来源处抛明确的 `EvidenceLensError`。
+**Fix:** 在把 analysis 交给 analyzer 前保存不可变的本地 cleanup 引用；在 analyzer-owned boundary 内同时执行 finding 生成和 analyzer metadata snapshot。不要在 deterministic response 构造时再次读取 analyzer 对象。cleanup 异常也应成为 `INTERNAL_ERROR`，且不能覆盖一个已经产生的更具体错误。
 
 ```ts
+const clearAnalysis = analysis.clear;
 let deterministicFindings: readonly ReviewFinding[];
+let analyzerName: string;
+let analyzerVersion: string;
 try {
   deterministicFindings = analyzer.analyze(analysis);
+  analyzerName = analyzer.name;
+  analyzerVersion = analyzer.version;
 } catch {
   throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
 }
+// use analyzerName/analyzerVersion; finally invokes the saved clearAnalysis
 ```
 
-增加 injected analyzer 的 TypeError、RangeError、普通 Error 与非 Error 回归，均断言完整 `INTERNAL_ERROR` 响应且不泄漏 sentinel。
+增加 `name`/`version` getter 的 TypeError、RangeError、Error、非 Error 回归，以及 analyzer 篡改 `analysis.clear` 的回归；全部应返回精确 `INTERNAL_ERROR` 且不包含 sentinel。
 
 ## Warnings
 
-### WR-01: [WARNING] Provider attribution grammar 测试因缺少 provider findings 而产生假阳性覆盖
+### WR-01：[WARNING] “不序列化 provider 内部数据”测试实际只验证了无效响应会失败
 
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:163-176`
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:516-559`
 
-**Issue:** `invalidProviders` 循环从 deterministic-only response 克隆候选对象并添加 `metadata.provider`。每个候选都会先因“attribution without provider findings”失败，因此这些断言无法证明大小写、model 空格/换行/URL/路径、长度或额外 `promptVersion` 字段真的被各自拒绝。若 provider attribution 子 schema 将来被意外放宽，这组测试仍然全绿。
+**Issue:** 名为 `successText` 的路径在 provider result 上添加 `promptText`、`privateInputFingerprint`、`rawResponse` 等额外字段。`providerReviewResultSchema.strict()` 会拒绝整个对象，所以该值实际上是 `PROVIDER_FAILURE`，而非成功响应。随后仅断言 sentinel 不出现，因此即使成功投影会通过允许字段泄露内部值，测试仍会全绿。该假阳性直接掩盖 CR-01。
 
-**Fix:** 从有效的 `attributed` response 克隆每个候选并保留 provider finding；对 name 变体同步 provider finding namespace，使每个 case 只因目标 grammar 违规而失败。也可直接对 `reviewProviderAttributionSchema` 做表驱动测试，再保留一组完整 response integration assertion。
+**Fix:** 先断言额外字段路径确实返回精确 `PROVIDER_FAILURE`；另建一个结构合法、预期 `ok:true` 的 provider 结果，将敏感 sentinel 放入允许的 finding 文本字段，验证边界拒绝或按明确契约安全处理，并断言最终成功路径只公开预期字段。
 
-### WR-02: [WARNING] INVALID_REQUEST 示例与同页稳定错误契约及实际输出矛盾
+### WR-02：[WARNING] “visual PDF wrong page”用例被更早的 location 校验短路
 
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/docs/mcp-contract.md:139-143`
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:285-286`
+**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:311-323`; `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:345-358`
 
-**Issue:** error response 示例写成 `{"code":"INVALID_REQUEST","message":"Review request failed validation"}`，但紧随其后的稳定消息列表规定 `INVALID_REQUEST` 的消息是 `Invalid request`，实际 `toToolErrorResult` 也会归一化为 `Invalid request`。同一规范页面给出两种精确 payload，会让基于示例实现的客户端契约测试失败。
+**Issue:** wrong-page case 对单页 `scanned-page.pdf` 构造 `pageNumber: 2`，helper 在找不到该页引用时伪造 `{kind:"pdf", pageNumber:2}`。完整响应会先在 `src/contracts/review.ts:402-404` 因 location 不属于 normalized references 而失败，根本无需执行 lines 409-415 的 retained page/hash 绑定规则。删除或破坏 wrong-page hash 约束后，这个回归仍可能通过，未满足其声称锁定的目标分支。
 
-**Fix:** 将示例改为实际稳定 payload：
+**Fix:** 使用包含两个合法 PDF page references、但只为其中一页保留 visual payload 的 fixture/构造；citation 应引用存在的第二页并携带第一页 hash。直接 schema 用例可从有效响应显式保留 page-2 reference 并移除 page-2 payload；handler 用例应提供等价的真实规范化输入。额外断言 location 本身在 `normalizedEvidence.references` 中，排除短路。
 
-```json
-{ "ok": false, "code": "INVALID_REQUEST", "message": "Invalid request" }
-```
+### WR-03：[WARNING] 文档中的成功响应示例不符合公开运行时 schema
 
-并在文档 contract test 中锁定 error 示例与稳定消息表，避免再次漂移。
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/docs/mcp-contract.md:74-124`
+**Related:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/public-contract-docs.test.ts:142-150`
 
-## Deferred Scope Note
+**Issue:** 独立抽取并运行 `reviewResponseSchema.safeParse` 后，成功示例同时因四处漂移失败：两个 `contentHash` 使用非 64 位 hex 占位符；finding 的 `evidenceIds` 有 `brief-1` 与 `solution-1`，却只提供 `brief-1` citation；metadata 含 provider attribution，但 finding ID 不是 `provider:<name>:` namespace。文档 contract test 只执行 Error response JSON，没有验证 success response，因此无法阻止此类运行时漂移。
 
-WR-03 的真实 Docker/full-boundary stdio、mount、image 与 compose 覆盖按用户要求明确归属 Phase 10。本项不是 Phase 09 finding，不计入 frontmatter counts，也不影响本报告对 Phase 09 的 blocker 判定。
+**Fix:** 将示例改为最小但完整的 schema-valid 响应：使用真实 64 位 lowercase SHA-256、让 `evidenceIds` 与 citation IDs 完全一致，并删除 provider metadata 或加入匹配 namespace 的 provider finding。扩展 docs contract test，抽取该 success JSON block 并要求 `reviewResponseSchema.parse` 成功。
 
-## Verification Performed
+## 验证记录
 
-- `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts tests/contract/fit5032-fixture.test.ts tests/providers/provider-contract.test.ts tests/providers/deepseek.test.ts`：5 files / 35 tests passed。
+- `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts`：2 files / 31 tests passed。
 - `npm run build`：通过。
-- 最小复现：throwing analyzer 的 TypeError → `INVALID_REQUEST`；RangeError → `LIMIT_EXCEEDED`。
-- 最小复现：provider result Proxy getter TypeError → `INVALID_REQUEST`。
-- 最小复现：非视觉 PDF citation 携带任意 hash 的完整 provider-backed response → schema accepted。
-- `git diff --check 99ec0f4..HEAD`：通过。
+- `git diff --check 1902251..HEAD -- <五个范围文件>`：通过。
+- 独立 analyzer metadata probe：TypeError → `INVALID_REQUEST`；RangeError → `LIMIT_EXCEEDED`。
+- 独立 analyzer cleanup mutation probe：TypeError → `INVALID_REQUEST`；RangeError → `LIMIT_EXCEEDED`。
+- 独立 provider echo probe：`inputFingerprint` 与 `promptVersion` 均出现在 `ok:true` MCP text。
+- 独立文档 schema probe：success JSON 被拒绝，错误路径分别为 finding citation hash、finding evidenceIds、normalized evidence hash 与 metadata.provider。
 
 ---
 
-_Reviewed: 2026-09-02T18:21:36Z_
+_Reviewed: 2026-09-03T10:36:01Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
