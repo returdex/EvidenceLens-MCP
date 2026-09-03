@@ -141,7 +141,12 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
   const analysis = buildReviewAnalysisInput(bundle);
   const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
   try {
-    const deterministicFindings = analyzer.analyze(analysis);
+    let deterministicFindings: readonly ReviewFinding[];
+    try {
+      deterministicFindings = analyzer.analyze(analysis);
+    } catch {
+      throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+    }
     const deterministicResponse = reviewResponseSchema.parse({
       ok: true,
       requestId: request.reviewId,
@@ -159,33 +164,36 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
     if (options.provider === undefined) return deterministicResponse;
 
     const expectedProviderRequest = providerRequest(analysis, request, options);
-    let untrustedProviderResult: unknown;
+    let internal: InternalReviewResult;
+    let providerMetadata: { provider?: { name: string; model: string } };
     try {
-      untrustedProviderResult = await options.provider.review(expectedProviderRequest);
-    } catch (error) {
-      if (error instanceof ProviderError) throw error;
-      throw new ProviderError("PROVIDER_REQUEST_FAILED");
-    }
-    const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
-    if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
-    const providerResult = parsedProviderResult.data;
-    validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
-    const internal: InternalReviewResult = {
-      deterministicFindings,
-      providerResult,
-      providerFindings: namespaceProviderFindings(providerResult, deterministicFindings)
-    };
+      let untrustedProviderResult: unknown;
+      try {
+        untrustedProviderResult = await options.provider.review(expectedProviderRequest);
+      } catch (error) {
+        if (error instanceof ProviderError) throw error;
+        throw new ProviderError("PROVIDER_REQUEST_FAILED");
+      }
+      const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
+      if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+      const providerResult = parsedProviderResult.data;
+      validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
+      internal = {
+        deterministicFindings,
+        providerResult,
+        providerFindings: namespaceProviderFindings(providerResult, deterministicFindings)
+      };
 
-    const providerMetadata = internal.providerFindings.length > 0
-      ? { provider: { name: providerResult.provider, model: providerResult.model } }
-      : {};
-    try {
+      providerMetadata = internal.providerFindings.length > 0
+        ? { provider: { name: providerResult.provider, model: providerResult.model } }
+        : {};
       reviewResponseSchema.parse({
         ...deterministicResponse,
         findings: internal.providerFindings,
         metadata: { ...deterministicResponse.metadata, ...providerMetadata }
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof ProviderError) throw error;
       throw new ProviderError("PROVIDER_INVALID_RESPONSE");
     }
 
