@@ -228,6 +228,101 @@ describe("provider review MCP boundary", () => {
     });
   }
 
+  it("enforces non-visual PDF arbitrary/retained hashes and visual PDF payload page/hash binding", async () => {
+    const [textPdf, scannedPdf] = await Promise.all([
+      readFile(new URL("../fixtures/evidence/pdfs/text-page.pdf", import.meta.url)),
+      readFile(new URL("../fixtures/evidence/pdfs/scanned-pages.pdf", import.meta.url))
+    ]);
+    const pdfRequest = (reviewId: string, contentBase64: string) => ({
+      ...request,
+      reviewId,
+      evidence: [
+        ...request.evidence,
+        { id: "pdf-1", role: "other", type: "pdf", reference: `fixture://${reviewId}.pdf`, mimeType: "application/pdf", contentBase64 }
+      ]
+    } as const);
+    const textPdfRequest = pdfRequest("text-pdf-citation", textPdf.toString("base64"));
+    const scannedPdfRequest = pdfRequest("scanned-pdf-citation", scannedPdf.toString("base64"));
+    type PdfCitationSpec = { visual: boolean; pageNumber: number; visualPayloadSha256?: string };
+    const providerWithPdfCitation = (spec: (source: Parameters<ReviewProvider["review"]>[0]["evidence"][number]) => PdfCitationSpec): ReviewProvider => {
+      const base = fakeProvider();
+      return {
+        ...base,
+        async review(providerRequest) {
+          const result = await base.review(providerRequest);
+          const source = providerRequest.evidence.find((evidence) => evidence.evidenceId === "pdf-1")!;
+          const citation = spec(source);
+          const location = source.references.find((reference) => reference.kind === "pdf" && reference.pageNumber === citation.pageNumber)!;
+          return {
+            ...result,
+            modelFindings: [{
+              ...result.modelFindings[0]!,
+              id: "pdf-finding",
+              evidenceIds: [source.evidenceId],
+              citations: [{
+                evidenceId: source.evidenceId,
+                role: source.role,
+                contentHash: source.contentHash,
+                sourceReference: source.sourceReference,
+                location,
+                visual: citation.visual,
+                ...(citation.visualPayloadSha256 === undefined ? {} : { visualPayloadSha256: citation.visualPayloadSha256 })
+              }]
+            }]
+          };
+        }
+      };
+    };
+    const normalizedScanned = reviewResponseSchema.parse(payload(await handleReviewRequest(scannedPdfRequest)));
+    const scannedEvidence = normalizedScanned.normalizedEvidence.find((evidence) => evidence.source.id === "pdf-1")!;
+    const pageOneHash = scannedEvidence.visualPayloads!.find((visual) => visual.pageNumber === 1)!.sha256;
+
+    const cases = [
+      { label: "non-visual PDF arbitrary hash", input: textPdfRequest, spec: { visual: false, pageNumber: 1, visualPayloadSha256: "0".repeat(64) } },
+      { label: "non-visual PDF retained hash", input: scannedPdfRequest, spec: { visual: false, pageNumber: 1, visualPayloadSha256: pageOneHash } },
+      { label: "visual PDF missing payload", input: textPdfRequest, spec: { visual: true, pageNumber: 1, visualPayloadSha256: pageOneHash } },
+      { label: "visual PDF wrong page", input: scannedPdfRequest, spec: { visual: true, pageNumber: 2, visualPayloadSha256: pageOneHash } },
+      { label: "visual PDF missing hash", input: scannedPdfRequest, spec: { visual: true, pageNumber: 1 } },
+      { label: "visual PDF wrong hash", input: scannedPdfRequest, spec: { visual: true, pageNumber: 1, visualPayloadSha256: "0".repeat(64) } }
+    ] as const;
+    const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
+    for (const testCase of cases) {
+      const provider = providerWithPdfCitation(() => testCase.spec);
+      const result = payload(await handleReviewRequest(testCase.input, { provider }));
+      expect(result, testCase.label).toEqual(failure);
+    }
+
+    const matchingProvider = providerWithPdfCitation(() => ({ visual: true, pageNumber: 1, visualPayloadSha256: pageOneHash }));
+    const exactMatch = payload(await handleReviewRequest(scannedPdfRequest, { provider: matchingProvider }));
+    const parsedExactMatch = reviewResponseSchema.parse(exactMatch);
+    const exactCitation = parsedExactMatch.findings.find((finding) => finding.id === "provider:local-reviewer:pdf-finding")!.citations[0]!;
+    const exactEvidence = parsedExactMatch.normalizedEvidence.find((evidence) => evidence.source.id === "pdf-1")!;
+    expect(exactCitation.visualPayloadSha256, "visual PDF exact page/hash match").toBe(exactEvidence.visualPayloads!.find((visual) => visual.pageNumber === 1)!.sha256);
+
+    const textBaseline = payload(await handleReviewRequest(textPdfRequest, {
+      provider: providerWithPdfCitation(() => ({ visual: false, pageNumber: 1 }))
+    }));
+    const directCases = cases.map((testCase) => ({
+      label: `direct ${testCase.label}`,
+      base: testCase.input === textPdfRequest ? textBaseline : exactMatch,
+      spec: testCase.spec
+    }));
+    for (const testCase of directCases) {
+      const candidate = structuredClone(testCase.base ?? textBaseline);
+      const finding = (candidate.findings as Array<{ id: string; citations: Array<Record<string, unknown>> }>).find((item) => item.id.startsWith("provider:"))!;
+      const currentLocation = finding.citations[0]!.location as Record<string, unknown>;
+      finding.citations[0] = {
+        ...finding.citations[0],
+        visual: testCase.spec.visual,
+        location: { ...currentLocation, pageNumber: testCase.spec.pageNumber },
+        ...(testCase.spec.visualPayloadSha256 === undefined ? {} : { visualPayloadSha256: testCase.spec.visualPayloadSha256 })
+      };
+      if (testCase.spec.visualPayloadSha256 === undefined) delete finding.citations[0]!.visualPayloadSha256;
+      expect(reviewResponseSchema.safeParse(candidate).success, testCase.label).toBe(false);
+    }
+    expect(reviewResponseSchema.safeParse(exactMatch).success, "direct visual PDF exact page/hash match").toBe(true);
+  });
+
   it("does not classify invalid local analyzer output as a provider failure", async () => {
     const invalidAnalyzer: ReviewAnalyzer = {
       name: "deterministic-rules",
