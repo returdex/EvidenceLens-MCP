@@ -716,10 +716,11 @@ describe("provider review MCP boundary", () => {
     }
   });
 
-  it("rejects current private request tokens from every public provider prose field without logging them", async () => {
+  it("rejects current private request tokens from every provider-authored public string without logging them", async () => {
     const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
     const sentinel = "provider-public-echo-sentinel";
     const fields = [
+      { label: "id suffix", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, id: value }) },
       { label: "title", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, title: value }) },
       { label: "summary", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, summary: value }) },
       { label: "observation", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, observation: value }) },
@@ -735,6 +736,21 @@ describe("provider review MCP boundary", () => {
       for (const privateToken of ["inputFingerprint", "promptVersion"] as const) {
         for (const field of fields) {
           const base = fakeProvider();
+          const baseline = payload(await handleReviewRequest(request, {
+            provider: {
+              ...base,
+              async review(providerRequest) {
+                const providerResult = await base.review(providerRequest);
+                return {
+                  ...providerResult,
+                  modelFindings: [field.mutate(providerResult.modelFindings[0]!, `safe-${field.label.replace(" ", "-")}`)]
+                };
+              }
+            }
+          }));
+          expect(reviewResponseSchema.safeParse(baseline).success, `${privateToken} ${field.label} baseline schema`).toBe(true);
+          expect(baseline, `${privateToken} ${field.label} baseline handler`).toMatchObject({ ok: true });
+
           let forbiddenValue = "";
           const result = payload(await handleReviewRequest(request, {
             provider: {
@@ -768,6 +784,67 @@ describe("provider review MCP boundary", () => {
       warn.mockRestore();
       error.mockRestore();
     }
+  });
+
+  it("allows locally-bound evidence ids and source references equal to the provider prompt version", async () => {
+    const collisionRequests = [
+      {
+        label: "evidence id",
+        input: {
+          ...request,
+          reviewId: "provider-evidence-id-collision",
+          evidence: request.evidence.map((evidence, index) => index === 0
+            ? { ...evidence, id: PROVIDER_PROMPT_VERSION }
+            : evidence)
+        }
+      },
+      {
+        label: "source reference",
+        input: {
+          ...request,
+          reviewId: "provider-source-reference-collision",
+          evidence: request.evidence.map((evidence, index) => index === 0
+            ? { ...evidence, reference: PROVIDER_PROMPT_VERSION }
+            : evidence)
+        }
+      }
+    ] as const;
+
+    for (const collision of collisionRequests) {
+      const result = payload(await handleReviewRequest(collision.input, { provider: fakeProvider() }));
+      expect(result, collision.label).toMatchObject({ ok: true });
+      expect(reviewResponseSchema.safeParse(result).success, collision.label).toBe(true);
+    }
+  });
+
+  it("allows a schema-valid locally-bound table sheet collision through the provider-authored guard", async () => {
+    const tableRequest = {
+      ...request,
+      reviewId: "provider-table-sheet-collision",
+      evidence: request.evidence.map((evidence, index) => index === 0
+        ? { id: evidence.id, role: evidence.role, type: "table" as const, reference: "fixture://assignment.csv", content: "criterion,requirement\nthreshold,Threshold must be 4." }
+        : evidence)
+    };
+    const baseline = reviewResponseSchema.parse(payload(await handleReviewRequest(tableRequest, { provider: fakeProvider() })));
+    const candidate = structuredClone(baseline);
+    const normalized = candidate.normalizedEvidence.find((evidence) => evidence.source.id === "brief-1")!;
+    const normalizedTableReference = normalized.references.find((reference) => reference.kind === "table")!;
+    normalizedTableReference.sheetName = PROVIDER_PROMPT_VERSION;
+    const providerFinding = candidate.findings.find((finding) => finding.id.startsWith("provider:"))!;
+    const providerCitation = providerFinding.citations.find((citation) => citation.evidenceId === "brief-1")!;
+    if (providerCitation.location.kind !== "table") throw new Error("expected table citation");
+    providerCitation.location.sheetName = PROVIDER_PROMPT_VERSION;
+    const schemaValid = reviewResponseSchema.parse(candidate);
+    const reviewModule = await import("../../src/tools/review.js");
+    const guard = (reviewModule as Record<string, unknown>).assertNoForbiddenProviderAuthoredStrings as
+      | ((findings: readonly ReviewFinding[], forbiddenValues: ReadonlySet<string>) => void)
+      | undefined;
+
+    expect(guard).toBeTypeOf("function");
+    expect(() => guard!(
+      schemaValid.findings.filter((finding) => finding.id.startsWith("provider:")),
+      new Set([PROVIDER_PROMPT_VERSION])
+    )).not.toThrow();
   });
 
   it("maps provider failures to stable sanitized MCP errors", async () => {
