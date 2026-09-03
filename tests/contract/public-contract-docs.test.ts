@@ -134,9 +134,8 @@ describe("public attribution and determinism documentation contract", () => {
     expect(contract).toContain("if and only if provider findings are returned");
     expect(contract).toContain("all prior fields and deterministic-only response bytes are retained");
     expect(contract).toContain("consumers should tolerate the optional provider child on provider-backed responses");
-    expect(contract).toContain('"provider": {');
-    expect(contract).toContain('"name": "deepseek"');
-    expect(contract).toContain('"model": "deepseek-v4-pro"');
+    expect(contract).toContain("contains exactly provider name and model");
+    expect(contract).toContain("only provider name and model are public attribution");
   });
 
   it("keeps the documented INVALID_REQUEST example equal to stable runtime output", async () => {

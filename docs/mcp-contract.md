@@ -77,7 +77,7 @@ DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed
   "requestId": "review-001",
   "status": "accepted",
   "findings": [{
-    "id": "contradiction-...",
+    "id": "contradiction-example",
     "type": "contradiction",
     "severity": "high",
     "confidence": "medium",
@@ -87,11 +87,11 @@ DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed
     "interpretation": "The solution claim conflicts with the cited requirement.",
     "uncertainty": "Lexical comparison cannot establish intent beyond the cited wording.",
     "followUpChecks": ["Inspect the cited source locations and confirm the intended requirement or value."],
-    "evidenceIds": ["brief-1", "solution-1"],
+    "evidenceIds": ["brief-1"],
     "citations": [{
       "evidenceId": "brief-1",
       "role": "assignment_brief",
-      "contentHash": "lowercase-sha256-hex",
+      "contentHash": "2fe21433f69d10ba75c55efee2e8e4f17d9b3145176db635e8957ba40f023953",
       "sourceReference": "course/assignment-brief",
       "location": { "kind": "text", "startLine": 1, "endLine": 1 },
       "visual": false
@@ -100,7 +100,7 @@ DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed
   "normalizedEvidence": [{
     "source": { "id": "brief-1", "type": "text", "reference": "course/assignment-brief" },
     "role": "assignment_brief",
-    "contentHash": "lowercase-sha256-hex",
+    "contentHash": "2fe21433f69d10ba75c55efee2e8e4f17d9b3145176db635e8957ba40f023953",
     "extraction": {
       "extractor": "text-normalizer",
       "extractorVersion": "1.0.0",
@@ -115,11 +115,7 @@ DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed
     "serverVersion": "0.1.3",
     "analyzerName": "deterministic-rules",
     "analyzerVersion": "1.0.0",
-    "generatedAt": "1970-01-01T00:00:00.000Z",
-    "provider": {
-      "name": "deepseek",
-      "model": "deepseek-v4-pro"
-    }
+    "generatedAt": "1970-01-01T00:00:00.000Z"
   }
 }
 ```
