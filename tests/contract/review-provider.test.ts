@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
+import { reviewProviderAttributionSchema, reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
@@ -160,21 +160,51 @@ describe("provider review MCP boundary", () => {
     (mixedNamespaces.findings as Record<string, unknown>[]).push({ ...providerFinding, id: "provider:other-reviewer:finding-2" });
     expect(reviewResponseSchema.safeParse(mixedNamespaces).success).toBe(false);
 
-    const invalidProviders = [
-      { name: "DeepSeek", model: "deepseek-v4-pro" },
-      { name: "deepseek", model: "deepseek v4" },
-      { name: "deepseek", model: "deepseek\n-v4" },
-      { name: "deepseek", model: "https://provider.invalid/model" },
-      { name: "deepseek", model: "models/deepseek-v4" },
-      { name: "deepseek", model: "models\\deepseek-v4" },
-      { name: "deepseek", model: "x".repeat(129) },
-      { name: "deepseek", model: "deepseek-v4-pro", promptVersion: "secret" }
-    ];
-    for (const provider of invalidProviders) {
-      const candidate = structuredClone(deterministic);
-      (candidate.metadata as Record<string, unknown>).provider = provider;
+    const baselineProviderFinding = (attributed.findings as Array<{ id: string }>).find((finding) => finding.id.startsWith("provider:"))!;
+    expect(baselineProviderFinding).toBeDefined();
+    const validNames = ["a", `a${"b".repeat(31)}`];
+    for (const name of validNames) {
+      const candidate = structuredClone(attributed);
+      ((candidate.metadata as Record<string, unknown>).provider as Record<string, unknown>).name = name;
+      const finding = (candidate.findings as Array<{ id: string }>).find((item) => item.id.startsWith("provider:"))!;
+      finding.id = `provider:${name}:finding-1`;
+      expect(reviewProviderAttributionSchema.safeParse({ name, model: "deepseek-v4-pro" }).success).toBe(true);
+      expect(reviewResponseSchema.safeParse(candidate).success).toBe(true);
+    }
+
+    const invalidNames = ["", "DeepSeek", "1deepseek", "deep_seek", `a${"b".repeat(32)}`];
+    for (const name of invalidNames) {
+      const candidate = structuredClone(attributed);
+      ((candidate.metadata as Record<string, unknown>).provider as Record<string, unknown>).name = name;
+      const finding = (candidate.findings as Array<{ id: string }>).find((item) => item.id.startsWith("provider:"))!;
+      finding.id = `provider:${name}:finding-1`;
+      expect(reviewProviderAttributionSchema.safeParse({ name, model: "deepseek-v4-pro" }).success).toBe(false);
       expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
     }
+
+    const validModels = ["a", "x".repeat(128)];
+    for (const model of validModels) {
+      const candidate = structuredClone(attributed);
+      ((candidate.metadata as Record<string, unknown>).provider as Record<string, unknown>).model = model;
+      expect((candidate.findings as Array<{ id: string }>).find((finding) => finding.id.startsWith("provider:"))!.id).toBe(baselineProviderFinding.id);
+      expect(reviewProviderAttributionSchema.safeParse({ name: "local-reviewer", model }).success).toBe(true);
+      expect(reviewResponseSchema.safeParse(candidate).success).toBe(true);
+    }
+
+    const invalidModels = ["", "deepseek v4", "deepseek\n-v4", "https://provider.invalid/model", "models/deepseek-v4", "models\\deepseek-v4", "x".repeat(129)];
+    for (const model of invalidModels) {
+      const candidate = structuredClone(attributed);
+      ((candidate.metadata as Record<string, unknown>).provider as Record<string, unknown>).model = model;
+      expect((candidate.findings as Array<{ id: string }>).find((finding) => finding.id.startsWith("provider:"))!.id).toBe(baselineProviderFinding.id);
+      expect(reviewProviderAttributionSchema.safeParse({ name: "local-reviewer", model }).success).toBe(false);
+      expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
+    }
+
+    const extraField = { name: "local-reviewer", model: "deepseek-v4-pro", promptVersion: "secret" };
+    expect(reviewProviderAttributionSchema.safeParse(extraField).success).toBe(false);
+    const candidate = structuredClone(attributed);
+    (candidate.metadata as Record<string, unknown>).provider = extraField;
+    expect(reviewResponseSchema.safeParse(candidate).success).toBe(false);
   });
 
   for (const evidenceType of ["image", "screenshot"] as const) {

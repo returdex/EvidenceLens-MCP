@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { reviewToolResultSchema } from "../../src/contracts/review.js";
+import { handleReviewRequest } from "../../src/tools/review.js";
 
 const documents = ["docs/mcp-contract.md", "README.md"] as const;
 
@@ -23,6 +25,17 @@ function findForbiddenDeterminismClaims(markdown: string): string[] {
     || /provider-backed[^.;]*(?:byte-for-byte|deterministic(?:ally)? ordered|stable order|deterministic order)/u.test(clause)
     || /provider findings?[^.;]*(?:deterministic(?:ally)? ordered|stable order|deterministic order)/u.test(clause)
   );
+}
+
+function firstJsonBlockUnderHeading(markdown: string, heading: string): unknown {
+  const headingStart = markdown.indexOf(`## ${heading}`);
+  if (headingStart < 0) throw new Error(`Missing ${heading} heading`);
+  const remainder = markdown.slice(headingStart + heading.length + 3);
+  const nextHeading = remainder.search(/\n##\s/u);
+  const section = nextHeading < 0 ? remainder : remainder.slice(0, nextHeading);
+  const json = section.match(/```json\s*([\s\S]*?)```/u)?.[1];
+  if (json === undefined) throw new Error(`Missing JSON block under ${heading}`);
+  return JSON.parse(json);
 }
 
 describe("public attribution and determinism documentation contract", () => {
@@ -124,5 +137,16 @@ describe("public attribution and determinism documentation contract", () => {
     expect(contract).toContain('"provider": {');
     expect(contract).toContain('"name": "deepseek"');
     expect(contract).toContain('"model": "deepseek-v4-pro"');
+  });
+
+  it("keeps the documented INVALID_REQUEST example equal to stable runtime output", async () => {
+    const documented = firstJsonBlockUnderHeading(await readFile("docs/mcp-contract.md", "utf8"), "Error response");
+    const runtime = await handleReviewRequest({ reviewId: "docs-invalid-request", objective: "", evidence: [] });
+    const actual = JSON.parse(reviewToolResultSchema.parse(runtime).content[0]!.text) as unknown;
+    const expected = { ok: false, code: "INVALID_REQUEST", message: "Invalid request" };
+
+    expect(documented).toEqual(expected);
+    expect(actual).toEqual(expected);
+    expect(documented).toEqual(actual);
   });
 });
