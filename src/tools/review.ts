@@ -24,6 +24,7 @@ const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.3";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
+const MAX_PROVIDER_PUBLIC_VALUE_NODES = 10_000;
 
 export interface ReviewHandlerOptions {
   filesystemPolicy?: FilesystemPolicy;
@@ -115,6 +116,27 @@ function namespaceProviderFindings(result: ProviderReviewResult, deterministic: 
   return namespaced;
 }
 
+function assertNoForbiddenProviderStrings(findings: readonly ReviewFinding[], forbiddenValues: ReadonlySet<string>): void {
+  const seen = new Set<object>();
+  let visitedNodes = 0;
+
+  const containsForbiddenValue = (value: unknown): boolean => {
+    if (typeof value === "string") {
+      return [...forbiddenValues].some((forbidden) => value.includes(forbidden));
+    }
+    if (typeof value !== "object" || value === null || seen.has(value)) return false;
+    visitedNodes += 1;
+    if (visitedNodes > MAX_PROVIDER_PUBLIC_VALUE_NODES) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    seen.add(value);
+    if (Array.isArray(value)) return value.some(containsForbiddenValue);
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    return Object.values(value).some(containsForbiddenValue);
+  };
+
+  if (containsForbiddenValue(findings)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+}
+
 function validateProviderResultIdentity(
   provider: ReviewProvider,
   request: ProviderReviewRequest,
@@ -178,10 +200,16 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
       const providerResult = parsedProviderResult.data;
       validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
+      const providerFindings = namespaceProviderFindings(providerResult, deterministicFindings);
+      const forbiddenProviderValues = new Set([
+        expectedProviderRequest.inputFingerprint,
+        expectedProviderRequest.promptVersion
+      ].filter((value) => value.length > 0));
+      assertNoForbiddenProviderStrings(providerFindings, forbiddenProviderValues);
       internal = {
         deterministicFindings,
         providerResult,
-        providerFindings: namespaceProviderFindings(providerResult, deterministicFindings)
+        providerFindings
       };
 
       providerMetadata = internal.providerFindings.length > 0

@@ -580,12 +580,14 @@ describe("provider review MCP boundary", () => {
       for (const privateToken of ["inputFingerprint", "promptVersion"] as const) {
         for (const field of fields) {
           const base = fakeProvider();
+          let forbiddenValue = "";
           const result = payload(await handleReviewRequest(request, {
             provider: {
               ...base,
               async review(providerRequest) {
                 const providerResult = await base.review(providerRequest);
-                const value = `${sentinel}:${providerRequest[privateToken]}`;
+                forbiddenValue = providerRequest[privateToken];
+                const value = `${sentinel}:${forbiddenValue}`;
                 return {
                   ...providerResult,
                   modelFindings: [field.mutate(providerResult.modelFindings[0]!, value)]
@@ -596,6 +598,7 @@ describe("provider review MCP boundary", () => {
           const serialized = JSON.stringify(result);
           expect(result, `${privateToken} in ${field.label}`).toEqual(failure);
           expect(serialized, `${privateToken} in ${field.label}`).not.toContain(sentinel);
+          expect(serialized, `${privateToken} in ${field.label}`).not.toContain(forbiddenValue);
         }
       }
 
