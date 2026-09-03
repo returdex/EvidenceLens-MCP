@@ -67,49 +67,181 @@ The analyzer is provider-independent `deterministic-rules` version `1.0.0`. It c
 
 When configured, the runtime also invokes the built-in DeepSeek provider through an internal replaceable `ReviewProvider` seam. The provider receives only bounded normalized evidence, role-labelled claims, the objective, fixed prompt version, allowlisted model/inference settings, and an input fingerprint. Deterministic and provider findings remain separate internally; provider findings are validated, namespaced, and then exposed as public finding elements. Provider-backed finding content may vary between calls. Provider-backed responses guarantee only strict schema validation, safe attribution, provider finding namespacing, and locally validated citation/hash provenance.
 
-The optional additive `metadata.provider` child contains exactly provider `name` and `model`, and is present if and only if provider findings are returned. The deterministic analyzer fields remain present on every successful response. All prior fields and deterministic-only response bytes are retained; consumers should tolerate the optional provider child on provider-backed responses. Only provider `name` and `model` are public attribution. Strict provider envelopes discard non-public fields: credentials/API keys, endpoint/base URL, prompt text/version, input fingerprint, provider request/result envelope, raw upstream response, and retry/transport internals are never public envelope fields and are never serialized as such. Exact echoes of the current input fingerprint or prompt-version value anywhere in projected provider finding strings are rejected before projection; these failures return sanitized `PROVIDER_FAILURE` without rejected values in payloads or logs. This bounded check does not claim to detect encoded, transformed, or previously unknown secrets. A fake or local compatible provider may be injected by embedders/tests without changing the MCP request contract. No arbitrary npm module or provider name is loaded.
+The optional additive `metadata.provider` child contains exactly provider `name` and `model`, and is present if and only if provider findings are returned. The deterministic analyzer fields remain present on every successful response. All prior fields and deterministic-only response bytes are retained; consumers should tolerate the optional provider child on provider-backed responses. Only provider `name` and `model` are public attribution. Strict provider envelopes discard non-public fields: credentials/API keys, endpoint/base URL, prompt text/version, input fingerprint, provider request/result envelope, raw upstream response, and retry/transport internals are never public envelope fields and are never serialized as such. Exact echoes of the current input fingerprint or prompt-version value in provider-authored finding strings—the original ID suffix, title, summary, observation, interpretation, uncertainty, or follow-up checks—are rejected before projection; locally validated evidence IDs, source references, typed locations, and hashes are not provider-authored and are not scanned. These failures return sanitized `PROVIDER_FAILURE` without rejected values in payloads or logs. This bounded check does not claim to detect encoded, transformed, or previously unknown secrets. A fake or local compatible provider may be injected by embedders/tests without changing the MCP request contract. No arbitrary npm module or provider name is loaded.
 
 DeepSeek configuration uses the ignored `.evidencelens.local.json` file or typed `DEEPSEEK_*` environment values. The redacted example is [.evidencelens.local.example.json](../.evidencelens.local.example.json). Defaults are `https://api.deepseek.com` and `deepseek-v4-pro`; allowed models are `deepseek-v4-pro`, `deepseek-v4-flash`, and `deepseek-v4-flash-vision-exp`. Chat Completions requests enable thinking mode and use `reasoning_effort: high` for V4 text models; `deepseek-v4-flash-vision-exp` instead receives visual evidence as official base64 `image_url` content and no thinking parameters. The provider asks the model for compact evidence references only; citation roles, hashes, source references, and retained visual payload hashes are enriched from local normalized evidence and are never trusted from model output. Timeout, retry, total-wait, temperature, and token bounds are enforced before provider construction. Transport retries are limited to transient 429/5xx/network/timeout failures, with at most two retries and bounded total wait. Missing credentials/configuration fail closed. The opt-in live test uses a placeholder fixture image and may incur provider cost; credential-free contract fixtures are the regression gate.
 
 ```json
 {
-  "ok": true,
-  "requestId": "review-001",
-  "status": "accepted",
-  "findings": [{
-    "id": "contradiction-example",
-    "type": "contradiction",
-    "severity": "high",
-    "confidence": "medium",
-    "title": "Solution contradicts a requirement",
-    "summary": "The solution claim has an opposing negation or incompatible scalar value.",
-    "observation": "Rule contradiction matched a normalized claim key.",
-    "interpretation": "The solution claim conflicts with the cited requirement.",
-    "uncertainty": "Lexical comparison cannot establish intent beyond the cited wording.",
-    "followUpChecks": ["Inspect the cited source locations and confirm the intended requirement or value."],
-    "evidenceIds": ["brief-1"],
-    "citations": [{
-      "evidenceId": "brief-1",
+  "reviewId": "docs-deterministic-review",
+  "objective": "Check threshold consistency.",
+  "evidence": [
+    {
+      "id": "docs-brief",
       "role": "assignment_brief",
-      "contentHash": "2fe21433f69d10ba75c55efee2e8e4f17d9b3145176db635e8957ba40f023953",
-      "sourceReference": "course/assignment-brief",
-      "location": { "kind": "text", "startLine": 1, "endLine": 1 },
-      "visual": false
-    }]
-  }],
-  "normalizedEvidence": [{
-    "source": { "id": "brief-1", "type": "text", "reference": "course/assignment-brief" },
-    "role": "assignment_brief",
-    "contentHash": "2fe21433f69d10ba75c55efee2e8e4f17d9b3145176db635e8957ba40f023953",
-    "extraction": {
-      "extractor": "text-normalizer",
-      "extractorVersion": "1.0.0",
-      "generatedAt": "1970-01-01T00:00:00.000Z",
-      "partial": false
+      "type": "text",
+      "reference": "docs/assignment-brief",
+      "content": "Threshold must be 4."
     },
-    "references": [{ "kind": "text", "startLine": 1, "endLine": 1 }],
-    "warnings": []
-  }],
+    {
+      "id": "docs-rubric",
+      "role": "rubric",
+      "type": "text",
+      "reference": "docs/rubric",
+      "content": "Assessment rubric."
+    },
+    {
+      "id": "docs-instructions",
+      "role": "teacher_instructions",
+      "type": "text",
+      "reference": "docs/teacher-guidance",
+      "content": "Teacher guidance."
+    },
+    {
+      "id": "docs-solution",
+      "role": "solution",
+      "type": "text",
+      "reference": "docs/solution",
+      "content": "Threshold = 3."
+    }
+  ]
+}
+```
+
+The complete deterministic-only runtime response for that exact request is:
+
+```json
+{
+  "ok": true,
+  "requestId": "docs-deterministic-review",
+  "status": "accepted",
+  "findings": [
+    {
+      "id": "omission-d9e27461d1c59d8797e0c0af",
+      "type": "omission",
+      "severity": "medium",
+      "confidence": "medium",
+      "title": "Required claim may be omitted",
+      "summary": "No sufficiently overlapping solution claim was found for this obligation.",
+      "observation": "Rule omission matched normalized claim key 4 threshold.",
+      "interpretation": "No sufficiently overlapping solution claim was found for this obligation.",
+      "uncertainty": "The deterministic lexical rule may miss a semantically equivalent claim; inspect the solution around the cited requirement.",
+      "followUpChecks": [
+        "Inspect the cited source locations and confirm the intended requirement or value."
+      ],
+      "evidenceIds": [
+        "docs-brief"
+      ],
+      "citations": [
+        {
+          "evidenceId": "docs-brief",
+          "role": "assignment_brief",
+          "contentHash": "6aaab2bd63746e055479aca7f3cc623fa619f922c90c3d5cb792eebceba58e96",
+          "sourceReference": "docs/assignment-brief",
+          "location": {
+            "kind": "text",
+            "startLine": 1,
+            "endLine": 1
+          },
+          "visual": false
+        }
+      ]
+    }
+  ],
+  "normalizedEvidence": [
+    {
+      "source": {
+        "id": "docs-brief",
+        "type": "text",
+        "reference": "docs/assignment-brief"
+      },
+      "role": "assignment_brief",
+      "contentHash": "6aaab2bd63746e055479aca7f3cc623fa619f922c90c3d5cb792eebceba58e96",
+      "extraction": {
+        "extractor": "text-normalizer",
+        "extractorVersion": "1.0.0",
+        "generatedAt": "1970-01-01T00:00:00.000Z",
+        "partial": false
+      },
+      "references": [
+        {
+          "kind": "text",
+          "startLine": 1,
+          "endLine": 1
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "source": {
+        "id": "docs-rubric",
+        "type": "text",
+        "reference": "docs/rubric"
+      },
+      "role": "rubric",
+      "contentHash": "32b009630b6c908840e371433f00a7a81f89e1a40b93bb5670bec6c0b9d73271",
+      "extraction": {
+        "extractor": "text-normalizer",
+        "extractorVersion": "1.0.0",
+        "generatedAt": "1970-01-01T00:00:00.000Z",
+        "partial": false
+      },
+      "references": [
+        {
+          "kind": "text",
+          "startLine": 1,
+          "endLine": 1
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "source": {
+        "id": "docs-instructions",
+        "type": "text",
+        "reference": "docs/teacher-guidance"
+      },
+      "role": "teacher_instructions",
+      "contentHash": "fa37e1795084c641ec9bb57b92163256236370f0ede3e25570ed1db19ce09f73",
+      "extraction": {
+        "extractor": "text-normalizer",
+        "extractorVersion": "1.0.0",
+        "generatedAt": "1970-01-01T00:00:00.000Z",
+        "partial": false
+      },
+      "references": [
+        {
+          "kind": "text",
+          "startLine": 1,
+          "endLine": 1
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "source": {
+        "id": "docs-solution",
+        "type": "text",
+        "reference": "docs/solution"
+      },
+      "role": "solution",
+      "contentHash": "861f23bea05dc92ce4cc8ba28624be37a72578806d4a0f99ebbfbd34b33740cd",
+      "extraction": {
+        "extractor": "text-normalizer",
+        "extractorVersion": "1.0.0",
+        "generatedAt": "1970-01-01T00:00:00.000Z",
+        "partial": false
+      },
+      "references": [
+        {
+          "kind": "text",
+          "startLine": 1,
+          "endLine": 1
+        }
+      ],
+      "warnings": []
+    }
+  ],
   "metadata": {
     "serverName": "evidencelens",
     "serverVersion": "0.1.3",
@@ -124,7 +256,7 @@ Finding fields are exactly `id`, `type`, `severity`, `confidence`, `title`, `sum
 
 Each citation maps one finding claim to one normalized evidence reference. Text locations are inclusive line ranges; table locations are sheet, row, column, and A1 cell; PDF locations are page numbers; image and screenshot locations are typed image references. Image/screenshot citations are visual and carry the normalized visual payload hash. A PDF page citation is visual only when that page has a retained rendered payload and then carries `visualPayloadSha256`. Scanned or otherwise uninspectable visual evidence is not semantically interpreted by this engine; it is cited visually when possible and findings retain explicit uncertainty and follow-up checks.
 
-Authorized normalization passes bounded request-scoped analysis payloads for inline and filesystem text/table/PDF/image evidence directly to the analyzer. The analyzer receives no filesystem path or read adapter and never reopens a path. Extracted raw text and raw filesystem read buffers are transient and cleared after analysis; they never appear in `ReviewResponse`. As an explicit exception, images and scanned PDF pages may retain bounded visual payload bytes as base64 for client rendering. These payloads are subject to the byte, dimension, pixel, page, and evidence-item limits below and may contain sensitive source content, so clients should avoid logging or redistributing them and apply appropriate privacy/access controls. Filesystem results expose only `filesystem://root-id/relative-path` provenance.
+Authorized normalization passes a deep-isolated, bounded request-scoped analysis view for inline and filesystem text/table/PDF/image evidence to the analyzer. The analyzer receives no filesystem path or read adapter and never reopens a path. On every success or failure, cleanup makes a best-effort pass over stable references from both the original and analyzer-isolated payloads: it clears transient text and table strings, zeroes captured mutable byte buffers, and continues across all payloads even if one cleanup action fails. A cleanup fault returns sanitized `INTERNAL_ERROR` only when no earlier typed request, limit, or provider error is pending; an earlier error keeps precedence. Transient raw text and raw filesystem read buffers never appear in `ReviewResponse`. As an explicit exception, images and scanned PDF pages may retain bounded visual payload bytes as base64 for client rendering. These payloads are subject to the byte, dimension, pixel, page, and evidence-item limits below and may contain sensitive source content, so clients should avoid logging or redistributing them and apply appropriate privacy/access controls. Filesystem results expose only `filesystem://root-id/relative-path` provenance.
 
 Every normalized artifact includes source identity, a lowercase SHA-256 content hash, extractor metadata, one or more typed references, and warnings. Text references identify lines. PDF references identify pages; scanned or unextractable pages are partial and retain actual bounded rendered PNG visual payload bytes or return a safe parser error. Image and screenshot references identify dimensions and MIME, with bounded visual payload metadata and bytes. Table references identify sheet, row, column, and A1 cell coordinates. Formula-like table values remain literal and emit `CELL_FORMULA_LITERAL` warnings.
 
