@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 gap-closure plan 09-03 ready to execute
-last_updated: "2026-09-03T00:49:01.625Z"
+stopped_at: Completed 09-03-PLAN.md; Phase 09 awaits re-verification
+last_updated: "2026-09-03T10:29:29.094Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 22
-  completed_plans: 21
-  percent: 73
+  completed_plans: 22
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY TO EXECUTE
+Phase: 09 (public-provider-attribution-and-determinism-contract) — EXECUTING
 Plan: 3 of 3
 
 - Phase: 9 of 11
@@ -83,6 +83,9 @@ Plan: 3 of 3
 - [Phase 09]: Validate local deterministic output before provider translation, provider-owned projection inside its own boundary, and the final merged response outside that boundary.
 - [Phase 09]: Treat every configured-provider return as unknown and cap modelFindings and deterministicFindings independently at 100 entries.
 - [Phase 09]: Lock deterministic behavior with complete raw MCP bytes plus a separately hand-maintained ordered finding projection.
+- [Phase 09]: Validate PDF visual provenance in both citation and full-response schemas against the retained payload for the cited page. — This prevents non-visual hashes and cross-page claims.
+- [Phase 09]: Translate analyzer throws at the analyzer seam and keep provider result parsing, identity, namespacing, metadata, and provider-only projection inside one sanitized provider-owned boundary. — Failure codes now identify the responsible subsystem without leaking thrown details.
+- [Phase 09]: Exercise provider attribution grammar from a valid provider-backed response with synchronized provider finding namespaces. — Each invalid candidate now fails its intended child grammar.
 
 ## Performance Metrics
 
@@ -101,11 +104,12 @@ Plan: 3 of 3
 | Phase 06 P02 | 11min | 2 tasks | 9 files |
 | Phase 09 P01 | 8 min | 3 tasks | 8 files |
 | Phase 09 P02 | 7 min | 3 tasks | 7 files |
+| Phase 09 P03 | 8 min | 3 tasks | 5 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-03
-- **Stopped at:** Phase 09 gap-closure plan 09-03 ready to execute
+- **Last session:** 2026-09-03T10:29:05.801Z
+- **Stopped at:** Completed 09-03-PLAN.md; Phase 09 awaits re-verification
 - **Resume file:** None
 
 ## Next Action
