@@ -137,7 +137,7 @@ Parser limits include `MAX_TEXT_BYTES`, `MAX_TABLE_BYTES`, `MAX_PDF_BYTES`, `MAX
 ## Error response
 
 ```json
-{ "ok": false, "code": "INVALID_REQUEST", "message": "Review request failed validation" }
+{ "ok": false, "code": "INVALID_REQUEST", "message": "Invalid request" }
 ```
 
 Stable codes are `INVALID_REQUEST`, `INVALID_REVIEW_ROLES`, `UNSUPPORTED_EVIDENCE_TYPE`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`, `ACCESS_DENIED`, `PROVIDER_FAILURE`, and `INTERNAL_ERROR`. Their stable messages are respectively `Invalid request`, `Review evidence roles are invalid`, `Unsupported evidence type`, `Unsupported evidence format`, `Evidence exceeds the configured limit`, `Filesystem access denied`, `Provider failure`, and `Internal error`. Configuration failures use `Invalid filesystem root configuration` before server start. Errors never include paths, secrets, raw evidence, errno details, or stacks.
