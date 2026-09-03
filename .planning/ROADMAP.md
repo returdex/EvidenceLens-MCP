@@ -176,7 +176,7 @@ Plans:
   1. Public responses identify deterministic and provider-backed analyzers with stable provider/model version metadata without exposing keys, upstream envelopes, or internal fingerprints.
   2. Existing citation, hash, request identifier, and timestamp provenance remains schema-valid and backwards-compatible through an explicit contract evolution.
   3. Documentation and tests scope byte-for-byte determinism to deterministic/offline output and describe provider-backed variability accurately.
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 **Wave 1**
