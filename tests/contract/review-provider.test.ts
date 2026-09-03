@@ -511,9 +511,21 @@ describe("provider review MCP boundary", () => {
     type MutableAnalysis = Parameters<ReviewAnalyzer["analyze"]>[0];
     const captureRun = async (mutate?: (analysis: MutableAnalysis) => void) => {
       let captured: ProviderReviewRequest | undefined;
+      let providerRequestFrozen = false;
       const provider: ReviewProvider = {
         name: "local-reviewer",
         async review(providerRequest) {
+          providerRequestFrozen = [
+            providerRequest,
+            providerRequest.evidence,
+            ...providerRequest.evidence,
+            ...providerRequest.evidence.flatMap((evidence) => [evidence.references, ...evidence.references]),
+            providerRequest.requirements,
+            ...providerRequest.requirements,
+            providerRequest.solutionClaims,
+            ...providerRequest.solutionClaims,
+            providerRequest.inference
+          ].every(Object.isFrozen);
           captured = structuredClone(providerRequest);
           return {
             provider: "local-reviewer",
@@ -534,10 +546,11 @@ describe("provider review MCP boundary", () => {
         }
       };
       const response = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { analyzer, provider })));
-      return { captured: captured!, response };
+      return { captured: captured!, providerRequestFrozen, response };
     };
 
     const oracle = await captureRun();
+    expect(oracle.providerRequestFrozen).toBe(true);
     const mutations: Array<{ label: string; mutate: (analysis: MutableAnalysis) => void }> = [
       { label: "replace payloads", mutate: (analysis) => { analysis.payloads = []; } },
       { label: "modify payload", mutate: (analysis) => { analysis.payloads[0]!.reference = "analyzer-mutated-reference"; } },
@@ -551,13 +564,14 @@ describe("provider review MCP boundary", () => {
 
     for (const mutation of mutations) {
       const actual = await captureRun(mutation.mutate);
+      expect(actual.providerRequestFrozen, mutation.label).toBe(true);
       expect(actual.captured, mutation.label).toEqual(oracle.captured);
       expect(actual.captured.inputFingerprint, mutation.label).toBe(oracle.captured.inputFingerprint);
       expect(actual.response.normalizedEvidence, mutation.label).toEqual(oracle.response.normalizedEvidence);
     }
   });
 
-  it("classifies analyzer-installed throwing accessors as internal rather than client failures", async () => {
+  it("does not access analyzer-installed throwing getters while building the provider request", async () => {
     const analyzer: ReviewAnalyzer = {
       name: "deterministic-rules",
       version: "1.0.0",
@@ -572,9 +586,8 @@ describe("provider review MCP boundary", () => {
         return [];
       }
     };
-    const result = payload(await handleReviewRequest(request, { analyzer, provider: fakeProvider() }));
-    expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
-    expect(result.code).not.toBe("INVALID_REQUEST");
+    const result = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { analyzer, provider: fakeProvider() })));
+    expect(result.ok).toBe(true);
     expect(JSON.stringify(result)).not.toMatch(/sentinel|stack/iu);
   });
 
@@ -606,11 +619,10 @@ describe("provider review MCP boundary", () => {
         version: "1.0.0",
         analyze(analysis) {
           const payloadEntry = analysis.payloads[0]!;
-          analysis.payloads[0] = new Proxy(payloadEntry, {
-            get(target, property, receiver) {
-              if (property === "bytes") throw failure;
-              return Reflect.get(target, property, receiver) as unknown;
-            }
+          Object.defineProperty(payloadEntry, "text", {
+            configurable: true,
+            get() { return "retained-cleanup-text"; },
+            set() { throw failure; }
           });
           return [];
         }
@@ -684,11 +696,10 @@ describe("provider review MCP boundary", () => {
       version: "1.0.0",
       analyze(analysis) {
         const payloadEntry = analysis.payloads[0]!;
-        analysis.payloads[0] = new Proxy(payloadEntry, {
-          get(target, property, receiver) {
-            if (property === "bytes") throw new TypeError("cleanup-precedence-sentinel");
-            return Reflect.get(target, property, receiver) as unknown;
-          }
+        Object.defineProperty(payloadEntry, "text", {
+          configurable: true,
+          get() { return "retained-cleanup-text"; },
+          set() { throw new TypeError("cleanup-precedence-sentinel"); }
         });
         return [];
       }

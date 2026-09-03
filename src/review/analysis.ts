@@ -1,6 +1,7 @@
 import type {
   EvidenceRole, EvidenceType, NormalizedEvidence, NormalizedEvidenceReference, ReviewCitation
 } from "../contracts/review.js";
+import { EvidenceLensError } from "../errors.js";
 
 export const ANALYSIS_LIMITS = {
   maxPayloadBytes: 32_000_000,
@@ -110,9 +111,9 @@ function visualPayloadHash(evidence: NormalizedEvidence, location: NormalizedEvi
   return undefined;
 }
 
-export function buildReviewAnalysisInput(bundle: ReviewAnalysisBundle): ReviewAnalysisInput {
-  const normalizedById = new Map(bundle.normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
-  const payloads = bundle.analysisPayloads.slice(0, ANALYSIS_LIMITS.maxClaims);
+function createReviewAnalysisInput(normalizedEvidence: NormalizedEvidence[], analysisPayloads: TransientEvidenceAnalysis[]): ReviewAnalysisInput {
+  const normalizedById = new Map(normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
+  const payloads = analysisPayloads.slice(0, ANALYSIS_LIMITS.maxClaims);
   const requirements = payloads.filter((payload) => payload.role !== "solution").flatMap(extractRequirementClaims).slice(0, ANALYSIS_LIMITS.maxClaims);
   const solutionClaims = payloads.filter((payload) => payload.role === "solution").flatMap(extractSolutionClaims).slice(0, ANALYSIS_LIMITS.maxClaims);
   const resolveCitation = (evidenceId: string, location: NormalizedEvidenceReference, visual = false): ReviewCitation => {
@@ -123,16 +124,43 @@ export function buildReviewAnalysisInput(bundle: ReviewAnalysisBundle): ReviewAn
     const intrinsicVisual = location.kind === "image" || (location.kind === "pdf" && payloadHash !== undefined);
     return { evidenceId, role: payloads.find((payload) => payload.evidenceId === evidenceId)?.role ?? "other", contentHash: evidence.contentHash, sourceReference: evidence.source.reference, location, visual: visual || intrinsicVisual, ...(payloadHash ? { visualPayloadSha256: payloadHash } : {}) };
   };
+  const cleanupTargets = payloads.map((payload) => ({
+    payload,
+    bytes: payload.bytes,
+    tableCells: payload.tableCells,
+    cells: payload.tableCells === undefined ? [] : [...payload.tableCells]
+  }));
   let cleared = false;
   const clear = () => {
     if (cleared) return;
-    cleared = true;
-    for (const payload of payloads) {
-      if (payload.bytes) payload.bytes.fill(0);
-      payload.bytes = undefined;
-      payload.text = undefined;
-      payload.tableCells = undefined;
+    let firstError: unknown;
+    const attempt = (action: () => void) => {
+      try {
+        action();
+      } catch (error) {
+        firstError ??= error;
+      }
+    };
+    for (const target of cleanupTargets) {
+      if (target.bytes !== undefined) attempt(() => { Uint8Array.prototype.fill.call(target.bytes, 0); });
+      for (const cell of target.cells) attempt(() => { cell.value = ""; });
+      attempt(() => { target.payload.bytes = undefined; });
+      attempt(() => { target.payload.text = undefined; });
+      attempt(() => { target.payload.tableCells = undefined; });
     }
+    cleared = true;
+    if (firstError !== undefined) throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
   };
-  return { normalizedEvidence: bundle.normalizedEvidence, payloads, requirements, solutionClaims, resolveCitation, clear };
+  return { normalizedEvidence, payloads, requirements, solutionClaims, resolveCitation, clear };
+}
+
+export function buildReviewAnalysisInput(bundle: ReviewAnalysisBundle): ReviewAnalysisInput {
+  return createReviewAnalysisInput(bundle.normalizedEvidence, bundle.analysisPayloads);
+}
+
+export function cloneReviewAnalysisInputForAnalyzer(input: ReviewAnalysisInput): ReviewAnalysisInput {
+  return createReviewAnalysisInput(
+    structuredClone(input.normalizedEvidence),
+    structuredClone(input.payloads)
+  );
 }

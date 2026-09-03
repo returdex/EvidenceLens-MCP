@@ -11,7 +11,7 @@ import { normalizeEvidenceBundle } from "../evidence/index.js";
 import { EvidenceLensError, toToolErrorResult } from "../errors.js";
 import type { FilesystemPolicy } from "../filesystem/policy.js";
 import type { FilesystemReadAdapter } from "../filesystem/read.js";
-import { buildReviewAnalysisInput } from "../review/analysis.js";
+import { buildReviewAnalysisInput, cloneReviewAnalysisInputForAnalyzer } from "../review/analysis.js";
 import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../review/engine.js";
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
@@ -24,6 +24,10 @@ const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.3";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
+const TRUSTED_ANALYZER_IDENTITY = {
+  name: "deterministic-rules",
+  version: "1.0.0"
+} as const;
 
 export interface ReviewHandlerOptions {
   filesystemPolicy?: FilesystemPolicy;
@@ -102,6 +106,18 @@ function providerRequest(analysis: ReturnType<typeof buildReviewAnalysisInput>, 
   return { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
 }
 
+function freezeProviderRequest(request: ProviderReviewRequest): Readonly<ProviderReviewRequest> {
+  const seen = new Set<object>();
+  const freeze = (value: unknown): void => {
+    if (typeof value !== "object" || value === null || seen.has(value)) return;
+    seen.add(value);
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  };
+  freeze(request);
+  return request;
+}
+
 function namespaceProviderFindings(result: ProviderReviewResult, deterministic: readonly ReviewFinding[]): ReviewFinding[] {
   if (!result.provider || !/^[a-z][a-z0-9-]{0,31}$/u.test(result.provider)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
   const deterministicIds = new Set(deterministic.map((finding) => finding.id));
@@ -162,17 +178,23 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
   const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
   const analysis = buildReviewAnalysisInput(bundle);
   const clearAnalysis = analysis.clear.bind(analysis);
+  const analyzerAnalysis = cloneReviewAnalysisInputForAnalyzer(analysis);
+  const clearAnalyzerAnalysis = analyzerAnalysis.clear.bind(analyzerAnalysis);
+  const expectedProviderRequest = options.provider === undefined
+    ? undefined
+    : freezeProviderRequest(providerRequest(analysis, request, options));
   const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
   let response: ReviewResponse | undefined;
   let pendingError: unknown;
   try {
     let deterministicFindings: readonly ReviewFinding[];
-    let analyzerName: ReviewAnalyzer["name"];
-    let analyzerVersion: ReviewAnalyzer["version"];
     try {
-      deterministicFindings = analyzer.analyze(analysis);
-      analyzerName = analyzer.name;
-      analyzerVersion = analyzer.version;
+      const analyzerName = analyzer.name;
+      const analyzerVersion = analyzer.version;
+      if (analyzerName !== TRUSTED_ANALYZER_IDENTITY.name || analyzerVersion !== TRUSTED_ANALYZER_IDENTITY.version) {
+        throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+      }
+      deterministicFindings = analyzer.analyze(analyzerAnalysis);
     } catch {
       throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
     }
@@ -185,15 +207,15 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       metadata: {
         serverName: SERVER_NAME,
         serverVersion: SERVER_VERSION,
-        analyzerName,
-        analyzerVersion,
+        analyzerName: TRUSTED_ANALYZER_IDENTITY.name,
+        analyzerVersion: TRUSTED_ANALYZER_IDENTITY.version,
         generatedAt: GENERATED_AT
       }
     });
     response = deterministicResponse;
 
     if (options.provider !== undefined) {
-      const expectedProviderRequest = providerRequest(analysis, request, options);
+      if (expectedProviderRequest === undefined) throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
       let internal: InternalReviewResult;
       let providerMetadata: { provider?: { name: string; model: string } };
       try {
@@ -244,10 +266,12 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
     pendingError = error;
   }
 
-  try {
-    clearAnalysis();
-  } catch {
-    if (pendingError === undefined) pendingError = new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+  for (const clear of [clearAnalysis, clearAnalyzerAnalysis]) {
+    try {
+      clear();
+    } catch {
+      if (pendingError === undefined) pendingError = new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+    }
   }
 
   if (pendingError !== undefined) throw pendingError;
