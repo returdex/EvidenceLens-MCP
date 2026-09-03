@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import { reviewProviderAttributionSchema, reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
-import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
+import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
@@ -456,6 +456,128 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("rejects spoofed analyzer identities, reads changing getters once, and publishes only the server identity", async () => {
+    const failure = { ok: false, code: "INTERNAL_ERROR", message: "Internal error" };
+    const sentinel = "analyzer-secret-sentinel";
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      const spoofedAnalyzers = [
+        { name: sentinel, version: "9.9.9", analyze() { return []; } },
+        { get name() { return sentinel; }, version: "1.0.0", analyze() { return []; } },
+        { name: "deterministic-rules", get version() { return "9.9.9"; }, analyze() { return []; } }
+      ];
+      for (const analyzer of spoofedAnalyzers) {
+        const result = payload(await handleReviewRequest(request, { analyzer: analyzer as ReviewAnalyzer }));
+        expect(result).toEqual(failure);
+        expect(JSON.stringify(result)).not.toMatch(/sentinel|9\.9\.9|stack/iu);
+      }
+
+      let nameReads = 0;
+      let versionReads = 0;
+      const changingAnalyzer = {
+        get name() {
+          nameReads += 1;
+          return nameReads === 1 ? "deterministic-rules" : sentinel;
+        },
+        get version() {
+          versionReads += 1;
+          return versionReads === 1 ? "1.0.0" : "9.9.9";
+        },
+        analyze() { return []; }
+      } as ReviewAnalyzer;
+      const success = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { analyzer: changingAnalyzer })));
+      expect(nameReads).toBe(1);
+      expect(versionReads).toBe(1);
+      expect(success.metadata.analyzerName).toBe("deterministic-rules");
+      expect(success.metadata.analyzerVersion).toBe("1.0.0");
+      expect(JSON.stringify(success)).not.toMatch(/sentinel|9\.9\.9/iu);
+
+      const consoleOutput = [...log.mock.calls, ...warn.mock.calls, ...error.mock.calls].flat().join(" ");
+      expect(consoleOutput).not.toMatch(/sentinel|9\.9\.9|stack/iu);
+      expect(log).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
+
+  it("keeps provider requests, fingerprints, and final provenance isolated from analyzer mutations", async () => {
+    type MutableAnalysis = Parameters<ReviewAnalyzer["analyze"]>[0];
+    const captureRun = async (mutate?: (analysis: MutableAnalysis) => void) => {
+      let captured: ProviderReviewRequest | undefined;
+      const provider: ReviewProvider = {
+        name: "local-reviewer",
+        async review(providerRequest) {
+          captured = structuredClone(providerRequest);
+          return {
+            provider: "local-reviewer",
+            model: providerRequest.inference.model,
+            promptVersion: providerRequest.promptVersion,
+            inputFingerprint: providerRequest.inputFingerprint,
+            modelFindings: [],
+            deterministicFindings: []
+          };
+        }
+      };
+      const analyzer: ReviewAnalyzer = {
+        name: "deterministic-rules",
+        version: "1.0.0",
+        analyze(analysis) {
+          mutate?.(analysis);
+          return [];
+        }
+      };
+      const response = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { analyzer, provider })));
+      return { captured: captured!, response };
+    };
+
+    const oracle = await captureRun();
+    const mutations: Array<{ label: string; mutate: (analysis: MutableAnalysis) => void }> = [
+      { label: "replace payloads", mutate: (analysis) => { analysis.payloads = []; } },
+      { label: "modify payload", mutate: (analysis) => { analysis.payloads[0]!.reference = "analyzer-mutated-reference"; } },
+      { label: "replace requirements", mutate: (analysis) => { analysis.requirements = []; } },
+      { label: "modify requirements", mutate: (analysis) => { if (analysis.requirements[0]) analysis.requirements[0].text = "analyzer-mutated-requirement"; } },
+      { label: "replace solution claims", mutate: (analysis) => { analysis.solutionClaims = []; } },
+      { label: "modify solution claims", mutate: (analysis) => { analysis.solutionClaims[0]!.text = "analyzer-mutated-solution"; } },
+      { label: "replace normalized evidence", mutate: (analysis) => { analysis.normalizedEvidence = []; } },
+      { label: "modify normalized evidence", mutate: (analysis) => { analysis.normalizedEvidence[0]!.source.reference = "analyzer-mutated-provenance"; } }
+    ];
+
+    for (const mutation of mutations) {
+      const actual = await captureRun(mutation.mutate);
+      expect(actual.captured, mutation.label).toEqual(oracle.captured);
+      expect(actual.captured.inputFingerprint, mutation.label).toBe(oracle.captured.inputFingerprint);
+      expect(actual.response.normalizedEvidence, mutation.label).toEqual(oracle.response.normalizedEvidence);
+    }
+  });
+
+  it("classifies analyzer-installed throwing accessors as internal rather than client failures", async () => {
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        const payloadEntry = analysis.payloads[0]!;
+        analysis.payloads[0] = new Proxy(payloadEntry, {
+          get(target, property, receiver) {
+            if (property === "evidenceId") throw new TypeError("analyzer-access-sentinel");
+            return Reflect.get(target, property, receiver) as unknown;
+          }
+        });
+        return [];
+      }
+    };
+    const result = payload(await handleReviewRequest(request, { analyzer, provider: fakeProvider() }));
+    expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+    expect(result.code).not.toBe("INVALID_REQUEST");
+    expect(JSON.stringify(result)).not.toMatch(/sentinel|stack/iu);
+  });
+
   it("uses the saved trusted cleanup instead of an analyzer replacement", async () => {
     const replacement = vi.fn(() => { throw new Error("replacement-clear-sentinel"); });
     const analyzer: ReviewAnalyzer = {
@@ -500,6 +622,60 @@ describe("provider review MCP boundary", () => {
       expect(result.code).not.toBe("PROVIDER_FAILURE");
       expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|deterministic-rules/iu);
     }
+  });
+
+  it("wipes every retained analyzer payload reference before reporting a cleanup fault", async () => {
+    const imageBytes = await readFile(new URL("../fixtures/evidence/images/rubric-screenshot.png", import.meta.url));
+    const cleanupRequest = {
+      reviewId: "cleanup-retained-reference-matrix",
+      objective: "Verify transient cleanup.",
+      evidence: [
+        { id: "brief-cleanup", role: "assignment_brief", type: "text", content: "Threshold must be 4." },
+        { id: "rubric-cleanup", role: "rubric", type: "table", content: "criterion,requirement\nthreshold,Threshold must be 4." },
+        { id: "instructions-cleanup", role: "teacher_instructions", type: "text", content: "Teacher guidance." },
+        { id: "solution-cleanup", role: "solution", type: "text", content: "Threshold = 3." },
+        { id: "image-cleanup", role: "other", type: "image", mimeType: "image/png", contentBase64: imageBytes.toString("base64") }
+      ]
+    } as const;
+    const retainedPayloads: Parameters<ReviewAnalyzer["analyze"]>[0]["payloads"] = [];
+    const retainedCells: Array<{ value: string }> = [];
+    const retainedBuffers: Uint8Array[] = [];
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        retainedPayloads.push(...analysis.payloads);
+        for (const payloadEntry of analysis.payloads) {
+          retainedCells.push(...(payloadEntry.tableCells ?? []));
+          if (payloadEntry.bytes !== undefined) retainedBuffers.push(payloadEntry.bytes);
+        }
+        const first = analysis.payloads[0]!;
+        const originalText = first.text;
+        Object.defineProperty(first, "text", {
+          configurable: true,
+          get() { return originalText; },
+          set(value: string | undefined) {
+            Object.defineProperty(first, "text", { configurable: true, writable: true, value });
+            throw new Error("cleanup-setter-sentinel");
+          }
+        });
+        return [];
+      }
+    };
+
+    const result = payload(await handleReviewRequest(cleanupRequest, { analyzer }));
+    expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+    expect(JSON.stringify(result)).not.toMatch(/sentinel|stack/iu);
+    expect(retainedPayloads.length).toBe(cleanupRequest.evidence.length);
+    for (const retained of retainedPayloads) {
+      expect(retained.text).toBeUndefined();
+      expect(retained.tableCells).toBeUndefined();
+      expect(retained.bytes).toBeUndefined();
+    }
+    expect(retainedCells.length).toBeGreaterThan(0);
+    expect(retainedCells.every((cell) => cell.value === "")).toBe(true);
+    expect(retainedBuffers.length).toBeGreaterThan(0);
+    expect(retainedBuffers.every((buffer) => buffer.every((byte) => byte === 0))).toBe(true);
   });
 
   it("preserves a pending provider failure when trusted cleanup also fails", async () => {
