@@ -231,7 +231,7 @@ describe("provider review MCP boundary", () => {
   it("enforces non-visual PDF arbitrary/retained hashes and visual PDF payload page/hash binding", async () => {
     const [textPdf, scannedPdf] = await Promise.all([
       readFile(new URL("../fixtures/evidence/pdfs/text-page.pdf", import.meta.url)),
-      readFile(new URL("../fixtures/evidence/pdfs/scanned-pages.pdf", import.meta.url))
+      readFile(new URL("../fixtures/evidence/pdfs/scanned-page.pdf", import.meta.url))
     ]);
     const pdfRequest = (reviewId: string, contentBase64: string) => ({
       ...request,
@@ -252,7 +252,8 @@ describe("provider review MCP boundary", () => {
           const result = await base.review(providerRequest);
           const source = providerRequest.evidence.find((evidence) => evidence.evidenceId === "pdf-1")!;
           const citation = spec(source);
-          const location = source.references.find((reference) => reference.kind === "pdf" && reference.pageNumber === citation.pageNumber)!;
+          const location = source.references.find((reference) => reference.kind === "pdf" && reference.pageNumber === citation.pageNumber)
+            ?? { kind: "pdf" as const, pageNumber: citation.pageNumber };
           return {
             ...result,
             modelFindings: [{
@@ -292,7 +293,11 @@ describe("provider review MCP boundary", () => {
       expect(result, testCase.label).toEqual(failure);
     }
 
-    const matchingProvider = providerWithPdfCitation(() => ({ visual: true, pageNumber: 1, visualPayloadSha256: pageOneHash }));
+    const matchingProvider = providerWithPdfCitation((source) => ({
+      visual: true,
+      pageNumber: 1,
+      visualPayloadSha256: source.visualPayloads!.find((visual) => visual.location.kind === "pdf" && visual.location.pageNumber === 1)!.sha256
+    }));
     const exactMatch = payload(await handleReviewRequest(scannedPdfRequest, { provider: matchingProvider }));
     const parsedExactMatch = reviewResponseSchema.parse(exactMatch);
     const exactCitation = parsedExactMatch.findings.find((finding) => finding.id === "provider:local-reviewer:pdf-finding")!.citations[0]!;
@@ -311,10 +316,12 @@ describe("provider review MCP boundary", () => {
       const candidate = structuredClone(testCase.base ?? textBaseline);
       const finding = (candidate.findings as Array<{ id: string; citations: Array<Record<string, unknown>> }>).find((item) => item.id.startsWith("provider:"))!;
       const currentLocation = finding.citations[0]!.location as Record<string, unknown>;
+      const location = { ...currentLocation, pageNumber: testCase.spec.pageNumber };
+      if (testCase.spec.pageNumber !== currentLocation.pageNumber) delete location.pageCount;
       finding.citations[0] = {
         ...finding.citations[0],
         visual: testCase.spec.visual,
-        location: { ...currentLocation, pageNumber: testCase.spec.pageNumber },
+        location,
         ...(testCase.spec.visualPayloadSha256 === undefined ? {} : { visualPayloadSha256: testCase.spec.visualPayloadSha256 })
       };
       if (testCase.spec.visualPayloadSha256 === undefined) delete finding.citations[0]!.visualPayloadSha256;

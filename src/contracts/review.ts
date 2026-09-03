@@ -296,11 +296,14 @@ export const reviewCitationSchema = z
   .strict()
   .superRefine((citation, ctx) => {
     const kind = citation.location.kind;
-    if ((kind === "image") !== citation.visual) {
+    if ((kind === "image" && !citation.visual) || (kind !== "image" && kind !== "pdf" && citation.visual)) {
       ctx.addIssue({ code: "custom", path: ["visual"], message: "image citations must be visual and text/table citations must not be visual" });
     }
     if ((kind === "image" || (kind === "pdf" && citation.visual)) && citation.visualPayloadSha256 === undefined) {
       ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual citations require a retained visual payload hash" });
+    }
+    if (kind === "pdf" && !citation.visual && citation.visualPayloadSha256 !== undefined) {
+      ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "non-visual PDF citations must not carry a visual payload hash" });
     }
     if (kind !== "pdf" && citation.visualPayloadSha256 !== undefined && kind !== "image") {
       ctx.addIssue({ code: "custom", path: ["visualPayloadSha256"], message: "visual payload hashes require visual citations" });
@@ -399,11 +402,18 @@ export const reviewResponseSchema = z
         if (!evidence.references.some((reference) => JSON.stringify(reference) === JSON.stringify(citation.location))) {
           ctx.addIssue({ code: "custom", path: [...path, "location"], message: "citation location must reference normalized evidence" });
         }
-        if (evidence.source.type === "pdf" && citation.visual) {
-          const page = citation.location.kind === "pdf" ? citation.location.pageNumber : undefined;
-          const payload = page === undefined ? undefined : evidence.visualPayloads?.find((candidate) => candidate.pageNumber === page);
-          if (payload === undefined || citation.visualPayloadSha256 !== payload.sha256) {
-            ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual PDF citation must match a retained page payload" });
+        if (evidence.source.type === "pdf") {
+          if (!citation.visual && citation.visualPayloadSha256 !== undefined) {
+            ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "non-visual PDF citation must not carry a visual payload hash" });
+          }
+          if (citation.visual) {
+            const page = citation.location.kind === "pdf" ? citation.location.pageNumber : undefined;
+            const payload = page === undefined || evidence.visualPayloads === undefined
+              ? undefined
+              : evidence.visualPayloads.find((candidate) => candidate.pageNumber === page);
+            if (payload === undefined || citation.visualPayloadSha256 !== payload.sha256) {
+              ctx.addIssue({ code: "custom", path: [...path, "visualPayloadSha256"], message: "visual PDF citation must match a retained page payload" });
+            }
           }
         }
         if (evidence.source.type === "image" || evidence.source.type === "screenshot") {
