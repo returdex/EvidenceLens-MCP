@@ -192,7 +192,7 @@ Plans:
 - [x] 09-04-PLAN.md — Close provider prose exfiltration, analyzer metadata/cleanup ownership, PDF branch coverage, and success-documentation gaps
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 09-05-PLAN.md — Close provider provenance false positives, analyzer identity/input isolation, fault-tolerant cleanup, and runtime-authentic success documentation
+- [x] 09-05-PLAN.md — Close provider provenance false positives, analyzer identity/input isolation, fault-tolerant cleanup, and runtime-authentic success documentation
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
@@ -231,7 +231,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
-| 9. Public Provider Attribution and Determinism Contract | 4/5 | Gap closure planned; Wave 5 pending | - |
+| 9. Public Provider Attribution and Determinism Contract | 5/5 | Awaiting independent verification | - |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/TBD | Not started | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
@@ -243,4 +243,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-03 after v1.0 milestone gap planning*
+*Last updated: 2026-09-03 after Phase 09 plan 09-05 execution; independent verification pending*

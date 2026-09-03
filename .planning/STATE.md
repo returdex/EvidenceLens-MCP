@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 plan 09-05 ready for gap-only execution
-last_updated: "2026-09-03T13:33:49.085Z"
+stopped_at: Completed 09-05-PLAN.md; awaiting Phase 09 verification
+last_updated: "2026-09-03T16:58:41.901Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY TO EXECUTE
+Phase: 09 (public-provider-attribution-and-determinism-contract) — AWAITING VERIFICATION
 Plan: 5 of 5
 
 - Phase: 9 of 11
-- Status: Gap-closure plan 09-05 created and independently reviewed; ready to execute
+- Status: All 5 plans implemented; independent Phase 09 verification pending
 - Progress: 73%
-- Last activity: Planned the four blockers and two warnings into Wave 5 with no plan-checker blockers
+- Last activity: Completed Wave 5 gap-only plan 09-05 with all automated gates passing
 
 ## Decisions and Assumptions
 
@@ -89,6 +89,9 @@ Plan: 5 of 5
 - [Phase 09]: Use a bounded exact-token provider projection guard — Reject current fingerprint and prompt-version substrings without claiming transformed or unknown secret detection.
 - [Phase 09]: Bind trusted cleanup before analyzer invocation — Analyzer replacement cannot run, and cleanup faults cannot mask pending source-specific failures.
 - [Phase 09]: Use executable direct-schema provenance and documentation fixtures — Tests reach the intended PDF refinement and parse the published success response.
+- [Phase 09]: Validate provider-only provenance before scanning only provider-authored ID/prose/follow-up strings. — Prevents private-token leakage without rejecting locally bound evidence and citation values.
+- [Phase 09]: Build and freeze provider requests before running a deep-isolated analyzer view; publish analyzer identity only from deterministic-rules/1.0.0. — Prevents injected analyzer getters and mutations from changing provider input, fingerprints, provenance, or public identity.
+- [Phase 09]: Best-effort cleanup traverses all captured payload, cell, and buffer references before reporting its first fault, while pending errors retain precedence. — Ensures transient data is erased as completely as possible without misclassifying earlier failures.
 
 ## Performance Metrics
 
@@ -109,16 +112,17 @@ Plan: 5 of 5
 | Phase 09 P02 | 7 min | 3 tasks | 7 files |
 | Phase 09 P03 | 8 min | 3 tasks | 5 files |
 | Phase 09 P04 | 8 min | 3 tasks | 4 files |
+| Phase 09 P05 | 10 min | 3 tasks | 5 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-03T13:33:49.085Z
-- **Stopped at:** Phase 09 plan 09-05 ready for gap-only execution
+- **Last session:** 2026-09-03T16:58:41.897Z
+- **Stopped at:** Completed 09-05-PLAN.md; awaiting Phase 09 verification
 - **Resume file:** None
 
 ## Next Action
 
-Run `$gsd-execute-phase 9 --gaps-only` to execute plan 09-05.
+Await orchestrator-owned independent verification for Phase 09 before marking the phase complete.
 
 ---
-*Last updated: 2026-09-03 after Phase 09 gap-closure planning and independent plan review*
+*Last updated: 2026-09-03 after completing plan 09-05; Phase 09 verification pending*
