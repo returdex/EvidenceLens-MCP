@@ -345,6 +345,41 @@ describe("provider review MCP boundary", () => {
     });
   });
 
+  it("maps every injected analyzer exception source to one sanitized internal error", async () => {
+    const sentinels: unknown[] = [
+      new TypeError("analyzer-type-sentinel"),
+      new RangeError("analyzer-range-sentinel"),
+      new Error("analyzer-error-sentinel"),
+      "analyzer-non-error-sentinel"
+    ];
+    for (const sentinel of sentinels) {
+      const analyzer: ReviewAnalyzer = {
+        name: "deterministic-rules",
+        version: "1.0.0",
+        analyze() { throw sentinel; }
+      };
+      const result = payload(await handleReviewRequest(request, { analyzer }));
+      expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+      expect(result.code).not.toBe("INVALID_REQUEST");
+      expect(result.code).not.toBe("LIMIT_EXCEEDED");
+      expect(result.code).not.toBe("PROVIDER_FAILURE");
+      expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|deterministic-rules/iu);
+    }
+  });
+
+  it("preserves exact malformed-request and recognized-limit classifications", async () => {
+    expect(payload(await handleReviewRequest({ ...request, objective: "" }))).toEqual({
+      ok: false,
+      code: "INVALID_REQUEST",
+      message: "Invalid request"
+    });
+    expect(payload(await handleReviewRequest({ ...request, limits: { maxEvidenceItems: 1 } }))).toEqual({
+      ok: false,
+      code: "LIMIT_EXCEEDED",
+      message: "Evidence exceeds the configured limit"
+    });
+  });
+
   it("retains citation bindings to normalized evidence", async () => {
     const result = payload(await handleReviewRequest(request, {
       provider: fakeProvider(),
@@ -539,6 +574,45 @@ describe("provider review MCP boundary", () => {
       expect(result.code).not.toBe("LIMIT_EXCEEDED");
       expect(result.code).not.toBe("INTERNAL_ERROR");
       expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|local-reviewer/iu);
+    }
+  });
+
+  it("contains hostile provider getter and Proxy access inside the provider failure boundary", async () => {
+    const hostileResults: Array<{ label: string; value: unknown }> = [
+      {
+        label: "provider getter TypeError",
+        value: Object.defineProperty({}, "provider", {
+          enumerable: true,
+          get() { throw new TypeError("provider-getter-type-sentinel"); }
+        })
+      },
+      {
+        label: "provider getter RangeError",
+        value: Object.defineProperty({}, "provider", {
+          enumerable: true,
+          get() { throw new RangeError("provider-getter-range-sentinel"); }
+        })
+      },
+      {
+        label: "provider Proxy ordinary Error",
+        value: new Proxy({}, {
+          ownKeys() { throw new Error("provider-proxy-error-sentinel"); }
+        })
+      },
+      {
+        label: "provider Proxy non-Error",
+        value: new Proxy({}, {
+          get() { throw "provider-proxy-non-error-sentinel"; }
+        })
+      }
+    ];
+    for (const hostile of hostileResults) {
+      const result = payload(await handleReviewRequest(request, { provider: unsafeProvider(hostile.value) }));
+      expect(result, hostile.label).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+      expect(result.code).not.toBe("INVALID_REQUEST");
+      expect(result.code).not.toBe("LIMIT_EXCEEDED");
+      expect(result.code).not.toBe("INTERNAL_ERROR");
+      expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|provider-getter|provider-proxy|local-reviewer/iu);
     }
   });
 
