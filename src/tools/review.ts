@@ -161,11 +161,18 @@ interface InternalReviewResult {
 async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
   const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
   const analysis = buildReviewAnalysisInput(bundle);
+  const clearAnalysis = analysis.clear.bind(analysis);
   const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
+  let response: ReviewResponse | undefined;
+  let pendingError: unknown;
   try {
     let deterministicFindings: readonly ReviewFinding[];
+    let analyzerName: ReviewAnalyzer["name"];
+    let analyzerVersion: ReviewAnalyzer["version"];
     try {
       deterministicFindings = analyzer.analyze(analysis);
+      analyzerName = analyzer.name;
+      analyzerVersion = analyzer.version;
     } catch {
       throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
     }
@@ -178,62 +185,74 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       metadata: {
         serverName: SERVER_NAME,
         serverVersion: SERVER_VERSION,
-        analyzerName: analyzer.name,
-        analyzerVersion: analyzer.version,
+        analyzerName,
+        analyzerVersion,
         generatedAt: GENERATED_AT
       }
     });
-    if (options.provider === undefined) return deterministicResponse;
+    response = deterministicResponse;
 
-    const expectedProviderRequest = providerRequest(analysis, request, options);
-    let internal: InternalReviewResult;
-    let providerMetadata: { provider?: { name: string; model: string } };
-    try {
-      let untrustedProviderResult: unknown;
+    if (options.provider !== undefined) {
+      const expectedProviderRequest = providerRequest(analysis, request, options);
+      let internal: InternalReviewResult;
+      let providerMetadata: { provider?: { name: string; model: string } };
       try {
-        untrustedProviderResult = await options.provider.review(expectedProviderRequest);
+        let untrustedProviderResult: unknown;
+        try {
+          untrustedProviderResult = await options.provider.review(expectedProviderRequest);
+        } catch (error) {
+          if (error instanceof ProviderError) throw error;
+          throw new ProviderError("PROVIDER_REQUEST_FAILED");
+        }
+        const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
+        if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+        const providerResult = parsedProviderResult.data;
+        validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
+        const providerFindings = namespaceProviderFindings(providerResult, deterministicFindings);
+        const forbiddenProviderValues = new Set([
+          expectedProviderRequest.inputFingerprint,
+          expectedProviderRequest.promptVersion
+        ].filter((value) => value.length > 0));
+        assertNoForbiddenProviderStrings(providerFindings, forbiddenProviderValues);
+        internal = {
+          deterministicFindings,
+          providerResult,
+          providerFindings
+        };
+
+        providerMetadata = internal.providerFindings.length > 0
+          ? { provider: { name: providerResult.provider, model: providerResult.model } }
+          : {};
+        reviewResponseSchema.parse({
+          ...deterministicResponse,
+          findings: internal.providerFindings,
+          metadata: { ...deterministicResponse.metadata, ...providerMetadata }
+        });
       } catch (error) {
         if (error instanceof ProviderError) throw error;
-        throw new ProviderError("PROVIDER_REQUEST_FAILED");
+        throw new ProviderError("PROVIDER_INVALID_RESPONSE");
       }
-      const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
-      if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
-      const providerResult = parsedProviderResult.data;
-      validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
-      const providerFindings = namespaceProviderFindings(providerResult, deterministicFindings);
-      const forbiddenProviderValues = new Set([
-        expectedProviderRequest.inputFingerprint,
-        expectedProviderRequest.promptVersion
-      ].filter((value) => value.length > 0));
-      assertNoForbiddenProviderStrings(providerFindings, forbiddenProviderValues);
-      internal = {
-        deterministicFindings,
-        providerResult,
-        providerFindings
-      };
 
-      providerMetadata = internal.providerFindings.length > 0
-        ? { provider: { name: providerResult.provider, model: providerResult.model } }
-        : {};
-      reviewResponseSchema.parse({
+      const mergedResponse = {
         ...deterministicResponse,
-        findings: internal.providerFindings,
+        findings: [...internal.deterministicFindings, ...internal.providerFindings],
         metadata: { ...deterministicResponse.metadata, ...providerMetadata }
-      });
-    } catch (error) {
-      if (error instanceof ProviderError) throw error;
-      throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+      } satisfies ReviewResponse;
+      response = reviewResponseSchema.parse(mergedResponse);
     }
-
-    const response = {
-      ...deterministicResponse,
-      findings: [...internal.deterministicFindings, ...internal.providerFindings],
-      metadata: { ...deterministicResponse.metadata, ...providerMetadata }
-    } satisfies ReviewResponse;
-    return reviewResponseSchema.parse(response);
-  } finally {
-    analysis.clear();
+  } catch (error) {
+    pendingError = error;
   }
+
+  try {
+    clearAnalysis();
+  } catch {
+    if (pendingError === undefined) pendingError = new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+  }
+
+  if (pendingError !== undefined) throw pendingError;
+  if (response === undefined) throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+  return response;
 }
 
 function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError {
