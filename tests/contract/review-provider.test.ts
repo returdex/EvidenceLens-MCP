@@ -397,6 +397,107 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("maps analyzer name and version getter failures to one sanitized internal error", async () => {
+    const failures = [
+      () => new TypeError("analyzer-metadata-type-sentinel"),
+      () => new RangeError("analyzer-metadata-range-sentinel"),
+      () => new Error("analyzer-metadata-error-sentinel"),
+      () => "analyzer-metadata-non-error-sentinel"
+    ];
+    for (const metadata of ["name", "version"] as const) {
+      for (const failure of failures) {
+        const analyzer = metadata === "name"
+          ? {
+              get name() { throw failure(); },
+              version: "1.0.0",
+              analyze() { return []; }
+            }
+          : {
+              name: "deterministic-rules",
+              get version() { throw failure(); },
+              analyze() { return []; }
+            };
+        const result = payload(await handleReviewRequest(request, { analyzer: analyzer as ReviewAnalyzer }));
+        expect(result, `${metadata} getter`).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+        expect(result.code).not.toBe("INVALID_REQUEST");
+        expect(result.code).not.toBe("LIMIT_EXCEEDED");
+        expect(result.code).not.toBe("PROVIDER_FAILURE");
+        expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|deterministic-rules/iu);
+      }
+    }
+  });
+
+  it("uses the saved trusted cleanup instead of an analyzer replacement", async () => {
+    const replacement = vi.fn(() => { throw new Error("replacement-clear-sentinel"); });
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        analysis.clear = replacement;
+        return [];
+      }
+    };
+
+    expect(payload(await handleReviewRequest(request, { analyzer }))).toMatchObject({ ok: true });
+    expect(replacement).not.toHaveBeenCalled();
+  });
+
+  it("maps failures from the saved trusted cleanup path to one sanitized internal error", async () => {
+    const failures: unknown[] = [
+      new TypeError("cleanup-type-sentinel"),
+      new RangeError("cleanup-range-sentinel"),
+      new Error("cleanup-error-sentinel"),
+      "cleanup-non-error-sentinel"
+    ];
+    for (const failure of failures) {
+      const analyzer: ReviewAnalyzer = {
+        name: "deterministic-rules",
+        version: "1.0.0",
+        analyze(analysis) {
+          const payloadEntry = analysis.payloads[0]!;
+          analysis.payloads[0] = new Proxy(payloadEntry, {
+            get(target, property, receiver) {
+              if (property === "bytes") throw failure;
+              return Reflect.get(target, property, receiver) as unknown;
+            }
+          });
+          return [];
+        }
+      };
+      const result = payload(await handleReviewRequest(request, { analyzer }));
+      expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+      expect(result.code).not.toBe("INVALID_REQUEST");
+      expect(result.code).not.toBe("LIMIT_EXCEEDED");
+      expect(result.code).not.toBe("PROVIDER_FAILURE");
+      expect(JSON.stringify(result)).not.toMatch(/sentinel|stack|deterministic-rules/iu);
+    }
+  });
+
+  it("preserves a pending provider failure when trusted cleanup also fails", async () => {
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        const payloadEntry = analysis.payloads[0]!;
+        analysis.payloads[0] = new Proxy(payloadEntry, {
+          get(target, property, receiver) {
+            if (property === "bytes") throw new TypeError("cleanup-precedence-sentinel");
+            return Reflect.get(target, property, receiver) as unknown;
+          }
+        });
+        return [];
+      }
+    };
+    const provider: ReviewProvider = {
+      name: "local-reviewer",
+      async review() { throw new ProviderError("PROVIDER_REQUEST_FAILED"); }
+    };
+
+    const result = payload(await handleReviewRequest(request, { analyzer, provider }));
+    expect(result).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    expect(JSON.stringify(result)).not.toMatch(/cleanup-precedence-sentinel|stack/iu);
+  });
+
   it("preserves exact malformed-request and recognized-limit classifications", async () => {
     expect(payload(await handleReviewRequest({ ...request, objective: "" }))).toEqual({
       ok: false,
@@ -404,6 +505,31 @@ describe("provider review MCP boundary", () => {
       message: "Invalid request"
     });
     expect(payload(await handleReviewRequest({ ...request, limits: { maxEvidenceItems: 1 } }))).toEqual({
+      ok: false,
+      code: "LIMIT_EXCEEDED",
+      message: "Evidence exceeds the configured limit"
+    });
+    expect(payload(await handleReviewRequest({ ...request, limits: { maxObjectiveLength: 10 } }))).toEqual({
+      ok: false,
+      code: "LIMIT_EXCEEDED",
+      message: "Evidence exceeds the configured limit"
+    });
+
+    const largeTable = "😀".repeat(1_150_000);
+    const parserLimitRequest = {
+      ...request,
+      reviewId: "parser-content-limit",
+      evidence: [
+        { id: "brief-limit", role: "assignment_brief", type: "table", content: largeTable },
+        { id: "rubric-limit", role: "rubric", type: "table", content: largeTable },
+        { id: "instructions-limit", role: "teacher_instructions", type: "table", content: largeTable },
+        { id: "solution-limit", role: "solution", type: "table", content: largeTable },
+        { id: "other-limit-1", role: "other", type: "table", content: largeTable },
+        { id: "other-limit-2", role: "other", type: "table", content: largeTable },
+        { id: "other-limit-3", role: "other", type: "table", content: largeTable }
+      ]
+    } as const;
+    expect(payload(await handleReviewRequest(parserLimitRequest))).toEqual({
       ok: false,
       code: "LIMIT_EXCEEDED",
       message: "Evidence exceeds the configured limit"
