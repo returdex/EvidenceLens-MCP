@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { reviewProviderAttributionSchema, reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
@@ -543,7 +543,9 @@ describe("provider review MCP boundary", () => {
         };
       }
     } satisfies ReviewProvider & Record<string, unknown>;
-    const successText = rawText(await handleReviewRequest(request, { provider }));
+    const invalidEnvelope = payload(await handleReviewRequest(request, { provider }));
+    expect(invalidEnvelope).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    const invalidEnvelopeText = JSON.stringify(invalidEnvelope);
     const errorText = rawText(await handleReviewRequest(request, {
       provider: {
         name: "local-reviewer",
@@ -554,8 +556,59 @@ describe("provider review MCP boundary", () => {
     }));
 
     for (const sentinel of sentinels) {
-      expect(successText).not.toContain(sentinel);
+      expect(invalidEnvelopeText).not.toContain(sentinel);
       expect(errorText).not.toContain(sentinel);
+    }
+  });
+
+  it("rejects current private request tokens from every public provider prose field without logging them", async () => {
+    const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
+    const sentinel = "provider-public-echo-sentinel";
+    const fields = [
+      { label: "title", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, title: value }) },
+      { label: "summary", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, summary: value }) },
+      { label: "observation", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, observation: value }) },
+      { label: "interpretation", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, interpretation: value }) },
+      { label: "uncertainty", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, uncertainty: value }) },
+      { label: "followUpChecks", mutate: (finding: ReviewFinding, value: string) => ({ ...finding, followUpChecks: [value] }) }
+    ] as const;
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      for (const privateToken of ["inputFingerprint", "promptVersion"] as const) {
+        for (const field of fields) {
+          const base = fakeProvider();
+          const result = payload(await handleReviewRequest(request, {
+            provider: {
+              ...base,
+              async review(providerRequest) {
+                const providerResult = await base.review(providerRequest);
+                const value = `${sentinel}:${providerRequest[privateToken]}`;
+                return {
+                  ...providerResult,
+                  modelFindings: [field.mutate(providerResult.modelFindings[0]!, value)]
+                };
+              }
+            }
+          }));
+          const serialized = JSON.stringify(result);
+          expect(result, `${privateToken} in ${field.label}`).toEqual(failure);
+          expect(serialized, `${privateToken} in ${field.label}`).not.toContain(sentinel);
+        }
+      }
+
+      const consoleOutput = [...log.mock.calls, ...warn.mock.calls, ...error.mock.calls].flat().join(" ");
+      expect(consoleOutput).not.toContain(sentinel);
+      expect(consoleOutput).not.toMatch(/inputFingerprint|promptVersion|stack/iu);
+      expect(log).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      warn.mockRestore();
+      error.mockRestore();
     }
   });
 
