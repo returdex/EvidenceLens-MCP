@@ -189,7 +189,7 @@ Plans:
 - [x] 09-03-PLAN.md — Close PDF provenance, provider/analyzer exception-boundary, attribution grammar, and stable error-documentation gaps
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 09-04-PLAN.md — Close provider prose exfiltration, analyzer metadata/cleanup ownership, PDF branch coverage, and success-documentation gaps
+- [x] 09-04-PLAN.md — Close provider prose exfiltration, analyzer metadata/cleanup ownership, PDF branch coverage, and success-documentation gaps
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
