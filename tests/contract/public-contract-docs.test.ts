@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { reviewResponseSchema, reviewToolResultSchema } from "../../src/contracts/review.js";
+import { reviewRequestSchema, reviewResponseSchema, reviewToolResultSchema } from "../../src/contracts/review.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
 const documents = ["docs/mcp-contract.md", "README.md"] as const;
@@ -27,15 +27,15 @@ function findForbiddenDeterminismClaims(markdown: string): string[] {
   );
 }
 
-function firstJsonBlockUnderHeading(markdown: string, heading: string): unknown {
+function jsonBlocksUnderHeading(markdown: string, heading: string): unknown[] {
   const headingStart = markdown.indexOf(`## ${heading}`);
   if (headingStart < 0) throw new Error(`Missing ${heading} heading`);
   const remainder = markdown.slice(headingStart + heading.length + 3);
   const nextHeading = remainder.search(/\n##\s/u);
   const section = nextHeading < 0 ? remainder : remainder.slice(0, nextHeading);
-  const json = section.match(/```json\s*([\s\S]*?)```/u)?.[1];
-  if (json === undefined) throw new Error(`Missing JSON block under ${heading}`);
-  return JSON.parse(json);
+  const blocks = [...section.matchAll(/```json\s*([\s\S]*?)```/gu)].map((match) => JSON.parse(match[1]!));
+  if (blocks.length === 0) throw new Error(`Missing JSON block under ${heading}`);
+  return blocks;
 }
 
 describe("public attribution and determinism documentation contract", () => {
@@ -139,7 +139,7 @@ describe("public attribution and determinism documentation contract", () => {
   });
 
   it("keeps the documented INVALID_REQUEST example equal to stable runtime output", async () => {
-    const documented = firstJsonBlockUnderHeading(await readFile("docs/mcp-contract.md", "utf8"), "Error response");
+    const [documented] = jsonBlocksUnderHeading(await readFile("docs/mcp-contract.md", "utf8"), "Error response");
     const runtime = await handleReviewRequest({ reviewId: "docs-invalid-request", objective: "", evidence: [] });
     const actual = JSON.parse(reviewToolResultSchema.parse(runtime).content[0]!.text) as unknown;
     const expected = { ok: false, code: "INVALID_REQUEST", message: "Invalid request" };
@@ -149,12 +149,25 @@ describe("public attribution and determinism documentation contract", () => {
     expect(documented).toEqual(actual);
   });
 
-  it("keeps the documented success response executable against the public schema", async () => {
-    const documented = firstJsonBlockUnderHeading(
+  it("keeps the documented four-role request exactly equal to its deterministic runtime response", async () => {
+    const blocks = jsonBlocksUnderHeading(
       await readFile("docs/mcp-contract.md", "utf8"),
       "Deterministic analysis and success response"
     );
+    expect(blocks).toHaveLength(2);
+    const documentedRequest = reviewRequestSchema.parse(blocks[0]);
+    const documentedResponse = blocks[1];
+    const runtime = await handleReviewRequest(documentedRequest);
+    const actual = JSON.parse(reviewToolResultSchema.parse(runtime).content[0]!.text) as unknown;
+    const parsed = reviewResponseSchema.parse(actual);
 
-    expect(() => reviewResponseSchema.parse(documented)).not.toThrow();
+    expect(actual).toEqual(documentedResponse);
+    expect(reviewResponseSchema.parse(documentedResponse)).toEqual(parsed);
+    expect(parsed.findings.length).toBeGreaterThan(0);
+    expect(parsed.metadata.analyzerName).toBe("deterministic-rules");
+    expect(parsed.metadata.analyzerVersion).toBe("1.0.0");
+    expect(parsed.metadata).not.toHaveProperty("provider");
+    expect(parsed.requestId).toBe(documentedRequest.reviewId);
+    expect(parsed.metadata.generatedAt).toBe("1970-01-01T00:00:00.000Z");
   });
 });
