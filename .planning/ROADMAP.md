@@ -176,7 +176,7 @@ Plans:
   1. Public responses identify deterministic and provider-backed analyzers with stable provider/model version metadata without exposing keys, upstream envelopes, or internal fingerprints.
   2. Existing citation, hash, request identifier, and timestamp provenance remains schema-valid and backwards-compatible through an explicit contract evolution.
   3. Documentation and tests scope byte-for-byte determinism to deterministic/offline output and describe provider-backed variability accurately.
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 **Wave 1**
@@ -184,6 +184,9 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 09-02-PLAN.md — Close provider attribution, fail-closed result/error, visual provenance, deterministic fixture, and documentation gaps
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 09-03-PLAN.md — Close PDF provenance, provider/analyzer exception-boundary, attribution grammar, and stable error-documentation gaps
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
