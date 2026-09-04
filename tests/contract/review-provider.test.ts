@@ -709,6 +709,86 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("publishes only the validated deterministic snapshot after microtask and timer mutations", async () => {
+    let returnedFinding: ReviewFinding | undefined;
+    let oracle: ReviewFinding | undefined;
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        const claim = analysis.requirements[0]!;
+        const finding: ReviewFinding = {
+          id: "snapshot-local-finding",
+          type: "omission",
+          severity: "medium",
+          confidence: "medium",
+          title: "Trusted title",
+          summary: "Trusted summary",
+          observation: "Trusted observation",
+          interpretation: "Trusted interpretation",
+          uncertainty: "Trusted uncertainty",
+          followUpChecks: ["Trusted follow-up"],
+          evidenceIds: [claim.evidenceId],
+          citations: [analysis.resolveCitation(claim.evidenceId, claim.location)]
+        };
+        const findings = [finding];
+        returnedFinding = finding;
+        oracle = structuredClone(finding);
+        queueMicrotask(() => {
+          finding.title = "ASYNC-MUTATION-SENTINEL-microtask";
+          finding.citations[0]!.sourceReference = "ASYNC-MUTATION-SENTINEL-reference";
+          findings.push({ ...finding, id: "ASYNC-MUTATION-SENTINEL-push" });
+        });
+        setTimeout(() => {
+          finding.summary = "ASYNC-MUTATION-SENTINEL-timer";
+          finding.citations[0]!.location = { kind: "text", startLine: 99, endLine: 99 };
+          findings[0] = { ...finding, id: "ASYNC-MUTATION-SENTINEL-replace" };
+        }, 0);
+        return findings;
+      }
+    };
+    const provider: ReviewProvider = {
+      name: "local-reviewer",
+      async review(providerRequest) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 5));
+        return {
+          provider: "local-reviewer",
+          model: providerRequest.inference.model,
+          promptVersion: providerRequest.promptVersion,
+          inputFingerprint: providerRequest.inputFingerprint,
+          modelFindings: [],
+          deterministicFindings: []
+        };
+      }
+    };
+
+    const result = reviewResponseSchema.parse(payload(await handleReviewRequest(request, { analyzer, provider })));
+    expect(returnedFinding).toBeDefined();
+    expect(result.findings).toEqual([oracle]);
+    expect(JSON.stringify(result)).not.toContain("ASYNC-MUTATION-SENTINEL");
+  });
+
+  it("clears isolated analyzer claim references on provider failure", async () => {
+    let retained: Parameters<ReviewAnalyzer["analyze"]>[0] | undefined;
+    const originalTokenArrays: string[][] = [];
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze(analysis) {
+        retained = analysis;
+        originalTokenArrays.push(...[...analysis.requirements, ...analysis.solutionClaims].map((claim) => claim.tokens));
+        return [];
+      }
+    };
+    const provider: ReviewProvider = { name: "local-reviewer", async review() { throw new ProviderError("PROVIDER_REQUEST_FAILED"); } };
+    expect(payload(await handleReviewRequest(request, { analyzer, provider }))).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    expect(retained).toBeDefined();
+    expect(retained!.requirements).toHaveLength(0);
+    expect(retained!.solutionClaims).toHaveLength(0);
+    expect(originalTokenArrays.every((tokens) => tokens.length === 0)).toBe(true);
+    expect(retained!.payloads.every((entry) => entry.text === undefined && entry.tableCells === undefined && entry.bytes === undefined)).toBe(true);
+  });
+
   it("does not access analyzer-installed throwing getters while building the provider request", async () => {
     const analyzer: ReviewAnalyzer = {
       name: "deterministic-rules",
