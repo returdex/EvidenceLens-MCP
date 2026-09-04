@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 plan 09-06 implemented; awaiting independent verification
-last_updated: "2026-09-04T13:09:49.678Z"
+stopped_at: Phase 09 verification found 2 blockers after plan 09-06
+last_updated: "2026-09-04T13:25:10.000Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 25
-  completed_plans: 24
+  completed_plans: 25
   percent: 73
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — AWAITING VERIFICATION
+Phase: 09 (public-provider-attribution-and-determinism-contract) — GAPS FOUND
 Plan: 6 of 6
 
 - Phase: 9 of 11
-- Status: Plan 09-06 implemented; independent phase verification pending
+- Status: All 6 plans implemented; verification score 21/23 with 2 blockers remaining
 - Progress: 73%
-- Last activity: Completed Wave 6 implementation and all no-network execution gates
+- Last activity: Independent verification confirmed 5 prior blockers closed and found 2 adjacent trust-boundary gaps
 
 ## Decisions and Assumptions
 
@@ -121,13 +121,13 @@ Plan: 6 of 6
 
 ## Session Continuity
 
-- **Last session:** 2026-09-04T13:09:49.672Z
-- **Stopped at:** Phase 09 plan 09-06 implemented; awaiting independent verification
+- **Last session:** 2026-09-04T13:25:10.000Z
+- **Stopped at:** Phase 09 verification found 2 blockers after plan 09-06
 - **Resume file:** None
 
 ## Next Action
 
-Run independent Phase 09 verification before completing the phase or marking MCP-02 complete.
+Run `$gsd-plan-phase 9 --gaps` to plan closure of the remaining handler-option snapshot and hidden provider-result field blockers.
 
 ---
-*Last updated: 2026-09-04 after Phase 09 plan 09-06 implementation; independent phase verification pending*
+*Last updated: 2026-09-04 after Phase 09 re-verification found 2 blockers (21/23)*
