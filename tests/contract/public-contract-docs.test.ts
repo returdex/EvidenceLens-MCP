@@ -27,6 +27,21 @@ function findForbiddenDeterminismClaims(markdown: string): string[] {
   );
 }
 
+function providerResultRejectionSemantics(markdown: string): { forbidden: string[]; required: boolean } {
+  const withoutFencedCode = markdown.replace(/```[\s\S]*?```/gu, "");
+  const prose = clauses(withoutFencedCode);
+  const resultClauses = prose.filter((clause) => /provider (?:result|envelope)|provider result\/envelope|strict provider envelopes/u.test(clause));
+  return {
+    forbidden: resultClauses.filter((clause) =>
+      /\b(?:discard|drop|ignore|strip)(?:s|ped)?\b[^.;]*(?:non-public|unknown|private|extra)/u.test(clause)
+      || /(?:non-public|unknown|private|extra)[^.;]*\b(?:discard|drop|ignore|strip)(?:s|ped)?\b/u.test(clause)
+    ),
+    required: resultClauses.some((clause) =>
+      containsAll(clause, ["strict", "reject", "entire", "unknown", "private", "extra field", "provider_failure"])
+    )
+  };
+}
+
 function jsonBlocksUnderHeading(markdown: string, heading: string): unknown[] {
   const headingStart = markdown.indexOf(`## ${heading}`);
   if (headingStart < 0) throw new Error(`Missing ${heading} heading`);
@@ -39,6 +54,24 @@ function jsonBlocksUnderHeading(markdown: string, heading: string): unknown[] {
 }
 
 describe("public attribution and determinism documentation contract", () => {
+  it("rejects silent provider-result discard claims and requires whole-result rejection", async () => {
+    const forbidden = [
+      "Strict provider result envelopes discard non-public fields.",
+      "Provider results drop unknown fields and continue.",
+      "The provider envelope may ignore private extras.",
+      "Provider result validation will strip extras and continue."
+    ];
+    for (const fixture of forbidden) {
+      expect(providerResultRejectionSemantics(fixture).forbidden, fixture).toEqual(clauses(fixture));
+    }
+    const required = "Strict provider result/envelope validation rejects the entire result when unknown or private extra fields are present and returns sanitized PROVIDER_FAILURE.";
+    expect(providerResultRejectionSemantics(required)).toEqual({ forbidden: [], required: true });
+
+    const actual = providerResultRejectionSemantics(await readFile("docs/mcp-contract.md", "utf8"));
+    expect(actual.forbidden).toEqual([]);
+    expect(actual.required).toBe(true);
+  });
+
   it("detects forbidden guarantees while allowing scoped deterministic-analyzer language", () => {
     const forbidden = [
       "Findings are deterministically ordered.",

@@ -1170,6 +1170,51 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("strictly rejects each otherwise-valid provider result extra field", async () => {
+    const extraFields = ["apiKey", "baseUrl", "providerRequestEnvelope", "providerResultEnvelope", "rawResponse", "retryTransport"] as const;
+    let validResult: ProviderReviewResult | undefined;
+    const base = fakeProvider();
+    const validControl = reviewResponseSchema.parse(payload(await handleReviewRequest(request, {
+      provider: {
+        ...base,
+        async review(providerRequest) {
+          validResult = await base.review(providerRequest);
+          return validResult;
+        }
+      }
+    })));
+    expect(validResult).toBeDefined();
+    expect(providerReviewResultSchema.safeParse(validResult).success).toBe(true);
+    expect(validControl.metadata.provider).toEqual({ name: "local-reviewer", model: "deepseek-v4-pro" });
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      for (const field of extraFields) {
+        const sentinel = `private-${field}-sentinel`;
+        const candidate = { ...validResult!, [field]: sentinel };
+        expect(providerReviewResultSchema.safeParse(candidate).success, `direct ${field}`).toBe(false);
+        const review = vi.fn(async (providerRequest: ProviderReviewRequest) => ({
+          ...(await base.review(providerRequest)),
+          [field]: sentinel
+        }));
+        const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));
+        expect(review, field).toHaveBeenCalledTimes(1);
+        expect(result, field).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+        expect(JSON.stringify(result), field).not.toContain(sentinel);
+      }
+      const consoleOutput = [...log.mock.calls, ...warn.mock.calls, ...error.mock.calls].flat().join(" ");
+      expect(consoleOutput).not.toMatch(/private-(?:apiKey|baseUrl|providerRequestEnvelope|providerResultEnvelope|rawResponse|retryTransport)-sentinel/u);
+      expect(log).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
+
   it("rejects current private request tokens from every provider-authored public string without logging them", async () => {
     const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
     const sentinel = "provider-public-echo-sentinel";
