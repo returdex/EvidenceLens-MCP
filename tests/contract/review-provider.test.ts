@@ -5,7 +5,7 @@ import { ProviderError } from "../../src/providers/errors.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ProviderConfig } from "../../src/providers/config.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
-import { handleReviewRequest } from "../../src/tools/review.js";
+import { handleReviewRequest, handleReviewRequestForTest, type ReviewHandlerOptions } from "../../src/tools/review.js";
 
 const request = {
   reviewId: "provider-contract-001",
@@ -98,7 +98,176 @@ function unsafeProvider(value: unknown): ReviewProvider {
   };
 }
 
+type RetainedAnalysis = Parameters<ReviewAnalyzer["analyze"]>[0];
+
+function retainAnalysisTargets(analysis: RetainedAnalysis) {
+  return {
+    analysis,
+    claims: [...analysis.requirements, ...analysis.solutionClaims],
+    tokenArrays: [...analysis.requirements, ...analysis.solutionClaims].map((claim) => claim.tokens),
+    payloads: [...analysis.payloads],
+    cells: analysis.payloads.flatMap((entry) => [...(entry.tableCells ?? [])]),
+    buffers: analysis.payloads.flatMap((entry) => entry.bytes === undefined ? [] : [entry.bytes])
+  };
+}
+
+function expectRetainedAnalysisScrubbed(retained: ReturnType<typeof retainAnalysisTargets>): void {
+  expect(retained.analysis.requirements).toHaveLength(0);
+  expect(retained.analysis.solutionClaims).toHaveLength(0);
+  for (const claim of retained.claims) {
+    expect(claim.text).toBe("");
+    expect(claim.key).toBe("");
+    expect(claim.value).toBeUndefined();
+    expect(claim.tokens).toEqual([]);
+  }
+  expect(retained.tokenArrays.every((tokens) => tokens.length === 0)).toBe(true);
+  expect(retained.payloads.every((entry) => entry.text === undefined && entry.tableCells === undefined && entry.bytes === undefined)).toBe(true);
+  expect(retained.cells.every((cell) => cell.value === "")).toBe(true);
+  expect(retained.buffers.every((buffer) => buffer.every((byte) => byte === 0))).toBe(true);
+}
+
 describe("provider review MCP boundary", () => {
+  it("reads normalization dependencies first and snapshots lifecycle dependencies once after both cleanup registrations", async () => {
+    const events: string[] = [];
+    const provider = fakeProvider();
+    const analyzer: ReviewAnalyzer = {
+      name: "deterministic-rules",
+      version: "1.0.0",
+      analyze() { return []; }
+    };
+    const options = Object.defineProperties({}, {
+      filesystemPolicy: { enumerable: true, get() { events.push("get:filesystemPolicy"); return undefined; } },
+      filesystemReadAdapter: { enumerable: true, get() { events.push("get:filesystemReadAdapter"); return undefined; } },
+      provider: { enumerable: true, get() { events.push("get:provider"); return provider; } },
+      providerConfig: { enumerable: true, get() { events.push("get:providerConfig"); return undefined; } },
+      analyzer: { enumerable: true, get() { events.push("get:analyzer"); return analyzer; } }
+    }) as ReviewHandlerOptions;
+
+    const result = payload(await handleReviewRequestForTest(request, options, (stage) => events.push(`cleanup:${stage}`)));
+
+    expect(result).toMatchObject({ ok: true });
+    expect(events).toEqual([
+      "get:filesystemPolicy",
+      "get:filesystemReadAdapter",
+      "cleanup:original",
+      "cleanup:isolated",
+      "get:provider",
+      "get:providerConfig",
+      "get:analyzer"
+    ]);
+  });
+
+  it("sanitizes every throwing lifecycle dependency getter after scrubbing both registered analysis views", async () => {
+    const imageBytes = await readFile(new URL("../fixtures/evidence/images/rubric-screenshot.png", import.meta.url));
+    const cleanupRequest = {
+      reviewId: "handler-option-cleanup-matrix",
+      objective: "Verify dependency getter cleanup.",
+      evidence: [
+        { id: "brief-cleanup", role: "assignment_brief", type: "text", content: "The threshold must be 4." },
+        { id: "rubric-cleanup", role: "rubric", type: "table", content: "criterion,requirement\nthreshold,The threshold must be 4." },
+        { id: "instructions-cleanup", role: "teacher_instructions", type: "text", content: "The report must explain the threshold." },
+        { id: "solution-cleanup", role: "solution", type: "text", content: "The threshold is 3." },
+        { id: "image-cleanup", role: "other", type: "image", mimeType: "image/png", contentBase64: imageBytes.toString("base64") }
+      ]
+    } as const;
+    const failures: Array<{ label: string; make: (sentinel: string) => unknown }> = [
+      { label: "TypeError", make: (sentinel) => new TypeError(sentinel) },
+      { label: "RangeError", make: (sentinel) => new RangeError(sentinel) },
+      { label: "Error", make: (sentinel) => new Error(sentinel) },
+      { label: "non-Error", make: (sentinel) => ({ privateValue: sentinel }) }
+    ];
+
+    for (const property of ["provider", "providerConfig", "analyzer"] as const) {
+      for (const failure of failures) {
+        const sentinel = `private-${property}-${failure.label}-sentinel`;
+        const events: string[] = [];
+        const retained: Array<ReturnType<typeof retainAnalysisTargets>> = [];
+        const review = vi.fn(async () => { throw new Error("provider-must-not-run"); });
+        const provider: ReviewProvider = { name: "local-reviewer", review };
+        const analyzer: ReviewAnalyzer = { name: "deterministic-rules", version: "1.0.0", analyze() { return []; } };
+        const values = { provider, providerConfig: undefined, analyzer } satisfies ReviewHandlerOptions;
+        const options = Object.defineProperties({}, {
+          filesystemPolicy: { enumerable: true, get() { events.push("get:filesystemPolicy"); return undefined; } },
+          filesystemReadAdapter: { enumerable: true, get() { events.push("get:filesystemReadAdapter"); return undefined; } },
+          provider: { enumerable: true, get() { events.push("get:provider"); if (property === "provider") throw failure.make(sentinel); return values.provider; } },
+          providerConfig: { enumerable: true, get() { events.push("get:providerConfig"); if (property === "providerConfig") throw failure.make(sentinel); return values.providerConfig; } },
+          analyzer: { enumerable: true, get() { events.push("get:analyzer"); if (property === "analyzer") throw failure.make(sentinel); return values.analyzer; } }
+        }) as ReviewHandlerOptions;
+        const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        try {
+          const result = payload(await handleReviewRequestForTest(cleanupRequest, options, (stage, analysis) => {
+            events.push(`cleanup:${stage}`);
+            retained.push(retainAnalysisTargets(analysis));
+          }));
+          expect(result, `${property} ${failure.label}`).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+          expect(review, `${property} ${failure.label}`).not.toHaveBeenCalled();
+          expect(retained, `${property} ${failure.label}`).toHaveLength(2);
+          retained.forEach(expectRetainedAnalysisScrubbed);
+          expect(events.indexOf(`get:${property}`), `${property} ${failure.label}`).toBeGreaterThan(events.indexOf("cleanup:isolated"));
+          const serialized = JSON.stringify(result);
+          expect(serialized).not.toContain(sentinel);
+          expect(serialized).not.toContain(property);
+          expect(serialized).not.toMatch(/cause|stack|privateValue/iu);
+          expect(log).not.toHaveBeenCalled();
+          expect(warn).not.toHaveBeenCalled();
+          expect(error).not.toHaveBeenCalled();
+        } finally {
+          log.mockRestore();
+          warn.mockRestore();
+          error.mockRestore();
+        }
+      }
+    }
+  });
+
+  it("sanitizes filesystem dependency getter failures before normalization without touching lifecycle dependencies", async () => {
+    for (const property of ["filesystemPolicy", "filesystemReadAdapter"] as const) {
+      const events: string[] = [];
+      const sentinel = `private-${property}-sentinel`;
+      const options = Object.defineProperties({}, {
+        filesystemPolicy: { enumerable: true, get() { events.push("get:filesystemPolicy"); if (property === "filesystemPolicy") throw new TypeError(sentinel); return undefined; } },
+        filesystemReadAdapter: { enumerable: true, get() { events.push("get:filesystemReadAdapter"); if (property === "filesystemReadAdapter") throw new RangeError(sentinel); return undefined; } },
+        provider: { enumerable: true, get() { events.push("get:provider"); return fakeProvider(); } },
+        providerConfig: { enumerable: true, get() { events.push("get:providerConfig"); return undefined; } },
+        analyzer: { enumerable: true, get() { events.push("get:analyzer"); return undefined; } }
+      }) as ReviewHandlerOptions;
+      const cleanupStages: string[] = [];
+
+      const result = payload(await handleReviewRequestForTest(request, options, (stage) => cleanupStages.push(stage)));
+
+      expect(result, property).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+      expect(events).not.toContain("get:provider");
+      expect(events).not.toContain("get:providerConfig");
+      expect(events).not.toContain("get:analyzer");
+      expect(cleanupStages).toEqual([]);
+      expect(JSON.stringify(result)).not.toMatch(/sentinel|filesystem|cause|stack/iu);
+    }
+  });
+
+  it("uses one stateful provider snapshot for request construction, invocation, identity, and attribution", async () => {
+    const provider = fakeProvider();
+    const review = vi.spyOn(provider, "review");
+    let providerReads = 0;
+    const options = Object.defineProperties({}, {
+      provider: {
+        enumerable: true,
+        get() {
+          providerReads += 1;
+          return providerReads === 1 ? provider : undefined;
+        }
+      }
+    }) as ReviewHandlerOptions;
+
+    const result = reviewResponseSchema.parse(payload(await handleReviewRequest(request, options)));
+
+    expect(providerReads).toBe(1);
+    expect(review).toHaveBeenCalledTimes(1);
+    expect(result.findings.some((finding) => finding.id.startsWith("provider:local-reviewer:"))).toBe(true);
+    expect(result.metadata.provider).toEqual({ name: "local-reviewer", model: "deepseek-v4-pro" });
+  });
+
   it("runtime-projects a production ProviderConfig into an owned frozen three-key inference", async () => {
     const holder = { marker: "nested-caller-holder" };
     const config: ProviderConfig & { holder: typeof holder } = {
