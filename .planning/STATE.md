@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 09 plan 09-06 ready for gap-only execution
-last_updated: "2026-09-03T23:26:02.792Z"
+stopped_at: Phase 09 plan 09-06 implemented; awaiting independent verification
+last_updated: "2026-09-04T13:09:49.678Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY TO EXECUTE
+Phase: 09 (public-provider-attribution-and-determinism-contract) — AWAITING VERIFICATION
 Plan: 6 of 6
 
 - Phase: 9 of 11
-- Status: Gap-closure plan 09-06 created and independently verified; ready to execute
+- Status: Plan 09-06 implemented; independent phase verification pending
 - Progress: 73%
-- Last activity: Planned the five blockers and three warnings into Wave 6; second checker pass found no issues
+- Last activity: Completed Wave 6 implementation and all no-network execution gates
 
 ## Decisions and Assumptions
 
@@ -92,6 +92,10 @@ Plan: 6 of 6
 - [Phase 09]: Validate provider-only provenance before scanning only provider-authored ID/prose/follow-up strings. — Prevents private-token leakage without rejecting locally bound evidence and citation values.
 - [Phase 09]: Build and freeze provider requests before running a deep-isolated analyzer view; publish analyzer identity only from deterministic-rules/1.0.0. — Prevents injected analyzer getters and mutations from changing provider input, fingerprints, provenance, or public identity.
 - [Phase 09]: Best-effort cleanup traverses all captured payload, cell, and buffer references before reporting its first fault, while pending errors retain precedence. — Ensures transient data is erased as completely as possible without misclassifying earlier failures.
+- [Phase 09]: Project production ProviderConfig into a fresh strict three-field inference object before fingerprinting and freezing.
+- [Phase 09]: Register original and isolated cleanup before provider setup and preserve pending subsystem errors over cleanup faults.
+- [Phase 09]: Deep-copy and freeze validated analyzer findings as the sole collision and merge source.
+- [Phase 09]: Reject the entire provider result for unknown or private extra fields.
 
 ## Performance Metrics
 
@@ -113,16 +117,17 @@ Plan: 6 of 6
 | Phase 09 P03 | 8 min | 3 tasks | 5 files |
 | Phase 09 P04 | 8 min | 3 tasks | 4 files |
 | Phase 09 P05 | 10 min | 3 tasks | 5 files |
+| Phase 09 P06 | 10 min | 3 tasks | 7 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-03T23:26:02.792Z
-- **Stopped at:** Phase 09 plan 09-06 ready for gap-only execution
+- **Last session:** 2026-09-04T13:09:49.672Z
+- **Stopped at:** Phase 09 plan 09-06 implemented; awaiting independent verification
 - **Resume file:** None
 
 ## Next Action
 
-Run `$gsd-execute-phase 9 --gaps-only` to execute plan 09-06.
+Run independent Phase 09 verification before completing the phase or marking MCP-02 complete.
 
 ---
-*Last updated: 2026-09-04 after Phase 09 gap-closure planning and independent plan review*
+*Last updated: 2026-09-04 after Phase 09 plan 09-06 implementation; independent phase verification pending*
