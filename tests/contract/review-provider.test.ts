@@ -1384,6 +1384,202 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("preflights exact provider-result envelopes before parsing or projection", async () => {
+    const providerTypes = await import("../../src/providers/types.js") as Record<string, unknown>;
+    const allowedKeys = providerTypes.PROVIDER_REVIEW_RESULT_KEYS as readonly string[] | undefined;
+    const preflight = providerTypes.isProviderReviewResultEnvelope as ((value: unknown) => boolean) | undefined;
+    expect(allowedKeys).toEqual([
+      "provider",
+      "model",
+      "promptVersion",
+      "inputFingerprint",
+      "modelFindings",
+      "deterministicFindings"
+    ]);
+    expect(preflight).toBeTypeOf("function");
+
+    const base = fakeProvider();
+    let validResult: ProviderReviewResult | undefined;
+    await handleReviewRequest(request, {
+      provider: {
+        ...base,
+        async review(providerRequest) {
+          validResult = await base.review(providerRequest);
+          return validResult;
+        }
+      }
+    });
+    expect(validResult).toBeDefined();
+    const nullPrototype = Object.assign(Object.create(null) as Record<string, unknown>, validResult);
+    for (const [label, candidate] of [["ordinary", validResult], ["null prototype", nullPrototype]] as const) {
+      expect(preflight!(candidate), label).toBe(true);
+      expect(providerReviewResultSchema.safeParse(candidate).success, label).toBe(true);
+      expect(payload(await handleReviewRequest(request, { provider: unsafeProvider(candidate) })), label).toMatchObject({ ok: true });
+    }
+
+    const privateKey = "privateEnvelopeKey";
+    const privateValue = "private-envelope-value-sentinel";
+    const nonEnumerable = Object.defineProperty({ ...validResult }, privateKey, { configurable: true, value: privateValue });
+    const symbolKey = Object.defineProperty({ ...validResult }, Symbol("privateEnvelopeSymbol"), { configurable: true, value: privateValue });
+    const inherited = Object.assign(Object.create({ [privateKey]: privateValue }) as Record<string, unknown>, validResult);
+    const enumerable = { ...validResult, [privateKey]: privateValue };
+    const proxyExposed = new Proxy({ ...validResult, [privateKey]: privateValue }, {});
+    const concealedTarget = Object.defineProperty({ ...validResult }, privateKey, { configurable: true, enumerable: false, value: privateValue });
+    const proxyConcealed = new Proxy(concealedTarget, {
+      ownKeys() { return [...allowedKeys!]; }
+    });
+    const hostile = [
+      ["non-enumerable extra", nonEnumerable],
+      ["symbol own key", symbolKey],
+      ["inherited custom prototype", inherited],
+      ["enumerable extra", enumerable],
+      ["Proxy-exposed extra", proxyExposed],
+      ["Proxy-concealed extra", proxyConcealed]
+    ] as const;
+    for (const [label, candidate] of hostile) {
+      expect(preflight!(candidate), `direct ${label}`).toBe(false);
+      const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+      const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+      try {
+        const review = vi.fn(async () => candidate as ProviderReviewResult);
+        const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));
+        expect(review, label).toHaveBeenCalledTimes(1);
+        expect(result, label).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+        expect(JSON.stringify(result), label).not.toMatch(/privateEnvelopeKey|private-envelope-value-sentinel|cause|stack/iu);
+        expect(log, label).not.toHaveBeenCalled();
+        expect(warn, label).not.toHaveBeenCalled();
+        expect(error, label).not.toHaveBeenCalled();
+      } finally {
+        log.mockRestore();
+        warn.mockRestore();
+        error.mockRestore();
+      }
+    }
+
+    const missingAllowedKey = { ...validResult } as Record<string, unknown>;
+    delete missingAllowedKey.model;
+    expect(preflight!(missingAllowedKey)).toBe(false);
+    const malformedExactEnvelope = { ...validResult, model: 42 };
+    expect(preflight!(malformedExactEnvelope)).toBe(true);
+    expect(providerReviewResultSchema.safeParse(malformedExactEnvelope).success).toBe(false);
+  });
+
+  it("contains the reflective preflight trap matrix inside the provider-owned boundary", async () => {
+    const providerTypes = await import("../../src/providers/types.js") as Record<string, unknown>;
+    const preflight = providerTypes.isProviderReviewResultEnvelope as ((value: unknown) => boolean) | undefined;
+    expect(preflight).toBeTypeOf("function");
+    const base = fakeProvider();
+    let validResult: ProviderReviewResult | undefined;
+    await handleReviewRequest(request, {
+      provider: {
+        ...base,
+        async review(providerRequest) {
+          validResult = await base.review(providerRequest);
+          return validResult;
+        }
+      }
+    });
+    const thrownValues: Array<{ label: string; make: (sentinel: string) => unknown }> = [
+      { label: "TypeError", make: (sentinel) => new TypeError(sentinel) },
+      { label: "RangeError", make: (sentinel) => new RangeError(sentinel) },
+      { label: "Error", make: (sentinel) => new Error(sentinel) },
+      { label: "non-Error", make: (sentinel) => ({ privateValue: sentinel }) }
+    ];
+
+    for (const trap of ["ownKeys", "getPrototypeOf", "getOwnPropertyDescriptor"] as const) {
+      for (const thrown of thrownValues) {
+        const sentinel = `private-${trap}-${thrown.label}-sentinel`;
+        const handler: ProxyHandler<ProviderReviewResult> = trap === "ownKeys"
+          ? { ownKeys() { throw thrown.make(sentinel); } }
+          : trap === "getPrototypeOf"
+            ? { getPrototypeOf() { throw thrown.make(sentinel); } }
+            : { getOwnPropertyDescriptor() { throw thrown.make(sentinel); } };
+        const candidate = new Proxy({ ...validResult! }, handler);
+        expect(() => preflight!(candidate), `direct ${trap} ${thrown.label}`).toThrow();
+        const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        try {
+          const review = vi.fn(async () => candidate);
+          const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));
+          expect(review, `${trap} ${thrown.label}`).toHaveBeenCalledTimes(1);
+          expect(result, `${trap} ${thrown.label}`).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+          expect(JSON.stringify(result)).not.toMatch(/private-(?:ownKeys|getPrototypeOf|getOwnPropertyDescriptor)|privateValue|cause|stack/iu);
+          expect(log).not.toHaveBeenCalled();
+          expect(warn).not.toHaveBeenCalled();
+          expect(error).not.toHaveBeenCalled();
+        } finally {
+          log.mockRestore();
+          warn.mockRestore();
+          error.mockRestore();
+        }
+      }
+    }
+  });
+
+  it("contains post-preflight Zod property-read failures for plain and null-prototype envelopes", async () => {
+    const providerTypes = await import("../../src/providers/types.js") as Record<string, unknown>;
+    const preflight = providerTypes.isProviderReviewResultEnvelope as ((value: unknown) => boolean) | undefined;
+    expect(preflight).toBeTypeOf("function");
+    const base = fakeProvider();
+    let validResult: ProviderReviewResult | undefined;
+    await handleReviewRequest(request, {
+      provider: {
+        ...base,
+        async review(providerRequest) {
+          validResult = await base.review(providerRequest);
+          return validResult;
+        }
+      }
+    });
+    const thrownValues: Array<{ label: string; make: (sentinel: string) => unknown }> = [
+      { label: "TypeError", make: (sentinel) => new TypeError(sentinel) },
+      { label: "RangeError", make: (sentinel) => new RangeError(sentinel) },
+      { label: "Error", make: (sentinel) => new Error(sentinel) },
+      { label: "non-Error", make: (sentinel) => ({ privateValue: sentinel }) }
+    ];
+
+    for (const prototype of ["ordinary", "null"] as const) {
+      for (const thrown of thrownValues) {
+        const sentinel = `private-${prototype}-accessor-${thrown.label}-sentinel`;
+        let getterCalls = 0;
+        const candidate = Object.assign(
+          prototype === "ordinary" ? {} : Object.create(null) as Record<string, unknown>,
+          validResult
+        );
+        Object.defineProperty(candidate, "provider", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            getterCalls += 1;
+            throw thrown.make(sentinel);
+          }
+        });
+        expect(preflight!(candidate), `${prototype} ${thrown.label}`).toBe(true);
+        expect(getterCalls, `${prototype} ${thrown.label} preflight`).toBe(0);
+        const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        try {
+          const review = vi.fn(async () => candidate as ProviderReviewResult);
+          const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));
+          expect(review, `${prototype} ${thrown.label}`).toHaveBeenCalledTimes(1);
+          expect(getterCalls, `${prototype} ${thrown.label} Zod read`).toBeGreaterThan(0);
+          expect(result, `${prototype} ${thrown.label}`).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+          expect(JSON.stringify(result)).not.toMatch(/private-(?:ordinary|null)-accessor|privateValue|cause|stack/iu);
+          expect(log).not.toHaveBeenCalled();
+          expect(warn).not.toHaveBeenCalled();
+          expect(error).not.toHaveBeenCalled();
+        } finally {
+          log.mockRestore();
+          warn.mockRestore();
+          error.mockRestore();
+        }
+      }
+    }
+  });
+
   it("rejects current private request tokens from every provider-authored public string without logging them", async () => {
     const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
     const sentinel = "provider-public-echo-sentinel";
