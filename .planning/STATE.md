@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Plan 09-07 complete; awaiting independent Phase 09 verification
-last_updated: "2026-09-04T16:40:35.000Z"
+stopped_at: Phase 09 verification found 1 blocker after plan 09-07
+last_updated: "2026-09-04T16:57:07.000Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — AWAITING VERIFICATION
+Phase: 09 (public-provider-attribution-and-determinism-contract) — GAPS FOUND
 Plan: 7 of 7
 
 - Phase: 9 of 11
-- Status: All seven plans executed; independent Phase 09 verification pending
+- Status: All seven plans executed; verification score 22/23 with 1 blocker remaining
 - Progress: 73%
-- Last activity: Completed Plan 09-07 trust-boundary closure and all offline verification gates
+- Last activity: Independent verification closed the dependency-snapshot gap and found an accessor-mutation envelope gap
 
 ## Decisions and Assumptions
 
@@ -125,13 +125,13 @@ Plan: 7 of 7
 
 ## Session Continuity
 
-- **Last session:** 2026-09-04T16:40:35.000Z
-- **Stopped at:** Plan 09-07 complete; awaiting independent Phase 09 verification
+- **Last session:** 2026-09-04T16:57:07.000Z
+- **Stopped at:** Phase 09 verification found 1 blocker after plan 09-07
 - **Resume file:** None
 
 ## Next Action
 
-Run the independent Phase 09 verifier. Keep Phase 09 and MCP-02 pending until it succeeds.
+Run `$gsd-plan-phase 9 --gaps` to close the validation-time accessor mutation bypass.
 
 ---
-*Last updated: 2026-09-04 after Plan 09-07 execution; independent Phase 09 verification pending*
+*Last updated: 2026-09-04 after Phase 09 re-verification found 1 blocker (22/23)*

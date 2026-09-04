@@ -237,7 +237,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
-| 9. Public Provider Attribution and Determinism Contract | 7/7 | Awaiting verification | - |
+| 9. Public Provider Attribution and Determinism Contract | 7/7 | Gaps found (22/23) | - |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/TBD | Not started | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
@@ -249,4 +249,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-04 after Plan 09-07 execution; independent Phase 09 verification pending*
+*Last updated: 2026-09-04 after Phase 09 plan 09-07 re-verification found 1 blocker*
