@@ -50,23 +50,88 @@ describe("review analysis handoff", () => {
     expect(() => analysis.clear()).not.toThrow();
   });
 
-  it("continues clearing stable references after a local claim fault", () => {
-    const firstBuffer = new Uint8Array([1, 2]);
-    const secondBuffer = new Uint8Array([3, 4]);
-    const analysis = buildReviewAnalysisInput({
-      normalizedEvidence: [],
-      analysisPayloads: [
-        { evidenceId: "brief", role: "assignment_brief", type: "text", reference: "inline://brief", contentHash: "a".repeat(64), text: "First must be present.", references: [{ kind: "text", startLine: 1, endLine: 1 }], byteLength: 10, bytes: firstBuffer },
-        { evidenceId: "rubric", role: "rubric", type: "text", reference: "inline://rubric", contentHash: "b".repeat(64), text: "Second must be present.", references: [{ kind: "text", startLine: 1, endLine: 1 }], byteLength: 10, bytes: secondBuffer }
-      ]
-    });
-    const claims = [...analysis.requirements];
-    Object.defineProperty(claims[0]!, "text", { configurable: true, get: () => "faulted", set: () => { throw new Error("claim-fault-sentinel"); } });
+  it("continues every independently clearable target after each local cleanup category fault", () => {
+    const createCleanupFixture = () => {
+      const firstBuffer = new Uint8Array([1, 2]);
+      const laterBuffer = new Uint8Array([3, 4]);
+      const requirementCell = { value: "Mode must be strict.", location: { kind: "table" as const, row: 2, column: 2 } };
+      const solutionCell = { value: "Mode = loose.", location: { kind: "table" as const, row: 2, column: 2 } };
+      const analysis = buildReviewAnalysisInput({
+        normalizedEvidence: [],
+        analysisPayloads: [
+          { evidenceId: "brief", role: "assignment_brief", type: "text", reference: "inline://brief", contentHash: "a".repeat(64), text: "Threshold must be 4.", references: [{ kind: "text", startLine: 1, endLine: 1 }], byteLength: 20, bytes: firstBuffer },
+          { evidenceId: "rubric", role: "rubric", type: "table", reference: "inline://rubric", contentHash: "b".repeat(64), tableCells: [requirementCell], references: [requirementCell.location], byteLength: 20 },
+          { evidenceId: "solution", role: "solution", type: "text", reference: "inline://solution", contentHash: "c".repeat(64), text: "Threshold = 3.", references: [{ kind: "text", startLine: 1, endLine: 1 }], byteLength: 14, bytes: laterBuffer },
+          { evidenceId: "solution-table", role: "solution", type: "table", reference: "inline://solution-table", contentHash: "d".repeat(64), tableCells: [solutionCell], references: [solutionCell.location], byteLength: 14 }
+        ]
+      });
+      const requirements = analysis.requirements;
+      const solutionClaims = analysis.solutionClaims;
+      const claims = [...requirements, ...solutionClaims];
+      const originalTokens = claims.map((claim) => claim.tokens);
+      const currentTokens = claims.map((claim, index) => [`current-token-${index}`]);
+      claims.forEach((claim, index) => { claim.tokens = currentTokens[index]!; });
+      const payloads = [...analysis.payloads];
+      const cells = payloads.flatMap((payload) => [...(payload.tableCells ?? [])]);
+      const buffers = [firstBuffer, laterBuffer];
+      return { analysis, requirements, solutionClaims, claims, originalTokens, currentTokens, payloads, cells, buffers };
+    };
+    type Fixture = ReturnType<typeof createCleanupFixture>;
+    const clearThenThrowSetter = <T extends object, K extends keyof T>(target: T, key: K, clearedValue: T[K]) => {
+      let value = target[key];
+      Object.defineProperty(target, key, {
+        configurable: true,
+        enumerable: true,
+        get: () => value,
+        set: (next: T[K]) => {
+          value = next;
+          if (next === clearedValue) throw new Error("local-cleanup-fault-sentinel");
+        }
+      });
+    };
+    const cases: Array<{ label: string; inject: (fixture: Fixture) => void }> = [
+      { label: "claim fields", inject: ({ claims }) => clearThenThrowSetter(claims[0]!, "text", "") },
+      { label: "original tokens", inject: ({ originalTokens }) => Object.freeze(originalTokens[0]!) },
+      { label: "current tokens", inject: ({ currentTokens }) => Object.freeze(currentTokens[0]!) },
+      { label: "requirements array", inject: ({ requirements }) => Object.freeze(requirements) },
+      { label: "solutionClaims array", inject: ({ solutionClaims }) => Object.freeze(solutionClaims) },
+      { label: "payload text", inject: ({ payloads }) => clearThenThrowSetter(payloads[0]!, "text", undefined) },
+      { label: "table cells", inject: ({ cells }) => clearThenThrowSetter(cells[0]!, "value", "") },
+      {
+        label: "buffers",
+        inject: ({ buffers }) => { structuredClone(buffers[0]!, { transfer: [buffers[0]!.buffer] }); }
+      }
+    ];
 
-    expect(() => analysis.clear()).toThrowError(expect.objectContaining({ code: "INTERNAL_ERROR", message: "Internal error" }));
-    expect(claims[1]).toMatchObject({ text: "", key: "", value: undefined, tokens: [] });
-    expect([...firstBuffer, ...secondBuffer]).toEqual([0, 0, 0, 0]);
-    expect(analysis.requirements).toHaveLength(0);
+    for (const testCase of cases) {
+      const fixture = createCleanupFixture();
+      testCase.inject(fixture);
+
+      expect(() => fixture.analysis.clear(), testCase.label).toThrowError(expect.objectContaining({ code: "INTERNAL_ERROR", message: "Internal error" }));
+      for (const claim of fixture.claims) {
+        expect(claim.text, `${testCase.label} claim text`).toBe("");
+        expect(claim.key, `${testCase.label} claim key`).toBe("");
+        expect(claim.value, `${testCase.label} claim value`).toBeUndefined();
+        expect(claim.tokens, `${testCase.label} current claim tokens`).toEqual([]);
+      }
+      fixture.originalTokens.forEach((tokens, index) => {
+        if (testCase.label !== "original tokens" || index !== 0) expect(tokens, `${testCase.label} original tokens ${index}`).toHaveLength(0);
+      });
+      fixture.currentTokens.forEach((tokens, index) => {
+        if (testCase.label !== "current tokens" || index !== 0) expect(tokens, `${testCase.label} current tokens ${index}`).toHaveLength(0);
+      });
+      if (testCase.label !== "requirements array") expect(fixture.requirements).toHaveLength(0);
+      if (testCase.label !== "solutionClaims array") expect(fixture.solutionClaims).toHaveLength(0);
+      expect(fixture.payloads.every((payload) => payload.text === undefined && payload.tableCells === undefined && payload.bytes === undefined), testCase.label).toBe(true);
+      expect(fixture.cells.every((cell) => cell.value === ""), testCase.label).toBe(true);
+      expect(fixture.buffers[1], `${testCase.label} later buffer`).toEqual(new Uint8Array([0, 0]));
+      if (testCase.label !== "buffers") expect(fixture.buffers[0], `${testCase.label} first buffer`).toEqual(new Uint8Array([0, 0]));
+      if (testCase.label === "original tokens") expect(fixture.originalTokens[0]).not.toHaveLength(0);
+      if (testCase.label === "current tokens") expect(fixture.currentTokens[0]).not.toHaveLength(0);
+      if (testCase.label === "requirements array") expect(fixture.requirements).not.toHaveLength(0);
+      if (testCase.label === "solutionClaims array") expect(fixture.solutionClaims).not.toHaveLength(0);
+      if (testCase.label === "buffers") expect(fixture.buffers[0]!.byteLength).toBe(0);
+    }
   });
 
   it("extracts requirements and ordinary solution claims with typed locations", () => {

@@ -42,6 +42,28 @@ function providerResultRejectionSemantics(markdown: string): { forbidden: string
   };
 }
 
+function cleanupContractSemantics(markdown: string): { paragraph: string; complete: boolean } {
+  const withoutFencedCode = markdown.replace(/```[\s\S]*?```/gu, "");
+  const paragraph = withoutFencedCode
+    .split(/\n\s*\n/gu)
+    .map((candidate) => candidate.replace(/[`*#]/gu, "").replace(/\s+/gu, " ").trim().toLowerCase())
+    .find((candidate) => candidate.includes("cleanup") && candidate.includes("best-effort") && candidate.includes("internal_error")) ?? "";
+  const required = [
+    /original and analyzer-isolated requirement and solution claim objects/u,
+    /claim text, key, and value/u,
+    /captured original and current token arrays/u,
+    /top-level requirements and solutionclaims arrays/u,
+    /payload text/u,
+    /table-cell values/u,
+    /mutable byte buffers/u,
+    /best-effort/u,
+    /continues after (?:an|any) individual cleanup (?:action )?fails/u,
+    /sanitized internal_error only when no earlier error is pending/u,
+    /earlier error (?:keeps|retains) precedence/u
+  ];
+  return { paragraph, complete: paragraph.length > 0 && required.every((pattern) => pattern.test(paragraph)) };
+}
+
 function jsonBlocksUnderHeading(markdown: string, heading: string): unknown[] {
   const headingStart = markdown.indexOf(`## ${heading}`);
   if (headingStart < 0) throw new Error(`Missing ${heading} heading`);
@@ -70,6 +92,19 @@ describe("public attribution and determinism documentation contract", () => {
     const actual = providerResultRejectionSemantics(await readFile("docs/mcp-contract.md", "utf8"));
     expect(actual.forbidden).toEqual([]);
     expect(actual.required).toBe(true);
+  });
+
+  it("requires the complete cleanup category and precedence contract in one normative paragraph", async () => {
+    const complete = "Cleanup makes a best-effort pass over original and analyzer-isolated requirement and solution claim objects, claim text, key, and value, captured original and current token arrays, top-level requirements and solutionClaims arrays, payload text, table-cell values, and mutable byte buffers; cleanup continues after any individual cleanup action fails, returns sanitized INTERNAL_ERROR only when no earlier error is pending, and an earlier error keeps precedence.";
+    expect(cleanupContractSemantics(complete).complete).toBe(true);
+
+    const incomplete = `${complete.replace("captured original and current token arrays, ", "")}\n\nToken arrays are discussed elsewhere.\n\n\`\`\`text\ncaptured original and current token arrays\n\`\`\``;
+    expect(cleanupContractSemantics(incomplete).complete).toBe(false);
+    expect(cleanupContractSemantics("Cleanup is best-effort and returns INTERNAL_ERROR. Other prose names claim text, token arrays, payload text, table-cell values, and buffers.").complete).toBe(false);
+
+    const actual = cleanupContractSemantics(await readFile("docs/mcp-contract.md", "utf8"));
+    expect(actual.paragraph).not.toBe("");
+    expect(actual.complete).toBe(true);
   });
 
   it("detects forbidden guarantees while allowing scoped deterministic-analyzer language", () => {
