@@ -111,7 +111,7 @@ function providerRequest(analysis: ReturnType<typeof buildReviewAnalysisInput>, 
   return { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
 }
 
-function freezeProviderRequest(request: ProviderReviewRequest): Readonly<ProviderReviewRequest> {
+function freezeOwnedTree<T>(owned: T): T {
   const seen = new Set<object>();
   const freeze = (value: unknown): void => {
     if (typeof value !== "object" || value === null || seen.has(value)) return;
@@ -119,8 +119,12 @@ function freezeProviderRequest(request: ProviderReviewRequest): Readonly<Provide
     for (const child of Object.values(value)) freeze(child);
     Object.freeze(value);
   };
-  freeze(request);
-  return request;
+  freeze(owned);
+  return owned;
+}
+
+function freezeProviderRequest(request: ProviderReviewRequest): Readonly<ProviderReviewRequest> {
+  return freezeOwnedTree(request);
 }
 
 function namespaceProviderFindings(result: ProviderReviewResult, deterministic: readonly ReviewFinding[]): ReviewFinding[] {
@@ -229,7 +233,12 @@ async function createReviewResponse(
         generatedAt: GENERATED_AT
       }
     });
-    response = deterministicResponse;
+    const trustedDeterministicFindings = freezeOwnedTree(structuredClone(deterministicResponse.findings));
+    const trustedDeterministicResponse = {
+      ...deterministicResponse,
+      findings: trustedDeterministicFindings
+    } satisfies ReviewResponse;
+    response = trustedDeterministicResponse;
 
     if (options.provider !== undefined) {
       if (expectedProviderRequest === undefined) throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
@@ -247,14 +256,14 @@ async function createReviewResponse(
         if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         const providerResult = parsedProviderResult.data;
         validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
-        const namespacedProviderFindings = namespaceProviderFindings(providerResult, deterministicFindings);
+        const namespacedProviderFindings = namespaceProviderFindings(providerResult, trustedDeterministicFindings);
         providerMetadata = namespacedProviderFindings.length > 0
           ? { provider: { name: providerResult.provider, model: providerResult.model } }
           : {};
         const providerOnlyResponse = reviewResponseSchema.parse({
-          ...deterministicResponse,
+          ...trustedDeterministicResponse,
           findings: namespacedProviderFindings,
-          metadata: { ...deterministicResponse.metadata, ...providerMetadata }
+          metadata: { ...trustedDeterministicResponse.metadata, ...providerMetadata }
         });
         const providerFindings = providerOnlyResponse.findings;
         const forbiddenProviderValues = new Set([
@@ -263,7 +272,7 @@ async function createReviewResponse(
         ].filter((value) => value.length > 0));
         assertNoForbiddenProviderAuthoredStrings(providerFindings, forbiddenProviderValues);
         internal = {
-          deterministicFindings,
+          deterministicFindings: trustedDeterministicFindings,
           providerResult,
           providerFindings
         };
@@ -273,9 +282,9 @@ async function createReviewResponse(
       }
 
       const mergedResponse = {
-        ...deterministicResponse,
+        ...trustedDeterministicResponse,
         findings: [...internal.deterministicFindings, ...internal.providerFindings],
-        metadata: { ...deterministicResponse.metadata, ...providerMetadata }
+        metadata: { ...trustedDeterministicResponse.metadata, ...providerMetadata }
       } satisfies ReviewResponse;
       response = reviewResponseSchema.parse(mergedResponse);
     }

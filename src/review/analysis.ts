@@ -130,6 +130,12 @@ function createReviewAnalysisInput(normalizedEvidence: NormalizedEvidence[], ana
     tableCells: payload.tableCells,
     cells: payload.tableCells === undefined ? [] : [...payload.tableCells]
   }));
+  const requirementClaims = [...requirements];
+  const solutionClaimCopies = [...solutionClaims];
+  const claimTargets = [...requirementClaims, ...solutionClaimCopies].map((claim) => ({
+    claim,
+    originalTokens: claim.tokens
+  }));
   let cleared = false;
   const clear = () => {
     if (cleared) return;
@@ -141,6 +147,21 @@ function createReviewAnalysisInput(normalizedEvidence: NormalizedEvidence[], ana
         firstError ??= error;
       }
     };
+    for (const target of claimTargets) {
+      attempt(() => { target.claim.text = ""; });
+      attempt(() => { target.claim.key = ""; });
+      attempt(() => { target.claim.value = undefined; });
+      attempt(() => { target.originalTokens.length = 0; });
+      let currentTokens: string[] | undefined;
+      attempt(() => { currentTokens = target.claim.tokens; });
+      if (currentTokens !== undefined) {
+        const tokensToClear = currentTokens;
+        attempt(() => { tokensToClear.length = 0; });
+      }
+      attempt(() => { target.claim.tokens = []; });
+    }
+    attempt(() => { requirements.length = 0; });
+    attempt(() => { solutionClaims.length = 0; });
     for (const target of cleanupTargets) {
       if (target.bytes !== undefined) attempt(() => { Uint8Array.prototype.fill.call(target.bytes, 0); });
       for (const cell of target.cells) attempt(() => { cell.value = ""; });

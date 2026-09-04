@@ -789,6 +789,55 @@ describe("provider review MCP boundary", () => {
     expect(retained!.payloads.every((entry) => entry.text === undefined && entry.tableCells === undefined && entry.bytes === undefined)).toBe(true);
   });
 
+  it("clears isolated claims after success, analyzer failure, and snapshot failure", async () => {
+    for (const mode of ["success", "analyzer", "snapshot"] as const) {
+      let retained: Parameters<ReviewAnalyzer["analyze"]>[0] | undefined;
+      const tokenArrays: string[][] = [];
+      const providerReview = vi.fn(async () => { throw new Error("provider-must-not-run"); });
+      const analyzer: ReviewAnalyzer = {
+        name: "deterministic-rules",
+        version: "1.0.0",
+        analyze(analysis) {
+          retained = analysis;
+          tokenArrays.push(...[...analysis.requirements, ...analysis.solutionClaims].map((claim) => claim.tokens));
+          if (mode === "analyzer") throw new TypeError("analyzer-cleanup-sentinel");
+          if (mode === "snapshot") {
+            const claim = analysis.requirements[0]!;
+            const hostile = {
+              id: "hostile-snapshot",
+              type: "omission",
+              severity: "medium",
+              confidence: "medium",
+              get title() { throw new RangeError("snapshot-cleanup-sentinel"); },
+              summary: "summary",
+              observation: "observation",
+              interpretation: "interpretation",
+              followUpChecks: ["follow up"],
+              evidenceIds: [claim.evidenceId],
+              citations: [analysis.resolveCitation(claim.evidenceId, claim.location)]
+            };
+            return [hostile] as unknown as ReviewFinding[];
+          }
+          return [];
+        }
+      };
+      const result = payload(await handleReviewRequest(request, {
+        analyzer,
+        ...(mode === "snapshot" ? { provider: { name: "local-reviewer", review: providerReview } } : {})
+      }));
+      expect(result, mode).toEqual(mode === "success"
+        ? expect.objectContaining({ ok: true })
+        : { ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+      expect(retained, mode).toBeDefined();
+      expect(retained!.requirements, mode).toHaveLength(0);
+      expect(retained!.solutionClaims, mode).toHaveLength(0);
+      expect(tokenArrays.every((tokens) => tokens.length === 0), mode).toBe(true);
+      expect(retained!.payloads.every((entry) => entry.text === undefined && entry.tableCells === undefined && entry.bytes === undefined), mode).toBe(true);
+      if (mode === "snapshot") expect(providerReview).not.toHaveBeenCalled();
+      expect(JSON.stringify(result), mode).not.toMatch(/sentinel|stack/iu);
+    }
+  });
+
   it("does not access analyzer-installed throwing getters while building the provider request", async () => {
     const analyzer: ReviewAnalyzer = {
       name: "deterministic-rules",
