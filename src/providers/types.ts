@@ -1,3 +1,4 @@
+import { isProxy } from "node:util/types";
 import { z } from "zod/v4";
 import {
   reviewFindingSchema,
@@ -10,6 +11,30 @@ import { DEEPSEEK_MODELS } from "./config.js";
 
 export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v1" as const;
 export const MAX_PROVIDER_FINDINGS = 100;
+export const PROVIDER_REVIEW_RESULT_KEYS = Object.freeze([
+  "provider",
+  "model",
+  "promptVersion",
+  "inputFingerprint",
+  "modelFindings",
+  "deterministicFindings"
+] as const);
+
+export function isProviderReviewResultEnvelope(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const keys = Reflect.ownKeys(value);
+  if (
+    keys.length !== PROVIDER_REVIEW_RESULT_KEYS.length
+    || keys.some((key) => typeof key !== "string" || !PROVIDER_REVIEW_RESULT_KEYS.includes(key as typeof PROVIDER_REVIEW_RESULT_KEYS[number]))
+  ) return false;
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  for (const key of PROVIDER_REVIEW_RESULT_KEYS) {
+    const descriptor = Reflect.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined || !descriptor.enumerable) return false;
+  }
+  return !isProxy(value);
+}
 
 export const providerInferenceSettingsSchema = z
   .object({

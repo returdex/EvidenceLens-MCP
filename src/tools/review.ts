@@ -15,7 +15,7 @@ import { buildReviewAnalysisInput, cloneReviewAnalysisInputForAnalyzer } from ".
 import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../review/engine.js";
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
-import { PROVIDER_PROMPT_VERSION, providerInferenceSettingsSchema, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
+import { isProviderReviewResultEnvelope, PROVIDER_PROMPT_VERSION, providerInferenceSettingsSchema, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
 import type { ProviderConfig } from "../providers/config.js";
 import { ProviderError } from "../providers/errors.js";
 import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
@@ -269,6 +269,9 @@ async function createReviewResponse(
         } catch (error) {
           if (error instanceof ProviderError) throw error;
           throw new ProviderError("PROVIDER_REQUEST_FAILED");
+        }
+        if (!isProviderReviewResultEnvelope(untrustedProviderResult)) {
+          throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         }
         const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
         if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
