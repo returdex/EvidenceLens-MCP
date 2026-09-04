@@ -93,8 +93,12 @@ function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>)
   });
 }
 
-function providerRequest(analysis: ReturnType<typeof buildReviewAnalysisInput>, request: ReviewRequest, options: ReviewHandlerOptions): ProviderReviewRequest {
-  const config = options.providerConfig ?? DEFAULT_PROVIDER_INFERENCE;
+function providerRequest(
+  analysis: ReturnType<typeof buildReviewAnalysisInput>,
+  request: ReviewRequest,
+  providerConfig: ReviewHandlerOptions["providerConfig"]
+): ProviderReviewRequest {
+  const config = providerConfig ?? DEFAULT_PROVIDER_INFERENCE;
   const inference = providerInferenceSettingsSchema.parse({
     model: config.model,
     temperature: config.temperature,
@@ -193,7 +197,19 @@ async function createReviewResponse(
   options: ReviewHandlerOptions = {},
   onCleanupRegistered?: CleanupRegistrationObserver
 ): Promise<ReviewResponse> {
-  const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
+  let filesystemPolicy: FilesystemPolicy | undefined;
+  let filesystemReadAdapter: FilesystemReadAdapter | undefined;
+  try {
+    filesystemPolicy = options.filesystemPolicy;
+    filesystemReadAdapter = options.filesystemReadAdapter;
+  } catch {
+    throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+  }
+  const bundle = await normalizeEvidenceBundle(request.evidence, {
+    filesystemPolicy,
+    filesystemReadAdapter,
+    generatedAt: GENERATED_AT
+  });
   const analysis = buildReviewAnalysisInput(bundle);
   const cleanupClosures: Array<() => void> = [];
   cleanupClosures.push(analysis.clear.bind(analysis));
@@ -204,10 +220,12 @@ async function createReviewResponse(
     const analyzerAnalysis = cloneReviewAnalysisInputForAnalyzer(analysis);
     cleanupClosures.push(analyzerAnalysis.clear.bind(analyzerAnalysis));
     onCleanupRegistered?.("isolated", analyzerAnalysis);
-    const expectedProviderRequest = options.provider === undefined
-      ? undefined
-      : freezeProviderRequest(providerRequest(analysis, request, options));
+    const provider = options.provider;
+    const providerConfig = options.providerConfig;
     const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
+    const expectedProviderRequest = provider === undefined
+      ? undefined
+      : freezeProviderRequest(providerRequest(analysis, request, providerConfig));
     let deterministicFindings: readonly ReviewFinding[];
     try {
       const analyzerName = analyzer.name;
@@ -240,14 +258,14 @@ async function createReviewResponse(
     } satisfies ReviewResponse;
     response = trustedDeterministicResponse;
 
-    if (options.provider !== undefined) {
+    if (provider !== undefined) {
       if (expectedProviderRequest === undefined) throw new EvidenceLensError("INTERNAL_ERROR", "Internal error");
       let internal: InternalReviewResult;
       let providerMetadata: { provider?: { name: string; model: string } };
       try {
         let untrustedProviderResult: unknown;
         try {
-          untrustedProviderResult = await options.provider.review(expectedProviderRequest);
+          untrustedProviderResult = await provider.review(expectedProviderRequest);
         } catch (error) {
           if (error instanceof ProviderError) throw error;
           throw new ProviderError("PROVIDER_REQUEST_FAILED");
@@ -255,7 +273,7 @@ async function createReviewResponse(
         const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
         if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         const providerResult = parsedProviderResult.data;
-        validateProviderResultIdentity(options.provider, expectedProviderRequest, providerResult);
+        validateProviderResultIdentity(provider, expectedProviderRequest, providerResult);
         const namespacedProviderFindings = namespaceProviderFindings(providerResult, trustedDeterministicFindings);
         providerMetadata = namespacedProviderFindings.length > 0
           ? { provider: { name: providerResult.provider, model: providerResult.model } }
