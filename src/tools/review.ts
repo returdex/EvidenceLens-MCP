@@ -15,7 +15,7 @@ import { buildReviewAnalysisInput, cloneReviewAnalysisInputForAnalyzer } from ".
 import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../review/engine.js";
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
-import { PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
+import { PROVIDER_PROMPT_VERSION, providerInferenceSettingsSchema, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
 import type { ProviderConfig } from "../providers/config.js";
 import { ProviderError } from "../providers/errors.js";
 import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
@@ -94,15 +94,20 @@ function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>)
 }
 
 function providerRequest(analysis: ReturnType<typeof buildReviewAnalysisInput>, request: ReviewRequest, options: ReviewHandlerOptions): ProviderReviewRequest {
-  const inference = options.providerConfig ?? DEFAULT_PROVIDER_INFERENCE;
-  const withoutFingerprint = {
+  const config = options.providerConfig ?? DEFAULT_PROVIDER_INFERENCE;
+  const inference = providerInferenceSettingsSchema.parse({
+    model: config.model,
+    temperature: config.temperature,
+    maxTokens: config.maxTokens
+  });
+  const withoutFingerprint = structuredClone({
     evidence: providerEvidence(analysis),
     requirements: analysis.requirements.map(({ text, evidenceId, role, location, kind }) => ({ text, evidenceId, role, location, kind })),
     solutionClaims: analysis.solutionClaims.map(({ text, evidenceId, role, location, kind }) => ({ text, evidenceId, role, location, kind })),
     objective: request.objective,
     promptVersion: PROVIDER_PROMPT_VERSION,
     inference
-  } satisfies Omit<ProviderReviewRequest, "inputFingerprint">;
+  } satisfies Omit<ProviderReviewRequest, "inputFingerprint">);
   return { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
 }
 
@@ -174,19 +179,31 @@ interface InternalReviewResult {
   providerFindings: readonly ReviewFinding[];
 }
 
-async function createReviewResponse(request: ReviewRequest, options: ReviewHandlerOptions = {}): Promise<ReviewResponse> {
+type CleanupRegistrationObserver = (
+  stage: "original" | "isolated",
+  analysis: ReturnType<typeof buildReviewAnalysisInput>
+) => void;
+
+async function createReviewResponse(
+  request: ReviewRequest,
+  options: ReviewHandlerOptions = {},
+  onCleanupRegistered?: CleanupRegistrationObserver
+): Promise<ReviewResponse> {
   const bundle = await normalizeEvidenceBundle(request.evidence, { ...options, generatedAt: GENERATED_AT });
   const analysis = buildReviewAnalysisInput(bundle);
-  const clearAnalysis = analysis.clear.bind(analysis);
-  const analyzerAnalysis = cloneReviewAnalysisInputForAnalyzer(analysis);
-  const clearAnalyzerAnalysis = analyzerAnalysis.clear.bind(analyzerAnalysis);
-  const expectedProviderRequest = options.provider === undefined
-    ? undefined
-    : freezeProviderRequest(providerRequest(analysis, request, options));
-  const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
+  const cleanupClosures: Array<() => void> = [];
+  cleanupClosures.push(analysis.clear.bind(analysis));
+  onCleanupRegistered?.("original", analysis);
   let response: ReviewResponse | undefined;
   let pendingError: unknown;
   try {
+    const analyzerAnalysis = cloneReviewAnalysisInputForAnalyzer(analysis);
+    cleanupClosures.push(analyzerAnalysis.clear.bind(analyzerAnalysis));
+    onCleanupRegistered?.("isolated", analyzerAnalysis);
+    const expectedProviderRequest = options.provider === undefined
+      ? undefined
+      : freezeProviderRequest(providerRequest(analysis, request, options));
+    const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
     let deterministicFindings: readonly ReviewFinding[];
     try {
       const analyzerName = analyzer.name;
@@ -263,14 +280,16 @@ async function createReviewResponse(request: ReviewRequest, options: ReviewHandl
       response = reviewResponseSchema.parse(mergedResponse);
     }
   } catch (error) {
-    pendingError = error;
-  }
-
-  for (const clear of [clearAnalysis, clearAnalyzerAnalysis]) {
-    try {
-      clear();
-    } catch {
-      if (pendingError === undefined) pendingError = new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+    pendingError = error instanceof EvidenceLensError || error instanceof ProviderError
+      ? error
+      : new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+  } finally {
+    for (const clear of cleanupClosures) {
+      try {
+        clear();
+      } catch {
+        if (pendingError === undefined) pendingError = new EvidenceLensError("INTERNAL_ERROR", "Internal error");
+      }
     }
   }
 
@@ -302,7 +321,11 @@ function errorFromValidation(error: ZodError, input: unknown): EvidenceLensError
   return new EvidenceLensError(code, "Review request failed validation");
 }
 
-export async function handleReviewRequest(input: unknown, options: ReviewHandlerOptions = {}): Promise<ReviewToolResult> {
+async function handleReviewRequestInternal(
+  input: unknown,
+  options: ReviewHandlerOptions,
+  onCleanupRegistered?: CleanupRegistrationObserver
+): Promise<ReviewToolResult> {
   const parsed = reviewRequestSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -316,7 +339,7 @@ export async function handleReviewRequest(input: unknown, options: ReviewHandler
 
   try {
     return {
-      content: [{ type: "text", text: JSON.stringify(await createReviewResponse(parsed.data, options)) }]
+      content: [{ type: "text", text: JSON.stringify(await createReviewResponse(parsed.data, options, onCleanupRegistered)) }]
     };
   } catch (error) {
     if (error instanceof RangeError) {
@@ -327,6 +350,19 @@ export async function handleReviewRequest(input: unknown, options: ReviewHandler
     }
     return toToolErrorResult(error);
   }
+}
+
+export async function handleReviewRequest(input: unknown, options: ReviewHandlerOptions = {}): Promise<ReviewToolResult> {
+  return handleReviewRequestInternal(input, options);
+}
+
+/** @internal */
+export async function handleReviewRequestForTest(
+  input: unknown,
+  options: ReviewHandlerOptions,
+  onCleanupRegistered: CleanupRegistrationObserver
+): Promise<ReviewToolResult> {
+  return handleReviewRequestInternal(input, options, onCleanupRegistered);
 }
 
 export function registerReviewTool(server: McpServer, options: ReviewHandlerOptions = {}): void {

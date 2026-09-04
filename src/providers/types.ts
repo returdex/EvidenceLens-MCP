@@ -6,9 +6,18 @@ import {
   EvidenceType,
   NormalizedEvidenceReference
 } from "../contracts/review.js";
+import { DEEPSEEK_MODELS } from "./config.js";
 
 export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v1" as const;
 export const MAX_PROVIDER_FINDINGS = 100;
+
+export const providerInferenceSettingsSchema = z
+  .object({
+    model: z.enum(DEEPSEEK_MODELS),
+    temperature: z.number().finite().min(0).max(2),
+    maxTokens: z.number().finite().int().min(1).max(20_000)
+  })
+  .strict();
 
 export const providerReviewResultSchema = z
   .object({
@@ -59,11 +68,7 @@ export interface ProviderEvidenceItem {
   visualPayloads?: readonly ProviderVisualPayload[];
 }
 
-export interface ProviderInferenceSettings {
-  model: "deepseek-v4-pro" | "deepseek-v4-flash" | "deepseek-v4-flash-vision-exp";
-  temperature: number;
-  maxTokens: number;
-}
+export type ProviderInferenceSettings = z.infer<typeof providerInferenceSettingsSchema>;
 
 export interface ProviderReviewRequest {
   evidence: readonly ProviderEvidenceItem[];

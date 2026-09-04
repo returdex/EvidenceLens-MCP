@@ -142,7 +142,14 @@ describe("provider review MCP boundary", () => {
     };
     expect(visit(capturedRequest)).toBe(true);
     const serialized = JSON.stringify({ request: capturedRequest, result });
-    for (const sentinel of [config.apiKey, config.baseUrl, String(config.timeoutMs), String(config.maxRetries), String(config.maxTotalWaitMs), holder.marker]) {
+    for (const sentinel of [
+      config.apiKey,
+      config.baseUrl,
+      `\"timeoutMs\":${config.timeoutMs}`,
+      `\"maxRetries\":${config.maxRetries}`,
+      `\"maxTotalWaitMs\":${config.maxTotalWaitMs}`,
+      holder.marker
+    ]) {
       expect(serialized).not.toContain(sentinel);
     }
     expect(Object.isFrozen(config)).toBe(false);
@@ -152,6 +159,20 @@ describe("provider review MCP boundary", () => {
     holder.marker = "caller-remains-writable";
     expect(config.temperature).toBe(0.3);
     expect(holder.marker).toBe("caller-remains-writable");
+
+    const failureHolder = { marker: "failure-holder" };
+    const failureConfig = { ...config, temperature: 0.2, holder: failureHolder };
+    const failed = payload(await handleReviewRequest(request, {
+      provider: { name: "local-reviewer", async review() { throw new ProviderError("PROVIDER_REQUEST_FAILED"); } },
+      providerConfig: failureConfig
+    }));
+    expect(failed).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    expect(Object.isFrozen(failureConfig)).toBe(false);
+    expect(Object.isFrozen(failureHolder)).toBe(false);
+    failureConfig.maxTokens = 4_002;
+    failureHolder.marker = "failure-remains-writable";
+    expect(failureConfig.maxTokens).toBe(4_002);
+    expect(failureHolder.marker).toBe("failure-remains-writable");
   });
 
   it("rejects invalid runtime inference before invoking the provider", async () => {
