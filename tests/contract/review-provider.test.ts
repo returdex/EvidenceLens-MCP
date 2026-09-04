@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { reviewProviderAttributionSchema, reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
+import type { ProviderConfig } from "../../src/providers/config.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 
@@ -98,6 +99,122 @@ function unsafeProvider(value: unknown): ReviewProvider {
 }
 
 describe("provider review MCP boundary", () => {
+  it("runtime-projects a production ProviderConfig into an owned frozen three-key inference", async () => {
+    const holder = { marker: "nested-caller-holder" };
+    const config: ProviderConfig & { holder: typeof holder } = {
+      apiKey: "config-api-key-sentinel",
+      baseUrl: "https://config-endpoint-sentinel.invalid/v1",
+      model: "deepseek-v4-pro",
+      timeoutMs: 31_337,
+      maxRetries: 2,
+      maxTotalWaitMs: 9_999,
+      temperature: 0.2,
+      maxTokens: 4_001,
+      holder
+    };
+    let capturedRequest: ProviderReviewRequest | undefined;
+    let forbiddenReads: unknown[] = [];
+    const provider: ReviewProvider = {
+      name: "local-reviewer",
+      async review(providerRequest) {
+        capturedRequest = providerRequest;
+        const inference = providerRequest.inference as unknown as Record<string, unknown>;
+        forbiddenReads = [inference.apiKey, inference.baseUrl, inference.timeoutMs, inference.maxRetries, inference.maxTotalWaitMs];
+        return {
+          provider: "local-reviewer",
+          model: providerRequest.inference.model,
+          promptVersion: providerRequest.promptVersion,
+          inputFingerprint: providerRequest.inputFingerprint,
+          modelFindings: [],
+          deterministicFindings: []
+        };
+      }
+    };
+
+    const result = payload(await handleReviewRequest(request, { provider, providerConfig: config }));
+    expect(result).toMatchObject({ ok: true });
+    expect(Object.keys(capturedRequest!.inference).sort()).toEqual(["maxTokens", "model", "temperature"]);
+    expect(forbiddenReads).toEqual([undefined, undefined, undefined, undefined, undefined]);
+    const visit = (value: unknown, seen = new Set<object>()): boolean => {
+      if (value === null || typeof value !== "object" || seen.has(value)) return true;
+      seen.add(value);
+      return Object.isFrozen(value) && Object.values(value).every((child) => visit(child, seen));
+    };
+    expect(visit(capturedRequest)).toBe(true);
+    const serialized = JSON.stringify({ request: capturedRequest, result });
+    for (const sentinel of [config.apiKey, config.baseUrl, String(config.timeoutMs), String(config.maxRetries), String(config.maxTotalWaitMs), holder.marker]) {
+      expect(serialized).not.toContain(sentinel);
+    }
+    expect(Object.isFrozen(config)).toBe(false);
+    expect(Object.isFrozen(holder)).toBe(false);
+    expect(holder.marker).toBe("nested-caller-holder");
+    config.temperature = 0.3;
+    holder.marker = "caller-remains-writable";
+    expect(config.temperature).toBe(0.3);
+    expect(holder.marker).toBe("caller-remains-writable");
+  });
+
+  it("rejects invalid runtime inference before invoking the provider", async () => {
+    const invalidValues: Array<{ field: "model" | "temperature" | "maxTokens"; value: unknown }> = [
+      { field: "model", value: undefined },
+      { field: "model", value: "unknown-model" },
+      { field: "temperature", value: undefined },
+      { field: "temperature", value: "0.2" },
+      { field: "temperature", value: Number.NaN },
+      { field: "temperature", value: Number.POSITIVE_INFINITY },
+      { field: "temperature", value: -0.01 },
+      { field: "temperature", value: 2.01 },
+      { field: "maxTokens", value: undefined },
+      { field: "maxTokens", value: "4000" },
+      { field: "maxTokens", value: Number.NaN },
+      { field: "maxTokens", value: Number.POSITIVE_INFINITY },
+      { field: "maxTokens", value: 0 },
+      { field: "maxTokens", value: 20_001 },
+      { field: "maxTokens", value: 1.5 }
+    ];
+    for (const testCase of invalidValues) {
+      const review = vi.fn(async () => { throw new Error("provider-must-not-run"); });
+      const config = {
+        model: "deepseek-v4-pro",
+        temperature: 0.2,
+        maxTokens: 4_000,
+        [testCase.field]: testCase.value
+      } as unknown as ProviderConfig;
+      expect(payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review }, providerConfig: config })), `${testCase.field}:${String(testCase.value)}`).toEqual({
+        ok: false,
+        code: "INTERNAL_ERROR",
+        message: "Internal error"
+      });
+      expect(review).not.toHaveBeenCalled();
+    }
+  });
+
+  it("registers original and isolated cleanup before hostile provider setup", async () => {
+    const reviewModule = await import("../../src/tools/review.js");
+    const testHandler = (reviewModule as Record<string, unknown>).handleReviewRequestForTest as
+      | ((input: unknown, options: Parameters<typeof handleReviewRequest>[1], observer: (stage: "original" | "isolated", analysis: Parameters<ReviewAnalyzer["analyze"]>[0]) => void) => ReturnType<typeof handleReviewRequest>)
+      | undefined;
+    expect(testHandler).toBeTypeOf("function");
+    const stages: string[] = [];
+    const retained: Array<Parameters<ReviewAnalyzer["analyze"]>[0]> = [];
+    const providerConfig = {
+      get model() { throw new TypeError("hostile-config-secret-sentinel"); },
+      temperature: 0.2,
+      maxTokens: 4_000
+    } as unknown as ProviderConfig;
+    const result = payload(await testHandler!(request, { provider: fakeProvider(), providerConfig }, (stage, analysis) => {
+      stages.push(stage);
+      retained.push(analysis);
+    }));
+    expect(result).toEqual({ ok: false, code: "INTERNAL_ERROR", message: "Internal error" });
+    expect(stages).toEqual(["original", "isolated"]);
+    expect(retained).toHaveLength(2);
+    for (const analysis of retained) {
+      expect(analysis.payloads.every((entry) => entry.text === undefined && entry.tableCells === undefined && entry.bytes === undefined)).toBe(true);
+    }
+    expect(JSON.stringify(result)).not.toMatch(/hostile|sentinel|stack/iu);
+  });
+
   it("keeps deterministic-only MCP text byte-for-byte compatible", async () => {
     const frozen = JSON.parse(await readFile(deterministicFixtureUrl, "utf8")) as string;
     const deterministicRequest = JSON.parse(await readFile(deterministicRequestUrl, "utf8")) as ReviewRequest;
