@@ -1,7 +1,7 @@
 ---
 phase: 09-public-provider-attribution-and-determinism-contract
-reviewed: 2026-09-04T16:50:34Z
-depth: standard
+reviewed: 2026-09-05T06:29:36Z
+depth: deep
 files_reviewed: 9
 files_reviewed_list:
   - docs/mcp-contract.md
@@ -15,78 +15,76 @@ files_reviewed_list:
   - tests/review/analysis.test.ts
 findings:
   critical: 1
-  warning: 1
+  warning: 2
   info: 0
-  total: 2
+  total: 3
 status: issues_found
 ---
 
 # Phase 09: Code Review Report
 
-**Reviewed:** 2026-09-04T16:50:34Z
-**Depth:** standard
+**Reviewed:** 2026-09-05T06:29:36Z
+**Depth:** deep
 **Files Reviewed:** 9
 **Status:** issues_found
 
 ## Summary
 
-The complete seven-plan Phase 09 implementation was reviewed against every 09-01 through 09-07 PLAN/SUMMARY artifact, the current verification report, the prior review, and the live source/tests. Plan 09-07 closes the previously reported whole-options spread, repeated provider getter, source-owned option error, hidden-key preflight, reflective-trap containment, cleanup continuation, and cleanup-documentation defects on their tested paths. The focused offline suite passes 63/63 tests, the strict TypeScript build passes, and the complete credential-free/no-network suite passes 188/188 tests without invoking the DeepSeek live test.
+Phase 09's top-level descriptor check correctly rejects all top-level accessor descriptors without reading them, and the existing reflective/proxy exception handling remains sanitized. However, the result envelope is only checked before Zod traverses nested values. A nested `modelFindings` proxy can mutate the otherwise ordinary outer result during schema parsing, add a hidden seventh field, and still produce an attributed success. This violates the documented whole-result rejection contract; **a blocker exists**.
 
-One provider-envelope blocker remains. The new preflight accepts accessor properties, but it runs only before Zod invokes those accessors. A schema-valid getter can add a non-enumerable/symbol/inherited private field or change the prototype after preflight; the handler then accepts the mutated envelope and returns a provider-backed success. This violates the exact-six-key whole-result rejection contract and is absent from the post-preflight accessor matrix. A separate exported-handler robustness issue allows hostile request objects to throw raw exceptions before the stable MCP error boundary.
+The focused Phase 09 suite passed (65 tests), `npm run build` passed, and the full credential-free/no-network suite passed (190 tests). Those green results do not cover the successful nested-mutation path below. The full suite emitted non-failing PDF.js font/indexing warnings.
 
 ## Critical Issues
 
-### CR-01: Accessor side effects bypass the exact provider-envelope preflight
+### CR-01: Nested parser traps can mutate and bypass the provider-result envelope preflight
 
 **Classification:** BLOCKER
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/providers/types.ts:32-36`
-**Affected flow:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:273-278`; missing regression at `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:1521-1581`
-**Issue:** `isProviderReviewResultEnvelope` checks that each allowed property is enumerable, but it does not require a data descriptor. An exact-six-key ordinary or null-prototype object with an accessor therefore passes preflight without invoking the getter. When `providerReviewResultSchema.safeParse` subsequently reads the property, that getter can mutate the original envelope by adding a non-enumerable or symbol-keyed private field, installing a custom prototype, or otherwise invalidating the preflight invariant while still returning a schema-valid value. There is no second preflight after structural reads, and Zod does not reject newly added non-enumerable/symbol/prototype data.
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/providers/types.ts:23-36`
+**Affected flow:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:273-278`
+**Issue:** The preflight proves only that the six *outer* properties are data descriptors before `providerReviewResultSchema.safeParse()` begins. Its values remain untrusted. A `modelFindings` array Proxy is itself stored in a valid data descriptor, so it passes `isProviderReviewResultEnvelope`. During Zod's normal reads of `length`/indexes, the Proxy can add a non-enumerable `apiKey` (or symbol/custom prototype) to the outer result and return valid findings. No post-parse envelope check runs, and the handler returns `ok: true` with `metadata.provider`.
 
-An offline probe used an enumerable `provider` getter that added a non-enumerable `apiKey` and returned `"local-reviewer"`. The handler returned `ok: true` with public provider attribution; after the call, `Reflect.ownKeys(result)` contained the seventh `apiKey` key. This directly contradicts the documented rule at `docs/mcp-contract.md:70` that unknown/private extra fields reject the entire result. The current post-preflight matrix covers getters that throw, but never a getter that returns valid data while mutating envelope shape.
+I reproduced this with an ordinary six-key result whose `modelFindings` Proxy adds a non-enumerable `apiKey: "nested-secret"` on its `get` trap. The handler returned success; the trap ran four times and `Reflect.ownKeys(result)` afterwards contained all six allowlisted keys plus `apiKey`. This is the same validation-time mutation class that 09-08 intended to close, now reachable through nested structural parsing. It contradicts the public contract at `docs/mcp-contract.md:70`, which says any unknown/private extra field rejects the entire provider result.
 
-**Fix:** Reject accessor descriptors during preflight so provider results must contain six enumerable own data properties. Since surviving Proxies are already rejected and parsing is synchronous after preflight, this removes the accessor-driven TOCTOU path.
+**Fix:** Re-run the descriptor/key/prototype/proxy preflight immediately after `safeParse` and before using `parsedProviderResult.data`; reject if the outer envelope changed. Add regression cases for proxied/accessor-backed `modelFindings` and `deterministicFindings` that mutate the outer object during parsing, asserting exact `PROVIDER_FAILURE`, no public sentinel, and no attributed success.
 
 ```ts
-for (const key of PROVIDER_REVIEW_RESULT_KEYS) {
-  const descriptor = Reflect.getOwnPropertyDescriptor(value, key);
-  if (
-    descriptor === undefined
-    || !descriptor.enumerable
-    || !("value" in descriptor)
-  ) {
-    return false;
-  }
+const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
+if (!parsedProviderResult.success || !isProviderReviewResultEnvelope(untrustedProviderResult)) {
+  throw new ProviderError("PROVIDER_INVALID_RESPONSE");
 }
+const providerResult = parsedProviderResult.data;
 ```
-
-Add ordinary and null-prototype handler regressions whose allowed-key getter adds each hidden shape (non-enumerable key, symbol key, and custom prototype) while returning a valid value. Each must be rejected as the exact sanitized `PROVIDER_FAILURE`. If accessors are intentionally supported instead, snapshot all six values into a fresh null-prototype object and revalidate the original envelope after reads before accepting the snapshot; do not rely on a single pre-read shape check.
 
 ## Warnings
 
-### WR-01: Hostile request objects can escape the stable tool-error boundary
+### WR-01: Hostile request objects escape the documented sanitized error boundary
 
 **Classification:** WARNING
-**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:359`
-**Issue:** `reviewRequestSchema.safeParse(input)` executes before the handler's `try/catch`. Despite its name, Zod `safeParse` does not contain exceptions thrown by input getters or Proxy traps. A hostile in-process caller can therefore make the exported `handleReviewRequest(input: unknown)` reject its Promise with the original exception and sentinel/stack instead of returning a stable three-field error payload. A focused offline probe with a Proxy getter throwing `Error("REQUEST-PROXY-SECRET")` produced a raw rejected exception. This is not constructible through ordinary JSON-RPC decoding, so it is a robustness defect rather than a remote MCP exploit, but it violates the exported unknown-input boundary and the general no-raw-error contract.
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/src/tools/review.ts:359-363`
+**Issue:** Request `safeParse` and `errorFromValidation` run before the handler's catch. Zod and the follow-on `in`/property reads can invoke Proxy traps. A direct call to the exported `handleReviewRequest` with a Proxy whose `ownKeys` throws `Error("REQUEST-PROXY-SECRET")` rejects the promise with that exact raw exception instead of returning a three-field stable error. Normal JSON-RPC decoded input cannot construct a Proxy, but this remains an unsafe exported unknown-input boundary and conflicts with `docs/mcp-contract.md:271`'s broad error-sanitization statement.
 
-**Fix:** Put request parsing and validation-error derivation inside a narrow catch that never copies the thrown value. Return a stable `INVALID_REQUEST` for hostile caller-owned request access (or a documented `INTERNAL_ERROR` if that is the chosen ownership policy), and add getter/`ownKeys`/`has` Proxy regressions.
+**Fix:** Wrap request parsing and validation-error derivation in a narrow boundary that discards the thrown value and returns a stable `INVALID_REQUEST` (or another explicitly documented stable code). Cover `ownKeys`, `has`, and getter traps.
 
 ```ts
 let parsed: ReturnType<typeof reviewRequestSchema.safeParse>;
 try {
   parsed = reviewRequestSchema.safeParse(input);
+  if (!parsed.success) return toToolErrorResult(errorFromValidation(parsed.error, input));
 } catch {
-  return toToolErrorResult(
-    new EvidenceLensError("INVALID_REQUEST", "Invalid request")
-  );
+  return toToolErrorResult(new EvidenceLensError("INVALID_REQUEST", "Invalid request"));
 }
 ```
 
-Also keep `errorFromValidation` in the same protected boundary because its `"evidence" in input` and property reads can independently trigger Proxy traps.
+### WR-02: The 09-08 regression does not test all six allowed accessor fields
+
+**Classification:** WARNING
+**File:** `/Users/yifeng/Documents/EvidenceLens-MCP/tests/contract/review-provider.test.ts:1550-1567`
+**Issue:** The test and summary claim descriptor-only rejection for all six allowlisted fields, but every accessor case replaces only `provider` (`Object.defineProperty(candidate, "provider", ...)`). The same is true of the accessor-mutation matrix at lines 1637-1661. The current production loop is generic, but this test cannot catch a future per-key regression affecting `model`, `promptVersion`, `inputFingerprint`, `modelFindings`, or `deterministicFindings`.
+
+**Fix:** Nest the ordinary/null-prototype matrix under `PROVIDER_REVIEW_RESULT_KEYS` and install a throwing or mutation-capable accessor for each key. Assert both direct preflight and handler execution leave every getter count at zero and return exact `PROVIDER_FAILURE`.
 
 ---
 
-_Reviewed: 2026-09-04T16:50:34Z_
+_Reviewed: 2026-09-05T06:29:36Z_
 _Reviewer: the agent (gsd-code-reviewer)_
-_Depth: standard_
+_Depth: deep_
