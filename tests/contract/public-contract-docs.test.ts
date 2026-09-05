@@ -42,6 +42,33 @@ function providerResultRejectionSemantics(markdown: string): { forbidden: string
   };
 }
 
+function providerEnvelopeParagraph(markdown: string): string {
+  const headingStart = markdown.indexOf("## Deterministic analysis and success response");
+  if (headingStart < 0) return "";
+  const remainder = markdown.slice(headingStart);
+  const nextHeading = remainder.search(/\n##\s/u);
+  return (nextHeading < 0 ? remainder : remainder.slice(0, nextHeading))
+    .split(/\n\s*\n/gu)
+    .map((paragraph) => paragraph.replace(/[`*#]/gu, "").replace(/\s+/gu, " ").trim().toLowerCase())
+    .find((paragraph) => paragraph.includes("strict provider result/envelope validation")) ?? "";
+}
+
+function providerEnvelopeDescriptorSemantics(markdown: string): boolean {
+  const paragraph = providerEnvelopeParagraph(markdown);
+  const required = [
+    /exactly the six public allowlisted keys/u,
+    /enumerable own data properties/u,
+    /unknown or private extra (?:fields or )?keys/u,
+    /symbols/u,
+    /(?:a )?non-ordinary custom prototype/u,
+    /proxy results/u,
+    /accessor properties/u,
+    /rejects? the entire provider result[\s\S]*before structural parsing/u,
+    /sanitized provider_failure/u
+  ];
+  return paragraph.length > 0 && required.every((pattern) => pattern.test(paragraph));
+}
+
 function cleanupContractSemantics(markdown: string): { paragraph: string; complete: boolean } {
   const withoutFencedCode = markdown.replace(/```[\s\S]*?```/gu, "");
   const paragraph = withoutFencedCode
@@ -92,6 +119,14 @@ describe("public attribution and determinism documentation contract", () => {
     const actual = providerResultRejectionSemantics(await readFile("docs/mcp-contract.md", "utf8"));
     expect(actual.forbidden).toEqual([]);
     expect(actual.required).toBe(true);
+  });
+
+  it("requires heading-scoped descriptor-only provider envelope rejection semantics", async () => {
+    const complete = "Strict provider result/envelope validation requires exactly the six public allowlisted keys as enumerable own data properties. Unknown or private extra keys, symbols, a non-ordinary custom prototype, Proxy results, and accessor properties reject the entire provider result before structural parsing and return sanitized PROVIDER_FAILURE.";
+    expect(providerEnvelopeDescriptorSemantics(`## Deterministic analysis and success response\n\n${complete}`)).toBe(true);
+    expect(providerEnvelopeDescriptorSemantics(`## Deterministic analysis and success response\n\n${complete.replace("enumerable own data properties", "enumerable own properties")}`)).toBe(false);
+    expect(providerEnvelopeDescriptorSemantics("## Error response\n\nStrict provider result/envelope validation requires exactly the six public allowlisted keys as enumerable own data properties.")).toBe(false);
+    expect(providerEnvelopeDescriptorSemantics(await readFile("docs/mcp-contract.md", "utf8"))).toBe(true);
   });
 
   it("requires the complete cleanup category and precedence contract in one normative paragraph", async () => {

@@ -1652,7 +1652,7 @@ describe("provider review MCP boundary", () => {
             }
           });
 
-          expect(preflight!(candidate), `${prototype} ${mutation.label} RED preflight`).toBe(true);
+          expect(preflight!(candidate), `${prototype} ${mutation.label} preflight`).toBe(false);
           expect(getterCalls, `${prototype} ${mutation.label} preflight reads`).toBe(0);
           const review = vi.fn(async () => candidate as ProviderReviewResult);
           const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));

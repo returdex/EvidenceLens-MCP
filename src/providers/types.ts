@@ -31,7 +31,7 @@ export function isProviderReviewResultEnvelope(value: unknown): boolean {
   if (prototype !== Object.prototype && prototype !== null) return false;
   for (const key of PROVIDER_REVIEW_RESULT_KEYS) {
     const descriptor = Reflect.getOwnPropertyDescriptor(value, key);
-    if (descriptor === undefined || !descriptor.enumerable) return false;
+    if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) return false;
   }
   return !isProxy(value);
 }
