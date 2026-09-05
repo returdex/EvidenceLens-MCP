@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 status: active
 stopped_at: Phase 09 plan 09-08 planned and verified; ready to execute
-last_updated: "2026-09-04T18:31:34.074Z"
+last_updated: "2026-09-05T06:23:26.869Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 27
-  completed_plans: 26
+  completed_plans: 27
   percent: 73
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 09 (public-provider-attribution-and-determinism-contract) — READY TO EXECUTE
+Phase: 09 (public-provider-attribution-and-determinism-contract) — EXECUTING
 Plan: 8 of 8
 
 - Phase: 9 of 11
-- Status: Gap-closure plan 09-08 created and independently verified
+- Status: Executing gap-closure plan 09-08
 - Progress: 73%
-- Last activity: Planned the remaining validation-time accessor mutation blocker in Wave 8
+- Last activity: Started Wave 8 to reject provider-result accessor descriptors before parsing
 
 ## Decisions and Assumptions
 

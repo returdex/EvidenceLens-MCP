@@ -201,7 +201,7 @@ Plans:
 - [x] 09-07-PLAN.md — Close handler dependency snapshot/fail-open boundaries, hidden provider-result envelopes, cleanup fault coverage, and cleanup documentation
 
 **Wave 8** *(blocked on Wave 7 completion)*
-- [ ] 09-08-PLAN.md — Reject validation-time accessor mutation in provider-result envelopes before structural parsing
+- [x] 09-08-PLAN.md — Reject validation-time accessor mutation in provider-result envelopes before structural parsing
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
