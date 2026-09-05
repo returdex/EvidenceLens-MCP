@@ -14,7 +14,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 6: Docker Deployment and End-to-End Validation** - Run a reproducible, documented multimodal review. (completed 2026-08-23)
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
-- [ ] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics.
+- [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
 - [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path.
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
@@ -206,7 +206,7 @@ Plans:
 **Wave 9** *(blocked on Wave 8 completion)*
 - [x] 09-09-PLAN.md — Revalidate the provider-result envelope after nested structural parsing and lock nested Proxy mutation rejection
 
-**Verification:** Wave 9 executed; independent phase verification pending.
+**Verification:** Passed 2026-09-05 (23/23 must-haves). Nested `modelFindings` / `deterministicFindings` Proxy mutation is revalidated after structural parsing before provider attribution can be projected.
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
@@ -257,4 +257,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-05 after Phase 09 gap-closure plan 09-09 passed plan verification*
+*Last updated: 2026-09-05 after Phase 09 completed with 23/23 must-haves verified*

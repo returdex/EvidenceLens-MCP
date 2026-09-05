@@ -1,47 +1,27 @@
 ---
 phase: 09-public-provider-attribution-and-determinism-contract
-verified: 2026-09-05T06:35:55Z
-status: gaps_found
-score: 22/23 must-haves verified
+verified: 2026-09-05T09:20:58Z
+status: passed
+score: 23/23 must-haves verified
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
   previous_score: 22/23
   gaps_closed:
-    - "Top-level allowed-key accessor envelopes are rejected by descriptor metadata before Zod can read them."
-  gaps_remaining:
-    - "The outer provider result is not revalidated after nested Zod parsing, so nested Proxies can mutate it into a disallowed shape and still yield success."
+    - "Every unknown/private provider-result field, including nested parse-time mutation, causes whole-result rejection."
+  gaps_remaining: []
   regressions: []
-gaps:
-  - truth: "Every unknown or private provider-result field causes whole-result rejection, including non-enumerable, symbol-keyed, inherited/custom-prototype, Proxy-backed, and validation-time mutation variants."
-    status: failed
-    reason: "The top-level descriptor preflight succeeds, then providerReviewResultSchema.safeParse reads untrusted nested arrays with no second preflight. A Proxy stored as the data value of modelFindings or deterministicFindings can add a non-enumerable key, symbol, or custom prototype to the outer result during parsing; all six independently reproduced cases return provider-attributed ok:true."
-    artifacts:
-      - path: "src/tools/review.ts"
-        issue: "Lines 273-278 perform one envelope preflight before safeParse but never verify that the outer envelope still satisfies it after nested reads."
-      - path: "src/providers/types.ts"
-        issue: "The descriptor-only preflight correctly protects top-level fields, but it cannot establish whole-result invariance across later nested parsing by itself."
-      - path: "tests/contract/review-provider.test.ts"
-        issue: "The accessor-mutation test covers a top-level provider getter only; it has no modelFindings/deterministicFindings Proxy that mutates the outer object during Zod parsing."
-      - path: "docs/mcp-contract.md"
-        issue: "Line 70 promises entire-result rejection before structural parsing, but the runtime accepts a result that becomes non-conforming during that structural parse."
-    missing:
-      - "Revalidate the outer provider result with isProviderReviewResultEnvelope after providerReviewResultSchema.safeParse and before parsed data is used, while preserving the provider-owned sanitized failure boundary."
-      - "Add credential-free regressions for modelFindings and deterministicFindings Proxies that mutate the outer envelope with hidden, symbol, and custom-prototype state during parsing; require exact PROVIDER_FAILURE and no provider attribution."
-deferred:
-  - truth: "Credentialed complete MCP/filesystem/provider/public-response end-to-end verification."
-    addressed_in: "Phase 10"
-    evidence: "Phase 10 success criterion 2 explicitly owns the opt-in stdio, filesystem, provider DTO, merge, and final public-schema path."
 ---
 
 # Phase 09: Public Provider Attribution and Determinism Contract Verification Report
 
 **Phase Goal:** Public review responses expose stable, non-secret analyzer/provider attribution and accurately distinguish deterministic offline behavior from variable provider-backed findings.
-**Verified:** 2026-09-05T06:35:55Z
-**Status:** GAPS FOUND
-**Re-verification:** Yes — after Plan 09-08
 
-This is an independent code-and-behavior review. I read Phase 09 plans and summaries 01-08, project/roadmap/requirements/state, the prior verification, the current review, current source/tests/docs, and Git history. SUMMARY claims were not used as implementation evidence. All executed checks were credential-free and no-network.
+**Verified:** 2026-09-05T09:20:58Z
+**Status:** PASSED
+**Re-verification:** Yes — after the prior 22/23 report and Plan 09-09 closure.
+
+This independent verification inspected all Phase 09 plans and summaries (09-01 through 09-09), prior review/verification artifacts, roadmap/state/requirements, current implementation/tests/docs, and closing commits `41a3b52` and `5fc50fd`. Summary claims were not used as implementation evidence.
 
 ## Goal Achievement
 
@@ -49,126 +29,122 @@ This is an independent code-and-behavior review. I read Phase 09 plans and summa
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | Public responses expose only stable deterministic analyzer identity and conditional provider name/model attribution. | VERIFIED | `src/tools/review.ts:240-252,280-288,305-310` builds trusted analyzer metadata and projects only `{ name, model }`; focused provider tests pass. |
-| 2 | Citation, hash, requestId, and timestamp provenance remain schema-bound and backwards-compatible. | VERIFIED | `src/contracts/review.ts:351-432` enforces response/citation refinements; focused and full suites pass. |
-| 3 | Documentation scopes byte equality to deterministic/offline output and allows provider-backed variability. | VERIFIED | `docs/mcp-contract.md:66-70`, `README.md:56-58`, and semantic documentation tests pass. |
-| 4 | Identical offline requests produce byte-identical, non-empty deterministic MCP text. | VERIFIED | `tests/contract/review-provider.test.ts:408` plus frozen fixture/oracle pass in the focused suite. |
-| 5 | Provider token checks exclude locally bound provenance collisions. | VERIFIED | Provider-only schema validation precedes the authored-string scan at `src/tools/review.ts:284-294`; collision controls pass. |
-| 6 | Provider attribution exists iff provider-prefixed findings exist and namespaces match. | VERIFIED | Cross-field contract rules at `src/contracts/review.ts:374-388`; provider test passes. |
-| 7 | Nullish, malformed, incomplete, and oversized ordinary provider results fail closed. | VERIFIED | Strict result schema/caps at `src/providers/types.ts:47-56`; focused controls pass. |
-| 8 | Provider throws, top-level reflective traps, and top-level accessors map to sanitized `PROVIDER_FAILURE`. | VERIFIED | Provider-owned catch at `src/tools/review.ts:265-303`; trap/accessor matrices pass. Independent check confirmed all six top-level fields reject ordinary/null-prototype accessors with zero getter reads. |
-| 9 | Image, screenshot, and PDF visual citations bind to retained local payload hashes. | VERIFIED | `src/contracts/review.ts:405-429`; direct/handler PDF and visual tests pass. |
-| 10 | Each provider finding array is capped at 100 entries. | VERIFIED | `MAX_PROVIDER_FINDINGS` and `.max()` at `src/providers/types.ts:13,53-54`; cap tests pass. |
-| 11 | The deterministic fixture is non-empty and independently locks order/content. | VERIFIED | Raw MCP fixture and ordered projection test pass. |
-| 12 | Analyzer execution, identity, and snapshot faults are sanitized `INTERNAL_ERROR`. | VERIFIED | Trusted identity/analyzer boundary at `src/tools/review.ts:229-258`; hostile analyzer matrices pass. |
-| 13 | Documented invalid-request and deterministic-success examples equal runtime output. | VERIFIED | `tests/contract/public-contract-docs.test.ts:244-275` executes and compares both examples. |
-| 14 | Current promptVersion/inputFingerprint echoes in provider-authored text are rejected. | VERIFIED | Guard at `src/tools/review.ts:147-167,289-294`; complete public-string matrix passes. |
-| 15 | Trusted cleanup cannot be replaced, and pending subsystem errors outrank cleanup faults. | VERIFIED | Bound closures/pending-error handling at `src/tools/review.ts:213-226,312-327`; precedence tests pass. |
-| 16 | Cleanup continues over retained claims, tokens, arrays, payloads, cells, and buffers after a local fault. | VERIFIED | Per-action cleanup continuation at `src/review/analysis.ts:127-174`; retained-reference tests pass. |
-| 17 | The documented four-role success response is produced by the built-in runtime. | VERIFIED | Documentation test invokes `handleReviewRequest` and exact-compares the emitted response. |
-| 18 | Provider inference is a fresh, validated, recursively frozen three-field object. | VERIFIED | Projection/freeze at `src/tools/review.ts:96-131`; production-shaped capture test passes. |
-| 19 | Caller-owned provider configuration remains unmodified. | VERIFIED | Fresh inference projection drops other config references; ownership tests pass. |
-| 20 | Original and isolated transient analysis references are scrubbed best-effort. | VERIFIED | Stable cleanup targets and tests cover text, cells, and buffers. |
-| 21 | Analyzer findings use a trusted immutable snapshot across provider await. | VERIFIED | Parsed deterministic findings are cloned/frozen at `src/tools/review.ts:254-258`; async mutation tests pass. |
-| 22 | Handler dependencies are snapshotted once after cleanup registration and cannot fail open. | VERIFIED | One source read each at `src/tools/review.ts:223-225`; lifecycle-order and fault controls pass. |
-| 23 | Every unknown/private provider-result field causes whole-result rejection, including validation-time mutation by nested values. | FAILED — BLOCKER | Nested array Proxies mutate the outer envelope during `safeParse`; six cases return attributed `ok:true`. |
+| 1 | Deterministic-only responses retain stable `deterministic-rules` analyzer name/version; provider findings add only validated provider name/model. | VERIFIED | `src/tools/review.ts:240-252,280-290`; strict response refinement and focused tests pass. |
+| 2 | Public output never exposes credentials, endpoints, prompts, fingerprints, envelopes, raw upstream data, or retry/transport internals. | VERIFIED | Strict schemas/projection plus redaction matrices; docs exclusion clause is enforced. |
+| 3 | Identical offline requests produce byte-identical MCP text while provider finding prose may vary. | VERIFIED | Frozen raw-MCP fixture/oracle and focused provider suite pass; docs scope byte equality to deterministic-only output. |
+| 4 | Provider attribution is present iff provider-prefixed findings are returned, and provider namespace/identity binding is enforced. | VERIFIED | Cross-field schema rules and `src/tools/review.ts:169-180`. |
+| 5 | Request ID, timestamp, normalized-evidence hashes, typed locations, citations, and visual PDF/image provenance remain schema-bound and compatible. | VERIFIED | Response refinements and full suite pass. |
+| 6 | Provider inference is a fresh strict three-field request-owned projection; caller config is not disclosed or frozen. | VERIFIED | Strict schema, request projection, ownership tests pass. |
+| 7 | Analyzer identity/input mutation and cleanup failures are sanitized `INTERNAL_ERROR` without replacing an earlier specific error. | VERIFIED | Analyzer-owned boundary and cleanup lifecycle tests pass. |
+| 8 | Provider failures, malformed returns, reflective traps, and top-level accessors map to exact sanitized `PROVIDER_FAILURE`. | VERIFIED | Provider boundary at `src/tools/review.ts:265-304`; focused matrices pass. |
+| 9 | Provider finding arrays are capped and locally schema/provenance-validated before projection. | VERIFIED | `src/providers/types.ts:47-56`; provider-only schema validation passes. |
+| 10 | Trusted deterministic findings are snapshotted across provider await; transient analysis data is scrubbed best-effort. | VERIFIED | Clone/freeze and retained-reference cleanup tests pass. |
+| 11 | Current fingerprint/prompt-version echoes in provider-authored strings fail closed without scanning locally bound provenance. | VERIFIED | Authored-string guard follows provider-only provenance validation; collision tests pass. |
+| 12 | Documentation examples and contract semantics are executable assertions. | VERIFIED | 15 documentation tests read the documents and validate runtime examples. |
+| 13 | Exact-six provider envelopes reject unknown, hidden, Symbol, inherited/custom-prototype, Proxy, and accessor shapes before parsing. | VERIFIED | `isProviderReviewResultEnvelope` checks own keys/prototype/data descriptors/Proxy at `src/providers/types.ts:23-37`. |
+| 14 | Top-level accessor rejection preserves zero reads and one provider call. | VERIFIED | Existing accessor/trap matrices remain in the passing focused suite. |
+| 15 | Nested parsing cannot turn an initially compliant envelope into provider-attributed success. | VERIFIED | Envelope preflight runs before and after `safeParse`, before `.data`. |
+| 16 | A `modelFindings` Proxy mutation to a hidden key, Symbol, or custom prototype returns exact `PROVIDER_FAILURE`. | VERIFIED | 2 prototypes × 3 mutations are exercised. |
+| 17 | A `deterministicFindings` Proxy mutation to a hidden key, Symbol, or custom prototype returns exact `PROVIDER_FAILURE`. | VERIFIED | The same 2 × 3 coverage is exercised. |
+| 18 | All 12 nested mutation cases disclose neither sentinels nor provider attribution/namespaced findings. | VERIFIED | Exact payload and negative serialization/log assertions pass. |
+| 19 | Ordinary six-data-property outer envelopes retain provider-attributed namespaced success. | VERIFIED | Ordinary control asserts valid metadata and finding namespace. |
+| 20 | Null-prototype six-data-property outer envelopes retain provider-attributed namespaced success. | VERIFIED | Null-prototype control asserts the same success. |
+| 21 | Public documentation states before-and-after structural-parsing envelope validation. | VERIFIED | Heading-scoped documentation guard at `public-contract-docs.test.ts:126-131` passes. |
+| 22 | The phase implementation/test scope has no required live provider or Phase 10/11 behavior. | VERIFIED | All test paths here are local/injected; no Phase 10/11 code is needed for this goal. |
+| 23 | MCP-02 and SAFE-03 implementation obligations are fulfilled. | VERIFIED | See requirements coverage. |
 
-**Score:** 22/23 truths verified
+**Score:** 23/23 truths verified
 
-### Required Artifacts
+### Mandatory Provider-Envelope Proof
+
+`src/tools/review.ts:273-280` proves the required ordering inside the provider-owned catch:
+
+1. `isProviderReviewResultEnvelope(untrustedProviderResult)` runs before parsing.
+2. `providerReviewResultSchema.safeParse(untrustedProviderResult)` structurally parses it.
+3. The same outer-envelope predicate runs again immediately after parsing.
+4. Only then does `parsedProviderResult.data` get assigned and used.
+
+`tests/contract/review-provider.test.ts:1679-1781` runs a nested Proxy which mutates the outer object during Zod parsing. Its matrix is `modelFindings`/`deterministicFindings` × ordinary/null prototype × hidden-key/Symbol/custom-prototype mutation: **2 × 2 × 3 = 12 cases**. Every case asserts exactly:
+
+```json
+{ "ok": false, "code": "PROVIDER_FAILURE", "message": "Provider failure" }
+```
+
+It also asserts no sentinel, `metadata.provider`, or namespaced provider finding is serialized. The ordinary and null-prototype controls retain `{ name: "local-reviewer", model }` attribution and a `provider:local-reviewer:` finding. Existing top-level accessor zero-read and reflection/Proxy trap tests pass unchanged.
+
+## Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `src/contracts/review.ts` | Strict additive public attribution/provenance contract | VERIFIED | Substantive and wired into deterministic, provider-only, and final response parsing. |
-| `src/providers/types.ts` | Exact-six data-descriptor result-envelope preflight | PARTIAL | Top-level own enumerable data-descriptor enforcement is correct (`:23-36`), but cannot preserve its conclusion over nested parse-time effects. |
-| `src/tools/review.ts` | Safe provider orchestration and provider-owned failure boundary | PARTIAL | Correct ordering and sanitation, but only preflights before `safeParse` (`:273-278`); the outer object is not rechecked after nested reads. |
-| `src/review/analysis.ts` | Best-effort stable-reference cleanup | VERIFIED | Substantive, wired, and covered across all retained target categories. |
-| `tests/contract/review-provider.test.ts` | Provider boundary regressions | PARTIAL | Strong top-level reflection/accessor coverage, but no nested proxy-to-outer mutation regression. |
-| `tests/contract/public-contract-docs.test.ts` | Executable public contract prose/examples | PARTIAL | Checks the accurate-looking top-level descriptor sentence but not runtime behavior after nested structural parsing. |
-| `tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json` | Frozen offline MCP bytes | VERIFIED | Used by passing raw-byte compatibility regression. |
-| `docs/mcp-contract.md` | Accurate determinism, attribution, rejection, and cleanup contract | PARTIAL | Determinism/attribution prose matches behavior; whole-result rejection sentence overstates it. |
-| `README.md` | Concise scoped public contract | VERIFIED | Correctly scopes deterministic bytes and provider variability; does not make the false whole-envelope claim. |
+| `src/contracts/review.ts` | Strict additive attribution/provenance contract | VERIFIED | Substantive cross-field response rules, tested. |
+| `src/providers/types.ts` | Exact-six outer-envelope preflight and strict provider DTO schema | VERIFIED | Called twice around parsing by handler. |
+| `src/tools/review.ts` | Safe deterministic/provider orchestration and public projection | VERIFIED | Preflight → parse → post-parse preflight → identity/namespace/provenance flow is wired. |
+| `src/review/analysis.ts` | Isolated analyzer data and transient cleanup | VERIFIED | Wired by handler and routine tests. |
+| `tests/contract/review-provider.test.ts` | Offline provider boundary, controls, and mutation regressions | VERIFIED | 47 focused tests; injected provider only. |
+| `tests/contract/public-contract-docs.test.ts` | Executable documentation guards | VERIFIED | 15 focused tests; reads docs and invokes local runtime only. |
+| `tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json` | Frozen deterministic MCP bytes | VERIFIED | Used by compatibility regression. |
+| `docs/mcp-contract.md` / `README.md` | Accurate public semantics | VERIFIED | Documentation tests pass and prose matches behavior. |
 
-### Key Link Verification
+## Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Handler | Public response schema | `reviewResponseSchema.parse` for deterministic/provider/final responses | WIRED | Multiple parse points at `src/tools/review.ts:240,284,310`. |
-| Provider result | Result preflight then Zod | `isProviderReviewResultEnvelope` before `providerReviewResultSchema.safeParse` | PARTIAL — BLOCKER | Top-level descriptor check is before reads, but no post-parse invariance check. |
-| Provider findings | Public response | Identity, namespace, provenance, authored-string guard, final schema | WIRED | `src/tools/review.ts:279-310`. |
-| Analysis inputs | Cleanup | Registered original/isolated closures and stable targets | WIRED | `src/tools/review.ts:213-222,312-327`; `src/review/analysis.ts:127-174`. |
-| Docs | Contract tests | Heading-scoped descriptor prose and executable examples | PARTIAL | Text link works, but test coverage does not detect the nested behavioral exception to that prose. |
+| Provider return | Outer envelope guard | Before structural parsing | WIRED | `src/tools/review.ts:273-275`. |
+| Provider return | Zod | `providerReviewResultSchema.safeParse` | WIRED | `src/tools/review.ts:276`. |
+| Zod result | Outer envelope guard | Post-parse, before `.data` | WIRED | `src/tools/review.ts:277-280`. |
+| Valid provider data | Public response | Identity, namespace, provider-only/final schemas | WIRED | `src/tools/review.ts:281-312`. |
+| Docs | Contract tests | Heading-scoped semantic checks/executable JSON examples | WIRED | `readFile`-based 15-test suite passes. |
+| Nested Proxy fixture | Real handler | Injected provider through `handleReviewRequest` | WIRED | `review-provider.test.ts:1731-1767`. |
 
-### Data-Flow Trace (Level 4)
+## Data-Flow Trace
 
-| Artifact | Data Variable | Source | Produces Real Data | Status |
+| Artifact | Data variable | Source | Produces real data | Status |
 | --- | --- | --- | --- | --- |
-| `src/tools/review.ts` | `inference` | Fresh validated projection from allowed config fields | Yes | FLOWING |
-| `src/tools/review.ts` | `trustedDeterministicFindings` | Analyzer output, parsed/cloned/frozen | Yes | FLOWING |
-| `src/tools/review.ts` | `providerResult` / `providerFindings` | `provider.review` → preflight → Zod parse | Yes, but nested parsing can alter the outer untrusted envelope after preflight | HOLLOW — BLOCKER |
-| `src/review/analysis.ts` | Cleanup targets | Captured payload/claim/cell/buffer references | Yes | FLOWING |
+| `src/tools/review.ts` | `expectedProviderRequest` | Strict fresh inference and normalized analysis | Yes | FLOWING |
+| `src/tools/review.ts` | `untrustedProviderResult` | Provider return | Yes; guarded before/after nested parse | FLOWING |
+| `src/tools/review.ts` | `providerResult` | `safeParse(...).data` after post-parse success only | Yes | FLOWING |
+| `src/tools/review.ts` | Metadata/findings | Identity-bound and provenance-validated provider result | Yes | FLOWING |
+| `src/review/analysis.ts` | Cleanup targets | Captured claim/payload/cell/buffer references | Yes | FLOWING |
 
-### Behavioral Spot-Checks
+## Behavioral Spot-Checks
 
-| Behavior | Command/probe | Result | Status |
+| Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Focused Phase 09 suite | `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts` | 61/61 passed | PASS |
-| Strict build | `npm run build` | Exit 0 | PASS |
-| Full routine suite | `npm test` | 26 files, 190/190 passed; `EVIDENCELENS_DISABLE_PROVIDER=1`, live test excluded | PASS |
-| Top-level exact-six data descriptors | Credential-free direct preflight probe | All six accessor fields × ordinary/null rejected with zero reads; ordinary/null six-data controls accepted | PASS |
-| Top-level reflection/proxy failures | Existing focused matrix | `ownKeys`, `getPrototypeOf`, and descriptor trap cases return sanitized `PROVIDER_FAILURE` | PASS |
-| CR-01 nested `modelFindings`/`deterministicFindings` Proxies | Credential-free injected-provider probe | 2 nested fields × hidden own key/symbol/custom prototype = 6 successful, provider-attributed responses; each Proxy trap ran and outer result became invalid | FAIL — BLOCKER |
-| Whitespace and pre-report worktree | `git diff --check`; `git status --short` | Clean before writing this report | PASS |
+| Phase 09 provider/docs contracts | `npm test -- --run tests/contract/review-provider.test.ts tests/contract/public-contract-docs.test.ts` | 62/62 passed | PASS |
+| Nested parse-time outer mutation | `npm test -- --run tests/contract/review-provider.test.ts -t 'rejects nested provider-result Proxy mutations after structural parsing'` | 1/1 targeted test passed; includes all 12 loop cases | PASS |
+| Strict compilation | `npm run build` | Exit 0 | PASS |
+| Default routine suite | `npm test` | 26 files, 191/191 passed | PASS |
+| Whitespace | `git diff --check` | Exit 0 | PASS |
 
-#### CR-01 reproduction
+No live/provider network test ran. The default test script sets `EVIDENCELENS_DISABLE_PROVIDER=1` and excludes `tests/providers/deepseek-live.test.ts`; the opt-in live command was not invoked.
 
-For each of `modelFindings` and `deterministicFindings`, I returned an otherwise valid, six-own-data-property result. Its selected array field was a Proxy. On the first Zod property read, the Proxy added one of a non-enumerable `apiKey`, a non-enumerable symbol, or a custom prototype with a non-enumerable `apiKey` to the outer result. Each probe returned `ok: true`, `metadata.provider: { name: "local-reviewer", model: "deepseek-v4-pro" }`, and a namespaced provider finding. Afterward, `Reflect.ownKeys(outer)` had seven keys for hidden/symbol cases, or `Object.getPrototypeOf(outer)` was no longer `Object.prototype`/`null` for prototype cases.
+## Requirements Coverage
 
-This is a confirmed whole-result strictness bypass, not an uncertain visual or live-provider behavior. The existing suite passes because `09-08` tests an accessor installed directly on the outer `provider` key; descriptor inspection correctly prevents that getter from executing, but it does not constrain a nested data value's Proxy during parsing.
-
-### Requirements Coverage
-
-| Requirement | Source Plans | Description | Status | Evidence |
+| Requirement | Source plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| MCP-02 | 09-01 through 09-08 | Deterministic schema-valid successes and machine-readable errors for rejected reviews/results | BLOCKED | A provider result that becomes structurally disallowed during validation produces attributed success instead of exact `PROVIDER_FAILURE`. This violates the Phase 09 explicit whole-result rejection contract. |
-| SAFE-03 | 09-01 through 09-08 | Preserve source/location/hash/provider/model/request/timestamp provenance | SATISFIED | Public schema/provenance refinements and provider attribution remain correctly bound; the bypassed hidden/prototype state was not serialized. |
+| MCP-02 | 09-01 through 09-09 | Deterministic schema-valid successes and machine-readable rejected-review errors | SATISFIED | Frozen offline bytes, exact sanitized failures, 62/62 focused and 191/191 full tests. `REQUIREMENTS.md` still says Pending: planning-state lag, not a code gap. |
+| SAFE-03 | 09-01 through 09-09 | Source/location/hash/provider/model/request/timestamp provenance | SATISFIED | Strict provenance rules, conditional safe attribution, and valid ordinary/null controls pass. |
 
-All eight Phase 09 plans declare only `MCP-02` and `SAFE-03`; ROADMAP maps the same two requirements to the phase. No orphaned Phase 09 requirement was found.
+No Phase 09 orphaned requirement was found: all plans declare MCP-02 and SAFE-03, matching the roadmap.
 
-### Anti-Patterns Found
+## Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `src/tools/review.ts` | 273-278 | Single top-level preflight followed by untrusted nested structural reads | BLOCKER | CR-01 changes outer shape after validation starts and reaches attributed success. |
-| `tests/contract/review-provider.test.ts` | 1590-1677 | Accessor-mutation regression targets only outer `provider` accessor | WARNING | It gives confidence in the descriptor fix while missing nested parse-time mutation. |
-| `tests/contract/public-contract-docs.test.ts` | 124-130 | Prose-only descriptor semantics test | WARNING | Documentation and runtime test can both pass while nested parsing violates the documented whole-result guarantee. |
-| `docs/mcp-contract.md` | 70 | Absolute whole-result rejection claim | BLOCKER | Runtime contradicts the contract for nested validation-time mutation. |
+| `docs/mcp-contract.md` | 72 | Placeholder image mention in an explicitly opt-in live-test note | INFO | No effect on default or Phase 09 verification. |
+| `src/review/analysis.ts` | 84 | `return []` for absent payload text | INFO | Utility control flow; not public output or a stub. |
 
-No production TODO/FIXME, placeholder implementation, or live/credentialed test invocation was found. PDF.js font/indexing messages during tests were non-failing fixture/runtime warnings, not Phase 09 gaps.
+No production TODO/FIXME/placeholder implementation, empty handler, hardcoded public success, or disconnected provider data flow was found.
 
-### Scope and Review Findings
+## Non-Blocking Warnings
 
-- **CR-01 — BLOCKER CONFIRMED.** The current `09-REVIEW.md` nested-Proxy report is reproducible for both nested arrays and all three requested outer mutations. Phase 10 does not explicitly defer or cover this provider-result strictness requirement, so it remains a Phase 09 gap.
-- **WR-01 — WARNING CONFIRMED, NON-BLOCKING.** A direct in-process hostile request Proxy can escape request parsing with its raw thrown value. The ordinary JSON/MCP decode path cannot construct such an object, and Plan 09-08 expressly excludes request-object Proxy work. It does not demonstrably violate an explicit Phase 09 attribution/determinism requirement, so it is not counted in this score.
-- **WR-02 — WARNING.** Phase 09 test coverage does not install an accessor in each of the other five allowed outer fields. The production descriptor loop is generic, and my direct six-field probe confirmed current behavior, so this is a coverage gap rather than a second Phase 09 blocker.
+WR-01 (direct hostile request Proxy before handler validation) and WR-02 (top-level accessor matrix does not enumerate every allowlisted field) remain **warnings only**. They are outside Phase 09's stated goal, requirements, and Plan 09-09 scope. Neither changes the verified provider-result envelope behavior.
 
-### Human Verification Required
+## Gaps Summary
 
-None. The failed contract is deterministic and fully reproduced without credentials or network access.
-
-### Deferred Items
-
-| # | Item | Addressed In | Evidence |
-| --- | --- | --- | --- |
-| 1 | Credentialed complete MCP/filesystem/provider/public-response E2E | Phase 10 | Phase 10 success criterion 2 explicitly owns this opt-in path. |
-
-### Gaps Summary
-
-**GAPS FOUND — Phase 09 is not ready to complete.** Plan 09-08 correctly closes the previously known top-level accessor path: exact six own enumerable data fields are checked without reading accessors. But the stated whole-result contract still fails because `safeParse` performs reads of nested array values after that one check. A nested Proxy can mutate the outer result into a hidden-key, symbol-key, or custom-prototype form and still get public provider attribution.
-
-The closure is narrowly scoped: revalidate the original outer envelope after parsing and before using parsed data, then add the six credential-free nested mutation regressions. Do not treat the passing current suite or descriptor prose as evidence that this success-path bypass is closed.
+None. The prior nested-Proxy blocker is closed in the actual handler and covered at the real boundary. The phase goal is achieved.
 
 ---
 
-_Verified: 2026-09-05T06:35:55Z_
+_Verified: 2026-09-05T09:20:58Z_
 _Verifier: the agent (gsd-verifier)_
