@@ -107,7 +107,7 @@ completed: 2026-09-05
 - **Fix:** Kept Phase 09 active, retained the truthful executing marker, and updated only the completed-plan count and roadmap checkbox.
 - **Files modified:** `.planning/STATE.md`, `.planning/ROADMAP.md`
 - **Verification:** Final state inspection confirms `status: active`, Phase 09 `EXECUTING`, eight completed plans, and no requirement changes.
-- **Committed in:** Pending metadata correction commit
+- **Committed in:** Plan metadata correction
 
 **Total deviations:** 2 auto-fixed (Rule 1)
 **Impact on plan:** Required test-contract alignment only; no scope expansion or behavior outside the provider result boundary.
