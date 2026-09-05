@@ -101,7 +101,15 @@ completed: 2026-09-05
 - **Verification:** Targeted tests and build pass.
 - **Committed in:** `e2af159`
 
-**Total deviations:** 1 auto-fixed (Rule 1)
+**2. [Rule 1 - Tracking safeguard] Restored the orchestrator's active Phase 09 execution marker**
+- **Found during:** Plan metadata update
+- **Issue:** The progress helper inferred a completed phase from summary count and restored an older `stopped_at` value.
+- **Fix:** Kept Phase 09 active, retained the truthful executing marker, and updated only the completed-plan count and roadmap checkbox.
+- **Files modified:** `.planning/STATE.md`, `.planning/ROADMAP.md`
+- **Verification:** Final state inspection confirms `status: active`, Phase 09 `EXECUTING`, eight completed plans, and no requirement changes.
+- **Committed in:** Pending metadata correction commit
+
+**Total deviations:** 2 auto-fixed (Rule 1)
 **Impact on plan:** Required test-contract alignment only; no scope expansion or behavior outside the provider result boundary.
 
 ## Issues Encountered
