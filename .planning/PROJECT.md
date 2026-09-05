@@ -18,6 +18,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - Text, PDF, image/screenshot, and table normalization with hashes and visual context validated in Phase 2.
 - Read-only allowlisted filesystem boundary, bounded reads, provenance, and sanitized failures validated in Phase 3.
 - Replaceable provider boundary, DeepSeek configuration/adapter, provenance validation, bounded retries, and unchanged MCP contract validated in Phase 5.
+- Stable public analyzer/provider attribution, deterministic-only byte equality, provider-backed variability, and strict provider-result rejection validated in Phase 9.
 
 ### Active
 
@@ -25,7 +26,6 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - [ ] Provide controlled read-only tools for text, PDF, image, screenshot, and table evidence. (Normalization validated in Phase 2; filesystem access remains active work.)
 - [ ] Support multimodal model review of visual evidence, including charts, scans, screenshots, and image-based text.
 - [ ] Compare assignment briefs, rubrics, teacher instructions, and a current solution for omissions and conflicts.
-- [ ] Return stable JSON findings with file path, page/line references where applicable, hashes, model version, and review metadata.
 - [ ] Enforce an allowlisted filesystem boundary and prevent unauthorized writes or reads.
 - [ ] Support Docker deployment and a replaceable model-provider boundary.
 
@@ -81,4 +81,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-23 after Phase 5 completion*
+*Last updated: 2026-09-05 after Phase 9 completion*
