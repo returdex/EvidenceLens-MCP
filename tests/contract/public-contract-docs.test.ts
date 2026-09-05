@@ -64,6 +64,8 @@ function providerEnvelopeDescriptorSemantics(markdown: string): boolean {
     /proxy results/u,
     /accessor properties/u,
     /rejects? the entire provider result[\s\S]*before structural parsing/u,
+    /after structural parsing/u,
+    /before (?:any )?(?:parsed (?:result )?data|\.data) (?:is )?used/u,
     /sanitized provider_failure/u
   ];
   return paragraph.length > 0 && required.every((pattern) => pattern.test(paragraph));
@@ -122,7 +124,7 @@ describe("public attribution and determinism documentation contract", () => {
   });
 
   it("requires heading-scoped descriptor-only provider envelope rejection semantics", async () => {
-    const complete = "Strict provider result/envelope validation requires exactly the six public allowlisted keys as enumerable own data properties. Unknown or private extra keys, symbols, a non-ordinary custom prototype, Proxy results, and accessor properties reject the entire provider result before structural parsing and return sanitized PROVIDER_FAILURE.";
+    const complete = "Strict provider result/envelope validation requires exactly the six public allowlisted keys as enumerable own data properties. Unknown or private extra keys, symbols, a non-ordinary custom prototype, Proxy results, and accessor properties reject the entire provider result before structural parsing and again after structural parsing before any parsed result data is used, returning sanitized PROVIDER_FAILURE.";
     expect(providerEnvelopeDescriptorSemantics(`## Deterministic analysis and success response\n\n${complete}`)).toBe(true);
     expect(providerEnvelopeDescriptorSemantics(`## Deterministic analysis and success response\n\n${complete.replace("enumerable own data properties", "enumerable own properties")}`)).toBe(false);
     expect(providerEnvelopeDescriptorSemantics("## Error response\n\nStrict provider result/envelope validation requires exactly the six public allowlisted keys as enumerable own data properties.")).toBe(false);

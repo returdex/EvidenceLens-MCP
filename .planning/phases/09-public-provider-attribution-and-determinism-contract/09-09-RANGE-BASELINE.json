@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "baseHead": "e068d7292e4d35dd7f38388b55b9969397e50d80",
+  "staged": [],
+  "unstaged": [
+    {
+      "path": ".planning/STATE.md",
+      "indexSha256": "54b0279c14a0b4a9100fce2cdaf92810073191fa94c08b8cef91fda87b8f02ee",
+      "worktreeSha256": "ce80a464ac1cde6d54a9d996d824ba827d3668be5fb7cd3947d3ae04af0a8a64"
+    }
+  ],
+  "untracked": []
+}

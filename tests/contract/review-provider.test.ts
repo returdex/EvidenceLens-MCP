@@ -1676,6 +1676,110 @@ describe("provider review MCP boundary", () => {
     }
   });
 
+  it("rejects nested provider-result Proxy mutations after structural parsing", async () => {
+    const providerTypes = await import("../../src/providers/types.js") as Record<string, unknown>;
+    const preflight = providerTypes.isProviderReviewResultEnvelope as ((value: unknown) => boolean) | undefined;
+    expect(preflight).toBeTypeOf("function");
+
+    const base = fakeProvider();
+    let validResult: ProviderReviewResult | undefined;
+    await handleReviewRequest(request, {
+      provider: {
+        ...base,
+        async review(providerRequest) {
+          validResult = await base.review(providerRequest);
+          return validResult;
+        }
+      }
+    });
+    expect(validResult).toBeDefined();
+
+    const mutations = [
+      {
+        label: "non-enumerable own private key",
+        apply(candidate: Record<string | symbol, unknown>, sentinel: string) {
+          Object.defineProperty(candidate, "apiKey", { configurable: true, enumerable: false, value: sentinel });
+        }
+      },
+      {
+        label: "symbol private key",
+        apply(candidate: Record<string | symbol, unknown>, sentinel: string) {
+          Object.defineProperty(candidate, Symbol(sentinel), { configurable: true, enumerable: false, value: sentinel });
+        }
+      },
+      {
+        label: "custom prototype private key",
+        apply(candidate: Record<string | symbol, unknown>, sentinel: string) {
+          Object.setPrototypeOf(candidate, Object.defineProperty({}, "apiKey", {
+            configurable: true,
+            enumerable: false,
+            value: sentinel
+          }));
+        }
+      }
+    ] as const;
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      for (const prototype of ["ordinary", "null"] as const) {
+        const control = Object.assign(
+          prototype === "ordinary" ? {} : Object.create(null) as Record<string, unknown>,
+          validResult
+        );
+        const controlReview = vi.fn(async () => control as ProviderReviewResult);
+        const controlResult = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review: controlReview } }));
+        expect(controlReview, `${prototype} valid control`).toHaveBeenCalledTimes(1);
+        expect(controlResult, `${prototype} valid control`).toMatchObject({
+          ok: true,
+          metadata: { provider: { name: "local-reviewer", model: validResult!.model } }
+        });
+        expect((controlResult.findings as Array<{ id: string }>).some((finding) => finding.id.startsWith("provider:local-reviewer:"))).toBe(true);
+
+        for (const field of ["modelFindings", "deterministicFindings"] as const) {
+          for (const mutation of mutations) {
+            const sentinel = `nested-${prototype}-${field}-${mutation.label.replaceAll(" ", "-")}-sentinel`;
+            const candidate = Object.assign(
+              prototype === "ordinary" ? {} : Object.create(null) as Record<string | symbol, unknown>,
+              validResult
+            );
+            let trapCalls = 0;
+            const values = [...validResult![field]];
+            candidate[field] = new Proxy(values, {
+              get(target, property, receiver) {
+                if (trapCalls === 0 && (property === "length" || typeof property === "string")) {
+                  trapCalls += 1;
+                  mutation.apply(candidate, sentinel);
+                }
+                return Reflect.get(target, property, receiver);
+              }
+            });
+
+            expect(preflight!(candidate), `${prototype} ${field} ${mutation.label} preflight`).toBe(true);
+            const review = vi.fn(async () => candidate as ProviderReviewResult);
+            const result = payload(await handleReviewRequest(request, { provider: { name: "local-reviewer", review } }));
+            expect(review, `${prototype} ${field} ${mutation.label}`).toHaveBeenCalledTimes(1);
+            expect(trapCalls, `${prototype} ${field} ${mutation.label} parses nested value`).toBeGreaterThan(0);
+            expect(result, `${prototype} ${field} ${mutation.label}`).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+            const serialized = JSON.stringify(result);
+            expect(serialized, `${prototype} ${field} ${mutation.label}`).not.toContain(sentinel);
+            expect(serialized, `${prototype} ${field} ${mutation.label}`).not.toMatch(/apiKey|cause|stack|metadata\.provider|provider:local-reviewer/iu);
+          }
+        }
+      }
+      const consoleOutput = [...log.mock.calls, ...warn.mock.calls, ...error.mock.calls].flat().join(" ");
+      expect(consoleOutput).not.toMatch(/nested-(?:ordinary|null)|apiKey|cause|stack/iu);
+      expect(log).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
+
   it("rejects current private request tokens from every provider-authored public string without logging them", async () => {
     const failure = { ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" };
     const sentinel = "provider-public-echo-sentinel";
