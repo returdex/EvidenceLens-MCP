@@ -176,7 +176,7 @@ Plans:
   1. Public responses identify deterministic and provider-backed analyzers with stable provider/model version metadata without exposing keys, upstream envelopes, or internal fingerprints.
   2. Existing citation, hash, request identifier, and timestamp provenance remains schema-valid and backwards-compatible through an explicit contract evolution.
   3. Documentation and tests scope byte-for-byte determinism to deterministic/offline output and describe provider-backed variability accurately.
-**Plans**: 8 plans
+**Plans**: 9 plans
 
 Plans:
 **Wave 1**
@@ -203,7 +203,10 @@ Plans:
 **Wave 8** *(blocked on Wave 7 completion)*
 - [x] 09-08-PLAN.md — Reject validation-time accessor mutation in provider-result envelopes before structural parsing
 
-**Verification:** Gaps found (22/23 must-haves). Nested `modelFindings` or `deterministicFindings` Proxies can mutate the outer provider result during Zod parsing after its first preflight; whole-result strictness still requires a post-parse revalidation and regression coverage.
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 09-09-PLAN.md — Revalidate the provider-result envelope after nested structural parsing and lock nested Proxy mutation rejection
+
+**Verification:** Gaps found (22/23 must-haves). Wave 9 is planned to revalidate the outer provider result after `safeParse` and regression-lock nested `modelFindings` / `deterministicFindings` Proxy mutation before provider attribution can be projected.
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
@@ -254,4 +257,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-05 after Phase 09 verification found one remaining provider-result strictness gap*
+*Last updated: 2026-09-05 after Phase 09 gap-closure plan 09-09 passed plan verification*
