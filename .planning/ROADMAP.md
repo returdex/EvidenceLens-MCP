@@ -217,7 +217,17 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+- [ ] 10-01-PLAN.md — Fail-closed provider startup, Docker configuration matrix, and operational contract
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 10-02-PLAN.md — Credentialed Docker MCP E2E boundary, redacted failure contract, and explicit live checkpoint
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 10-03-PLAN.md — Environment-backed live-provider regression and independent Phase 7 verification evidence
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
@@ -245,8 +255,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Docker Deployment and End-to-End Validation | 2/2 | Complete   | 2026-08-23 |
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
-| 9. Public Provider Attribution and Determinism Contract | 7/8 | Ready to execute | - |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/TBD | Not started | - |
+| 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 0/3 | Ready to execute | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
@@ -257,4 +267,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-05 after Phase 09 completed with 23/23 must-haves verified*
+*Last updated: 2026-09-05 after Phase 10 planning passed final review*
