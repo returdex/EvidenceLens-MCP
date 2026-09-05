@@ -203,6 +203,8 @@ Plans:
 **Wave 8** *(blocked on Wave 7 completion)*
 - [x] 09-08-PLAN.md — Reject validation-time accessor mutation in provider-result envelopes before structural parsing
 
+**Verification:** Gaps found (22/23 must-haves). Nested `modelFindings` or `deterministicFindings` Proxies can mutate the outer provider result during Zod parsing after its first preflight; whole-result strictness still requires a post-parse revalidation and regression coverage.
+
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
 **Depends on**: Phase 9
@@ -252,4 +254,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-04 after Phase 09 plan 09-08 passed plan verification*
+*Last updated: 2026-09-05 after Phase 09 verification found one remaining provider-result strictness gap*
