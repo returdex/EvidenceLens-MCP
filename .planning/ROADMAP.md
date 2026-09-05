@@ -204,9 +204,9 @@ Plans:
 - [x] 09-08-PLAN.md — Reject validation-time accessor mutation in provider-result envelopes before structural parsing
 
 **Wave 9** *(blocked on Wave 8 completion)*
-- [ ] 09-09-PLAN.md — Revalidate the provider-result envelope after nested structural parsing and lock nested Proxy mutation rejection
+- [x] 09-09-PLAN.md — Revalidate the provider-result envelope after nested structural parsing and lock nested Proxy mutation rejection
 
-**Verification:** Gaps found (22/23 must-haves). Wave 9 is planned to revalidate the outer provider result after `safeParse` and regression-lock nested `modelFindings` / `deterministicFindings` Proxy mutation before provider attribution can be projected.
+**Verification:** Wave 9 executed; independent phase verification pending.
 
 ### Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E
 **Goal**: Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
