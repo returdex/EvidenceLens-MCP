@@ -274,7 +274,9 @@ async function createReviewResponse(
           throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         }
         const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
-        if (!parsedProviderResult.success) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+        if (!parsedProviderResult.success || !isProviderReviewResultEnvelope(untrustedProviderResult)) {
+          throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+        }
         const providerResult = parsedProviderResult.data;
         validateProviderResultIdentity(provider, expectedProviderRequest, providerResult);
         const namespacedProviderFindings = namespaceProviderFindings(providerResult, trustedDeterministicFindings);
