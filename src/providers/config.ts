@@ -53,6 +53,12 @@ function parseFiniteNumber(value: unknown, min: number, max: number): number {
   return value;
 }
 
+function parseInteger(value: unknown, min: number, max: number): number {
+  const parsed = parseFiniteNumber(value, min, max);
+  if (!Number.isInteger(parsed)) invalid();
+  return parsed;
+}
+
 function parseEnvironment(env: NodeJS.ProcessEnv): { values: Partial<Record<ConfigKey, unknown>>; supplied: Set<ConfigKey> } {
   const mappings: Record<string, ConfigKey> = {
     DEEPSEEK_API_KEY: "apiKey", DEEPSEEK_BASE_URL: "baseUrl", DEEPSEEK_MODEL: "model", DEEPSEEK_TIMEOUT_MS: "timeoutMs",
@@ -105,11 +111,11 @@ export function parseProviderConfig(options: ProviderConfigOptions = {}): Provid
     apiKey: merged.apiKey,
     baseUrl: validateUrl(merged.baseUrl),
     model: merged.model as ProviderConfig["model"],
-    timeoutMs: parseFiniteNumber(merged.timeoutMs, 1_000, 120_000),
-    maxRetries: parseFiniteNumber(merged.maxRetries, 0, 2),
-    maxTotalWaitMs: parseFiniteNumber(merged.maxTotalWaitMs, 1_000, 60_000),
+    timeoutMs: parseInteger(merged.timeoutMs, 1_000, 120_000),
+    maxRetries: parseInteger(merged.maxRetries, 0, 2),
+    maxTotalWaitMs: parseInteger(merged.maxTotalWaitMs, 1_000, 60_000),
     temperature: parseFiniteNumber(merged.temperature, 0, 2),
-    maxTokens: parseFiniteNumber(merged.maxTokens, 1, 20_000)
+    maxTokens: parseInteger(merged.maxTokens, 1, 20_000)
   };
 }
 
