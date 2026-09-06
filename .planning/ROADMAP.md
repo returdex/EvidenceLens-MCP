@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 7 plans
+**Plans**: 11 plans
 
 Plans:
 **Wave 1**
@@ -236,6 +236,14 @@ Plans:
 
 **Wave 5** *(gap closure; blocked on Wave 4 completion)*
 - [x] 10-07-PLAN.md — Single-attempt authorized credentialed Docker MCP proof and evidence audit
+
+**Wave 6** *(gap closure; blocked on Wave 5 completion)*
+- [ ] 10-08-PLAN.md — Reject fractional integral provider configuration values
+- [ ] 10-09-PLAN.md — Require clean Docker child exit before live-proof success
+- [ ] 10-10-PLAN.md — Enforce exact fixture and positive finding evidence counts
+
+**Wave 7** *(gap closure; blocked on Wave 6 completion)*
+- [ ] 10-11-PLAN.md — Freshly authorized single-attempt credentialed proof and audited state synchronization
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -269,7 +277,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 7/7 | Gaps found | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 7/11 | Gap closure planned | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
