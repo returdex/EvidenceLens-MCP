@@ -36,6 +36,25 @@ describe("provider configuration", () => {
     expect(example).toMatchObject({ apiKey: "REPLACE_WITH_DEEPSEEK_API_KEY", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000 });
   });
 
+  it("accepts an environment-only key for the named live command without disclosing it", async () => {
+    const environmentKey = "environment-only-secret-marker";
+    const config = parseProviderConfig({ localConfig: {}, env: { DEEPSEEK_API_KEY: environmentKey } });
+    expect(config.apiKey).toBe(environmentKey);
+
+    let caught: unknown;
+    try {
+      parseProviderConfig({ localConfig: { apiKey: "local-secret-marker" }, env: { DEEPSEEK_API_KEY: environmentKey } });
+    } catch (error) {
+      caught = error;
+    }
+    const serialized = JSON.stringify(serializeProviderError(caught));
+    expect(serialized).not.toContain(environmentKey);
+    expect(serialized).not.toContain("local-secret-marker");
+
+    const liveTest = await readFile("tests/providers/deepseek-live.test.ts", "utf8");
+    expect(liveTest).toContain("loadProviderConfig(undefined, process.env)");
+  });
+
   it("classifies malformed, conflicting, and unreadable files without leaking inputs", async () => {
     const directory = await mkdtemp(join(tmpdir(), "evidencelens-config-"));
     const hostile = join(directory, "hostile.json");
