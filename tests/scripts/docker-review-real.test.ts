@@ -1,8 +1,9 @@
 import { execFile } from "node:child_process";
+import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -23,7 +24,79 @@ function rejectProtocol(value: unknown, model = "deepseek-v4-flash-vision-exp") 
   expect(() => assertStructuralReview(value, false, model)).toThrow("[docker-review:protocol] failed");
 }
 
+class FakeChild extends EventEmitter {
+  exitCode: number | null = null;
+  signalCode: NodeJS.Signals | null = null;
+  stdin = { end: vi.fn() };
+}
+
 describe("credentialed Docker review harness", () => {
+  it("emits success only after a clean child exit", async () => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+
+    expect(child.stdin.end).toHaveBeenCalledOnce();
+    expect(write).not.toHaveBeenCalled();
+    child.exitCode = 0;
+    child.emit("exit", 0, null);
+
+    await expect(completion).resolves.toBeUndefined();
+    expect(write).toHaveBeenCalledWith("credentialed review passed: 4 fixtures, 1 findings\n");
+  });
+
+  it.each([
+    [1, null, "nonzero exit"],
+    [null, "SIGTERM", "signal exit"]
+  ] as const)("rejects %s/%s %s without success or private lifecycle detail", async (code, signal) => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    child.exitCode = code;
+    child.signalCode = signal;
+    child.emit("exit", code, signal);
+
+    await expect(completion).rejects.toThrow("[docker-review:protocol] failed");
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it("rejects a spawn error without exposing its details or emitting success", async () => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    child.emit("error", new Error("private stderr /Users/private cause stack response-body"));
+
+    await expect(completion).rejects.toThrow("[docker-review:docker] failed");
+    await completion.catch((error) => {
+      expect(error.message).not.toMatch(/private|Users|cause|stack|response-body/u);
+    });
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it("rejects a bounded shutdown timeout without success", async () => {
+    vi.useFakeTimers();
+    try {
+      const child = new FakeChild();
+      const write = vi.fn();
+      const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 50 });
+      await vi.advanceTimersByTimeAsync(50);
+      await expect(completion).rejects.toThrow("[docker-review:timeout] failed");
+      expect(write).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("observes a child that exited before the shutdown waiter was attached", async () => {
+    const child = new FakeChild();
+    child.exitCode = 0;
+    const write = vi.fn();
+
+    await expect(completeProofLifecycle(child, successPayload(), true, { write, timeoutMs: 100 })).resolves.toBeUndefined();
+    expect(write).toHaveBeenCalledWith("offline smoke passed: 4 fixtures, 1 findings\n");
+    expect(child.listenerCount("exit")).toBe(0);
+    expect(child.listenerCount("error")).toBe(0);
+  });
   it("forces a literal zero-retry child environment and encloses one provider attempt", () => {
     const result = liveProofPreflight({ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "0" }, { DEEPSEEK_MAX_RETRIES: "2", KEEP: "yes" });
     expect(result).toEqual({
