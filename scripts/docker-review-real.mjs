@@ -206,6 +206,46 @@ export function assertStructuralReview(result, isOffline = offline, expectedMode
   return payload;
 }
 
+function waitForChildExit(child, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let timer;
+    const cleanup = () => {
+      clearTimeout(timer);
+      child.off("exit", onExit);
+      child.off("error", onError);
+    };
+    const settleExit = (code, signal) => {
+      cleanup();
+      resolve({ code, signal });
+    };
+    const onExit = (code, signal) => settleExit(code, signal);
+    const onError = () => {
+      cleanup();
+      try { fail("docker"); } catch (error) { reject(error); }
+    };
+
+    child.once("exit", onExit);
+    child.once("error", onError);
+    timer = setTimeout(() => {
+      cleanup();
+      try { fail("shutdown"); } catch (error) { reject(error); }
+    }, timeoutMs);
+
+    if (child.exitCode !== null || child.signalCode !== null) {
+      settleExit(child.exitCode, child.signalCode);
+    }
+  });
+}
+
+export async function completeProofLifecycle(child, payload, isOffline = offline, options = {}) {
+  const write = options.write ?? ((message) => process.stdout.write(message));
+  const timeoutMs = options.timeoutMs ?? controlTimeoutMs;
+  child.stdin.end();
+  const { code, signal } = await waitForChildExit(child, timeoutMs);
+  if (code !== 0 || signal !== null) fail("protocol", code, signal);
+  write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
+}
+
 async function main() {
   if (!offline && (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -233,9 +273,7 @@ async function main() {
     if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
     const result = await client.request(3, "tools/call", { name: "review_evidence", arguments: fixtureRequest(offline) });
     const payload = assertStructuralReview(result, offline, expectedModel);
-    process.stdout.write(`${offline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
-    client.child.stdin.end();
-    await withTimeout(new Promise((resolve) => child.once("exit", resolve)), "shutdown");
+    await completeProofLifecycle(child, payload, offline);
   } catch (error) {
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
     fail("protocol", error, stderr);

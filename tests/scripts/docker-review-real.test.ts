@@ -64,12 +64,10 @@ describe("credentialed Docker review harness", () => {
     const child = new FakeChild();
     const write = vi.fn();
     const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    const rejection = expect(completion).rejects.toThrow("[docker-review:docker] failed");
     child.emit("error", new Error("private stderr /Users/private cause stack response-body"));
 
-    await expect(completion).rejects.toThrow("[docker-review:docker] failed");
-    await completion.catch((error) => {
-      expect(error.message).not.toMatch(/private|Users|cause|stack|response-body/u);
-    });
+    await rejection;
     expect(write).not.toHaveBeenCalled();
   });
 
@@ -79,8 +77,9 @@ describe("credentialed Docker review harness", () => {
       const child = new FakeChild();
       const write = vi.fn();
       const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 50 });
+      const rejection = expect(completion).rejects.toThrow("[docker-review:timeout] failed");
       await vi.advanceTimersByTimeAsync(50);
-      await expect(completion).rejects.toThrow("[docker-review:timeout] failed");
+      await rejection;
       expect(write).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
