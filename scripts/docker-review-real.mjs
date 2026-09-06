@@ -9,7 +9,8 @@ import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
 const offline = process.argv.includes("--offline");
 const profile = offline ? "smoke" : "review";
 const service = profile;
-const requestTimeoutMs = 30_000;
+const controlTimeoutMs = 30_000;
+const liveProofMarginMs = 30_000;
 const expectedReferences = [
   "filesystem://course/tests/fixtures/evidence/text/assignment.txt",
   "filesystem://course/tests/fixtures/evidence/tables/rubric.csv",
@@ -36,19 +37,43 @@ function jsonLine(message) {
   return `${JSON.stringify(message)}\n`;
 }
 
-function withTimeout(promise, phase) {
+export function methodTimeoutMs(method, toolsCallTimeoutMs = controlTimeoutMs) {
+  return method === "tools/call" ? toolsCallTimeoutMs : controlTimeoutMs;
+}
+
+export function liveProofPreflight(resolvedEnvironment, baseEnvironment = process.env) {
+  try {
+    const retry = resolvedEnvironment?.DEEPSEEK_MAX_RETRIES;
+    const rawTimeout = resolvedEnvironment?.DEEPSEEK_TIMEOUT_MS ?? "30000";
+    if (retry !== "0" || !/^(?:0|[1-9]\d*)$/u.test(rawTimeout)) fail("preflight");
+    const providerTimeoutMs = Number(rawTimeout);
+    if (!Number.isFinite(providerTimeoutMs) || providerTimeoutMs < 1_000 || providerTimeoutMs > 120_000) fail("preflight");
+    const toolsCallTimeoutMs = providerTimeoutMs + liveProofMarginMs;
+    if (!Number.isFinite(toolsCallTimeoutMs) || toolsCallTimeoutMs <= providerTimeoutMs) fail("preflight");
+    return {
+      childEnv: { ...baseEnvironment, DEEPSEEK_MAX_RETRIES: "0" },
+      providerTimeoutMs,
+      toolsCallTimeoutMs
+    };
+  } catch {
+    fail("preflight");
+  }
+}
+
+function withTimeout(promise, phase, timeoutMs = controlTimeoutMs) {
   let timer;
   const timeout = new Promise((_, reject) => {
     timer = setTimeout(() => {
       try { fail("timeout", phase); } catch (error) { reject(error); }
-    }, requestTimeoutMs);
+    }, timeoutMs);
   });
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 class StdioClient {
-  constructor(child) {
+  constructor(child, toolsCallTimeoutMs = controlTimeoutMs) {
     this.child = child;
+    this.toolsCallTimeoutMs = toolsCallTimeoutMs;
     this.buffer = "";
     this.waiters = [];
     child.stdout.setEncoding("utf8");
@@ -89,7 +114,7 @@ class StdioClient {
   async request(id, method, params = {}) {
     this.child.stdin.write(jsonLine({ jsonrpc: "2.0", id, method, params }));
     while (true) {
-      const event = await withTimeout(this.next(), method);
+      const event = await withTimeout(this.next(), method, methodTimeoutMs(method, this.toolsCallTimeoutMs));
       if (event.dockerError) fail("docker");
       if (event.done) fail(method, `container exited before response (code=${event.code ?? "none"}, signal=${event.signal ?? "none"})`);
       if (event.malformed !== undefined) fail(method, "malformed JSON-RPC response");
@@ -136,6 +161,20 @@ export async function resolveReviewModel(runCompose = execFileAsync) {
   }
 }
 
+async function resolveLiveProof(runCompose = execFileAsync, baseEnvironment = process.env) {
+  const childEnv = { ...baseEnvironment, DEEPSEEK_MAX_RETRIES: "0" };
+  try {
+    const resolved = await runCompose("docker", ["compose", "--profile", "review", "config", "--format", "json"], { env: childEnv });
+    const document = JSON.parse(resolved.stdout);
+    const environment = document?.services?.review?.environment;
+    const model = environment?.DEEPSEEK_MODEL;
+    if (typeof model !== "string" || model.trim() === "" || !DEEPSEEK_MODELS.includes(model)) fail("preflight");
+    return { model, ...liveProofPreflight(environment, childEnv) };
+  } catch {
+    fail("preflight");
+  }
+}
+
 export function assertStructuralReview(result, isOffline = offline, expectedModel) {
   if (typeof result !== "object" || result === null || Array.isArray(result) || Object.keys(result).length !== 1 || result.content?.length !== 1 || result.content[0]?.type !== "text" || typeof result.content[0]?.text !== "string" || Object.keys(result.content[0]).length !== 2) fail("protocol");
   let payload;
@@ -172,16 +211,17 @@ async function main() {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
   }
 
-  const expectedModel = offline ? undefined : await resolveReviewModel();
+  const liveProof = offline ? undefined : await resolveLiveProof();
+  const expectedModel = liveProof?.model;
 
   const child = spawn("docker", ["compose", "--profile", profile, "run", "--rm", "-T", service], {
     stdio: ["pipe", "pipe", "pipe"],
-    env: { ...process.env, ...(offline ? { EVIDENCELENS_DISABLE_PROVIDER: "1" } : {}) }
+    env: offline ? { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
   });
   let stderr = "";
   child.stderr.setEncoding("utf8");
   child.stderr.on("data", (chunk) => { stderr += chunk; });
-  const client = new StdioClient(child);
+  const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
     await client.request(1, "initialize", {
       protocolVersion: "2025-11-25",
