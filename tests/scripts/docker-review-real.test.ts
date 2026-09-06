@@ -70,12 +70,14 @@ describe("credentialed Docker review harness", () => {
     for (const leaked of ["Read the assignment brief.", "Criterion,Excellent", "/Users/private/file", "/workspace/private/file"]) { const payload = successPayload(); payload.findings[0].summary = leaked; rejectProtocol(mcp(payload)); }
   });
 
-  it("resolves allowlisted models solely through the injected Compose-config seam", async () => {
-    for (const model of ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v4-flash-vision-exp"]) {
+  it.each([
+    ["shell/process override", "deepseek-v4-pro"],
+    ["project .env interpolation", "deepseek-v4-flash"],
+    ["Compose default", "deepseek-v4-flash-vision-exp"]
+  ])("uses the resolved model for %s solely through the injected Compose-config seam", async (_source, model) => {
       const run = vi.fn().mockResolvedValue({ stdout: JSON.stringify({ services: { review: { environment: { DEEPSEEK_API_KEY: "secret", DEEPSEEK_MODEL: model } } } }) });
       await expect(resolveReviewModel(run)).resolves.toBe(model);
       expect(run).toHaveBeenCalledWith("docker", ["compose", "--profile", "review", "config", "--format", "json"]);
-    }
   });
 
   it("sanitizes missing, malformed, disallowed, and failed Compose resolution", async () => {

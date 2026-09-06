@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
+import { reviewResponseSchema } from "../dist/contracts/review.js";
+import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
 
 const offline = process.argv.includes("--offline");
 const profile = offline ? "smoke" : "review";
@@ -15,6 +19,7 @@ const expectedReferences = [
 const rawFixtureMarkers = ["Read the assignment brief.", "Criterion,Excellent"];
 
 const failurePhases = new Set(["preflight", "docker", "initialize", "tools/list", "tools/call", "protocol", "timeout"]);
+const execFileAsync = promisify(execFile);
 
 export function classifyFailure(phase, ..._privateDetails) {
   if (failurePhases.has(phase)) return phase;
@@ -119,16 +124,27 @@ function hasForbiddenKey(value) {
   return Object.entries(value).some(([key, child]) => forbiddenKeys.has(key) || hasForbiddenKey(child));
 }
 
-export function assertStructuralReview(result, isOffline = offline) {
-  if (result?.content?.length !== 1 || result.content[0]?.type !== "text") fail("tools/call", "missing MCP text result");
+export async function resolveReviewModel(runCompose = execFileAsync) {
+  try {
+    const resolved = await runCompose("docker", ["compose", "--profile", "review", "config", "--format", "json"]);
+    const document = JSON.parse(resolved.stdout);
+    const model = document?.services?.review?.environment?.DEEPSEEK_MODEL;
+    if (typeof model !== "string" || model.trim() === "" || !DEEPSEEK_MODELS.includes(model)) fail("preflight");
+    return model;
+  } catch {
+    fail("preflight");
+  }
+}
+
+export function assertStructuralReview(result, isOffline = offline, expectedModel) {
+  if (typeof result !== "object" || result === null || Array.isArray(result) || Object.keys(result).length !== 1 || result.content?.length !== 1 || result.content[0]?.type !== "text" || typeof result.content[0]?.text !== "string" || Object.keys(result.content[0]).length !== 2) fail("protocol");
   let payload;
   try {
-    payload = JSON.parse(result.content[0].text);
+    payload = reviewResponseSchema.parse(JSON.parse(result.content[0].text));
   } catch {
-    fail("tools/call", "MCP text result was not JSON");
+    fail("protocol");
   }
-  if (payload.ok !== true || payload.status !== "accepted") fail("protocol");
-  if (!Array.isArray(payload.normalizedEvidence) || payload.normalizedEvidence.length !== 4) fail("protocol");
+  if (payload.normalizedEvidence.length !== 4) fail("protocol");
   const references = payload.normalizedEvidence.map((evidence) => evidence?.source?.reference);
   if (JSON.stringify(references) !== JSON.stringify(expectedReferences)) fail("protocol");
   for (const evidence of payload.normalizedEvidence) {
@@ -145,8 +161,8 @@ export function assertStructuralReview(result, isOffline = offline) {
     if (!/^[a-f0-9]{64}$/u.test(citation.contentHash ?? "")) fail("protocol");
   }
   if (!isOffline) {
-    if (!payload.findings.some((finding) => typeof finding?.id === "string" && finding.id.startsWith("provider:"))) fail("protocol");
-    if (typeof payload.metadata?.provider?.name !== "string" || typeof payload.metadata?.provider?.model !== "string") fail("protocol");
+    if (typeof expectedModel !== "string" || payload.metadata.provider?.name !== "deepseek" || payload.metadata.provider.model !== expectedModel) fail("protocol");
+    if (!payload.findings.some((finding) => finding.id.startsWith("provider:deepseek:"))) fail("protocol");
   }
   return payload;
 }
@@ -155,6 +171,8 @@ async function main() {
   if (!offline && (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
   }
+
+  const expectedModel = offline ? undefined : await resolveReviewModel();
 
   const child = spawn("docker", ["compose", "--profile", profile, "run", "--rm", "-T", service], {
     stdio: ["pipe", "pipe", "pipe"],
@@ -174,7 +192,7 @@ async function main() {
     if (!Array.isArray(listed?.tools) || listed.tools.length !== 1 || listed.tools[0]?.name !== "review_evidence") fail("tools/list", "expected only review_evidence");
     if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
     const result = await client.request(3, "tools/call", { name: "review_evidence", arguments: fixtureRequest(offline) });
-    const payload = assertStructuralReview(result, offline);
+    const payload = assertStructuralReview(result, offline, expectedModel);
     process.stdout.write(`${offline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
     client.child.stdin.end();
     await withTimeout(new Promise((resolve) => child.once("exit", resolve)), "shutdown");
