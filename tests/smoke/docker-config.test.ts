@@ -73,4 +73,16 @@ describe("Docker deployment configuration", () => {
     expect(dockerignore).not.toMatch(/^tests\/?$/m);
     expect(dockerignore).not.toMatch(/^tests\/fixtures(?:\/|$)/m);
   });
+
+  it("requires an explicit offline profile and a provider startup failure matrix", async () => {
+    const compose = await readText("compose.yaml");
+    const smoke = await readText("scripts/docker-smoke.sh");
+    const matrix = await readText("scripts/docker-provider-startup-matrix.sh");
+
+    expect(compose).toContain('EVIDENCELENS_DISABLE_PROVIDER: "1"');
+    expect(smoke).toContain("DEEPSEEK_API_KEY=compose-placeholder docker compose --profile smoke");
+    expect(smoke).toContain("-e EVIDENCELENS_DISABLE_PROVIDER=0 -e DEEPSEEK_API_KEY=");
+    expect(matrix).toContain("PROVIDER_CONFIGURATION");
+    expect(matrix).toMatch(/missing-key|invalid-model|configuration-conflict|unreadable-file/iu);
+  });
 });

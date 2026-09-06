@@ -1,6 +1,8 @@
-import { readFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEEPSEEK_MODELS, parseProviderConfig } from "../../src/providers/config.js";
+import { DEEPSEEK_MODELS, loadProviderConfig, parseProviderConfig } from "../../src/providers/config.js";
 import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
 
 const key = "test-key-only";
@@ -32,5 +34,34 @@ describe("provider configuration", () => {
     expect(serialized).not.toContain("api.deepseek.com");
     const example = JSON.parse(await readFile(".evidencelens.local.example.json", "utf8"));
     expect(example).toMatchObject({ apiKey: "REPLACE_WITH_DEEPSEEK_API_KEY", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000 });
+  });
+
+  it("classifies malformed, conflicting, and unreadable files without leaking inputs", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "evidencelens-config-"));
+    const hostile = join(directory, "hostile.json");
+    const conflict = join(directory, "conflict.json");
+    const unreadable = join(directory, "unreadable.json");
+    await writeFile(hostile, "{not-json SECRET-MATERIAL https://host.invalid}");
+    await writeFile(conflict, JSON.stringify({ apiKey: "local-synthetic" }));
+    await writeFile(unreadable, JSON.stringify({ apiKey: "file-synthetic" }));
+    await chmod(unreadable, 0o000);
+    try {
+      const attempts = [
+        () => loadProviderConfig(hostile, {}),
+        () => loadProviderConfig(conflict, { DEEPSEEK_API_KEY: "env-synthetic" }),
+        () => loadProviderConfig(unreadable, {})
+      ];
+      for (const attempt of attempts) {
+        let caught: unknown;
+        try { attempt(); } catch (error) { caught = error; }
+        expect(caught).toBeInstanceOf(ProviderError);
+        const payload = JSON.stringify(serializeProviderError(caught));
+        expect(payload).toContain("PROVIDER_CONFIGURATION");
+        expect(payload).not.toMatch(/synthetic|SECRET-MATERIAL|host\.invalid|hostile|unreadable|cause|stack/iu);
+      }
+    } finally {
+      await chmod(unreadable, 0o600);
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });

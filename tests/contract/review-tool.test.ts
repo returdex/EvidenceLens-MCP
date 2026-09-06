@@ -9,6 +9,8 @@ import {
 import { EvidenceLensError, toToolErrorResult } from "../../src/errors.js";
 import { createServer } from "../../src/server.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
+import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
+import type { ReviewProvider } from "../../src/providers/types.js";
 
 const validRequest = {
   reviewId: "review-001",
@@ -187,6 +189,59 @@ function parseToolPayload(toolResult: unknown) {
 }
 
 describe("review_evidence handler and MCP protocol contract", () => {
+  it("fails closed with a sanitized classification when automatic provider configuration is missing", () => {
+    const previousDisable = process.env.EVIDENCELENS_DISABLE_PROVIDER;
+    const previousKey = process.env.DEEPSEEK_API_KEY;
+    delete process.env.EVIDENCELENS_DISABLE_PROVIDER;
+    delete process.env.DEEPSEEK_API_KEY;
+    try {
+      expect(() => createServer()).toThrowError(ProviderError);
+      try { createServer(); } catch (error) {
+        expect(serializeProviderError(error)).toEqual({
+          code: "PROVIDER_CONFIGURATION",
+          message: "Provider configuration is invalid",
+          retryable: false,
+          retryCount: 0
+        });
+        const publicError = JSON.stringify(serializeProviderError(error));
+        expect(publicError).not.toMatch(/DEEPSEEK_API_KEY|api\.deepseek\.com|\.evidencelens|cause|stack|\/Users\//iu);
+      }
+    } finally {
+      if (previousDisable === undefined) delete process.env.EVIDENCELENS_DISABLE_PROVIDER;
+      else process.env.EVIDENCELENS_DISABLE_PROVIDER = previousDisable;
+      if (previousKey === undefined) delete process.env.DEEPSEEK_API_KEY;
+      else process.env.DEEPSEEK_API_KEY = previousKey;
+    }
+  });
+
+  it("uses only literal disable mode and preserves explicit provider seams", () => {
+    const previousDisable = process.env.EVIDENCELENS_DISABLE_PROVIDER;
+    const previousKey = process.env.DEEPSEEK_API_KEY;
+    const fakeProvider: ReviewProvider = { name: "fake", review: async () => { throw new Error("unused"); } };
+    delete process.env.DEEPSEEK_API_KEY;
+    try {
+      process.env.EVIDENCELENS_DISABLE_PROVIDER = "1";
+      expect(createServer()).toBeDefined();
+      process.env.EVIDENCELENS_DISABLE_PROVIDER = "true";
+      expect(() => createServer()).toThrowError(ProviderError);
+      expect(createServer({ provider: fakeProvider })).toBeDefined();
+      expect(createServer({ providerConfig: {
+        apiKey: "synthetic",
+        baseUrl: "https://example.invalid",
+        model: "deepseek-v4-pro",
+        timeoutMs: 30000,
+        maxRetries: 0,
+        maxTotalWaitMs: 1000,
+        temperature: 0.2,
+        maxTokens: 100
+      } })).toBeDefined();
+    } finally {
+      if (previousDisable === undefined) delete process.env.EVIDENCELENS_DISABLE_PROVIDER;
+      else process.env.EVIDENCELENS_DISABLE_PROVIDER = previousDisable;
+      if (previousKey === undefined) delete process.env.DEEPSEEK_API_KEY;
+      else process.env.DEEPSEEK_API_KEY = previousKey;
+    }
+  });
   it("requires one distinct complete role set before normalization", async () => {
     const rolePayload = parseToolPayload(await handleReviewRequest({
       ...completeFindingRequest,
