@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Phase 10 gap closure planned; ready to execute plans 10-04 through 10-07
-last_updated: "2026-09-06T14:14:00.297Z"
+stopped_at: Completed 10-04-PLAN.md
+last_updated: "2026-09-06T14:21:01.843Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 35
-  completed_plans: 32
-  percent: 91
+  completed_plans: 33
+  percent: 94
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,8 +27,8 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — READY TO EXECUTE GAP CLOSURE
-Plan: 3 of 7 complete; 4 gap plans pending
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Plan: 2 of 7
 
 - Phase: 10 of 11
 - Status: Gap-closure plans 10-04 through 10-07 created and plan-checker verified
@@ -105,6 +105,8 @@ Plan: 3 of 7 complete; 4 gap plans pending
 - [Phase 10]: A credentialed timeout remains a visible non-pass; it is never converted to offline success or skip.
 - [Phase 10]: Adapter-only Vision verification accepts environment or ignored local config; complete credentialed proof requires Docker and a process-level key. — The two commands exercise different boundaries and must not be conflated.
 - [Phase 10]: Phase 7 remains gaps_found because the authorized Docker MCP run returned a sanitized timeout non-pass. — Executed failure evidence cannot support a passed PROV-01 claim.
+- [Phase 10]: Construct one validated McpServer before serveStdio, then expose that instance through the SDK-required factory contract. — This closes lazy provider validation while retaining compatibility with the installed factory-only stdio API.
+- [Phase 10]: Sanitize only PROVIDER_CONFIGURATION at the executable boundary while preserving main() rejection and unrelated-error behavior. — This prevents configuration disclosure without masking programming or transport failures.
 
 ### Blockers
 
@@ -135,11 +137,12 @@ Plan: 3 of 7 complete; 4 gap plans pending
 | Phase 10 P01 | 6h 7m | 3 tasks | 9 files |
 | Phase 10 P02 | 5 min | 2 tasks | 2 files |
 | Phase 10 P03 | 3 min | 2 tasks | 7 files |
+| Phase 10 P04 | 2 min | 2 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-06T12:43:49.634Z
-- **Stopped at:** Completed 10-03-PLAN.md with PROV-01 live-proof gap
+- **Last session:** 2026-09-06T14:21:01.838Z
+- **Stopped at:** Completed 10-04-PLAN.md
 - **Resume file:** None
 
 ## Next Action
