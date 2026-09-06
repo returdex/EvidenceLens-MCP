@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 
 const START = "<!-- live-proof:start -->";
 const END = "<!-- live-proof:end -->";
-const success = /^outcome: credentialed review passed: (\d+) fixtures, (\d+) findings$/u;
+const success = /^outcome: credentialed review passed: 4 fixtures, ([1-9]\d*) findings$/u;
 const failure = /^outcome: \[docker-review:(preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u;
 const noAuthorization = "outcome: no-authorization";
 
@@ -18,7 +18,8 @@ export function auditLiveEvidence(verification, requirements) {
   const [command, timestamp, outcome, interpretation, retainedStatus] = lines;
   if (command !== "command: npm run docker:review:real" || !/^timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(timestamp)) throw new Error("live evidence audit failed");
 
-  const passedOutcome = success.test(outcome);
+  const successMatch = success.exec(outcome);
+  const passedOutcome = successMatch !== null && Number.isSafeInteger(Number(successMatch[1]));
   const failedOutcome = failure.test(outcome) || outcome === noAuthorization;
   if (!passedOutcome && !failedOutcome) throw new Error("live evidence audit failed");
   const expectedInterpretation = passedOutcome
