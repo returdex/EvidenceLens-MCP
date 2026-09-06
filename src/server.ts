@@ -5,6 +5,7 @@ import { registerReviewTool } from "./tools/review.js";
 import { createFilesystemPolicy, parseAllowedRoots, type FilesystemRootConfig } from "./filesystem/policy.js";
 import { loadProviderConfig, type ProviderConfig } from "./providers/config.js";
 import { createDeepSeekProvider } from "./providers/deepseek.js";
+import { ProviderError, serializeProviderError } from "./providers/errors.js";
 import type { ReviewProvider } from "./providers/types.js";
 
 export interface ServerOptions {
@@ -34,9 +35,20 @@ export function createServer(options: ServerOptions = {}): McpServer {
 }
 
 export async function main(): Promise<void> {
-  serveStdio(() => createServer({ allowedRoots: parseAllowedRoots(process.env.EVIDENCELENS_ALLOWED_ROOTS) }));
+  const server = createServer({ allowedRoots: parseAllowedRoots(process.env.EVIDENCELENS_ALLOWED_ROOTS) });
+  serveStdio(() => server);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main();
+  try {
+    await main();
+  } catch (error) {
+    if (error instanceof ProviderError && error.code === "PROVIDER_CONFIGURATION") {
+      const diagnostic = serializeProviderError(error);
+      process.stderr.write(`${diagnostic.code}: ${diagnostic.message}\n`);
+      process.exitCode = 1;
+    } else {
+      throw error;
+    }
+  }
 }
