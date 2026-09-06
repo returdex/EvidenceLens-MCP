@@ -1,19 +1,22 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-reviewed: 2026-09-06T12:48:05Z
+reviewed: 2026-09-07T00:58:00Z
 depth: standard
-files_reviewed: 12
+files_reviewed: 15
 files_reviewed_list:
   - README.md
   - docs/docker-deployment.md
   - docs/mcp-contract.md
+  - scripts/audit-live-evidence.mjs
   - scripts/docker-provider-startup-matrix.sh
   - scripts/docker-review-real.mjs
   - scripts/docker-smoke.sh
+  - src/providers/config.ts
   - src/server.ts
   - tests/contract/review-tool.test.ts
   - tests/providers/config.test.ts
   - tests/providers/deepseek-live.test.ts
+  - tests/scripts/audit-live-evidence.test.ts
   - tests/scripts/docker-review-real.test.ts
   - tests/smoke/docker-config.test.ts
 findings:
@@ -26,39 +29,47 @@ status: issues_found
 
 # Phase 10: Code Review Report
 
-**Reviewed:** 2026-09-06T12:48:05Z
+**Reviewed:** 2026-09-07T00:58:00Z
 **Depth:** standard
-**Files Reviewed:** 12
+**Files Reviewed:** 15
 **Status:** issues_found
 
 ## Summary
 
-The fail-closed provider startup and Docker proof paths contain two release-blocking false-success/failure-contract gaps. The direct stdio executable does not actually fail during startup when configuration is missing, and the credentialed Docker proof accepts output that is not demonstrably from DeepSeek or schema-valid. The opt-in live test can also silently skip malformed configuration, making an explicitly requested validation command exit successfully without validating anything.
+The final Phase 10 source state fixes the earlier eager-startup, live-test skip, schema-validation, provider-identity, and zero-retry defects. The focused credential-free suite passed 50 tests. The separately authorized live result was `[docker-review:protocol] failed`; this report correctly treats that result as a non-pass, not by itself as a source-code defect.
+
+Three remaining defects were found. Two can let the retained proof path report success without proving the complete command outcome it claims, and one permits fractional values for settings documented and consumed as integral counts.
 
 ## Critical Issues
 
-### CR-01 (BLOCKER): Direct stdio startup defers provider configuration failure until MCP initialization
+### CR-01 (BLOCKER): Evidence audit accepts impossible success summaries
 
-**File:** `src/server.ts:36-41`
-**Issue:** `main()` passes `createServer()` as a lazy callback to `serveStdio`. Consequently, missing provider configuration is not checked when the executable starts. A direct invocation stays alive until an MCP request arrives; an `initialize` request then receives only JSON-RPC `Internal server error`, and the process can exit with status 0 when stdin closes. This contradicts the documented contract that provider-enabled local startup terminates with a sanitized `PROVIDER_CONFIGURATION` classification. It also prevents operators and MCP clients from distinguishing a configuration failure from an internal server defect. The unit test at `tests/contract/review-tool.test.ts:173-195` calls `createServer()` directly and therefore does not exercise this executable behavior.
-**Fix:** Eagerly create/validate the server before entering the stdio loop, and catch `ProviderError` at the executable boundary to emit exactly the sanitized classification and set a non-zero exit code. Add a child-process test that launches `dist/server.js` with no configuration and asserts failure occurs before any MCP request and without stack/path leakage.
+**File:** `scripts/audit-live-evidence.mjs:7-27`
+**Issue:** The success expression accepts any decimal fixture and finding counts, including `0 fixtures, 0 findings`, and `passedOutcome` is based only on that loose expression. Consequently a verification report containing `outcome: credentialed review passed: 0 fixtures, 0 findings`, a checked PROV-01 box, and `status: passed` passes the audit even though the live harness requires exactly four normalized fixtures and at least one `provider:deepseek:` finding. This creates a false-positive proof path in the artifact-consistency gate.
+**Fix:** Require the exact harness success contract and reject all other counts, for example:
 
-### CR-02 (BLOCKER): Credentialed E2E proof accepts fake or structurally invalid provider output
+```js
+const success = /^outcome: credentialed review passed: 4 fixtures, ([1-9]\d*) findings$/u;
+```
 
-**File:** `scripts/docker-review-real.mjs:122-151`
-**Issue:** The real-provider gate does not parse the payload with the public response schema and only requires any finding ID beginning with `provider:` plus any string-valued `metadata.provider.name` and `model`. A response attributed to another provider (for example `name: "fake"`, `id: "provider:fake:x"`) or a malformed response with missing/invalid finding, citation, evidence, or metadata fields can pass. Therefore the command can report `credentialed review passed` without proving the documented DeepSeek MCP contract. The test fixture in `tests/scripts/docker-review-real.test.ts:15-43` only covers a valid-looking happy path and has no adversarial cases for fake attribution or missing schema fields.
-**Fix:** Parse the decoded payload with the same strict public `reviewResponseSchema` (or an equivalent standalone schema usable from the script), require `metadata.provider.name === "deepseek"`, require the expected configured model, and require at least one `provider:deepseek:` finding. Add negative tests for another provider name, another namespace, invalid/missing finding fields, invalid normalized evidence, and inconsistent citation/evidence IDs.
+Add adversarial tests for zero, non-four, and malformed counts.
+
+### CR-02 (BLOCKER): Live harness reports success after an abnormal container exit
+
+**File:** `scripts/docker-review-real.mjs:236-238`
+**Issue:** After receiving a structurally valid response, the harness prints `credentialed review passed` before waiting for shutdown, and the exit promise resolves for every exit code or signal. A container that returns one response and then terminates with a fatal non-zero status is therefore recorded as a successful complete Docker MCP stdio proof. This is especially problematic because the retained stdout line is the evidence consumed by the audit workflow.
+**Fix:** Wait for the exit result, require `code === 0` and `signal === null`, and only then print the success summary. Add a child-process seam test covering a valid response followed by exit code 1.
 
 ## Warnings
 
-### WR-01 (WARNING): Live command treats every configuration defect as an absent credential
+### WR-01 (WARNING): Integral provider settings accept fractional values
 
-**File:** `tests/providers/deepseek-live.test.ts:12-18`
-**Issue:** The blanket `catch` around `loadProviderConfig()` calls `skip()` for every `ProviderError`. An explicitly invoked `npm run test:deepseek-live` therefore succeeds as skipped not only when credentials are absent, but also when the local JSON is malformed or unreadable, environment and file sources conflict, the model is invalid, or numeric settings are out of bounds. This hides actionable setup regressions and contradicts the documentation that the command skips only when neither usable credential source exists.
-**Fix:** Decide whether credentials are absent before loading (for example, check the environment key and default config-file existence). Skip only for the precise no-credential case; allow malformed, unreadable, conflicting, and invalid configuration errors to fail the test. Add tests that distinguish absent credentials from invalid supplied configuration.
+**File:** `src/providers/config.ts:51-53`
+**Issue:** `parseFiniteNumber` enforces only numeric bounds. It therefore accepts values such as `maxRetries: 0.9` and `maxTokens: 1.5`, even though these are count-valued settings. Retry execution silently floors `maxRetries`, while token APIs may reject fractional `max_tokens` later. The accepted typed configuration can thus behave differently from the configured value or fail only after a paid request is attempted.
+**Fix:** Add an integer-aware parser (or an `integer` parameter) and use it for `timeoutMs`, `maxRetries`, `maxTotalWaitMs`, and `maxTokens`; retain finite-number validation for `temperature`. Add local-file and environment regression cases for fractional values.
 
 ---
 
-_Reviewed: 2026-09-06T12:48:05Z_
+_Reviewed: 2026-09-07T00:58:00Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
