@@ -68,7 +68,6 @@ describe("credentialed Docker review harness", () => {
       expect(result.stdout).toBe("");
       expect(result.stderr).toBe("[docker-review:preflight] failed\n");
       expect(result.stderr).not.toContain("DEEPSEEK_API_KEY");
-      expect(result.stderr).not.toContain("docker");
     }
   });
 
