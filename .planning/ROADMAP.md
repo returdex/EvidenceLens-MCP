@@ -68,7 +68,7 @@ Plans:
   1. Requests outside configured allowlisted roots are rejected before file contents are read.
   2. The service exposes no default write, delete, or mutation operation.
   3. Findings and errors preserve provenance without leaking unintended filesystem details or secrets.
-**Plans**: 7 plans
+**Plans**: 3 plans
 
 Plans:
 **Wave 1**
@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 3 plans
+**Plans**: 7 plans
 
 Plans:
 **Wave 1**
