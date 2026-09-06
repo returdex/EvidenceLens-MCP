@@ -239,7 +239,7 @@ Plans:
 
 **Wave 6** *(gap closure; blocked on Wave 5 completion)*
 - [x] 10-08-PLAN.md — Reject fractional integral provider configuration values
-- [ ] 10-09-PLAN.md — Require clean Docker child exit before live-proof success
+- [x] 10-09-PLAN.md — Require clean Docker child exit before live-proof success
 - [ ] 10-10-PLAN.md — Enforce exact fixture and positive finding evidence counts
 
 **Wave 7** *(gap closure; blocked on Wave 6 completion)*
@@ -277,7 +277,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 8/11 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 9/11 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
