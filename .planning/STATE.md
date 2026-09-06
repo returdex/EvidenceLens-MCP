@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_verify
-stopped_at: Completed 10-07-PLAN.md; PROV-01 remains open
+status: gaps_found
+stopped_at: Phase 10 re-verification found 3 remaining gaps; PROV-01 remains open
 last_updated: "2026-09-06T14:52:25.354Z"
 progress:
   total_phases: 11
-  completed_phases: 10
+  completed_phases: 9
   total_plans: 35
-  completed_plans: 36
+  completed_plans: 35
   percent: 100
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — GAPS FOUND
 Plan: 7 of 7
 
 - Phase: 10 of 11
-- Status: All seven Phase 10 plans executed; phase verification is pending
+- Status: All seven Phase 10 plans executed; re-verification found 3 remaining gaps
 - Progress: 7 of 7 Phase 10 plans complete
-- Last activity: Ran the single authorized zero-retry Docker proof, retained its sanitized protocol non-pass, and audited consistent open PROV-01 evidence
+- Last activity: Re-verified Phase 10 at 8/11 must-haves; retained the sanitized protocol non-pass and open PROV-01 evidence
 
 ## Decisions and Assumptions
 
