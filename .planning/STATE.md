@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Phase 10 remaining gap closure planned; ready to execute plans 10-08 through 10-11
-last_updated: "2026-09-06T15:19:14.188Z"
+stopped_at: Completed 10-08-PLAN.md
+last_updated: "2026-09-06T17:55:19.762Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 39
-  completed_plans: 36
-  percent: 92
+  completed_plans: 37
+  percent: 95
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — READY TO EXECUTE GAP CLOSURE
-Plan: 7 of 11 complete; 4 gap plans pending
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Plan: 8 of 11 complete; 3 gap plans pending
 
 - Phase: 10 of 11
-- Status: Gap-closure plans 10-08 through 10-11 created and plan-checker verified
-- Progress: 7 of 11 Phase 10 plans complete
-- Last activity: Planned integral configuration, clean child exit, evidence count, and fresh authorized live-proof closure
+- Status: Gap closure executing; plans 10-09 through 10-11 remain
+- Progress: 8 of 11 Phase 10 plans complete
+- Last activity: Rejected fractional integral provider controls from environment and local configuration
 
 ## Decisions and Assumptions
 
@@ -113,6 +113,7 @@ Plan: 7 of 11 complete; 4 gap plans pending
 - [Phase 10]: Collapse malformed envelopes, schema failures, attribution drift, and provenance inconsistencies into the redacted protocol category.
 - [Phase 10]: Budget live tools/call as one provider timeout plus a fixed 30000ms Docker/MCP margin, with retries forced to zero.
 - [Phase 10]: Keep PROV-01 open because the separately authorized single live execution returned a sanitized protocol non-pass.
+- [Phase 10]: Apply integer validation only to timeoutMs, maxRetries, maxTotalWaitMs, and maxTokens while preserving fractional temperature. — Integral controls affect retry and request budgets; temperature intentionally remains fractional.
 
 ### Blockers
 
@@ -147,16 +148,17 @@ Plan: 7 of 11 complete; 4 gap plans pending
 | Phase 10 P05 | 2min | 2 tasks | 3 files |
 | Phase 10 P06 | 2min | 2 tasks | 2 files |
 | Phase 10 P07 | 20min | 3 tasks | 6 files | 2026-09-07 |
+| Phase 10 P08 | 2min | 2 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-06T14:52:25.350Z
-- **Stopped at:** Completed 10-07-PLAN.md; PROV-01 remains open
+- **Last session:** 2026-09-06T17:55:19.758Z
+- **Stopped at:** Completed 10-08-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Run Phase 10 verification. Preserve the PROV-01 gap because the single separately authorized proof returned a sanitized protocol non-pass.
+Execute 10-09-PLAN.md. Preserve the PROV-01 gap until a separately authorized proof succeeds.
 
 ---
 *Last updated: 2026-09-05 after Phase 10 planning passed final review*
