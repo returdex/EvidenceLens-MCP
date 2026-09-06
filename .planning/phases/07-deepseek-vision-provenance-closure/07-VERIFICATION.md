@@ -24,7 +24,7 @@ Verify that DeepSeek Vision can be invoked through the production provider and c
 
 | Requirement | Offline evidence | Authorized live evidence | Status |
 |---|---|---|---|
-| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | `npm run docker:review:real` was authorized and executed once; it returned `[docker-review:timeout] failed`. | **Gap:** complete credentialed MCP structural success is not proven. |
+| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | `npm run docker:review:real` was separately authorized and executed once; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
 
 ## Evidence
 
@@ -36,13 +36,17 @@ Verify that DeepSeek Vision can be invoked through the production provider and c
 
 These commands validate configuration redaction, local provenance, documentation, and offline MCP behavior. They do not establish a successful real-provider response.
 
-### Authorized optional result
+### Authorized live outcome
 
-- Exact command: `npm run docker:review:real`
-- Exact retained result: `[docker-review:timeout] failed`
-- Interpretation: the complete credentialed Docker MCP structural assertions did not complete, so this is an executed failure and the report status is `gaps_found`.
+<!-- live-proof:start -->
+command: npm run docker:review:real
+timestamp: 2026-09-06T14:50:48.000Z
+outcome: [docker-review:protocol] failed
+interpretation: complete credentialed Docker MCP structural proof remains unproven
+status: gaps_found
+<!-- live-proof:end -->
 
-The command was not retried because Phase 10 authorized exactly one provider call. No API key, configuration value, raw provider body, model prose, endpoint, or transport detail was recorded.
+The separately authorized command was executed exactly once with retries forced to zero. No fallback or second provider command was run.
 
 ## Scope and Conclusion
 
