@@ -1,6 +1,6 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-reviewed: 2026-09-07T00:58:00Z
+reviewed: 2026-09-06T18:12:23Z
 depth: standard
 files_reviewed: 15
 files_reviewed_list:
@@ -20,56 +20,36 @@ files_reviewed_list:
   - tests/scripts/docker-review-real.test.ts
   - tests/smoke/docker-config.test.ts
 findings:
-  critical: 2
-  warning: 1
+  critical: 1
+  warning: 0
   info: 0
-  total: 3
+  total: 1
 status: issues_found
 ---
 
 # Phase 10: Code Review Report
 
-**Reviewed:** 2026-09-07T00:58:00Z
+**Reviewed:** 2026-09-06T18:12:23Z
 **Depth:** standard
 **Files Reviewed:** 15
 **Status:** issues_found
 
 ## Summary
 
-The final Phase 10 source state fixes the earlier eager-startup, live-test skip, schema-validation, provider-identity, and zero-retry defects. The focused credential-free suite passed 50 tests. The separately authorized live result was `[docker-review:protocol] failed`; this report correctly treats that result as a non-pass, not by itself as a source-code defect.
+The final Phase 10 source state now enforces integral count-valued configuration, exact four-fixture positive-finding evidence, resolved DeepSeek model identity, literal zero retries, bounded provider/tool timeouts, and success only after a clean unsignaled child exit. The observed authorized `[docker-review:protocol] failed` remains a live non-pass and is not treated as proof of a source defect.
 
-Three remaining defects were found. Two can let the retained proof path report success without proving the complete command outcome it claims, and one permits fractional values for settings documented and consumed as integral counts.
+One correctness defect remains in the Docker MCP client. Its stdout parser has no pending-message queue, so a valid JSON-RPC response can be discarded when multiple protocol messages arrive in one stream chunk. This can turn a successful one-shot paid invocation into an unrecoverable timeout without permission to retry.
 
 ## Critical Issues
 
-### CR-01 (BLOCKER): Evidence audit accepts impossible success summaries
+### CR-01 (BLOCKER): Stdio parser discards messages that arrive without an installed waiter
 
-**File:** `scripts/audit-live-evidence.mjs:7-27`
-**Issue:** The success expression accepts any decimal fixture and finding counts, including `0 fixtures, 0 findings`, and `passedOutcome` is based only on that loose expression. Consequently a verification report containing `outcome: credentialed review passed: 0 fixtures, 0 findings`, a checked PROV-01 box, and `status: passed` passes the audit even though the live harness requires exactly four normalized fixtures and at least one `provider:deepseek:` finding. This creates a false-positive proof path in the artifact-consistency gate.
-**Fix:** Require the exact harness success contract and reject all other counts, for example:
-
-```js
-const success = /^outcome: credentialed review passed: 4 fixtures, ([1-9]\d*) findings$/u;
-```
-
-Add adversarial tests for zero, non-four, and malformed counts.
-
-### CR-02 (BLOCKER): Live harness reports success after an abnormal container exit
-
-**File:** `scripts/docker-review-real.mjs:236-238`
-**Issue:** After receiving a structurally valid response, the harness prints `credentialed review passed` before waiting for shutdown, and the exit promise resolves for every exit code or signal. A container that returns one response and then terminates with a fatal non-zero status is therefore recorded as a successful complete Docker MCP stdio proof. This is especially problematic because the retained stdout line is the evidence consumed by the audit workflow.
-**Fix:** Wait for the exit result, require `code === 0` and `signal === null`, and only then print the success summary. Add a child-process seam test covering a valid response followed by exit code 1.
-
-## Warnings
-
-### WR-01 (WARNING): Integral provider settings accept fractional values
-
-**File:** `src/providers/config.ts:51-53`
-**Issue:** `parseFiniteNumber` enforces only numeric bounds. It therefore accepts values such as `maxRetries: 0.9` and `maxTokens: 1.5`, even though these are count-valued settings. Retry execution silently floors `maxRetries`, while token APIs may reject fractional `max_tokens` later. The accepted typed configuration can thus behave differently from the configured value or fail only after a paid request is attempted.
-**Fix:** Add an integer-aware parser (or an `integer` parameter) and use it for `timeoutMs`, `maxRetries`, `maxTotalWaitMs`, and `maxTokens`; retain finite-number validation for `temperature`. Add local-file and environment regression cases for fractional values.
+**File:** `scripts/docker-review-real.mjs:92-121`
+**Issue:** `drain()` removes every complete line from `this.buffer`, but delivers it only through `this.waiters.shift()?.(...)`. If a chunk contains more messages than there are current waiters, every subsequent message is silently discarded. This occurs naturally when an MCP notification and the requested response are coalesced into one stdout chunk: the notification consumes the sole waiter, the response is dropped, and `request()` installs its next waiter only after the current callback completes. The one-shot credentialed proof then waits until timeout even though the server returned a valid response. The same defect also drops output that arrives just before `next()` is registered.
+**Fix:** Maintain a FIFO event queue in addition to the waiter queue. `drain()` should enqueue each parsed/malformed event when no waiter exists, and `next()` should return a queued event immediately before registering a waiter. Add a test that emits two newline-delimited messages in one data event (an unrelated notification followed by the matching response) and verifies the request resolves rather than timing out.
 
 ---
 
-_Reviewed: 2026-09-07T00:58:00Z_
+_Reviewed: 2026-09-06T18:12:23Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
