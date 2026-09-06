@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import { InMemoryTransport, LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/server";
 import {
   reviewResponseSchema,
@@ -200,6 +201,73 @@ function withoutLocalProviderConfig<T>(run: () => T): T {
     rmSync(directory, { recursive: true, force: true });
   }
 }
+
+describe("production executable provider startup contract", () => {
+  it("fails closed before MCP traffic for missing, invalid, and conflicting configuration", () => {
+    const projectDirectory = process.cwd();
+    const executable = resolve(projectDirectory, "dist/server.js");
+    const privateValue = "private-api-key-sentinel";
+    const providerVariables = [
+      "DEEPSEEK_API_KEY",
+      "DEEPSEEK_BASE_URL",
+      "DEEPSEEK_MODEL",
+      "DEEPSEEK_TIMEOUT_MS",
+      "DEEPSEEK_MAX_RETRIES",
+      "DEEPSEEK_MAX_TOTAL_WAIT_MS",
+      "DEEPSEEK_TEMPERATURE",
+      "DEEPSEEK_MAX_TOKENS",
+      "EVIDENCELENS_DISABLE_PROVIDER"
+    ] as const;
+    const baseEnvironment = { ...process.env };
+    for (const name of providerVariables) delete baseEnvironment[name];
+
+    const cases = [
+      { name: "missing", env: {} },
+      { name: "invalid", env: { DEEPSEEK_API_KEY: privateValue, DEEPSEEK_MODEL: "disallowed-model" } },
+      {
+        name: "conflicting",
+        env: { DEEPSEEK_API_KEY: privateValue, DEEPSEEK_MODEL: "deepseek-v4-pro" },
+        config: { model: "deepseek-v4-flash" }
+      }
+    ];
+
+    for (const testCase of cases) {
+      const directory = mkdtempSync(join(tmpdir(), `evidencelens-executable-${testCase.name}-`));
+      const configPath = join(directory, ".evidencelens.local.json");
+      try {
+        if (testCase.config) writeFileSync(configPath, JSON.stringify(testCase.config), "utf8");
+        const result = spawnSync(process.execPath, [executable], {
+          cwd: directory,
+          env: { ...baseEnvironment, ...testCase.env },
+          input: "",
+          encoding: "utf8",
+          timeout: 5_000
+        });
+
+        expect(result.status, testCase.name).not.toBe(0);
+        expect(result.stdout, testCase.name).toBe("");
+        expect(result.stderr, testCase.name).toBe("PROVIDER_CONFIGURATION: Provider configuration is invalid\n");
+        expect(result.stderr, testCase.name).not.toMatch(
+          new RegExp([
+            "DEEPSEEK_API_KEY",
+            privateValue,
+            directory.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"),
+            "api\\.deepseek\\.com",
+            "https?://",
+            "apiKey",
+            "baseUrl",
+            "deepseek-v4",
+            "cause",
+            "stack",
+            "(?:^|\\n)\\s+at\\s"
+          ].join("|"), "iu")
+        );
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    }
+  });
+});
 
 describe("review_evidence handler and MCP protocol contract", () => {
   it("fails closed with a sanitized classification when automatic provider configuration is missing", () => {
