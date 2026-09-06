@@ -2,7 +2,7 @@ import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEEPSEEK_MODELS, loadProviderConfig, parseProviderConfig } from "../../src/providers/config.js";
+import { DEEPSEEK_MODELS, hasProviderCredentialSource, loadProviderConfig, parseProviderConfig } from "../../src/providers/config.js";
 import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
 
 const key = "test-key-only";
@@ -77,6 +77,56 @@ describe("provider configuration", () => {
         const payload = JSON.stringify(serializeProviderError(caught));
         expect(payload).toContain("PROVIDER_CONFIGURATION");
         expect(payload).not.toMatch(/synthetic|SECRET-MATERIAL|host\.invalid|hostile|unreadable|cause|stack/iu);
+      }
+    } finally {
+      await chmod(unreadable, 0o600);
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("distinguishes absent credential sources from every supplied-but-defective source", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "evidencelens-presence-"));
+    const missing = join(directory, "missing.json");
+    const malformed = join(directory, "malformed.json");
+    const conflicting = join(directory, "conflicting.json");
+    const unreadable = join(directory, "unreadable.json");
+    const invalidModel = join(directory, "invalid-model.json");
+    const invalidUrl = join(directory, "invalid-url.json");
+    const invalidNumber = join(directory, "invalid-number.json");
+    await writeFile(malformed, "{not-json SECRET-PRESENCE-MARKER}");
+    await writeFile(conflicting, JSON.stringify({ apiKey: "local-presence-marker" }));
+    await writeFile(unreadable, JSON.stringify({ apiKey: "file-presence-marker" }));
+    await writeFile(invalidModel, JSON.stringify({ apiKey: key, model: "deepseek-invalid" }));
+    await writeFile(invalidUrl, JSON.stringify({ apiKey: key, baseUrl: "http://external.invalid" }));
+    await writeFile(invalidNumber, JSON.stringify({ apiKey: key, timeoutMs: 999 }));
+    await chmod(unreadable, 0o000);
+
+    try {
+      expect(hasProviderCredentialSource(missing, {})).toBe(false);
+      expect(hasProviderCredentialSource(missing, { DEEPSEEK_API_KEY: "" })).toBe(true);
+      expect(hasProviderCredentialSource(missing, { DEEPSEEK_API_KEY: undefined })).toBe(true);
+
+      const defectiveSources = [
+        { path: malformed, env: {} },
+        { path: conflicting, env: { DEEPSEEK_API_KEY: "env-presence-marker" } },
+        { path: unreadable, env: {} },
+        { path: directory, env: {} },
+        { path: invalidModel, env: {} },
+        { path: invalidUrl, env: {} },
+        { path: invalidNumber, env: {} }
+      ];
+      for (const source of defectiveSources) {
+        expect(hasProviderCredentialSource(source.path, source.env)).toBe(true);
+        let caught: unknown;
+        try { loadProviderConfig(source.path, source.env); } catch (error) { caught = error; }
+        expect(caught).toBeInstanceOf(ProviderError);
+        expect(serializeProviderError(caught)).toEqual({
+          code: "PROVIDER_CONFIGURATION",
+          message: "Provider configuration is invalid",
+          retryable: false,
+          retryCount: 0
+        });
+        expect(JSON.stringify(serializeProviderError(caught))).not.toMatch(/presence-marker|SECRET-PRESENCE-MARKER|external\.invalid|malformed|unreadable|stack|cause/iu);
       }
     } finally {
       await chmod(unreadable, 0o600);
