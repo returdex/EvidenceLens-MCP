@@ -24,7 +24,7 @@ Verify that DeepSeek Vision can be invoked through the production provider and c
 
 | Requirement | Offline evidence | Authorized live evidence | Status |
 |---|---|---|---|
-| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | `npm run docker:review:real` was separately authorized and executed once; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
+| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | A new `npm run docker:review:real` execution was separately authorized after the hardened offline gates passed; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
 
 ## Evidence
 
@@ -40,13 +40,13 @@ These commands validate configuration redaction, local provenance, documentation
 
 <!-- live-proof:start -->
 command: npm run docker:review:real
-timestamp: 2026-09-06T14:50:48.000Z
+timestamp: 2026-09-06T18:08:49.000Z
 outcome: [docker-review:protocol] failed
 interpretation: complete credentialed Docker MCP structural proof remains unproven
 status: gaps_found
 <!-- live-proof:end -->
 
-The separately authorized command was executed exactly once with retries forced to zero. No fallback or second provider command was run.
+The newly and separately authorized command was executed exactly once with retries forced to zero. No fallback, timeout extension, alternate provider command, or second attempt was run.
 
 ## Scope and Conclusion
 
