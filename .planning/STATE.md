@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-04-PLAN.md
-last_updated: "2026-09-06T14:21:01.843Z"
+stopped_at: Completed 10-05-PLAN.md
+last_updated: "2026-09-06T14:25:07.954Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 35
-  completed_plans: 33
-  percent: 94
+  completed_plans: 34
+  percent: 97
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 
 - Phase: 10 of 11
 - Status: Gap-closure plans 10-04 through 10-07 created and plan-checker verified
@@ -107,6 +107,8 @@ Plan: 2 of 7
 - [Phase 10]: Phase 7 remains gaps_found because the authorized Docker MCP run returned a sanitized timeout non-pass. — Executed failure evidence cannot support a passed PROV-01 claim.
 - [Phase 10]: Construct one validated McpServer before serveStdio, then expose that instance through the SDK-required factory contract. — This closes lazy provider validation while retaining compatibility with the installed factory-only stdio API.
 - [Phase 10]: Sanitize only PROVIDER_CONFIGURATION at the executable boundary while preserving main() rejection and unrelated-error behavior. — This prevents configuration disclosure without masking programming or transport failures.
+- [Phase 10]: Treat an own DEEPSEEK_API_KEY environment property as supplied even when blank or undefined. — Validation must reject defective supplied values instead of allowing the live test to skip.
+- [Phase 10]: Probe local credential source presence with lstat metadata only; only ENOENT means absence. — The skip gate must not read configuration content or conceal filesystem probe defects.
 
 ### Blockers
 
@@ -138,11 +140,12 @@ Plan: 2 of 7
 | Phase 10 P02 | 5 min | 2 tasks | 2 files |
 | Phase 10 P03 | 3 min | 2 tasks | 7 files |
 | Phase 10 P04 | 2 min | 2 tasks | 2 files |
+| Phase 10 P05 | 2min | 2 tasks | 3 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-06T14:21:01.838Z
-- **Stopped at:** Completed 10-04-PLAN.md
+- **Last session:** 2026-09-06T14:25:07.949Z
+- **Stopped at:** Completed 10-05-PLAN.md
 - **Resume file:** None
 
 ## Next Action
