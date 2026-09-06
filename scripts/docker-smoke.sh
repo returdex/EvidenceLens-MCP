@@ -15,31 +15,31 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 phase config 'Rendering the offline Compose profile.'
-if ! docker compose --profile smoke config --quiet; then
+if ! DEEPSEEK_API_KEY=compose-placeholder docker compose --profile smoke config --quiet; then
   phase config 'Compose configuration failed.'
   exit 1
 fi
 
 phase build 'Building the single-stage offline image.'
-if ! docker compose --profile smoke build; then
+if ! DEEPSEEK_API_KEY=compose-placeholder docker compose --profile smoke build; then
   phase build 'Docker image build failed.'
   exit 1
 fi
 
 phase protocol 'Running initialize, tools/list, and tools/call over container stdio.'
-if ! node "$PROJECT_ROOT/scripts/docker-review-real.mjs" --offline; then
+if ! DEEPSEEK_API_KEY=compose-placeholder node "$PROJECT_ROOT/scripts/docker-review-real.mjs" --offline; then
   phase protocol 'Offline MCP stdio validation failed.'
   exit 1
 fi
 
 phase filesystem 'Proving the /workspace evidence mount rejects writes.'
-if docker compose --profile smoke run --rm -T --entrypoint /bin/sh smoke -c 'touch /workspace/.evidencelens-docker-smoke-write-test'; then
+if DEEPSEEK_API_KEY=compose-placeholder docker compose --profile smoke run --rm -T --entrypoint /bin/sh smoke -c 'touch /workspace/.evidencelens-docker-smoke-write-test'; then
   phase filesystem 'The read-only /workspace mount unexpectedly accepted a write.'
   exit 1
 fi
 
 phase preflight 'Proving credentialed startup fails closed without a key.'
-missing_key_output=$(docker compose --profile smoke run --rm -T -e EVIDENCELENS_DISABLE_PROVIDER=0 smoke 2>&1) || missing_key_status=$?
+missing_key_output=$(DEEPSEEK_API_KEY=compose-placeholder docker compose --profile smoke run --rm -T -e EVIDENCELENS_DISABLE_PROVIDER=0 -e DEEPSEEK_API_KEY= smoke 2>&1) || missing_key_status=$?
 missing_key_status=${missing_key_status:-0}
 if [ "$missing_key_status" -eq 0 ]; then
   phase preflight 'Credentialed startup unexpectedly succeeded without DEEPSEEK_API_KEY.'

@@ -26,6 +26,8 @@ This command is the authoritative container-runtime gate for DEPL-01; `npm test`
 
 The default smoke profile is offline: it sets `EVIDENCELENS_DISABLE_PROVIDER=1`, uses Compose `network_mode: none`, and never sends a DeepSeek request. `npm run test:e2e` is the routine semantic check; it injects a compatible offline `ReviewProvider` and uses a macOS-safe filesystem adapter backed by `node:fs/promises` for the same fixed fixtures. Both paths use structural assertions, not exact model prose.
 
+Provider-enabled local and Docker startup requires valid `.evidencelens.local.json` or `DEEPSEEK_*` configuration. Missing, malformed, conflicting, or unreadable configuration terminates startup with sanitized `PROVIDER_CONFIGURATION`; there is no deterministic-only fallback. Exactly `EVIDENCELENS_DISABLE_PROVIDER=1` is the explicit offline switch used by routine no-network test and smoke paths. Injected providers are reserved for embedding and test seams, not deployment configuration. Run `scripts/docker-provider-startup-matrix.sh` to exercise these sanitized failure cases before the ordinary offline smoke.
+
 ## Runtime boundary
 
 Every service sets the exact application allowlist `EVIDENCELENS_ALLOWED_ROOTS=course=/workspace` and mounts the whole host project read-only at `/workspace`. Filesystem evidence therefore uses references such as `filesystem://course/tests/fixtures/evidence/text/assignment.txt`; absolute host paths are never public provenance. The container root filesystem is read-only, `/tmp` is the only declared tmpfs, and the image runs as a non-root user with dropped capabilities and no-new-privileges protection.
