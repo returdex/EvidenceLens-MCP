@@ -31,11 +31,11 @@
 - [ ] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
 - [x] **SAFE-02**: Default requests cannot write, delete, or mutate local files.
 - [x] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
-- [ ] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
+- [x] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
 
 ### Provider and Deployment
 
-- [ ] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract.
+- [x] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract.
 - [x] **PROV-02**: The model provider is isolated behind an adapter that can later support a local model or another compatible API.
 - [x] **DEPL-01**: The service runs from a documented Docker image/configuration with read-only evidence mounts.
 - [x] **DEPL-02**: A local development path and a minimal end-to-end review example are documented.
@@ -74,12 +74,12 @@
 | SAFE-01 | Phase 11 | Pending |
 | SAFE-02 | Phase 3 | Complete |
 | SAFE-03 | Phase 9 | Complete |
-| SAFE-04 | Phase 10 | Pending |
+| SAFE-04 | Phase 10 | Complete |
 | REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Complete |
 | REVW-03 | Phase 4 | Complete |
 | REVW-04 | Phase 4 | Complete |
-| PROV-01 | Phase 10 | Pending |
+| PROV-01 | Phase 10 | Complete |
 | PROV-02 | Phase 5 | Complete |
 | DEPL-01 | Phase 8 | Complete |
 | DEPL-02 | Phase 6 | Complete |

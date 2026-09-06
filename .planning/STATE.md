@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Phase 10 planned; ready to execute 3 sequential plans
-last_updated: "2026-09-05T11:10:30.000Z"
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-09-06T12:31:58.666Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 31
-  completed_plans: 28
-  percent: 90
+  completed_plans: 30
+  percent: 97
 ---
 
 # EvidenceLens MCP — Project State
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — READY TO EXECUTE
-Plan: 3 plans in 3 sequential waves
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Plan: 2 of 3
 
 - Phase: 10 of 11
-- Status: Plans created and verified; execution is pending
-- Progress: 90%
-- Last activity: Planned fail-closed provider startup and credentialed MCP E2E closure
+- Status: Plan 10-01 complete; Plan 10-02 is next
+- Progress: 97%
+- Last activity: Completed fail-closed provider startup and Docker failure-matrix verification
 
 ## Decisions and Assumptions
 
@@ -99,6 +99,8 @@ Plan: 3 plans in 3 sequential waves
 - [Phase 09]: Snapshot filesystem dependencies only for normalization, then snapshot provider, providerConfig, and analyzer once after both cleanup closures are registered.
 - [Phase 09]: Reject provider results unless reflective preflight proves exactly six enumerable own string keys on a plain/null-prototype non-Proxy object before Zod parsing.
 - [Phase 09]: Regression-lock best-effort cleanup continuation across claim, token, top-array, payload, cell, and buffer targets while preserving earlier-error precedence.
+- [Phase 10]: Only literal EVIDENCELENS_DISABLE_PROVIDER=1 disables automatic provider loading; explicit provider and typed providerConfig retain precedence. — Invalid ambient configuration must never silently downgrade provider-enabled startup.
+- [Phase 10]: Use a host-only Compose interpolation placeholder and explicitly blank container credentials for missing-key startup checks. — Inactive Compose profiles still interpolate required variables, while the container must receive a genuinely absent key.
 
 ## Performance Metrics
 
@@ -122,11 +124,12 @@ Plan: 3 plans in 3 sequential waves
 | Phase 09 P05 | 10 min | 3 tasks | 5 files |
 | Phase 09 P06 | 10 min | 3 tasks | 7 files |
 | Phase 09 P07 | 10 min | 3 tasks | 6 files |
+| Phase 10 P01 | 6h 7m | 3 tasks | 9 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-05T11:10:30.000Z
-- **Stopped at:** Phase 10 planned; ready to execute 3 sequential plans
+- **Last session:** 2026-09-06T12:31:58.662Z
+- **Stopped at:** Completed 10-01-PLAN.md
 - **Resume file:** None
 
 ## Next Action
