@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Completed 10-06-PLAN.md
-last_updated: "2026-09-06T14:31:03.818Z"
+status: ready_to_verify
+stopped_at: Completed 10-07-PLAN.md; PROV-01 remains open
+last_updated: "2026-09-06T14:52:25.354Z"
 progress:
   total_phases: 11
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 35
-  completed_plans: 35
+  completed_plans: 36
   percent: 100
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 4 of 7
+Plan: 7 of 7
 
 - Phase: 10 of 11
-- Status: Gap-closure plans 10-04 through 10-07 created and plan-checker verified
-- Progress: 3 of 7 Phase 10 plans complete
-- Last activity: Planned executable startup, live-config, schema/identity, timeout, authorization, and evidence-audit gap closure
+- Status: All seven Phase 10 plans executed; phase verification is pending
+- Progress: 7 of 7 Phase 10 plans complete
+- Last activity: Ran the single authorized zero-retry Docker proof, retained its sanitized protocol non-pass, and audited consistent open PROV-01 evidence
 
 ## Decisions and Assumptions
 
@@ -111,10 +111,12 @@ Plan: 4 of 7
 - [Phase 10]: Probe local credential source presence with lstat metadata only; only ENOENT means absence. — The skip gate must not read configuration content or conceal filesystem probe defects.
 - [Phase 10]: Resolve the Docker proof expected provider model from the resolved Compose review service and retain only the validated model string.
 - [Phase 10]: Collapse malformed envelopes, schema failures, attribution drift, and provenance inconsistencies into the redacted protocol category.
+- [Phase 10]: Budget live tools/call as one provider timeout plus a fixed 30000ms Docker/MCP margin, with retries forced to zero.
+- [Phase 10]: Keep PROV-01 open because the separately authorized single live execution returned a sanitized protocol non-pass.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified after `[docker-review:timeout] failed`.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified after a separately authorized sanitized protocol non-pass.
 
 ## Performance Metrics
 
@@ -144,16 +146,17 @@ Plan: 4 of 7
 | Phase 10 P04 | 2 min | 2 tasks | 2 files |
 | Phase 10 P05 | 2min | 2 tasks | 3 files |
 | Phase 10 P06 | 2min | 2 tasks | 2 files |
+| Phase 10 P07 | 20min | 3 tasks | 6 files | 2026-09-07 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-06T14:31:03.813Z
-- **Stopped at:** Completed 10-06-PLAN.md
+- **Last session:** 2026-09-06T14:52:25.350Z
+- **Stopped at:** Completed 10-07-PLAN.md; PROV-01 remains open
 - **Resume file:** None
 
 ## Next Action
 
-Run Phase 10 verification, preserving the PROV-01 live-proof gap until a separately authorized `npm run docker:review:real` completes all structural assertions.
+Run Phase 10 verification. Preserve the PROV-01 gap because the single separately authorized proof returned a sanitized protocol non-pass.
 
 ---
 *Last updated: 2026-09-05 after Phase 10 planning passed final review*
