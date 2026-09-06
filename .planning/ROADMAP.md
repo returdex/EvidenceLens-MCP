@@ -232,7 +232,7 @@ Plans:
 **Wave 4** *(gap closure; blocked on Wave 3 completion)*
 - [x] 10-04-PLAN.md — Eager executable provider validation and sanitized process-boundary failures
 - [x] 10-05-PLAN.md — Precise adapter-live credential absence and invalid-configuration handling
-- [ ] 10-06-PLAN.md — Production-schema validation and resolved DeepSeek identity binding
+- [x] 10-06-PLAN.md — Production-schema validation and resolved DeepSeek identity binding
 
 **Wave 5** *(gap closure; blocked on Wave 4 completion)*
 - [ ] 10-07-PLAN.md — Single-attempt authorized credentialed Docker MCP proof and evidence audit
@@ -269,7 +269,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 5/7 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 6/7 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
