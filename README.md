@@ -8,7 +8,8 @@ EvidenceLens MCP is a TypeScript Model Context Protocol server for read-only evi
 npm install
 npm run dev
 npm test
-npm run test:deepseek-live # opt-in real API test
+npm run test:deepseek-live # opt-in adapter-only Vision structure
+npm run docker:review:real # opt-in complete Docker MCP stdio proof
 npm run build
 ```
 
@@ -49,7 +50,7 @@ The default model is `deepseek-v4-pro`; the allowlist is `deepseek-v4-pro`, `dee
 
 Provider-enabled local and Docker startup requires a valid `.evidencelens.local.json` file or valid `DEEPSEEK_*` environment configuration. Missing, malformed, conflicting, or unreadable configuration exits with the sanitized `PROVIDER_CONFIGURATION` classification; it never falls back to deterministic-only output. Set exactly `EVIDENCELENS_DISABLE_PROVIDER=1` for intentional offline operation, as used by routine no-network tests and smoke checks. Injected providers and typed `providerConfig` are embedding/test seams, not end-user configuration options.
 
-The real API test is opt-in only: `npm run test:deepseek-live`. It requires `DEEPSEEK_API_KEY`, network access, and may incur API cost. It preflight-skips only when that key is absent under this named command; the default `npm test` command never invokes it. The live screenshot check uses `deepseek-v4-flash-vision-exp`; V4 text models use thinking mode, while the vision request uses the official base64 `image_url` format without thinking parameters. Live output is variable, so structural findings/provenance are asserted rather than exact wording. The model returns compact evidence references; local normalized evidence remains authoritative for citation binding and provenance. Credential-free fixtures remain the required regression gate.
+Two real-provider commands are deliberately opt-in. `npm run test:deepseek-live` checks adapter-only Vision structure using either `DEEPSEEK_API_KEY` from the process environment or the ignored `.evidencelens.local.json` file; it skips only when neither usable credential source exists. `npm run docker:review:real` checks the complete credentialed Docker MCP stdio path and requires a process-level `DEEPSEEK_API_KEY` plus Docker. Both commands require network access and may incur API cost, and both are excluded from `npm test`. The live screenshot check uses `deepseek-v4-flash-vision-exp`; V4 text models use thinking mode, while the vision request uses the official base64 `image_url` format without thinking parameters. Byte-for-byte equality remains scoped to deterministic-only offline output; neither live command promises byte-for-byte equality of model prose, and assertions cover structure, safe attribution, provider finding namespacing, and locally validated citation/hash provenance. The model returns compact evidence references; local normalized evidence remains authoritative for citation binding and provenance. Credential-free fixtures remain the required regression gate. Injected-provider E2E remains a credential-free semantic test and is not credentialed proof.
 
 ## MCP Contract
 

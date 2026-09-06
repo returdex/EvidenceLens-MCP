@@ -51,7 +51,9 @@ The real four-role client is deliberately separate from routine validation. `scr
 DEEPSEEK_API_KEY=... npm run docker:review:real
 ```
 
-This command requires network access to the configured DeepSeek endpoint and may incur API cost. Use an independent Compose `.env` or secret source per project; do not rely on a shared shell configuration. The `review` profile injects typed `DEEPSEEK_*` settings and does not disable the provider. The client requires provider-namespaced structural findings, so deterministic-only output is not accepted as a credentialed success. Natural-language finding prose may vary.
+This command requires Docker, a process-level `DEEPSEEK_API_KEY`, network access to the configured DeepSeek endpoint, and may incur API cost. The `review` profile injects typed `DEEPSEEK_*` settings and does not disable the provider. The client requires provider-namespaced structural findings, so deterministic-only or injected-provider output is not accepted as credentialed proof. Natural-language finding prose may vary; the command does not promise byte-for-byte model prose equality.
+
+The separate `npm run test:deepseek-live` command checks adapter-only Vision structure. It accepts either a process-level `DEEPSEEK_API_KEY` or the ignored `.evidencelens.local.json` file and also requires network access and may incur API cost. Both named live commands are excluded from the credential-free, no-network `npm test` suite.
 
 Missing `DEEPSEEK_API_KEY`, malformed settings, and conflicting environment/config-file sources fail before server startup with a non-zero exit and one actionable `PROVIDER_CONFIGURATION` message. The message omits secrets, absolute paths, request details, upstream bodies, and stacks.
 

@@ -11,7 +11,7 @@ describe("DeepSeek live structural review", () => {
   it("calls the opt-in API and validates structural/provenance output", async ({ skip }) => {
     let config;
     try {
-      config = loadProviderConfig(undefined, {});
+      config = loadProviderConfig(undefined, process.env);
     } catch {
       skip();
       return;
