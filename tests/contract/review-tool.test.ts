@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { InMemoryTransport, LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/server";
 import {
   reviewResponseSchema,
@@ -188,6 +191,16 @@ function parseToolPayload(toolResult: unknown) {
   return JSON.parse(parsedToolResult.content[0]?.text ?? "{}");
 }
 
+function withoutLocalProviderConfig<T>(run: () => T): T {
+  const previousDirectory = process.cwd();
+  const directory = mkdtempSync(join(tmpdir(), "evidencelens-server-"));
+  process.chdir(directory);
+  try { return run(); } finally {
+    process.chdir(previousDirectory);
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
 describe("review_evidence handler and MCP protocol contract", () => {
   it("fails closed with a sanitized classification when automatic provider configuration is missing", () => {
     const previousDisable = process.env.EVIDENCELENS_DISABLE_PROVIDER;
@@ -195,8 +208,8 @@ describe("review_evidence handler and MCP protocol contract", () => {
     delete process.env.EVIDENCELENS_DISABLE_PROVIDER;
     delete process.env.DEEPSEEK_API_KEY;
     try {
-      expect(() => createServer()).toThrowError(ProviderError);
-      try { createServer(); } catch (error) {
+      expect(() => withoutLocalProviderConfig(() => createServer())).toThrowError(ProviderError);
+      try { withoutLocalProviderConfig(() => createServer()); } catch (error) {
         expect(serializeProviderError(error)).toEqual({
           code: "PROVIDER_CONFIGURATION",
           message: "Provider configuration is invalid",
@@ -223,7 +236,7 @@ describe("review_evidence handler and MCP protocol contract", () => {
       process.env.EVIDENCELENS_DISABLE_PROVIDER = "1";
       expect(createServer()).toBeDefined();
       process.env.EVIDENCELENS_DISABLE_PROVIDER = "true";
-      expect(() => createServer()).toThrowError(ProviderError);
+      expect(() => withoutLocalProviderConfig(() => createServer())).toThrowError(ProviderError);
       expect(createServer({ provider: fakeProvider })).toBeDefined();
       expect(createServer({ providerConfig: {
         apiKey: "synthetic",

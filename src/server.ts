@@ -6,7 +6,6 @@ import { createFilesystemPolicy, parseAllowedRoots, type FilesystemRootConfig } 
 import { loadProviderConfig, type ProviderConfig } from "./providers/config.js";
 import { createDeepSeekProvider } from "./providers/deepseek.js";
 import type { ReviewProvider } from "./providers/types.js";
-import { ProviderError } from "./providers/errors.js";
 
 export interface ServerOptions {
   allowedRoots?: readonly FilesystemRootConfig[];
@@ -21,13 +20,9 @@ export function createServer(options: ServerOptions = {}): McpServer {
   let providerConfig = options.providerConfig;
   const providerDisabled = process.env.EVIDENCELENS_DISABLE_PROVIDER === "1";
   if (!provider && !providerConfig && !providerDisabled) {
-    try {
-      providerConfig = loadProviderConfig();
-    } catch (error) {
-      if (!(error instanceof ProviderError) || error.code !== "PROVIDER_CONFIGURATION") throw error;
-    }
+    providerConfig = loadProviderConfig();
   }
-  if (!provider && providerConfig && !providerDisabled) provider = createDeepSeekProvider(providerConfig);
+  if (!provider && providerConfig) provider = createDeepSeekProvider(providerConfig);
 
   registerReviewTool(server, {
     filesystemPolicy: createFilesystemPolicy(options.allowedRoots ?? []),
