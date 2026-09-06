@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [x] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. (completed 2026-09-06)
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path.
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -68,7 +68,7 @@ Plans:
   1. Requests outside configured allowlisted roots are rejected before file contents are read.
   2. The service exposes no default write, delete, or mutation operation.
   3. Findings and errors preserve provenance without leaking unintended filesystem details or secrets.
-**Plans**: 3 plans
+**Plans**: 7 plans
 
 Plans:
 **Wave 1**
@@ -229,6 +229,19 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 10-03-PLAN.md — Environment-backed live-provider regression and independent Phase 7 verification evidence
 
+**Wave 4** *(gap closure; blocked on Wave 3 completion)*
+- [ ] 10-04-PLAN.md — Eager executable provider validation and sanitized process-boundary failures
+- [ ] 10-05-PLAN.md — Precise adapter-live credential absence and invalid-configuration handling
+- [ ] 10-06-PLAN.md — Production-schema validation and resolved DeepSeek identity binding
+
+**Wave 5** *(gap closure; blocked on Wave 4 completion)*
+- [ ] 10-07-PLAN.md — Single-attempt authorized credentialed Docker MCP proof and evidence audit
+
+Cross-cutting constraints:
+- SAFE-04 and PROV-01 remain open until every gap plan passes verification.
+- Live proof requires fresh human authorization for exactly one paid provider request, with retries disabled and no fallback or masked failure.
+- Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
+
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
 **Depends on**: Phase 10
@@ -256,7 +269,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 3/3 | Complete   | 2026-09-06 |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 3/7 | Gap closure planned | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
