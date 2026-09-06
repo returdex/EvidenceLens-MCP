@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, fixtureRequest, resolveReviewModel } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -24,6 +24,41 @@ function rejectProtocol(value: unknown, model = "deepseek-v4-flash-vision-exp") 
 }
 
 describe("credentialed Docker review harness", () => {
+  it("forces a literal zero-retry child environment and encloses one provider attempt", () => {
+    const result = liveProofPreflight({ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "0" }, { DEEPSEEK_MAX_RETRIES: "2", KEEP: "yes" });
+    expect(result).toEqual({
+      childEnv: { DEEPSEEK_MAX_RETRIES: "0", KEEP: "yes" },
+      providerTimeoutMs: 30_000,
+      toolsCallTimeoutMs: 60_000
+    });
+    expect(result.toolsCallTimeoutMs).toBeGreaterThan(result.providerTimeoutMs);
+  });
+
+  it.each([
+    [{ DEEPSEEK_TIMEOUT_MS: "30000" }, "missing retry"],
+    [{ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "" }, "blank retry"],
+    [{ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "wat" }, "malformed retry"],
+    [{ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "1" }, "nonzero retry"],
+    [{ DEEPSEEK_TIMEOUT_MS: "999", DEEPSEEK_MAX_RETRIES: "0" }, "low timeout"],
+    [{ DEEPSEEK_TIMEOUT_MS: "120001", DEEPSEEK_MAX_RETRIES: "0" }, "high timeout"],
+    [{ DEEPSEEK_TIMEOUT_MS: "Infinity", DEEPSEEK_MAX_RETRIES: "0" }, "non-finite timeout"]
+  ])("rejects %s with only a sanitized preflight failure", (resolvedEnvironment) => {
+    expect(() => liveProofPreflight(resolvedEnvironment, {})).toThrowError(new Error("[docker-review:preflight] failed"));
+  });
+
+  it.each([
+    [undefined, 30_000, 60_000], ["1000", 1_000, 31_000], ["120000", 120_000, 150_000]
+  ])("accepts the production timeout default/boundaries", (raw, providerTimeoutMs, toolsCallTimeoutMs) => {
+    const environment: Record<string, string> = { DEEPSEEK_MAX_RETRIES: "0" };
+    if (raw !== undefined) environment.DEEPSEEK_TIMEOUT_MS = raw;
+    expect(liveProofPreflight(environment, {})).toMatchObject({ providerTimeoutMs, toolsCallTimeoutMs });
+  });
+
+  it("uses the one-attempt budget only for tools/call", () => {
+    expect(methodTimeoutMs("tools/call", 60_000)).toBe(60_000);
+    for (const method of ["initialize", "tools/list", "shutdown"]) expect(methodTimeoutMs(method, 60_000)).toBe(30_000);
+  });
+
   it("redacts every failure category", () => {
     const secrets = ["rpc-secret", "/Users/private", "/workspace/private", "raw-fixture", "stack-secret", "config-secret"];
     const allowed = ["preflight", "docker", "initialize", "tools/list", "tools/call", "protocol", "timeout"];
