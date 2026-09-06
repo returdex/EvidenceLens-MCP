@@ -1,60 +1,42 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-verified: 2026-09-06T14:59:25Z
+verified: 2026-09-07T04:15:30Z
 status: gaps_found
-score: 8/11 must-haves verified
+score: 10/11 must-haves verified
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
-  previous_score: 6/11
+  previous_score: 8/11
   gaps_closed:
-    - "The local executable eagerly validates provider configuration and emits a sanitized nonzero PROVIDER_CONFIGURATION failure."
-    - "The adapter live command skips only when neither credential source exists and lets supplied invalid configuration fail."
-    - "The Docker proof parses reviewResponseSchema and binds success to DeepSeek identity, resolved model, namespace, and provenance."
+    - "Fractional integral provider settings now fail closed with sanitized errors."
+    - "Harness success now requires a clean code-0/no-signal child exit."
+    - "Evidence audit now requires exactly four fixtures and at least one finding."
   gaps_remaining:
-    - "The authorized Docker MCP run returned [docker-review:protocol] failed; complete live DeepSeek proof is absent."
-    - "The harness prints success before verifying clean child shutdown and ignores exit status/signal."
-    - "The evidence audit accepts impossible success summaries such as 0 fixtures, 0 findings."
-    - "Count-valued provider configuration accepts fractional values."
+    - "Complete credentialed proof remains absent: the authorized run returned [docker-review:protocol] failed, and the stdio parser drops coalesced messages when no waiter exists."
   regressions: []
 gaps:
-  - truth: "Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available."
-    status: partial
-    reason: "Startup is now eager and sanitized, but integer-valued settings accept fractions such as maxRetries=0.9 and maxTokens=1.5."
-    artifacts:
-      - path: "src/providers/config.ts"
-        issue: "parseFiniteNumber does not require integers for timeoutMs, maxRetries, maxTotalWaitMs, or maxTokens."
-    missing:
-      - "Reject fractional integral settings from files and environment, with regression tests."
   - truth: "A credentialed, opt-in structural test exercises stdio tools/call, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation."
     status: failed
-    reason: "The authorized run returned [docker-review:protocol] failed, and the harness can print success before an abnormal Docker child exit is observed."
+    reason: "The newly authorized exactly-once run returned [docker-review:protocol] failed. Independently, StdioClient discards parsed JSON-RPC events whenever no waiter is installed; a notification and matching response coalesced in one stdout chunk loses the response and turns a valid one-shot result into timeout."
     artifacts:
       - path: "scripts/docker-review-real.mjs"
-        issue: "Success is printed before shutdown; the exit promise discards code and signal."
+        issue: "drain() removes every complete line but only delivers through waiters.shift()?.(...); next() has no FIFO pending-event queue."
+      - path: "tests/scripts/docker-review-real.test.ts"
+        issue: "The 29 passing tests omit coalesced notification-plus-response and output-before-next ordering."
       - path: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md"
-        issue: "The retained outcome is a protocol non-pass and PROV-01 remains open."
+        issue: "The retained authorized outcome is [docker-review:protocol] failed and Phase 7 remains gaps_found."
     missing:
-      - "Require clean child exit before printing success and test nonzero/signal exits."
-      - "After fixes, obtain a new separately authorized successful credentialed Docker MCP run."
-  - truth: "Phase 7 passes only when the authorized complete MCP structural check passed."
-    status: failed
-    reason: "The audit accepts fabricated success with 0 fixtures and 0 findings."
-    artifacts:
-      - path: "scripts/audit-live-evidence.mjs"
-        issue: "Success regex accepts arbitrary decimal counts instead of exactly four fixtures and at least one finding."
-      - path: "tests/scripts/audit-live-evidence.test.ts"
-        issue: "No zero/non-four fixture or zero-finding adversarial cases."
-    missing:
-      - "Require exactly 4 fixtures and a positive finding count; add adversarial tests."
+      - "Add a FIFO pending-event queue; drain() must enqueue events without waiters and next() must consume queued events first."
+      - "Add an offline test emitting a notification and matching response in one stdout data event."
+      - "After the fix and offline gates, obtain fresh authorization and a successful exactly-once zero-retry docker:review:real outcome."
 ---
 
 # Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E Verification Report
 
 **Phase Goal:** Invalid provider configuration fails consistently in every runtime, and an opt-in test proves DeepSeek vision through the complete MCP, filesystem, orchestration, and public-response boundary.
-**Verified:** 2026-09-06T14:59:25Z
+**Verified:** 2026-09-07T04:15:30Z
 **Status:** gaps_found
-**Re-verification:** Yes — after gap-closure plans 10-04 through 10-07
+**Re-verification:** Yes — after plans 10-08 through 10-11
 
 ## Goal Achievement
 
@@ -62,94 +44,90 @@ gaps:
 
 | # | Truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available. | ✗ FAILED | Executable checks pass, but direct checks show fractional `maxRetries`, `maxTokens`, `timeoutMs`, and `maxTotalWaitMs` are accepted. |
-| 2 | A credentialed opt-in test proves the full stdio `tools/call`, four-role filesystem, provider conversion/merge, and final public-schema boundary. | ✗ FAILED | The exactly-once authorized run returned `[docker-review:protocol] failed`; the harness also prints success before validating child exit. |
-| 3 | Phase 7 has independent evidence and routine tests remain credential-free/no-network. | ✓ VERIFIED | Phase 7 retains a sanitized live-proof block; `npm test` excludes the live adapter and passed 233 tests. |
-| 4 | Literal `EVIDENCELENS_DISABLE_PROVIDER=1` is the sole ambient offline override. | ✓ VERIFIED | `src/server.ts` uses strict equality and focused tests pass. |
-| 5 | Explicit provider/providerConfig injection remains usable without ambient configuration. | ✓ VERIFIED | Injection-first factory behavior remains covered by the passing contract suite. |
-| 6 | Local and Docker startup failure output is sanitized as `PROVIDER_CONFIGURATION`. | ✓ VERIFIED | `main()` eagerly creates the server; child-process tests launch `dist/server.js`, assert nonzero status, and exact sanitized stderr before MCP input. |
-| 7 | Only the explicit opt-in command can perform a credentialed Docker stdio review with all four roles. | ✓ VERIFIED | `docker:review:real` is separate from routine commands; `fixtureRequest()` contains exactly four required role-labeled filesystem inputs. |
-| 8 | Live structural assertions prove DeepSeek DTO conversion, namespace, public schema, provenance, hashes, citations, and disclosure constraints. | ✓ VERIFIED | `assertStructuralReview()` parses `reviewResponseSchema`, binds name/model/namespace, and its adversarial tests reject schema/identity/provenance drift. This verifies the assertion code, not a successful live outcome. |
-| 9 | Adapter live command accepts process environment or ignored local config without printing either source. | ✓ VERIFIED | Presence probing precedes validation; `loadProviderConfig()` is outside any catch; defective-source tests pass offline. |
-| 10 | Documentation distinguishes adapter-only testing from complete Docker MCP proof and excludes both from `npm test`. | ✓ VERIFIED | Routine commands remain disconnected from `docker:review:real`; documentation regression tests pass. |
-| 11 | Phase 7 passes only when the authorized complete MCP structural check passed. | ✗ FAILED | Current state honestly remains open, but `auditLiveEvidence()` accepted synthetic `0 fixtures, 0 findings` success and could falsely close PROV-01. |
+| 1 | Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available. | ✓ VERIFIED | `parseInteger()` requires `Number.isInteger` for timeout, retry, wait, and token controls; local/environment/file regressions pass. Earlier eager startup checks remain intact. |
+| 2 | A credentialed opt-in test proves the full stdio `tools/call`, four-role filesystem, provider conversion/merge, and final public-schema boundary. | ✗ FAILED | The authorized run returned `[docker-review:protocol] failed`. Lines 92-111 also drop events without a waiter; an offline reproduction lost a coalesced matching response. |
+| 3 | Phase 7 has independent evidence and routine tests remain credential-free/no-network. | ✓ VERIFIED | Phase 7 retains a sanitized live-proof block and honest `gaps_found`; `npm test` excludes the live adapter and passed 310 tests. |
+| 4 | Literal `EVIDENCELENS_DISABLE_PROVIDER=1` is the sole ambient offline override. | ✓ VERIFIED | Strict literal handling and startup contract tests remain present. |
+| 5 | Explicit provider/providerConfig injection remains usable without ambient configuration. | ✓ VERIFIED | Injection-first construction remains implemented and covered. |
+| 6 | Local and Docker startup failure output is sanitized as `PROVIDER_CONFIGURATION`. | ✓ VERIFIED | Process and Docker configuration regressions retain the stable redacted classification. |
+| 7 | Only the explicit opt-in command can perform a credentialed Docker stdio review with all four roles. | ✓ VERIFIED | `docker:review:real` is disconnected from routine commands; `fixtureRequest()` has exactly four role-labelled filesystem inputs. |
+| 8 | Structural assertions validate DeepSeek DTO conversion, namespace, public schema, provenance, hashes, citations, and disclosure constraints. | ✓ VERIFIED | `assertStructuralReview()` parses the production schema and checks resolved provider/model, namespace, four references, hashes, citations, and redaction. This does not establish a successful live outcome. |
+| 9 | Adapter live command distinguishes absent credentials from invalid supplied configuration. | ✓ VERIFIED | Presence probing precedes `loadProviderConfig`; invalid supplied sources propagate sanitized failure. |
+| 10 | Documentation and scripts preserve the opt-in/no-network boundary. | ✓ VERIFIED | Routine scripts do not invoke `docker:review:real`; documentation regressions pass. |
+| 11 | Phase 7 passes only when the authorized complete MCP structural check passed. | ✓ VERIFIED | Audit grammar requires exactly four fixtures, a positive safe-integer finding count, and synchronized Phase 7/PROV-01 state. |
 
-**Score:** 8/11 truths verified
+**Score:** 10/11 truths verified
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |---|---|---|---|
-| `src/server.ts` | Eager sanitized startup | ✓ VERIFIED | Exists, substantive, wired before stdio, and exercised through a real child process. |
-| `tests/contract/review-tool.test.ts` | Process-boundary regressions | ✓ VERIFIED | Covers missing, invalid, and conflicting configuration before MCP traffic. |
-| `src/providers/config.ts` | Precise source detection and validation | ⚠️ PARTIAL | `hasProviderCredentialSource` is exported/wired (the SDK export warning is a parser false negative), but integral values are not enforced. |
-| `tests/providers/deepseek-live.test.ts` | Absence-only skip | ✓ VERIFIED | Presence gate then uncompromised load/validation. |
-| `scripts/docker-review-real.mjs` | Complete Docker MCP proof | ⚠️ PARTIAL | Schema/identity/model/namespace/timeout/retry wiring exists; clean process completion is not enforced. |
-| `tests/scripts/docker-review-real.test.ts` | Adversarial proof tests | ⚠️ PARTIAL | 23 tests pass, including zero-retry/model/schema checks; no abnormal-exit seam test. The SDK `maxRetries` miss is a parser false negative. |
-| `scripts/audit-live-evidence.mjs` | Exact evidence consistency | ✗ STUB-CONTRACT | Substantive and wired, but its success grammar is weaker than the harness contract. |
-| `tests/scripts/audit-live-evidence.test.ts` | Contradiction/disclosure rejection | ⚠️ PARTIAL | Existing cases pass but omit impossible success counts. |
-| Phase 7 verification and `REQUIREMENTS.md` | Honest synchronized state | ✓ VERIFIED | Both retain failure/open PROV-01 after the protocol non-pass. |
+| `src/server.ts` | Eager sanitized startup | ✓ VERIFIED | Substantive, wired before stdio serving, and process-tested. |
+| `src/providers/config.ts` | Precise source and integral validation | ✓ VERIFIED | All four integral controls use `parseInteger`; temperature remains fractional. |
+| `tests/providers/config.test.ts` | Fractional/hostile regressions | ✓ VERIFIED | 45 tests pass across local, environment, and file inputs. |
+| `scripts/docker-review-real.mjs` | Complete Docker MCP proof | ✗ PARTIAL | Structural, retry, timeout, lifecycle, and schema gates exist, but its stdio client lacks pending-event storage and the live proof failed. |
+| `tests/scripts/docker-review-real.test.ts` | Adversarial proof tests | ⚠️ PARTIAL | 29 tests pass but do not cover the failing message ordering. |
+| `scripts/audit-live-evidence.mjs` | Exact evidence consistency | ✓ VERIFIED | Requires four fixtures, positive findings, and synchronized state. |
+| `tests/scripts/audit-live-evidence.test.ts` | Adversarial count/disclosure tests | ✓ VERIFIED | 53 tests pass, including impossible counts. |
+| Phase 7 verification and `REQUIREMENTS.md` | Honest synchronized state | ✓ VERIFIED | Both retain the protocol non-pass and open PROV-01. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 |---|---|---|---|---|
-| Local executable | provider config | eager `createServer()` | ✓ WIRED | Child-process tests prove failure before MCP traffic. |
-| Adapter test | config loader | presence gate then validation | ✓ WIRED | Invalid supplied sources are not skipped. |
-| Docker response | public contract | `reviewResponseSchema.parse` | ✓ WIRED | Complete schema parse precedes identity assertions. |
-| Docker proof | Compose model/retry/timeout | resolved config preflight | ✓ WIRED | Requires allowed model, retry zero, and provider timeout plus fixed margin. |
-| Valid MCP response | successful command completion | Docker child shutdown | ✗ NOT WIRED | Success prints first; code/signal are ignored. |
-| Retained evidence | Phase 7/PROV-01 state | evidence audit | ✗ PARTIAL | State consistency exists, but impossible success counts pass. |
+| Local executable | provider config | eager `createServer()` | ✓ WIRED | Invalid ambient config fails before MCP traffic. |
+| Docker response | public contract | `reviewResponseSchema.parse` | ✓ WIRED | Schema parsing precedes identity/provenance assertions. |
+| Structural response | success marker | clean child lifecycle | ✓ WIRED | stdin closes, exit is awaited, and code 0/no signal is required. |
+| Docker stdout | request matcher | `StdioClient.drain()` / `next()` | ✗ NOT WIRED | Events without a current waiter are discarded rather than queued. |
+| Retained outcome | Phase 7 and PROV-01 | strict audit | ✓ WIRED | Non-pass, status, checkbox, and trace agree. |
 
 ### Data-Flow Trace (Level 4)
 
-| Artifact | Data | Source | Real Data | Status |
+| Artifact | Data | Source | Produces Real Data | Status |
 |---|---|---|---|---|
-| `src/server.ts` | provider config | injected or validated ambient config | Yes | ✓ FLOWING |
-| `tests/providers/deepseek-live.test.ts` | provider result | opt-in adapter | Potentially | ✓ WIRED; excluded routinely |
-| `scripts/docker-review-real.mjs` | public payload | Docker MCP `tools/call` | No successful authorized sample | ✗ UNPROVEN |
-| `scripts/audit-live-evidence.mjs` | completion state | live-proof block | Accepts impossible success | ✗ HOLLOW |
+| `src/server.ts` | provider config | validated injection/ambient config | Yes | ✓ FLOWING |
+| `scripts/docker-review-real.mjs` | JSON-RPC response | Docker MCP stdout | Not reliably | ✗ DISCONNECTED for no-waiter/coalesced ordering |
+| `scripts/audit-live-evidence.mjs` | completion state | retained five-line block | Yes, strictly parsed | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Result | Status |
 |---|---|---|
-| Six focused Phase 10 test files | 72 tests passed (live adapter excluded by routine script) | ✓ PASS |
-| `npm test` | 233 tests / 28 files passed | ✓ PASS |
-| `npm run build` | Exit 0 | ✓ PASS |
-| Current evidence audit | Honest protocol-failure state accepted | ✓ PASS |
-| Synthetic `0 fixtures, 0 findings` success | `auditLiveEvidence()` returned `{ passed: true }` | ✗ FAIL |
-| Fractional integral configuration | Four fractional values were accepted | ✗ FAIL |
-| Authorized credentialed Docker MCP proof | `[docker-review:protocol] failed`; no retry/fallback | ✗ FAIL |
+| Routine suite | `npm test`: 28 files, 310 tests passed | ✓ PASS |
+| Build | `npm run build`: exit 0 | ✓ PASS |
+| Current evidence audit | `live evidence audit passed` | ✓ PASS |
+| Fractional integral config | Focused config tests and `Number.isInteger` checks pass | ✓ PASS |
+| Clean child gate | Clean/nonzero/signal/error/timeout/already-exited tests pass | ✓ PASS |
+| Coalesced notification + response | Exact drain algorithm with one waiter delivered notification, emptied buffer, and lost response id 3 | ✗ FAIL |
+| Authorized credentialed proof | `[docker-review:protocol] failed`; exactly once, zero retries, no fallback | ✗ FAIL |
 
 ### Requirements Coverage
 
 | Requirement | Source Plans | Status | Evidence |
 |---|---|---|---|
-| SAFE-04 | 10-01–10-07 | ✓ SATISFIED | Diagnostics and retained evidence are sanitized; routine tests are offline and no secret/raw provider output was retained. |
-| PROV-01 | 10-01–10-07 | ✗ BLOCKED | The real Docker MCP run did not pass and future completion can be falsely reported after abnormal exit or impossible counts. |
+| SAFE-04 | 10-01–10-11 | ✓ SATISFIED | Stable sanitized errors, no retained raw diagnostics, and passing offline safety regressions. |
+| PROV-01 | 10-01–10-11 | ✗ BLOCKED | No successful complete credentialed Docker MCP proof exists, and the harness can drop a valid stdio response. |
 
-No Phase 10 requirement is orphaned. Phase 11 covers Linux filesystem traversal, not these provider/live-proof defects; nothing is deferred.
+No requirement is orphaned. Phase 11 covers Linux filesystem traversal, not this live-proof/parser gap; nothing is deferred.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |---|---|---|---|---|
-| `scripts/docker-review-real.mjs` | 236-238 | Pass before shutdown; exit result discarded | Blocker | Abnormal container completion can be recorded as successful proof. |
-| `scripts/audit-live-evidence.mjs` | 7 | Arbitrary decimal success counts | Blocker | Impossible proof can mark PROV-01 complete. |
-| `src/providers/config.ts` | 51-53, 108-112 | Finite-only parser for integer settings | Warning / failed truth | Invalid fractions survive startup and may diverge at runtime/API use. |
+| `scripts/docker-review-real.mjs` | 92-111 | Destructive drain with optional waiter and no pending queue | Blocker | Valid coalesced or early responses are silently lost, causing irreversible timeout in a one-attempt paid proof. |
+| `tests/scripts/docker-review-real.test.ts` | file-wide | Missing parser-ordering test | Blocker-supporting | The 310-test suite passes despite the protocol data-loss defect. |
 
-No TODO/FIXME/placeholder or empty implementation blocker was found in the reviewed Phase 10 files.
+No TODO/FIXME/placeholder or empty implementation blocker was found.
 
 ### Human Verification Required
 
-None. The live outcome is a definite sanitized non-pass; remaining defects are deterministic and directly observable.
+None. The live result is a definite non-pass and the parser defect is deterministic offline.
 
 ### Gaps Summary
 
-Gap closure fixed eager local startup, adapter skip correctness, production schema validation, DeepSeek binding, and the single-attempt timeout boundary. The goal remains unmet because the authorized complete proof failed, two false-positive proof paths remain, and fractional integral settings violate fail-closed configuration. No later phase owns these gaps.
+Plans 10-08 through 10-10 closed all three previous implementation gaps. Plan 10-11 correctly consumed one fresh authorization and retained the sanitized non-pass without retry. The phase goal remains unmet because the complete credentialed proof did not succeed and the proof harness has a confirmed stdio message-loss bug. Add the pending-event queue and regression test before requesting another paid attempt.
 
 ---
 
-_Verified: 2026-09-06T14:59:25Z_
+_Verified: 2026-09-07T04:15:30Z_
 _Verifier: the agent (gsd-verifier)_
