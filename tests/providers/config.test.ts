@@ -6,6 +6,24 @@ import { DEEPSEEK_MODELS, hasProviderCredentialSource, loadProviderConfig, parse
 import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
 
 const key = "test-key-only";
+const sanitizedConfigurationError = {
+  code: "PROVIDER_CONFIGURATION",
+  message: "Provider configuration is invalid",
+  retryable: false,
+  retryCount: 0
+} as const;
+
+function expectSanitizedConfigurationFailure(attempt: () => unknown, hostileValue: string): void {
+  let caught: unknown;
+  try { attempt(); } catch (error) { caught = error; }
+  expect(caught).toBeInstanceOf(ProviderError);
+  expect(serializeProviderError(caught)).toEqual(sanitizedConfigurationError);
+  const serialized = JSON.stringify(serializeProviderError(caught));
+  expect(serialized).not.toMatch(new RegExp(`${key}|stack|cause|evidencelens-integral`, "iu"));
+  if (!/^\d+$/u.test(hostileValue)) {
+    expect(serialized).not.toContain(hostileValue);
+  }
+}
 
 describe("provider configuration", () => {
   it("applies defaults and accepts every allowlisted model", () => {
@@ -25,6 +43,67 @@ describe("provider configuration", () => {
     expect(() => parseProviderConfig({ localConfig: { apiKey: key }, env: { DEEPSEEK_API_KEY: "other" } })).toThrowError(ProviderError);
     expect(() => parseProviderConfig({ localConfig: { apiKey: key, extra: true }, env: {} })).toThrowError(ProviderError);
     expect(() => parseProviderConfig({ localConfig: { apiKey: key }, env: {}, request: { DEEPSEEK_API_KEY: key } })).toThrowError(ProviderError);
+  });
+
+  it.each([
+    ["timeoutMs", 1000.5],
+    ["maxRetries", 0.9],
+    ["maxTotalWaitMs", 1000.5],
+    ["maxTokens", 1.5]
+  ] as const)("rejects fractional local %s values with the sanitized contract", (field, value) => {
+    expectSanitizedConfigurationFailure(
+      () => parseProviderConfig({ localConfig: { apiKey: key, [field]: value }, env: {} }),
+      String(value)
+    );
+  });
+
+  it.each([
+    ["DEEPSEEK_TIMEOUT_MS", "1000.5"],
+    ["DEEPSEEK_MAX_RETRIES", "0.9"],
+    ["DEEPSEEK_MAX_TOTAL_WAIT_MS", "1000.5"],
+    ["DEEPSEEK_MAX_TOKENS", "1.5"]
+  ] as const)("rejects fractional environment %s values with the sanitized contract", (field, value) => {
+    expectSanitizedConfigurationFailure(
+      () => parseProviderConfig({ localConfig: {}, env: { DEEPSEEK_API_KEY: key, [field]: value } }),
+      value
+    );
+  });
+
+  it("rejects fractional integral values loaded from a local file", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "evidencelens-integral-"));
+    try {
+      for (const [field, value] of [
+        ["timeoutMs", 1000.5],
+        ["maxRetries", 0.9],
+        ["maxTotalWaitMs", 1000.5],
+        ["maxTokens", 1.5]
+      ] as const) {
+        const path = join(directory, `${field}.json`);
+        await writeFile(path, JSON.stringify({ apiKey: key, [field]: value }));
+        expectSanitizedConfigurationFailure(() => loadProviderConfig(path, {}), String(value));
+      }
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    ["timeoutMs", -1], ["timeoutMs", Number.NaN], ["timeoutMs", Number.POSITIVE_INFINITY], ["timeoutMs", "1000"], ["timeoutMs", 120001],
+    ["maxRetries", -1], ["maxRetries", Number.NaN], ["maxRetries", Number.POSITIVE_INFINITY], ["maxRetries", "0"], ["maxRetries", 3],
+    ["maxTotalWaitMs", -1], ["maxTotalWaitMs", Number.NaN], ["maxTotalWaitMs", Number.POSITIVE_INFINITY], ["maxTotalWaitMs", "1000"], ["maxTotalWaitMs", 60001],
+    ["maxTokens", -1], ["maxTokens", Number.NaN], ["maxTokens", Number.POSITIVE_INFINITY], ["maxTokens", "1"], ["maxTokens", 20001]
+  ] as const)("rejects invalid local %s value %#", (field, value) => {
+    expectSanitizedConfigurationFailure(
+      () => parseProviderConfig({ localConfig: { apiKey: key, [field]: value }, env: {} }),
+      String(value)
+    );
+  });
+
+  it("preserves integral bounds and fractional temperature", () => {
+    expect(parseProviderConfig({ localConfig: { apiKey: key, timeoutMs: 1000, maxRetries: 0, maxTotalWaitMs: 1000, maxTokens: 1, temperature: 0.25 }, env: {} }))
+      .toMatchObject({ timeoutMs: 1000, maxRetries: 0, maxTotalWaitMs: 1000, maxTokens: 1, temperature: 0.25 });
+    expect(parseProviderConfig({ localConfig: { apiKey: key, timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 20000, temperature: 1.75 }, env: {} }))
+      .toMatchObject({ timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 20000, temperature: 1.75 });
   });
 
   it("serializes only stable safe error metadata and commits a redacted example", async () => {
