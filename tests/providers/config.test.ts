@@ -52,7 +52,10 @@ describe("provider configuration", () => {
     expect(serialized).not.toContain("local-secret-marker");
 
     const liveTest = await readFile("tests/providers/deepseek-live.test.ts", "utf8");
+    expect(liveTest).toContain("hasProviderCredentialSource(undefined, process.env)");
     expect(liveTest).toContain("loadProviderConfig(undefined, process.env)");
+    expect(liveTest.indexOf("hasProviderCredentialSource(undefined, process.env)")).toBeLessThan(liveTest.indexOf("loadProviderConfig(undefined, process.env)"));
+    expect(liveTest).not.toMatch(/try\s*\{[^}]*loadProviderConfig[\s\S]*?catch/gu);
   });
 
   it("classifies malformed, conflicting, and unreadable files without leaking inputs", async () => {

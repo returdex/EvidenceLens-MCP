@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { lstatSync, readFileSync } from "node:fs";
 import { ProviderError } from "./errors.js";
 
 export const PROVIDER_CONFIG_FILE = ".evidencelens.local.json" as const;
@@ -22,6 +22,17 @@ export interface ProviderConfigOptions {
   localConfig?: unknown;
   env?: NodeJS.ProcessEnv;
   request?: unknown;
+}
+
+export function hasProviderCredentialSource(path = PROVIDER_CONFIG_FILE, env = process.env): boolean {
+  if (Object.prototype.hasOwnProperty.call(env, "DEEPSEEK_API_KEY")) return true;
+  try {
+    lstatSync(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
 }
 
 function invalid(): never {

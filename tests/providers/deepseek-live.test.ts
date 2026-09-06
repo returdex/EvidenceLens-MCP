@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { loadProviderConfig } from "../../src/providers/config.js";
+import { hasProviderCredentialSource, loadProviderConfig } from "../../src/providers/config.js";
 import { createDeepSeekProvider, computeProviderInputFingerprint } from "../../src/providers/deepseek.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
 
@@ -9,13 +9,11 @@ const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest(
 
 describe("DeepSeek live structural review", () => {
   it("calls the opt-in API and validates structural/provenance output", async ({ skip }) => {
-    let config;
-    try {
-      config = loadProviderConfig(undefined, process.env);
-    } catch {
+    if (!hasProviderCredentialSource(undefined, process.env)) {
       skip();
       return;
     }
+    const config = loadProviderConfig(undefined, process.env);
     const model = "deepseek-v4-flash-vision-exp" as const;
 
     const screenshot = await readFile(new URL("../fixtures/evidence/images/rubric-screenshot.png", import.meta.url));
