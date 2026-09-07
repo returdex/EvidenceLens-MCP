@@ -60,33 +60,63 @@ export function liveProofPreflight(resolvedEnvironment, baseEnvironment = proces
   }
 }
 
-function withTimeout(promise, phase, timeoutMs = controlTimeoutMs) {
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => {
-      try { fail("timeout", phase); } catch (error) { reject(error); }
-    }, timeoutMs);
-  });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-}
+const maxPendingEvents = 8;
 
 export class StdioClient {
+  static get MAX_PENDING_EVENTS() { return maxPendingEvents; }
+
   constructor(child, toolsCallTimeoutMs = controlTimeoutMs) {
     this.child = child;
     this.toolsCallTimeoutMs = toolsCallTimeoutMs;
     this.buffer = "";
+    this.pendingEvents = [];
     this.waiters = [];
-    child.stdout.setEncoding("utf8");
-    child.stdout.on("data", (chunk) => {
+    this.terminalEvent = undefined;
+    this.onData = (chunk) => {
+      if (this.terminalEvent !== undefined) return;
       this.buffer += chunk;
       this.drain();
-    });
-    child.on("exit", (code, signal) => {
-      while (this.waiters.length) this.waiters.shift()({ done: true, code, signal });
-    });
-    child.on("error", () => {
-      while (this.waiters.length) this.waiters.shift()({ dockerError: true });
-    });
+    };
+    this.onExit = () => this.terminate({ done: true });
+    this.onError = () => this.terminate({ dockerError: true });
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", this.onData);
+    child.on("exit", this.onExit);
+    child.on("error", this.onError);
+  }
+
+  detach() {
+    this.child.stdout.off("data", this.onData);
+    this.child.off("exit", this.onExit);
+    this.child.off("error", this.onError);
+    this.buffer = "";
+  }
+
+  resolveWaiter(waiter, event) {
+    if (waiter.timer !== undefined) clearTimeout(waiter.timer);
+    waiter.resolve(event);
+  }
+
+  terminate(event, clearPending = false) {
+    if (this.terminalEvent !== undefined) return;
+    this.terminalEvent = event;
+    this.detach();
+    if (clearPending) this.pendingEvents.length = 0;
+    while (this.waiters.length) this.resolveWaiter(this.waiters.shift(), event);
+  }
+
+  deliver(event) {
+    if (this.terminalEvent !== undefined) return;
+    const waiter = this.waiters.shift();
+    if (waiter !== undefined) {
+      this.resolveWaiter(waiter, event);
+      return;
+    }
+    if (this.pendingEvents.length >= maxPendingEvents) {
+      this.terminate({ overflow: true }, true);
+      return;
+    }
+    this.pendingEvents.push(event);
   }
 
   drain() {
@@ -100,21 +130,38 @@ export class StdioClient {
       try {
         message = JSON.parse(line);
       } catch {
-        this.waiters.shift()?.({ malformed: line });
+        this.deliver({ malformed: true });
         continue;
       }
-      this.waiters.shift()?.({ message });
+      this.deliver({ message });
+      if (this.terminalEvent !== undefined) return;
     }
   }
 
-  next() {
-    return new Promise((resolve) => this.waiters.push(resolve));
+  next(timeoutMs) {
+    if (this.pendingEvents.length > 0) return Promise.resolve(this.pendingEvents.shift());
+    if (this.terminalEvent !== undefined) return Promise.resolve(this.terminalEvent);
+    return new Promise((resolve) => {
+      const waiter = { resolve, timer: undefined };
+      if (timeoutMs !== undefined) {
+        waiter.timer = setTimeout(() => {
+          const index = this.waiters.indexOf(waiter);
+          if (index < 0) return;
+          this.waiters.splice(index, 1);
+          this.terminate({ timeout: true });
+          resolve({ timeout: true });
+        }, timeoutMs);
+      }
+      this.waiters.push(waiter);
+    });
   }
 
   async request(id, method, params = {}) {
     this.child.stdin.write(jsonLine({ jsonrpc: "2.0", id, method, params }));
     while (true) {
-      const event = await withTimeout(this.next(), method, methodTimeoutMs(method, this.toolsCallTimeoutMs));
+      const event = await this.next(methodTimeoutMs(method, this.toolsCallTimeoutMs));
+      if (event.timeout) fail("timeout", method);
+      if (event.overflow) fail("protocol");
       if (event.dockerError) fail("docker");
       if (event.done) fail(method, `container exited before response (code=${event.code ?? "none"}, signal=${event.signal ?? "none"})`);
       if (event.malformed !== undefined) fail(method, "malformed JSON-RPC response");

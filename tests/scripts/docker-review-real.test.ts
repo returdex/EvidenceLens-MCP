@@ -135,9 +135,11 @@ describe("bounded Docker stdio event delivery", () => {
       await vi.advanceTimersByTimeAsync(25);
       await rejection;
       expect((client as any).waiters).toHaveLength(0);
+      expect(child.stdout.listenerCount("data")).toBe(0);
 
       child.stdout.emit("data", line({ jsonrpc: "2.0", id: 2, result: "later" }));
-      await expect(client.next()).resolves.toEqual({ message: { jsonrpc: "2.0", id: 2, result: "later" } });
+      await expect(client.next()).resolves.toEqual({ timeout: true });
+      expect((client as any).pendingEvents).toHaveLength(0);
     } finally {
       vi.useRealTimers();
     }
