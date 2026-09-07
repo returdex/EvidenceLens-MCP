@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel, StdioClient } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, methodTimeoutMs, resolveReviewModel, StdioClient } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -42,6 +42,52 @@ class FakeStdioChild extends EventEmitter {
 const line = (value: unknown) => `${JSON.stringify(value)}\n`;
 
 describe("bounded Docker stdio event delivery", () => {
+  it("keeps one absolute request deadline across notification traffic", async () => {
+    vi.useFakeTimers();
+    try {
+      const child = new FakeStdioChild();
+      const client = new StdioClient(child, 50);
+      const request = client.request(7, "tools/call");
+      const rejection = expect(request).rejects.toThrow("[docker-review:timeout] failed");
+
+      for (const elapsed of [15, 15, 19]) {
+        await vi.advanceTimersByTimeAsync(elapsed);
+        child.stdout.emit("data", line({ jsonrpc: "2.0", method: "notifications/progress" }));
+        await Promise.resolve();
+      }
+      await vi.advanceTimersByTimeAsync(1);
+
+      await rejection;
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each([
+    [{ jsonrpc: "2.0", id: 7, result: {} }, true, "valid result"],
+    [{ jsonrpc: "2.0", id: 7, error: { code: -1 } }, true, "valid error"],
+    [{ id: 7, result: {} }, false, "missing jsonrpc"],
+    [{ jsonrpc: "1.0", id: 7, result: {} }, false, "wrong jsonrpc"],
+    [{ jsonrpc: "2.0", id: 7, result: {}, error: {} }, false, "both result and error"],
+    [{ jsonrpc: "2.0", id: 7 }, false, "neither result nor error"],
+    [{ jsonrpc: "2.0", id: 8, result: {} }, false, "wrong id"],
+    [[{ jsonrpc: "2.0", id: 7, result: {} }], false, "array"],
+    [null, false, "null"],
+    ["response", false, "primitive"]
+  ] as const)("validates %s as %s (%s)", (message, expected) => {
+    expect(isJsonRpcResponse(message, 7)).toBe(expected);
+  });
+
+  it("redacts a valid matching JSON-RPC error response", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const request = client.request(7, "initialize");
+    child.stdout.emit("data", line({ jsonrpc: "2.0", id: 7, error: { message: "private response secret" } }));
+    await expect(request).rejects.toThrow("[docker-review:initialize] failed");
+    await expect(request).rejects.not.toThrow("private response secret");
+  });
+
   it("resolves a request when a notification and its response are coalesced", async () => {
     const child = new FakeStdioChild();
     const client = new StdioClient(child, 100);
