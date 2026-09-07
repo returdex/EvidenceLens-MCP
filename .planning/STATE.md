@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: gaps_found
-stopped_at: Completed 10-15-PLAN.md; corrected-lifecycle live proof remained protocol non-pass
+stopped_at: Phase 10 re-verification found subprocess I/O bounds gaps; PROV-01 remains open
 last_updated: "2026-09-07T03:04:36.665Z"
 progress:
   total_phases: 11
@@ -31,9 +31,9 @@ Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — GAPS FOUND
 Plan: 15 of 15 complete; corrected-lifecycle proof remains unverified
 
 - Phase: 10 of 11
-- Status: Corrected MCP lifecycle is offline-verified, but the single authorized live proof returned a sanitized protocol non-pass
+- Status: Corrected MCP lifecycle is offline-verified, but subprocess write/error and raw-output bounds remain open and the authorized live proof returned a sanitized protocol non-pass
 - Progress: 15 of 15 Phase 10 plans executed; PROV-01 remains open
-- Last activity: Completed Plan 10-15 with one authorized zero-retry live command and a passing independent evidence audit
+- Last activity: Re-verified Phase 10 at 9/11 must-haves after the single authorized corrected-lifecycle live non-pass
 
 ## Decisions and Assumptions
 
@@ -127,6 +127,7 @@ Plan: 15 of 15 complete; corrected-lifecycle proof remains unverified
 ### Blockers
 
 - PROV-01 complete credentialed Docker MCP structural proof remains unverified after the newest separately authorized sanitized protocol non-pass.
+- Docker proof subprocess stdin failures and unterminated stdout/stderr byte accumulation are not yet bounded and sanitized on every path.
 
 ## Performance Metrics
 
