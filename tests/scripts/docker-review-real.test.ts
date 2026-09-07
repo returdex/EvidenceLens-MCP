@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, methodTimeoutMs, resolveReviewModel, StdioClient } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, methodTimeoutMs, performMcpReview, resolveReviewModel, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -193,6 +193,57 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it("writes the exact initialize, initialized, tools/list, and tools/call transcript", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    child.stdin.write.mockImplementation((raw: string) => {
+      const message = JSON.parse(raw);
+      if (message.method === "initialize") {
+        child.stdout.emit("data", line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "evidencelens", version: "0.1.3" } } }));
+      } else if (message.method === "tools/list") {
+        child.stdout.emit("data", line({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "review_evidence", annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true } }] } }));
+      } else if (message.method === "tools/call") {
+        child.stdout.emit("data", line({ jsonrpc: "2.0", id: 3, result: mcp(successPayload()) }));
+      }
+      return true;
+    });
+
+    await expect(performMcpReview(client, true)).resolves.toMatchObject({ ok: true });
+    const transcript = child.stdin.write.mock.calls.map(([raw]) => JSON.parse(raw));
+    expect(transcript.map(({ method }) => method)).toEqual(["initialize", "notifications/initialized", "tools/list", "tools/call"]);
+    expect(transcript.map(({ id }) => id)).toEqual([1, undefined, 2, 3]);
+    expect(transcript[1]).toEqual({ jsonrpc: "2.0", method: "notifications/initialized", params: {} });
+    expect(Object.prototype.hasOwnProperty.call(transcript[1], "id")).toBe(false);
+  });
+
+  it.each([
+    [{ capabilities: {}, serverInfo: { name: "server", version: "1" } }, "missing protocolVersion"],
+    [{ protocolVersion: "", capabilities: {}, serverInfo: { name: "server", version: "1" } }, "blank protocolVersion"],
+    [{ protocolVersion: 2, capabilities: {}, serverInfo: { name: "server", version: "1" } }, "wrong protocolVersion type"],
+    [{ protocolVersion: "other", capabilities: {}, serverInfo: { name: "server", version: "1" } }, "mismatched protocolVersion"],
+    [{ protocolVersion: "2025-11-25", serverInfo: { name: "server", version: "1" } }, "missing capabilities"],
+    [{ protocolVersion: "2025-11-25", capabilities: [], serverInfo: { name: "server", version: "1" } }, "non-object capabilities"],
+    [{ protocolVersion: "2025-11-25", capabilities: {} }, "missing serverInfo"],
+    [{ protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "", version: "1" } }, "blank server name"],
+    [{ protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "server", version: 1 } }, "wrong server version type"]
+  ] as const)("rejects malformed initialize result: %s (%s)", (result) => {
+    expect(() => validateInitializeResult(result, "2025-11-25")).toThrow("[docker-review:initialize] failed");
+  });
+
+  it("stops before initialized notification and tools/list when initialization is invalid", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    child.stdin.write.mockImplementation((raw: string) => {
+      const message = JSON.parse(raw);
+      if (message.method === "initialize") child.stdout.emit("data", line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "wrong", capabilities: {}, serverInfo: { name: "private", version: "secret" } } }));
+      return true;
+    });
+
+    await expect(performMcpReview(client, true)).rejects.toThrow("[docker-review:initialize] failed");
+    expect(child.stdin.write).toHaveBeenCalledOnce();
+    expect(JSON.parse(child.stdin.write.mock.calls[0][0]).method).toBe("initialize");
+  });
+
   it("emits success only after a clean child exit", async () => {
     const child = new FakeChild();
     const write = vi.fn();
