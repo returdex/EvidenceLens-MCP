@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(13 of 15 plans executed; MCP lifecycle gap closure planned.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(15 of 15 plans executed; corrected-lifecycle live proof remains a sanitized protocol non-pass.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -255,7 +255,7 @@ Plans:
 - [x] 10-14-PLAN.md — Absolute request deadlines, strict JSON-RPC 2.0 validation, and complete MCP initialization transcript
 
 **Wave 11** *(gap closure; blocked on Wave 10 completion)*
-- [ ] 10-15-PLAN.md — Freshly authorized single-attempt credentialed proof after lifecycle hardening
+- [x] 10-15-PLAN.md — Freshly authorized single-attempt credentialed proof after lifecycle hardening
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -289,7 +289,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 14/15 | In Progress | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 15/15 | Gaps found | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
@@ -300,4 +300,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-05 after Phase 10 planning passed final review*
+*Last updated: 2026-09-07 after Phase 10 Plan 15 retained a corrected-lifecycle protocol non-pass*

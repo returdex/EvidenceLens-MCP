@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Completed 10-14-PLAN.md; 10-15 authorization checkpoint pending
-last_updated: "2026-09-07T02:45:56.177Z"
+status: gaps_found
+stopped_at: Completed 10-15-PLAN.md; corrected-lifecycle live proof remained protocol non-pass
+last_updated: "2026-09-07T03:04:36.665Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 43
-  completed_plans: 42
+  completed_plans: 43
   percent: 98
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — READY TO EXECUTE
-Plan: 14 of 15 complete; plan 10-15 pending
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — GAPS FOUND
+Plan: 15 of 15 complete; corrected-lifecycle proof remains unverified
 
 - Phase: 10 of 11
-- Status: Offline MCP lifecycle gaps closed; fresh live proof remains separately authorized and pending
-- Progress: 14 of 15 Phase 10 plans complete
-- Last activity: Completed Plan 10-14 with 342 credential-free tests and build passing
+- Status: Corrected MCP lifecycle is offline-verified, but the single authorized live proof returned a sanitized protocol non-pass
+- Progress: 15 of 15 Phase 10 plans executed; PROV-01 remains open
+- Last activity: Completed Plan 10-15 with one authorized zero-retry live command and a passing independent evidence audit
 
 ## Decisions and Assumptions
 
@@ -122,6 +122,7 @@ Plan: 14 of 15 complete; plan 10-15 pending
 - [Phase 10]: Keep Phase 7 gaps_found and PROV-01 open because the freshly authorized post-parser-fix execution returned a sanitized protocol non-pass. — A protocol non-pass cannot establish the complete credentialed Docker MCP structural proof.
 - [Phase 10]: Treat matching-id malformed responses as sanitized method failures while unrelated notifications remain bounded by one absolute deadline.
 - [Phase 10]: Validate negotiated initialize metadata before sending an id-less notifications/initialized message and beginning normal MCP operations.
+- [Phase 10]: Keep Phase 7 gaps_found and PROV-01 open because the freshly authorized corrected-lifecycle execution returned a sanitized protocol non-pass.
 
 ### Blockers
 
@@ -163,16 +164,17 @@ Plan: 14 of 15 complete; plan 10-15 pending
 | Phase 10 P12 | 5min | 2 tasks | 2 files |
 | Phase 10 P13 | 4min | 3 tasks | 2 files |
 | Phase 10 P14 | 4min | 2 tasks | 2 files | 2026-09-07 |
+| Phase 10 P15 | 4min | 3 tasks | 3 files | 2026-09-07 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-07T02:45:56.172Z
-- **Stopped at:** Completed 10-14-PLAN.md; 10-15 authorization checkpoint pending
+- **Last session:** 2026-09-07T03:04:36.653Z
+- **Stopped at:** Completed 10-15-PLAN.md; corrected-lifecycle live proof remained protocol non-pass
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-15 only after obtaining its exact fresh authorization; Phase 7 and PROV-01 remain open until a successful audited live proof.
+Re-plan Phase 10 gaps before any further paid proof; Phase 7 and PROV-01 remain open until a successful audited live proof.
 
 ---
-*Last updated: 2026-09-07 after Phase 10 Plan 14 execution*
+*Last updated: 2026-09-07 after Phase 10 Plan 15 execution*
