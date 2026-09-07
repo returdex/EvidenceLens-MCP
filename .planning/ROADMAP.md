@@ -252,7 +252,7 @@ Plans:
 - [x] 10-13-PLAN.md — Freshly authorized single-attempt credentialed proof after parser correction
 
 **Wave 10** *(gap closure; blocked on Wave 9 completion)*
-- [ ] 10-14-PLAN.md — Absolute request deadlines, strict JSON-RPC 2.0 validation, and complete MCP initialization transcript
+- [x] 10-14-PLAN.md — Absolute request deadlines, strict JSON-RPC 2.0 validation, and complete MCP initialization transcript
 
 **Wave 11** *(gap closure; blocked on Wave 10 completion)*
 - [ ] 10-15-PLAN.md — Freshly authorized single-attempt credentialed proof after lifecycle hardening
@@ -289,7 +289,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 13/15 | Planned gaps | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 14/15 | In Progress | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
