@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, liveProofPreflight, methodTimeoutMs, resolveReviewModel, StdioClient } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -29,6 +29,120 @@ class FakeChild extends EventEmitter {
   signalCode: NodeJS.Signals | null = null;
   stdin = { end: vi.fn() };
 }
+
+class FakeStream extends EventEmitter {
+  setEncoding = vi.fn();
+}
+
+class FakeStdioChild extends EventEmitter {
+  stdout = new FakeStream();
+  stdin = { write: vi.fn(), end: vi.fn() };
+}
+
+const line = (value: unknown) => `${JSON.stringify(value)}\n`;
+
+describe("bounded Docker stdio event delivery", () => {
+  it("resolves a request when a notification and its response are coalesced", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child, 100);
+    const request = client.request(7, "tools/call");
+
+    child.stdout.emit("data", `${line({ jsonrpc: "2.0", method: "notifications/progress" })}${line({ jsonrpc: "2.0", id: 7, result: { ok: true } })}`);
+
+    await expect(request).resolves.toEqual({ ok: true });
+    expect(child.stdin.write).toHaveBeenCalledOnce();
+  });
+
+  it("delivers an event emitted before next is registered", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    child.stdout.emit("data", line({ sequence: 1 }));
+    await expect(client.next()).resolves.toEqual({ message: { sequence: 1 } });
+  });
+
+  it("returns three queued events exactly once in FIFO order", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    child.stdout.emit("data", [1, 2, 3].map((sequence) => line({ sequence })).join(""));
+
+    const events = await Promise.all([client.next(), client.next(), client.next()]);
+    expect(events.map((event: any) => event.message.sequence)).toEqual([1, 2, 3]);
+  });
+
+  it("parses split and coalesced lines once while ignoring blanks", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    child.stdout.emit("data", "  \n{\"sequence\":1");
+    child.stdout.emit("data", `}\n${line({ sequence: 2 })}`);
+
+    await expect(client.next()).resolves.toEqual({ message: { sequence: 1 } });
+    await expect(client.next()).resolves.toEqual({ message: { sequence: 2 } });
+  });
+
+  it("surfaces a sanitized malformed marker without losing adjacent events", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const raw = '{"secret":"never-surface"';
+    child.stdout.emit("data", `${line({ sequence: 1 })}${raw}\n${line({ sequence: 2 })}`);
+
+    await expect(client.next()).resolves.toEqual({ message: { sequence: 1 } });
+    const malformed = await client.next();
+    expect(malformed).toEqual({ malformed: true });
+    expect(JSON.stringify(malformed)).not.toContain(raw);
+    await expect(client.next()).resolves.toEqual({ message: { sequence: 2 } });
+  });
+
+  it("accepts exactly the finite queue bound and terminally overflows on the next event", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const capacity = (StdioClient as any).MAX_PENDING_EVENTS as number;
+    expect(Number.isSafeInteger(capacity)).toBe(true);
+    expect(capacity).toBeGreaterThanOrEqual(3);
+
+    child.stdout.emit("data", Array.from({ length: capacity }, (_, index) => line({ index })).join(""));
+    expect((client as any).pendingEvents).toHaveLength(capacity);
+    child.stdout.emit("data", line({ secret: "overflow-secret" }));
+
+    expect((client as any).pendingEvents.length).toBeLessThanOrEqual(capacity);
+    const terminal = await client.next();
+    expect(terminal).toEqual({ overflow: true });
+    expect(JSON.stringify(terminal)).not.toContain("overflow-secret");
+    child.stdout.emit("data", Array.from({ length: capacity + 2 }, (_, index) => line({ later: index })).join(""));
+    expect((client as any).pendingEvents.length).toBe(0);
+  });
+
+  it.each(["exit", "error"])("cleans up waiters and parser listeners after child %s", async (kind) => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const waiting = client.next();
+    if (kind === "exit") child.emit("exit", 1, null);
+    else child.emit("error", new Error("private /Users/path stack secret"));
+
+    const event = await waiting;
+    expect(event).toEqual(kind === "exit" ? { done: true } : { dockerError: true });
+    expect((client as any).waiters).toHaveLength(0);
+    expect(child.stdout.listenerCount("data")).toBe(0);
+    expect(JSON.stringify(event)).not.toMatch(/Users|private|stack|secret/u);
+  });
+
+  it("removes a timed-out waiter so it cannot consume a future event", async () => {
+    vi.useFakeTimers();
+    try {
+      const child = new FakeStdioChild();
+      const client = new StdioClient(child, 25);
+      const timedOut = client.request(1, "tools/call");
+      const rejection = expect(timedOut).rejects.toThrow("[docker-review:timeout] failed");
+      await vi.advanceTimersByTimeAsync(25);
+      await rejection;
+      expect((client as any).waiters).toHaveLength(0);
+
+      child.stdout.emit("data", line({ jsonrpc: "2.0", id: 2, result: "later" }));
+      await expect(client.next()).resolves.toEqual({ message: { jsonrpc: "2.0", id: 2, result: "later" } });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
 
 describe("credentialed Docker review harness", () => {
   it("emits success only after a clean child exit", async () => {

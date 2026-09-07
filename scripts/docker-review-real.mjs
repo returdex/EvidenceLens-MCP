@@ -70,7 +70,7 @@ function withTimeout(promise, phase, timeoutMs = controlTimeoutMs) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-class StdioClient {
+export class StdioClient {
   constructor(child, toolsCallTimeoutMs = controlTimeoutMs) {
     this.child = child;
     this.toolsCallTimeoutMs = toolsCallTimeoutMs;
