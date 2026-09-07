@@ -41,6 +41,19 @@ export function methodTimeoutMs(method, toolsCallTimeoutMs = controlTimeoutMs) {
   return method === "tools/call" ? toolsCallTimeoutMs : controlTimeoutMs;
 }
 
+function isOrdinaryObject(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+export function isJsonRpcResponse(message, expectedId) {
+  if (!isOrdinaryObject(message) || message.jsonrpc !== "2.0" || message.id !== expectedId) return false;
+  const hasResult = Object.prototype.hasOwnProperty.call(message, "result");
+  const hasError = Object.prototype.hasOwnProperty.call(message, "error");
+  return hasResult !== hasError;
+}
+
 export function liveProofPreflight(resolvedEnvironment, baseEnvironment = process.env) {
   try {
     const retry = resolvedEnvironment?.DEEPSEEK_MAX_RETRIES;
@@ -158,16 +171,19 @@ export class StdioClient {
 
   async request(id, method, params = {}) {
     this.child.stdin.write(jsonLine({ jsonrpc: "2.0", id, method, params }));
+    const deadline = Date.now() + methodTimeoutMs(method, this.toolsCallTimeoutMs);
     while (true) {
-      const event = await this.next(methodTimeoutMs(method, this.toolsCallTimeoutMs));
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) fail("timeout", method);
+      const event = await this.next(remaining);
       if (event.timeout) fail("timeout", method);
       if (event.overflow) fail("protocol");
       if (event.dockerError) fail("docker");
       if (event.done) fail(method, `container exited before response (code=${event.code ?? "none"}, signal=${event.signal ?? "none"})`);
       if (event.malformed !== undefined) fail(method, "malformed JSON-RPC response");
-      if (event.message?.id !== id) continue;
-      if (event.message.error !== undefined) fail(method, JSON.stringify(event.message.error));
-      if (event.message.result === undefined) fail(method, "response did not contain a result");
+      if (!isOrdinaryObject(event.message) || event.message.id !== id) continue;
+      if (!isJsonRpcResponse(event.message, id)) fail(method, "invalid JSON-RPC response envelope");
+      if (Object.prototype.hasOwnProperty.call(event.message, "error")) fail(method, JSON.stringify(event.message.error));
       return event.message.result;
     }
   }
