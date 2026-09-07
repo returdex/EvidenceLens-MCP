@@ -246,7 +246,7 @@ Plans:
 - [x] 10-11-PLAN.md — Freshly authorized single-attempt credentialed proof and audited state synchronization
 
 **Wave 8** *(gap closure; blocked on Wave 7 completion)*
-- [ ] 10-12-PLAN.md — Bounded FIFO stdio event delivery and coalesced-message regressions
+- [x] 10-12-PLAN.md — Bounded FIFO stdio event delivery and coalesced-message regressions
 
 **Wave 9** *(gap closure; blocked on Wave 8 completion)*
 - [ ] 10-13-PLAN.md — Freshly authorized single-attempt credentialed proof after parser correction
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 11/13 | Gap closure planned | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 12/13 | In Progress | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

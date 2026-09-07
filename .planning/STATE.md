@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Final Phase 10 parser gap closure planned; ready to execute plans 10-12 and 10-13
-last_updated: "2026-09-07T02:10:08.772Z"
+stopped_at: Completed 10-12-PLAN.md
+last_updated: "2026-09-07T02:15:46.483Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 41
-  completed_plans: 40
+  total_plans: 42
+  completed_plans: 41
   percent: 98
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — READY TO EXECUTE GAP CLOSURE
-Plan: 11 of 13 complete; 2 gap plans pending
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Plan: 12 of 13 complete; 1 gap plan pending
 
 - Phase: 10 of 11
-- Status: Gap-closure plans 10-12 and 10-13 created and plan-checker verified
-- Progress: 11 of 13 Phase 10 plans complete
-- Last activity: Planned bounded FIFO stdio delivery and a fresh authorized live proof after parser correction
+- Status: Bounded FIFO parser correction complete; Plan 10-13 credentialed proof pending
+- Progress: 12 of 13 Phase 10 plans complete
+- Last activity: Implemented and verified bounded, ordered Docker MCP stdout event delivery entirely offline
 
 ## Decisions and Assumptions
 
@@ -118,6 +118,7 @@ Plan: 11 of 13 complete; 2 gap plans pending
 - [Phase 10]: Accept retained proof success only for exactly four fixtures and a positive JavaScript safe-integer finding count. — Prevents impossible or overflow-like evidence from closing PROV-01.
 - [Phase 10]: Preserve the live producer's plural findings token for both one and multiple findings. — Keeps the audit aligned with the exact current production grammar.
 - [Phase 10]: Keep Phase 7 gaps_found and PROV-01 open because the newly authorized single live execution returned a sanitized protocol non-pass. — A protocol non-pass cannot establish the complete credentialed Docker MCP structural proof.
+- [Phase 10]: Bound pending Docker MCP stdout events at eight and consume accepted FIFO events before non-overflow terminal state. — This preserves wire order without allowing untrusted stdout to grow memory without limit.
 
 ### Blockers
 
@@ -156,16 +157,17 @@ Plan: 11 of 13 complete; 2 gap plans pending
 | Phase 10 P09 | 3min | 2 tasks | 2 files |
 | Phase 10 P10 | 2min | 2 tasks | 2 files |
 | Phase 10 P11 | 4min | 3 tasks | 2 files |
+| Phase 10 P12 | 5min | 2 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-06T18:10:24.116Z
-- **Stopped at:** Completed 10-11-PLAN.md
+- **Last session:** 2026-09-07T02:15:46.479Z
+- **Stopped at:** Completed 10-12-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Re-verify Phase 10 and preserve the PROV-01 gap until a future separately authorized proof succeeds.
+Execute Plan 10-13 only with a new explicit authorization for its single paid Docker provider proof.
 
 ---
-*Last updated: 2026-09-07 after Phase 10 Plan 11 execution*
+*Last updated: 2026-09-07 after Phase 10 Plan 12 execution*
