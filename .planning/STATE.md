@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Completed 10-13-PLAN.md
+status: gaps_found
+stopped_at: Phase 10 re-verification found MCP lifecycle and JSON-RPC validation gaps; PROV-01 remains open
 last_updated: "2026-09-07T02:22:35.375Z"
 progress:
   total_phases: 11
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 13 of 13 complete; phase verification pending
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — GAPS FOUND
+Plan: 13 of 13 complete; MCP lifecycle proof remains unverified
 
 - Phase: 10 of 11
-- Status: All Phase 10 plans executed; fresh post-parser-fix credentialed proof returned a sanitized protocol non-pass
+- Status: All Phase 10 plans executed; re-verification found absolute-deadline, initialized-notification, and JSON-RPC validation gaps
 - Progress: 13 of 13 Phase 10 plans complete
-- Last activity: Executed one freshly authorized zero-retry Docker MCP proof and retained the independently audited open-gap outcome
+- Last activity: Re-verified Phase 10 at 9/11 must-haves and retained the independently audited open-gap outcome
 
 ## Decisions and Assumptions
 
