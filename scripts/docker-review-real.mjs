@@ -11,6 +11,7 @@ const profile = offline ? "smoke" : "review";
 const service = profile;
 const controlTimeoutMs = 30_000;
 const liveProofMarginMs = 30_000;
+const protocolVersion = "2025-11-25";
 const expectedReferences = [
   "filesystem://course/tests/fixtures/evidence/text/assignment.txt",
   "filesystem://course/tests/fixtures/evidence/tables/rubric.csv",
@@ -169,6 +170,10 @@ export class StdioClient {
     });
   }
 
+  notify(method, params = {}) {
+    this.child.stdin.write(jsonLine({ jsonrpc: "2.0", method, params }));
+  }
+
   async request(id, method, params = {}) {
     this.child.stdin.write(jsonLine({ jsonrpc: "2.0", id, method, params }));
     const deadline = Date.now() + methodTimeoutMs(method, this.toolsCallTimeoutMs);
@@ -187,6 +192,20 @@ export class StdioClient {
       return event.message.result;
     }
   }
+}
+
+export function validateInitializeResult(result, expectedProtocolVersion = protocolVersion) {
+  if (!isOrdinaryObject(result)
+    || result.protocolVersion !== expectedProtocolVersion
+    || !isOrdinaryObject(result.capabilities)
+    || !isOrdinaryObject(result.serverInfo)
+    || typeof result.serverInfo.name !== "string"
+    || result.serverInfo.name.trim() === ""
+    || typeof result.serverInfo.version !== "string"
+    || result.serverInfo.version.trim() === "") {
+    fail("initialize", "invalid initialize result");
+  }
+  return result;
 }
 
 export function fixtureRequest(isOffline = offline) {
@@ -309,6 +328,21 @@ export async function completeProofLifecycle(child, payload, isOffline = offline
   write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
 }
 
+export async function performMcpReview(client, isOffline = offline, expectedModel) {
+  const initialized = await client.request(1, "initialize", {
+    protocolVersion,
+    capabilities: {},
+    clientInfo: { name: isOffline ? "docker-smoke" : "docker-review-real", version: "0.1.0" }
+  });
+  validateInitializeResult(initialized, protocolVersion);
+  client.notify("notifications/initialized", {});
+  const listed = await client.request(2, "tools/list");
+  if (!Array.isArray(listed?.tools) || listed.tools.length !== 1 || listed.tools[0]?.name !== "review_evidence") fail("tools/list", "expected only review_evidence");
+  if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
+  const result = await client.request(3, "tools/call", { name: "review_evidence", arguments: fixtureRequest(isOffline) });
+  return assertStructuralReview(result, isOffline, expectedModel);
+}
+
 async function main() {
   if (!offline && (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -326,16 +360,7 @@ async function main() {
   child.stderr.on("data", (chunk) => { stderr += chunk; });
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
-    await client.request(1, "initialize", {
-      protocolVersion: "2025-11-25",
-      capabilities: {},
-      clientInfo: { name: offline ? "docker-smoke" : "docker-review-real", version: "0.1.0" }
-    });
-    const listed = await client.request(2, "tools/list");
-    if (!Array.isArray(listed?.tools) || listed.tools.length !== 1 || listed.tools[0]?.name !== "review_evidence") fail("tools/list", "expected only review_evidence");
-    if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
-    const result = await client.request(3, "tools/call", { name: "review_evidence", arguments: fixtureRequest(offline) });
-    const payload = assertStructuralReview(result, offline, expectedModel);
+    const payload = await performMcpReview(client, offline, expectedModel);
     await completeProofLifecycle(child, payload, offline);
   } catch (error) {
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
