@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(15 of 15 plans executed; corrected-lifecycle live proof remains a sanitized protocol non-pass.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(15 of 23 plans executed; exhaustive bounded-proof gap closure planned.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 15 plans
+**Plans**: 23 plans
 
 Plans:
 **Wave 1**
@@ -257,6 +257,30 @@ Plans:
 **Wave 11** *(gap closure; blocked on Wave 10 completion)*
 - [x] 10-15-PLAN.md — Freshly authorized single-attempt credentialed proof after lifecycle hardening
 
+**Wave 12** *(gap closure; blocked on Wave 11 completion)*
+- [ ] 10-16-PLAN.md — Exhaustive subprocess I/O state machine, bounded teardown, and adversarial race coverage
+
+**Wave 13** *(gap closure; blocked on Wave 12 completion)*
+- [ ] 10-17-PLAN.md — Deterministic full MCP transcript simulation and provider-disabled Docker diagnosis
+
+**Wave 14** *(gap closure; blocked on Wave 13 completion)*
+- [ ] 10-18-PLAN.md — Reviewed-commit archive as the sole immutable proof-image context
+
+**Wave 15** *(gap closure; blocked on Wave 14 completion)*
+- [ ] 10-19-PLAN.md — Credential-free dual-sentinel Compose and exact proof runtime contracts
+
+**Wave 16** *(gap closure; blocked on Wave 15 completion)*
+- [ ] 10-20-PLAN.md — Evidence schemas and irreversible single-generation proof-image boundary
+
+**Wave 17** *(gap closure; blocked on Wave 16 completion)*
+- [ ] 10-21-PLAN.md — Evidence sealing, replay protection, durable challenge publication, and atomic authorization
+
+**Wave 18** *(gap closure; blocked on Wave 17 completion)*
+- [ ] 10-22-PLAN.md — Committed build handoff, deep/security review, one build, and read-only validation
+
+**Wave 19** *(gap closure; blocked on Wave 18 completion)*
+- [ ] 10-23-PLAN.md — Committed challenge handoff, exact stdin authorization, and at-most-once paid proof
+
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Live proof requires fresh human authorization for exactly one paid provider request, with retries disabled and no fallback or masked failure.
@@ -289,7 +313,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 15/15 | Gaps found | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 15/23 | Planned gaps | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
