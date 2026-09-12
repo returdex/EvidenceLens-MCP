@@ -53,6 +53,21 @@ describe("reviewed non-planning source set", () => {
     await expect(materializePrivateContext({ repoDir: root, reviewedCommit })).rejects.toThrow("SOURCE_SET_TRACKED_DRIFT");
   });
 
+  it("rejects an ordinary untracked path named as a pre-archive input", async () => {
+    const root = await repository();
+    const reviewedCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
+    await writeFile(join(root, "local-runner.mjs"), "throw new Error('must not execute');\n");
+    await expect(materializePrivateContext({ repoDir: root, reviewedCommit, preArchiveInputs: ["local-runner.mjs"] })).rejects.toThrow("SOURCE_SET_RELEVANT_UNTRACKED");
+  });
+
+  it("defines a self-contained proof image with exactly four immutable fixtures", async () => {
+    const dockerfile = await readFile(new URL("../../Dockerfile.proof", import.meta.url), "utf8");
+    const fixtureCopies = dockerfile.split("\n").filter((line) => line.startsWith("COPY tests/fixtures/evidence/"));
+    expect(fixtureCopies).toHaveLength(4);
+    expect(dockerfile).toContain("chmod 0444 /proof-fixtures/*");
+    expect(dockerfile).not.toMatch(/\.planning|VOLUME|--mount/u);
+  });
+
   it("materializes only exact commit bytes and detects private snapshot mutation", async () => {
     const root = await repository();
     const reviewedCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
