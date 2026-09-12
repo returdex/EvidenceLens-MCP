@@ -234,11 +234,11 @@ describe("bounded Docker stdio event delivery", () => {
     const child = new FakeStdioChild();
     const client = new StdioClient(child);
     const waiting = client.next();
-    if (kind === "exit") child.emit("exit", 1, null);
+    if (kind === "exit") { child.emit("exit", 1, null); child.emit("close", 1, null); }
     else child.emit("error", new Error("private /Users/path stack secret"));
 
     const event = await waiting;
-    expect(event).toEqual(kind === "exit" ? { done: true } : { dockerError: true });
+    expect(event).toEqual(kind === "exit" ? { done: true, code: 1, signal: null } : { dockerError: true });
     expect((client as any).waiters).toHaveLength(0);
     expect(child.stdout.listenerCount("data")).toBe(0);
     expect(JSON.stringify(event)).not.toMatch(/Users|private|stack|secret/u);
@@ -269,7 +269,7 @@ describe("credentialed Docker review harness", () => {
   it("writes the exact initialize, initialized, tools/list, and tools/call transcript", async () => {
     const child = new FakeStdioChild();
     const client = new StdioClient(child);
-    child.stdin.write.mockImplementation((raw: string) => {
+    child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
       const message = JSON.parse(raw);
       if (message.method === "initialize") {
         child.stdout.emit("data", line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "evidencelens", version: "0.1.3" } } }));
@@ -278,7 +278,7 @@ describe("credentialed Docker review harness", () => {
       } else if (message.method === "tools/call") {
         child.stdout.emit("data", line({ jsonrpc: "2.0", id: 3, result: mcp(successPayload()) }));
       }
-      return true;
+      callback?.(); return true;
     });
 
     await expect(performMcpReview(client, true)).resolves.toMatchObject({ ok: true });
@@ -306,10 +306,10 @@ describe("credentialed Docker review harness", () => {
   it("stops before initialized notification and tools/list when initialization is invalid", async () => {
     const child = new FakeStdioChild();
     const client = new StdioClient(child);
-    child.stdin.write.mockImplementation((raw: string) => {
+    child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
       const message = JSON.parse(raw);
       if (message.method === "initialize") child.stdout.emit("data", line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "wrong", capabilities: {}, serverInfo: { name: "private", version: "secret" } } }));
-      return true;
+      callback?.(); return true;
     });
 
     await expect(performMcpReview(client, true)).rejects.toThrow("[docker-review:initialize] failed");
@@ -326,6 +326,7 @@ describe("credentialed Docker review harness", () => {
     expect(write).not.toHaveBeenCalled();
     child.exitCode = 0;
     child.emit("exit", 0, null);
+    child.emit("close", 0, null);
 
     await expect(completion).resolves.toBeUndefined();
     expect(write).toHaveBeenCalledWith("credentialed review passed: 4 fixtures, 1 findings\n");
@@ -341,6 +342,7 @@ describe("credentialed Docker review harness", () => {
     child.exitCode = code;
     child.signalCode = signal;
     child.emit("exit", code, signal);
+    child.emit("close", code, signal);
 
     await expect(completion).rejects.toThrow("[docker-review:protocol] failed");
     expect(write).not.toHaveBeenCalled();

@@ -2,6 +2,7 @@
 import { spawn } from "node:child_process";
 import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { StringDecoder } from "node:string_decoder";
 import { promisify } from "node:util";
 import { reviewResponseSchema } from "../dist/contracts/review.js";
 import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
@@ -74,36 +75,82 @@ export function liveProofPreflight(resolvedEnvironment, baseEnvironment = proces
   }
 }
 
-const maxPendingEvents = 8;
+export const MAX_STDOUT_LINE_BYTES = 32_000_000;
+export const MAX_STDERR_BYTES = 1_000_000;
+export const MAX_PENDING_EVENTS = 8;
 
 export class StdioClient {
-  static get MAX_PENDING_EVENTS() { return maxPendingEvents; }
+  static get MAX_PENDING_EVENTS() { return MAX_PENDING_EVENTS; }
 
   constructor(child, toolsCallTimeoutMs = controlTimeoutMs) {
     this.child = child;
     this.toolsCallTimeoutMs = toolsCallTimeoutMs;
     this.buffer = "";
+    this.decoder = new StringDecoder("utf8");
+    this.stdoutLineBytes = 0;
+    this.stderrBytes = 0;
     this.pendingEvents = [];
     this.waiters = [];
     this.terminalEvent = undefined;
+    this.exitMetadata = undefined;
     this.onData = (chunk) => {
       if (this.terminalEvent !== undefined) return;
-      this.buffer += chunk;
-      this.drain();
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      let offset = 0;
+      while (offset < bytes.length && this.terminalEvent === undefined) {
+        const newline = bytes.indexOf(0x0a, offset);
+        const end = newline < 0 ? bytes.length : newline;
+        const piece = bytes.subarray(offset, end);
+        if (this.stdoutLineBytes + piece.length > MAX_STDOUT_LINE_BYTES) {
+          this.terminate({ overflow: true }, true);
+          return;
+        }
+        this.stdoutLineBytes += piece.length;
+        this.buffer += this.decoder.write(piece);
+        if (newline < 0) return;
+        this.buffer += this.decoder.end();
+        this.consumeLine();
+        this.decoder = new StringDecoder("utf8");
+        this.stdoutLineBytes = 0;
+        offset = newline + 1;
+      }
     };
-    this.onExit = () => this.terminate({ done: true });
+    this.onStderrData = (chunk) => {
+      if (this.terminalEvent !== undefined) return;
+      const size = Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk);
+      if (this.stderrBytes + size > MAX_STDERR_BYTES) this.terminate({ overflow: true }, true);
+      else this.stderrBytes += size;
+    };
+    this.onExit = (code, signal) => { this.exitMetadata = { code, signal }; };
+    this.onClose = (code, signal) => {
+      const exit = this.exitMetadata;
+      if (exit === undefined || exit.code !== code || exit.signal !== signal) this.terminate({ dockerError: true }, true);
+      else this.terminate({ done: true, code, signal });
+    };
     this.onError = () => this.terminate({ dockerError: true });
-    child.stdout.setEncoding("utf8");
+    this.onStdinError = () => this.terminate({ dockerError: true }, true);
+    this.onStdoutError = () => this.terminate({ dockerError: true }, true);
+    this.onStderrError = () => this.terminate({ dockerError: true }, true);
     child.stdout.on("data", this.onData);
+    child.stdout.on("error", this.onStdoutError);
+    child.stderr?.on("data", this.onStderrData);
+    child.stderr?.on("error", this.onStderrError);
+    child.stdin.on("error", this.onStdinError);
     child.on("exit", this.onExit);
+    child.on("close", this.onClose);
     child.on("error", this.onError);
   }
 
   detach() {
     this.child.stdout.off("data", this.onData);
+    this.child.stderr?.off("data", this.onStderrData);
     this.child.off("exit", this.onExit);
+    this.child.off("close", this.onClose);
     this.child.off("error", this.onError);
     this.buffer = "";
+    this.stdoutLineBytes = 0;
+    this.stderrBytes = 0;
+    this.pendingEvents.length = 0;
   }
 
   resolveWaiter(waiter, event) {
@@ -126,30 +173,25 @@ export class StdioClient {
       this.resolveWaiter(waiter, event);
       return;
     }
-    if (this.pendingEvents.length >= maxPendingEvents) {
+    if (this.pendingEvents.length >= MAX_PENDING_EVENTS) {
       this.terminate({ overflow: true }, true);
       return;
     }
     this.pendingEvents.push(event);
   }
 
-  drain() {
-    while (true) {
-      const newline = this.buffer.indexOf("\n");
-      if (newline < 0) return;
-      const line = this.buffer.slice(0, newline).trim();
-      this.buffer = this.buffer.slice(newline + 1);
-      if (line.length === 0) continue;
+  consumeLine() {
+      const line = this.buffer.trim();
+      this.buffer = "";
+      if (line.length === 0) return;
       let message;
       try {
         message = JSON.parse(line);
       } catch {
         this.deliver({ malformed: true });
-        continue;
+        return;
       }
       this.deliver({ message });
-      if (this.terminalEvent !== undefined) return;
-    }
   }
 
   next(timeoutMs) {
@@ -170,13 +212,58 @@ export class StdioClient {
     });
   }
 
-  notify(method, params = {}) {
-    this.child.stdin.write(jsonLine({ jsonrpc: "2.0", method, params }));
+  writeMessage(message, deadline = Date.now() + controlTimeoutMs) {
+    if (this.terminalEvent !== undefined) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      let settled = false;
+      let callbackDone = false;
+      let drainDone = true;
+      let callbackError;
+      const timer = setTimeout(() => {
+        this.terminate({ timeout: true }, true);
+        finish();
+      }, Math.max(0, deadline - Date.now()));
+      timer.unref?.();
+      const finish = () => {
+        if (!callbackDone || !drainDone) return;
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (callbackError) this.terminate({ dockerError: true }, true);
+        resolve(!callbackError && this.terminalEvent === undefined);
+      };
+      try {
+        const writable = this.child.stdin.write(jsonLine(message), (error) => {
+          callbackDone = true;
+          callbackError = error;
+          finish();
+        });
+        if (writable === false) {
+          drainDone = false;
+          this.child.stdin.once("drain", () => { drainDone = true; finish(); });
+        }
+        finish();
+      } catch {
+        callbackDone = true;
+        callbackError = new Error("write");
+        this.terminate({ dockerError: true }, true);
+        finish();
+      }
+    });
+  }
+
+  async notify(method, params = {}) {
+    const written = await this.writeMessage({ jsonrpc: "2.0", method, params });
+    if (!written) fail("docker");
   }
 
   async request(id, method, params = {}) {
-    this.child.stdin.write(jsonLine({ jsonrpc: "2.0", id, method, params }));
     const deadline = Date.now() + methodTimeoutMs(method, this.toolsCallTimeoutMs);
+    const written = await this.writeMessage({ jsonrpc: "2.0", id, method, params }, deadline);
+    if (!written) {
+      if (this.terminalEvent?.timeout) fail("timeout");
+      fail("docker");
+    }
     while (true) {
       const remaining = deadline - Date.now();
       if (remaining <= 0) fail("timeout", method);
@@ -288,25 +375,33 @@ export function assertStructuralReview(result, isOffline = offline, expectedMode
   return payload;
 }
 
-function waitForChildExit(child, timeoutMs) {
+function waitForChildClose(child, timeoutMs) {
   return new Promise((resolve, reject) => {
     let timer;
+    let exitMetadata;
     const cleanup = () => {
       clearTimeout(timer);
       child.off("exit", onExit);
+      child.off("close", onClose);
       child.off("error", onError);
     };
-    const settleExit = (code, signal) => {
+    const settleClose = (code, signal) => {
       cleanup();
+      if (exitMetadata !== undefined && (exitMetadata.code !== code || exitMetadata.signal !== signal)) {
+        try { fail("protocol"); } catch (error) { reject(error); }
+        return;
+      }
       resolve({ code, signal });
     };
-    const onExit = (code, signal) => settleExit(code, signal);
+    const onExit = (code, signal) => { exitMetadata = { code, signal }; };
+    const onClose = (code, signal) => settleClose(code, signal);
     const onError = () => {
       cleanup();
       try { fail("docker"); } catch (error) { reject(error); }
     };
 
     child.once("exit", onExit);
+    child.once("close", onClose);
     child.once("error", onError);
     timer = setTimeout(() => {
       cleanup();
@@ -314,7 +409,7 @@ function waitForChildExit(child, timeoutMs) {
     }, timeoutMs);
 
     if (child.exitCode !== null || child.signalCode !== null) {
-      settleExit(child.exitCode, child.signalCode);
+      settleClose(child.exitCode, child.signalCode);
     }
   });
 }
@@ -322,8 +417,8 @@ function waitForChildExit(child, timeoutMs) {
 export async function completeProofLifecycle(child, payload, isOffline = offline, options = {}) {
   const write = options.write ?? ((message) => process.stdout.write(message));
   const timeoutMs = options.timeoutMs ?? controlTimeoutMs;
-  child.stdin.end();
-  const { code, signal } = await waitForChildExit(child, timeoutMs);
+  try { child.stdin.end(); } catch { fail("docker"); }
+  const { code, signal } = await waitForChildClose(child, timeoutMs);
   if (code !== 0 || signal !== null) fail("protocol", code, signal);
   write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
 }
@@ -335,7 +430,7 @@ export async function performMcpReview(client, isOffline = offline, expectedMode
     clientInfo: { name: isOffline ? "docker-smoke" : "docker-review-real", version: "0.1.0" }
   });
   validateInitializeResult(initialized, protocolVersion);
-  client.notify("notifications/initialized", {});
+  await client.notify("notifications/initialized", {});
   const listed = await client.request(2, "tools/list");
   if (!Array.isArray(listed?.tools) || listed.tools.length !== 1 || listed.tools[0]?.name !== "review_evidence") fail("tools/list", "expected only review_evidence");
   if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
@@ -355,16 +450,13 @@ async function main() {
     stdio: ["pipe", "pipe", "pipe"],
     env: offline ? { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
   });
-  let stderr = "";
-  child.stderr.setEncoding("utf8");
-  child.stderr.on("data", (chunk) => { stderr += chunk; });
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
     const payload = await performMcpReview(client, offline, expectedModel);
     await completeProofLifecycle(child, payload, offline);
   } catch (error) {
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
-    fail("protocol", error, stderr);
+    fail("protocol", error);
   } finally {
     if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
   }
