@@ -27,7 +27,7 @@ describe("evidence envelope and challenge", () => {
     const f = await completedFixture(); const git = vi.fn(); const external = vi.fn();
     const prepared = await prepareChallengeHandoff(f.handoffPath, { expectedPath: f.handoffPath, privateRoot: join(f.root, "private"), descriptorLocator: f.descriptorLocator, reportPaths: [f.report, f.security], nowMs: 1_000, randomBytes: () => Buffer.alloc(32, 0xab), git, external });
     expect(prepared.nonce).toBe("ab".repeat(32)); expect(git).not.toHaveBeenCalled(); expect(external).not.toHaveBeenCalled();
-    await expect(validateChallengePrecommit(f.handoffPath, { expectedPath: f.handoffPath, nowMs: 1_001 })).resolves.toMatchObject({ nonce: prepared.nonce });
+    await expect(validateChallengePrecommit(f.handoffPath, { expectedPath: f.handoffPath, nowMs: 1_001 })).resolves.toMatchObject({ handoff: { nonce: prepared.nonce } });
   });
 
   it("rejects precommit Git identity and accepts a postcommit authenticated handoff", async () => {
@@ -45,9 +45,9 @@ describe("evidence envelope and challenge", () => {
 
   it("rejects expired, tampered and replayed durable state", async () => {
     const f = await completedFixture();
-    await prepareChallengeHandoff(f.handoffPath, { expectedPath: f.handoffPath, privateRoot: join(f.root, "private"), descriptorLocator: f.descriptorLocator, reportPaths: [f.report, f.security], nowMs: 3_000, ttlMs: 20, randomBytes: () => Buffer.alloc(32, 2) });
+    await prepareChallengeHandoff(f.handoffPath, { expectedPath: f.handoffPath, privateRoot: join(f.root, "private"), descriptorLocator: f.descriptorLocator, reportPaths: [f.report, f.security], nowMs: 3_000, ttlMs: 1_000, randomBytes: () => Buffer.alloc(32, 2) });
     const auth = async () => ({ blob: hex("e"), commit: "f".repeat(40) });
-    await expect(verifyChallengeHandoff(f.handoffPath, { expectedPath: f.handoffPath, nowMs: 3_021, authenticatePlanning: auth })).rejects.toThrow("ENVELOPE_TTL");
+    await expect(verifyChallengeHandoff(f.handoffPath, { expectedPath: f.handoffPath, nowMs: 4_001, authenticatePlanning: auth })).rejects.toThrow("ENVELOPE_TTL");
     const handoff = JSON.parse(await readFile(f.handoffPath, "utf8")); handoff.manifest_sha256 = hex("0"); await writeFile(f.handoffPath, canonicalJson(handoff));
     await expect(validateChallengePrecommit(f.handoffPath, { expectedPath: f.handoffPath, nowMs: 3_001 })).rejects.toThrow("ENVELOPE_DIGEST");
   });

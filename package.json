@@ -13,6 +13,8 @@
     "docker:review:real": "node scripts/docker-review-real.mjs",
     "docker:proof:produce-handoff": "node scripts/docker-proof-produce.mjs",
     "docker:proof:verify-handoff": "node scripts/docker-proof-verify-existing.mjs",
+    "review:prepare-challenge-handoff": "node scripts/evidence-envelope.mjs prepare",
+    "review:verify-challenge-handoff": "node scripts/evidence-envelope.mjs verify",
     "test:e2e": "EVIDENCELENS_DISABLE_PROVIDER=1 vitest run tests/e2e/docker-review.test.ts"
   },
   "dependencies": {
