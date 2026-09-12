@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, methodTimeoutMs, performMcpReview, resolveReviewModel, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -32,16 +32,89 @@ class FakeChild extends EventEmitter {
 
 class FakeStream extends EventEmitter {
   setEncoding = vi.fn();
+  destroyed = false;
+  destroy = vi.fn(() => { this.destroyed = true; this.emit("close"); });
 }
 
 class FakeStdioChild extends EventEmitter {
   stdout = new FakeStream();
-  stdin = { write: vi.fn(), end: vi.fn() };
+  stderr = new FakeStream();
+  stdin = Object.assign(new FakeStream(), { write: vi.fn((_raw: string, callback?: (error?: Error) => void) => { callback?.(); return true; }), end: vi.fn((callback?: (error?: Error) => void) => callback?.()) });
+  exitCode: number | null = null;
+  signalCode: NodeJS.Signals | null = null;
+  killed = false;
+  kill = vi.fn((signal: NodeJS.Signals) => { this.killed = true; this.signalCode = signal; return true; });
 }
 
 const line = (value: unknown) => `${JSON.stringify(value)}\n`;
 
 describe("bounded Docker stdio event delivery", () => {
+  it("exports the exact byte ceilings", () => {
+    expect(MAX_STDOUT_LINE_BYTES).toBe(32_000_000);
+    expect(MAX_STDERR_BYTES).toBe(1_000_000);
+    expect(StdioClient.MAX_PENDING_EVENTS).toBe(8);
+  });
+
+  it.each(["before request", "while pending", "after settlement"])("absorbs sanitized stdin EPIPE %s", async (stage) => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child, 25);
+    if (stage === "before request") child.stdin.emit("error", Object.assign(new Error("private"), { code: "EPIPE" }));
+    const request = client.request(7, "tools/call");
+    if (stage === "while pending") child.stdin.emit("error", Object.assign(new Error("private"), { code: "EPIPE" }));
+    if (stage === "after settlement") {
+      child.stdout.emit("data", line({ jsonrpc: "2.0", id: 7, result: {} }));
+      await expect(request).resolves.toEqual({});
+      expect(() => child.stdin.emit("error", Object.assign(new Error("late"), { code: "EPIPE" }))).not.toThrow();
+      return;
+    }
+    await expect(request).rejects.toThrow("[docker-review:docker] failed");
+  });
+
+  it("sanitizes a synchronous stdin write throw", async () => {
+    const child = new FakeStdioChild();
+    child.stdin.write.mockImplementationOnce(() => { throw new Error("private write"); });
+    const client = new StdioClient(child);
+    await expect(client.request(1, "initialize")).rejects.toThrow("[docker-review:docker] failed");
+  });
+
+  it("enforces prospective stdout and cumulative stderr byte limits", async () => {
+    const stdoutChild = new FakeStdioChild();
+    const stdoutClient = new StdioClient(stdoutChild);
+    stdoutChild.stdout.emit("data", Buffer.alloc(MAX_STDOUT_LINE_BYTES + 1, 0x61));
+    await expect(stdoutClient.next()).resolves.toEqual({ overflow: true });
+    expect((stdoutClient as any).buffer).toBe("");
+
+    const stderrChild = new FakeStdioChild();
+    const stderrClient = new StdioClient(stderrChild);
+    stderrChild.stderr.emit("data", Buffer.alloc(MAX_STDERR_BYTES, 0x61));
+    stderrChild.stderr.emit("data", Buffer.from("b"));
+    await expect(stderrClient.next()).resolves.toEqual({ overflow: true });
+    expect((stderrClient as any).stderrBytes).toBe(0);
+  });
+
+  it("records exit as metadata and waits for close before terminal delivery", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const pending = client.next();
+    child.emit("exit", 0, null);
+    let settled = false;
+    void pending.then(() => { settled = true; });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    child.stdout.emit("end");
+    child.stderr.emit("end");
+    child.emit("close", 0, null);
+    await expect(pending).resolves.toMatchObject({ done: true, code: 0, signal: null });
+  });
+
+  it("fails closed when exit and close metadata differ", async () => {
+    const child = new FakeStdioChild();
+    const client = new StdioClient(child);
+    const pending = client.next();
+    child.emit("exit", 0, null);
+    child.emit("close", 1, null);
+    await expect(pending).resolves.toEqual({ dockerError: true });
+  });
   it("keeps one absolute request deadline across notification traffic", async () => {
     vi.useFakeTimers();
     try {
