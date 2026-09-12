@@ -87,3 +87,32 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+
+  proof:
+    build:
+      context: .
+      dockerfile: Dockerfile.proof
+    image: evidencelens-mcp:proof
+    profiles:
+      - proof
+    working_dir: /app
+    user: node
+    entrypoint:
+      - /usr/local/bin/docker-entrypoint.sh
+    environment:
+      EVIDENCELENS_ALLOWED_ROOTS: "course=/proof-fixtures"
+      DEEPSEEK_API_KEY: "${EVIDENCELENS_PROOF_DEEPSEEK_API_KEY:?Set only by the sealed proof launcher}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      DEEPSEEK_MODEL: "${DEEPSEEK_MODEL:-deepseek-v4-flash-vision-exp}"
+      DEEPSEEK_TIMEOUT_MS: "${DEEPSEEK_TIMEOUT_MS:-30000}"
+      DEEPSEEK_MAX_RETRIES: "0"
+      DEEPSEEK_MAX_TOTAL_WAIT_MS: "${DEEPSEEK_MAX_TOTAL_WAIT_MS:-10000}"
+      DEEPSEEK_TEMPERATURE: "${DEEPSEEK_TEMPERATURE:-0.2}"
+      DEEPSEEK_MAX_TOKENS: "${DEEPSEEK_MAX_TOKENS:-4000}"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

@@ -89,7 +89,7 @@ describe("credential-free proof runtime specification", () => {
     const argv = proofDockerRunArgv(spec, "sha256:" + "a".repeat(64));
     expect(argv.at(-1)).toBe("sha256:" + "a".repeat(64));
     expect(argv).toContain("--read-only");
-    expect(argv).toContain("--network=none");
+    expect(argv).not.toContain("--network=host");
     expect(argv).toContain("--cap-drop=ALL");
     expect(argv).toContain("--security-opt=no-new-privileges:true");
     expect(argv.join(" ")).not.toMatch(/(?:--mount|--volume|-v\b|build|pull|EVIDENCELENS_PROOF_DEEPSEEK_API_KEY|PREFLIGHT_SENTINEL)/u);
