@@ -11,6 +11,8 @@
     "test:deepseek-live": "vitest run tests/providers/deepseek-live.test.ts",
     "docker:smoke": "bash scripts/docker-smoke.sh",
     "docker:review:real": "node scripts/docker-review-real.mjs",
+    "docker:proof:produce-handoff": "node scripts/docker-proof-produce.mjs",
+    "docker:proof:verify-handoff": "node scripts/docker-proof-verify-existing.mjs",
     "test:e2e": "EVIDENCELENS_DISABLE_PROVIDER=1 vitest run tests/e2e/docker-review.test.ts"
   },
   "dependencies": {
