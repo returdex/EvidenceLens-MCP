@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -266,6 +266,51 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it("drives the production orchestration seam through the complete offline-shaped lifecycle", async () => {
+    const child = new FakeStdioChild();
+    const transcript: any[] = [];
+    const write = vi.fn();
+    let providerOrNetworkCalls = 0;
+    child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
+      const message = JSON.parse(raw);
+      transcript.push(message);
+      if (message.method === "initialize") {
+        child.stdout.emit("data", Buffer.from(line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "evidencelens", version: "0.1.3" } } })));
+      } else if (message.method === "tools/list") {
+        child.stdout.emit("data", Buffer.from(line({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "review_evidence", annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true } }] } })));
+      } else if (message.method === "tools/call") {
+        const payload = successPayload();
+        payload.requestId = "docker-smoke-001";
+        delete payload.metadata.provider;
+        payload.findings[0].id = "deterministic:finding-1";
+        child.stdout.emit("data", Buffer.from(line({ jsonrpc: "2.0", id: 3, result: mcp(payload) })));
+        queueMicrotask(() => {
+          child.stdout.emit("end");
+          child.stderr.emit("end");
+          child.exitCode = 0;
+          child.emit("exit", 0, null);
+          child.emit("close", 0, null);
+        });
+      }
+      callback?.();
+      return true;
+    });
+
+    await expect(runReviewHarness({
+      isOffline: true,
+      spawnChild: vi.fn(() => child),
+      write,
+      onProviderOrNetworkCall: () => { providerOrNetworkCalls += 1; }
+    })).resolves.toBeUndefined();
+
+    expect(transcript.map(({ method }) => method)).toEqual(["initialize", "notifications/initialized", "tools/list", "tools/call"]);
+    expect(transcript.map(({ id }) => id)).toEqual([1, undefined, 2, 3]);
+    expect(transcript[3].params.arguments).toEqual(fixtureRequest(true));
+    expect(write).toHaveBeenCalledOnce();
+    expect(write).toHaveBeenCalledWith("offline smoke passed: 4 fixtures, 1 findings\n");
+    expect(providerOrNetworkCalls).toBe(0);
+  });
+
   it("writes the exact initialize, initialized, tools/list, and tools/call transcript", async () => {
     const child = new FakeStdioChild();
     const client = new StdioClient(child);
