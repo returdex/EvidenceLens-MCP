@@ -40,6 +40,8 @@ describe("Docker deployment configuration", () => {
     expect(compose).toContain("smoke:");
     expect(compose).toContain("review:");
     expect(compose).toContain("review-file:");
+    expect(compose).toContain("proof:");
+    expect(compose).toContain('EVIDENCELENS_PROOF_DEEPSEEK_API_KEY: "${EVIDENCELENS_PROOF_DEEPSEEK_API_KEY:?');
     expect(compose).toContain('EVIDENCELENS_ALLOWED_ROOTS: "course=/workspace"');
     expect(compose).toContain('EVIDENCELENS_DISABLE_PROVIDER: "1"');
     expect(compose).toContain("DEEPSEEK_API_KEY:");
