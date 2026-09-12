@@ -99,4 +99,18 @@ describe("credential-free proof runtime specification", () => {
     const spec = await deriveProofRuntimeSpec(async () => ({ stdout: JSON.stringify(composeObject()), stderr: "" }), {});
     expect(() => proofDockerRunArgv(spec, image)).toThrow("proof runtime argv failed");
   });
+
+  it.each([
+    ["writable root", (proof: any) => { proof.readOnly = false; }],
+    ["host network", (proof: any) => { proof.network = "host"; }],
+    ["extra entrypoint", (proof: any) => { proof.entrypoint.push("--unexpected"); }],
+    ["shell command", (proof: any) => { proof.command = ["/bin/sh", "-c", "echo bad"]; }],
+    ["duplicate tmpfs", (proof: any) => { proof.tmpfs.push("/tmp"); }],
+    ["extra environment", (proof: any) => { proof.environment.EXTRA = "x"; }],
+    ["proof variable leak", (proof: any) => { proof.environment.DEEPSEEK_MODEL = "EVIDENCELENS_PROOF_DEEPSEEK_API_KEY"; }],
+  ])("rejects mutated runtime contract: %s", async (_name, mutate) => {
+    const spec = await deriveProofRuntimeSpec(async () => ({ stdout: JSON.stringify(composeObject()), stderr: "" }), {});
+    mutate(spec.proof);
+    expect(() => proofDockerRunArgv(spec, "sha256:" + "a".repeat(64))).toThrow("proof runtime argv failed");
+  });
 });
