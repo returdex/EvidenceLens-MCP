@@ -78,4 +78,32 @@ describe("reviewed non-planning source set", () => {
     await expect(verifyPrivateContext(snapshot)).rejects.toThrow("SOURCE_SET_SNAPSHOT_DRIFT");
     await snapshot.cleanup();
   });
+
+  it("remains tainted after a private snapshot mutate-restore race", async () => {
+    const root = await repository();
+    const reviewedCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
+    const snapshot = await materializePrivateContext({ repoDir: root, reviewedCommit });
+    const target = join(snapshot.contextPath, "src", "server.ts");
+    const original = await readFile(target);
+    await writeFile(target, "transient mutation\n");
+    await writeFile(target, original);
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    await expect(verifyPrivateContext(snapshot)).rejects.toThrow("SOURCE_SET_SNAPSHOT_DRIFT");
+    await snapshot.cleanup();
+  });
+
+  it("never copies ignored dependency, build, or credential paths", async () => {
+    const root = await repository();
+    const reviewedCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
+    for (const path of ["node_modules/private.js", "dist/private.js"]) {
+      await mkdir(join(root, path.split("/")[0]), { recursive: true });
+      await writeFile(join(root, path), "private\n");
+    }
+    await writeFile(join(root, ".evidencelens.local.json"), "{\"secret\":true}\n");
+    const snapshot = await materializePrivateContext({ repoDir: root, reviewedCommit });
+    for (const path of ["node_modules/private.js", "dist/private.js", ".evidencelens.local.json"]) {
+      await expect(readFile(join(snapshot.contextPath, path))).rejects.toMatchObject({ code: "ENOENT" });
+    }
+    await snapshot.cleanup();
+  });
 });
