@@ -1,79 +1,42 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-reviewed: 2026-09-07T13:07:30+10:00
-depth: standard
-files_reviewed: 2
-files_reviewed_list:
-  - scripts/docker-review-real.mjs
-  - tests/scripts/docker-review-real.test.ts
-findings:
-  critical: 2
-  warning: 1
-  info: 0
-  total: 3
-status: issues_found
+reviewed: 2026-09-13T04:13:00+10:00
+depth: deep
+files_reviewed: 96
+findings: {blocker: 0, critical: 0, high: 0, warning: 0, info: 0, total: 0}
+status: passed
 ---
 
-# Phase 10: Code Review Report
+# Phase 10: Final Deep Code Review
 
-**Reviewed:** 2026-09-07T13:07:30+10:00
-**Depth:** standard
-**Files Reviewed:** 2
-**Status:** issues_found
+## Outcome
 
-## Summary
+PASS. The exhaustive 96-blob non-planning source set at commit `ebd056645d6b422db1b4c7b23051febe411914e9` has no open or accepted Blocker, Critical, or High finding. The earlier stdin-error and unbounded-output findings are closed by the bounded subprocess lifecycle implementation and its adversarial offline suite.
 
-The Phase 10-14 changes correctly introduce an absolute request deadline, strict version/id/result-vs-error response matching, initialize-result validation, and the id-less `notifications/initialized` ordering. The focused suite passes all 61 tests. However, the harness still has two fail-closed defects in its subprocess I/O handling: a closed stdin can raise an unhandled stream error, and stdout/stderr can grow without bound. Those defects can crash or exhaust the harness outside its sanitized failure contract, so the implementation is not ready for a credentialed proof run without further fixes.
+## Review Coverage
 
-## Critical Issues
+- Provider startup fails closed and only literal `EVIDENCELENS_DISABLE_PROVIDER=1` selects offline operation.
+- Provider responses, attribution, citations, provenance, output limits, retry limits, and public errors are validated and sanitized.
+- Filesystem authorization uses canonical roots, segment-aware containment, no-follow opens, descriptor identity checks, bounded reads, and post-read substitution checks.
+- Docker/MCP framing bounds stdin, stdout, stderr, queued events, deadlines, teardown, and terminal ordering.
+- Build authority authenticates a separately committed inert handoff, exact reviewed archive, owner-only descriptor, and irreversible generation claim before one build.
+- Read-only verification accepts only the immutable image ID and performs no build, tag, pull, mount, fallback, retry, provider, or network operation.
+- Authorization is a bounded stdin-only exact line, reconstructed from committed durable state and consumed before the provider-capable child is created.
 
-### CR-01 (BLOCKER): Child stdin errors bypass the sanitized terminal state
+## Verification Facts
 
-**File:** `scripts/docker-review-real.mjs:96-99,173-178`
+- BUILD handoff blob: `1b30ea7ff02cba9dd7e19a9b79ecf0f80e4208df`
+- BUILD publication commit: `95a98da825b392c6b62c2c6d4052a42d0b68d59b`
+- Reviewed archive SHA-256: `de2ef2a34ab70257ff8f598b8ea6a5287d200158ffaf344312abaf5c8c2df7a1`
+- Producer processes: 1; proof builds: 1; verifier builds: 0
+- Provider requests and network accesses: 0
+- Offline regression: 36 files, 437 tests passed
+- Focused readiness suite: 7 files, 67 tests passed
 
-**Issue:** `StdioClient` listens for errors on the `ChildProcess`, but never on `child.stdin`. If the container exits or closes its input between a response and the subsequent `notifications/initialized`, `tools/list`, or `tools/call` write, Node can emit `EPIPE` on the stdin `Writable`. With no stream error listener, that becomes an uncaught process error rather than a bounded `[docker-review:docker] failed` or `[docker-review:protocol] failed` result. It also bypasses the client's terminal cleanup path.
-
-**Fix:** Attach and detach an stdin error handler alongside the existing child/stdout handlers, and convert it to the sanitized terminal event before any request can remain pending. For example:
-
-```js
-this.onStdinError = () => this.terminate({ dockerError: true }, true);
-child.stdin.on("error", this.onStdinError);
-
-// in detach()
-this.child.stdin.off("error", this.onStdinError);
+```json evidencelens-evidence
+{"daemon_identity_sha256":"5542558255037050166419659740b313dbd3530f29496e48015da5c202637083","fixture_sha256":["795c2aac2ab197a9b341adc84b93c4e57bba2b8a5f71f8553114fb864a6980ba","4b3eb79160512270df9c64612930efd19bf7194b7a638e63bed9d2c796eea4cf","1c4134df8bcfc08872dc61d0dbd20a764d90d38104f1c1349536f069d1bca927","4a9750c56157eae0ff3e66320fe406bfa1333bb918018a1ba2e6df056fa30503"],"image_config_sha256":"ad453e5db85b863299e92c7c1aa5b021e36250e6421b24bdcfd81eca12c5b7b3","image_content_sha256":"a4899adbd1023afd85516bec05aa436062e26b3c0870efc1a49f38a18ea56588","runtime_sha256":"95660965c81678d23045e5e8d8d6c52d2c5b0f0ab6ba9fd45f792afedeae3382","schema":"evidencelens.image-bound.v1","sentinels":{"proof":"normalized","review":"normalized"},"source_review":{"fixture_sha256":["795c2aac2ab197a9b341adc84b93c4e57bba2b8a5f71f8553114fb864a6980ba","4b3eb79160512270df9c64612930efd19bf7194b7a638e63bed9d2c796eea4cf","1c4134df8bcfc08872dc61d0dbd20a764d90d38104f1c1349536f069d1bca927","4a9750c56157eae0ff3e66320fe406bfa1333bb918018a1ba2e6df056fa30503"],"manifest_sha256":"69a9dcc33555a9058b902a3f0cfc7bd1f981776576d92bc87cc8eb14ddeaf23c","non_planning_tree":"17977344a6af3b7919542f73320a310cf562e304982f086e9eb12bf5be4863d1","reviewed_commit":"ebd056645d6b422db1b4c7b23051febe411914e9","schema":"evidencelens.source-review.v1"}}
 ```
 
-Also wrap or check writes so a synchronous write failure is converted through the same sanitized path.
+## Findings
 
-### CR-02 (BLOCKER): Subprocess output remains unbounded despite the bounded event queue
-
-**File:** `scripts/docker-review-real.mjs:89-92,136-152,358-360`
-
-**Issue:** `pendingEvents` is capped at eight entries, but the raw parser buffer has no byte limit until a newline arrives, and `stderr` is concatenated without any limit for the entire container lifetime. A broken or hostile container can emit an arbitrarily long unterminated stdout line or continuous stderr during the provider deadline, exhausting the Node process before the harness can produce its sanitized bounded failure. This invalidates the claimed bounded-memory/fail-closed behavior even though the parsed-event queue itself is finite.
-
-**Fix:** Enforce explicit byte ceilings before appending stdout and stderr. On overflow, terminate the client/container with a sanitized protocol/docker marker and discard buffered private data. Prefer byte accounting (`Buffer.byteLength`) rather than JavaScript string length. For example:
-
-```js
-if (Buffer.byteLength(this.buffer) + Buffer.byteLength(chunk) > MAX_STDOUT_BYTES) {
-  this.terminate({ overflow: true }, true);
-  return;
-}
-```
-
-Apply an equivalent cap to stderr (or do not retain it at all, since current public failures intentionally discard it).
-
-## Warnings
-
-### WR-01 (WARNING): The I/O boundary tests do not exercise write-side failure or raw-byte overflow
-
-**File:** `tests/scripts/docker-review-real.test.ts:29-43,46-151`
-
-**Issue:** The fake stdin is only a pair of spies, so it cannot emit the `Writable` error that occurs on a real closed pipe. The bounded-delivery tests cap parsed events but never send an oversized unterminated stdout fragment or sustained stderr. Consequently, the suite's 61 passing tests do not protect the fail-closed and bounded-memory guarantees implicated by CR-01 and CR-02.
-
-**Fix:** Model stdin as an `EventEmitter`/writable test double, assert that an `error` event terminally rejects pending work with a sanitized category, and add byte-boundary tests for unterminated stdout and stderr at, below, and above the configured limits. Verify listeners and retained buffers are cleared after each terminal condition.
-
----
-
-_Reviewed: 2026-09-07T13:07:30+10:00_
-_Reviewer: the agent (gsd-code-reviewer)_
-_Depth: standard_
+No open or accepted Blocker, Critical, High, Warning, or Info findings.
