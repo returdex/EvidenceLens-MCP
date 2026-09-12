@@ -16,9 +16,10 @@ describe("atomic authorized once", () => {
 
   it("reconstructs state, consumes durably, then spawns the pinned image once", async () => {
     const consume = vi.fn(async () => undefined), spawnPinned = vi.fn(async () => ({ status: "passed" }));
-    const result = await executeAuthorizedOnce("fixed", input(`${echo}\n`), { expectedPath: "fixed", verify: vi.fn(async () => resume), consume, spawnPinned });
+    const publishOutcome = vi.fn(async () => undefined);
+    const result = await executeAuthorizedOnce("fixed", input(`${echo}\n`), { expectedPath: "fixed", verify: vi.fn(async () => resume), consume, spawnPinned, publishOutcome });
     expect(consume).toHaveBeenCalledOnce(); expect(spawnPinned).toHaveBeenCalledOnce(); expect(spawnPinned).toHaveBeenCalledWith(resume);
-    expect(result).toEqual({ schema: "evidencelens.authorized-review.v1", status: "passed" });
+    expect(result).toEqual({ schema: "evidencelens.authorized-review.v1", status: "passed" }); expect(publishOutcome).toHaveBeenCalledOnce();
   });
 
   it("rejects wrong challenge and replay before spawning", async () => {
@@ -30,7 +31,7 @@ describe("atomic authorized once", () => {
 
   it("permits at most one spawn under concurrent execution", async () => {
     let claimed = false; const spawnPinned = vi.fn(async () => ({ status: "passed" }));
-    const options = { expectedPath: "fixed", verify: async () => resume, consume: async () => { if (claimed) throw new Error("AUTHORIZED_REPLAY"); claimed = true; }, spawnPinned };
+    const options = { expectedPath: "fixed", verify: async () => resume, consume: async () => { if (claimed) throw new Error("AUTHORIZED_REPLAY"); claimed = true; }, spawnPinned, publishOutcome: async () => undefined };
     const outcomes = await Promise.allSettled([executeAuthorizedOnce("fixed", input(`${echo}\n`), options), executeAuthorizedOnce("fixed", input(`${echo}\n`), options)]);
     expect(outcomes.filter(x => x.status === "fulfilled")).toHaveLength(1); expect(spawnPinned).toHaveBeenCalledOnce();
   });

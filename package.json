@@ -15,6 +15,7 @@
     "docker:proof:verify-handoff": "node scripts/docker-proof-verify-existing.mjs",
     "review:prepare-challenge-handoff": "node scripts/evidence-envelope.mjs prepare",
     "review:verify-challenge-handoff": "node scripts/evidence-envelope.mjs verify",
+    "review:authorized-once": "node scripts/atomic-authorized-review.mjs",
     "test:e2e": "EVIDENCELENS_DISABLE_PROVIDER=1 vitest run tests/e2e/docker-review.test.ts"
   },
   "dependencies": {
