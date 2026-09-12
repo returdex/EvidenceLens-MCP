@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { constants as fsConstants } from "node:fs";
+import { constants as fsConstants, watch } from "node:fs";
 import { chmod, lstat, mkdir, mkdtemp, open, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
@@ -12,6 +12,7 @@ const MAX_ARCHIVE_ENTRIES = 20_000;
 const MAX_ARCHIVE_BYTES = 512 * 1024 * 1024;
 const SAFE_MODES = new Set(["100644", "100755"]);
 const SECRET_PATH = ".evidencelens.local.json";
+const utf8 = new TextDecoder("utf-8", { fatal: true });
 
 function fail(code) { throw new Error(code); }
 function sha256(bytes) { return createHash("sha256").update(bytes).digest("hex"); }
@@ -46,7 +47,14 @@ export async function createNonPlanningManifest({ repoDir, reviewedCommit }) {
   const resolvedCommit = (await git(root, ["rev-parse", "--verify", `${reviewedCommit}^{commit}`])).stdout.toString("utf8").trim();
   if (!/^[0-9a-f]{40,64}$/u.test(resolvedCommit)) fail("SOURCE_SET_BAD_COMMIT");
   const raw = (await git(root, ["ls-tree", "-r", "-z", "--full-tree", resolvedCommit])).stdout;
-  const records = raw.length === 0 ? [] : raw.subarray(0, raw.length - 1).toString("utf8").split("\0");
+  if (raw.length > 0 && raw[raw.length - 1] !== 0) fail("SOURCE_SET_BAD_TREE");
+  const records = [];
+  for (let start = 0; start < raw.length - 1;) {
+    const end = raw.indexOf(0, start);
+    if (end < 0) fail("SOURCE_SET_BAD_TREE");
+    try { records.push(utf8.decode(raw.subarray(start, end))); } catch { fail("SOURCE_SET_UNSAFE_PATH"); }
+    start = end + 1;
+  }
   const entries = [];
   const seen = new Set();
   for (const record of records) {
@@ -166,9 +174,32 @@ function assertInventory(manifest, inventory, code) {
 }
 
 export async function verifyPrivateContext(snapshot) {
+  if (snapshot.tainted?.()) fail("SOURCE_SET_SNAPSHOT_DRIFT");
   const inventory = await inventoryContext(snapshot.contextPath);
   assertInventory(snapshot.manifest, inventory, "SOURCE_SET_SNAPSHOT_DRIFT");
+  if (snapshot.tainted?.()) fail("SOURCE_SET_SNAPSHOT_DRIFT");
   return true;
+}
+
+async function monitorTree(contextPath) {
+  let changed = false;
+  const watchers = [];
+  async function add(directory) {
+    watchers.push(watch(directory, { persistent: false }, () => { changed = true; }));
+    for (const name of await readdir(directory)) {
+      const absolute = join(directory, name);
+      if ((await lstat(absolute)).isDirectory()) await add(absolute);
+    }
+  }
+  await add(contextPath);
+  return { tainted: () => changed, close: () => watchers.forEach((entry) => entry.close()) };
+}
+
+export async function runWithVerifiedPrivateContext(snapshot, operation) {
+  await verifyPrivateContext(snapshot);
+  const result = await operation({ contextPath: snapshot.contextPath, dockerfilePath: snapshot.dockerfilePath });
+  await verifyPrivateContext(snapshot);
+  return result;
 }
 
 export async function materializePrivateContext({ repoDir, reviewedCommit, preArchiveInputs = [] }) {
@@ -181,9 +212,11 @@ export async function materializePrivateContext({ repoDir, reviewedCommit, preAr
   const contextPath = join(privateRoot, "context");
   await mkdir(contextPath, { mode: 0o700 });
   let valid = true;
+  let monitor;
   const cleanup = async () => {
     if (!valid || !privateRoot.startsWith(join(tmpdir(), "evidencelens-proof-"))) fail("SOURCE_SET_CLEANUP_REFUSED");
     valid = false;
+    monitor?.close();
     await rm(privateRoot, { recursive: true, force: true });
   };
   try {
@@ -191,7 +224,8 @@ export async function materializePrivateContext({ repoDir, reviewedCommit, preAr
     const extracted = await extractGitTar(tar, contextPath);
     assertInventory(manifest, extracted, "SOURCE_SET_ARCHIVE_MISMATCH");
     await verifyPrivateContext({ contextPath, manifest });
-    return { reviewedCommit: manifest.reviewedCommit, nonPlanningTree: manifest.nonPlanningTree, manifest, contextPath, dockerfilePath: join(contextPath, "Dockerfile.proof"), cleanup };
+    monitor = await monitorTree(contextPath);
+    return { reviewedCommit: manifest.reviewedCommit, nonPlanningTree: manifest.nonPlanningTree, manifest, contextPath, dockerfilePath: join(contextPath, "Dockerfile.proof"), tainted: monitor.tainted, cleanup };
   } catch (error) {
     await cleanup().catch(() => undefined);
     throw error;

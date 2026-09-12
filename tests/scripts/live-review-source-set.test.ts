@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -105,5 +105,14 @@ describe("reviewed non-planning source set", () => {
       await expect(readFile(join(snapshot.contextPath, path))).rejects.toMatchObject({ code: "ENOENT" });
     }
     await snapshot.cleanup();
+  });
+
+  it("rejects a tracked symlink rather than following or archiving it", async () => {
+    const root = await repository();
+    await symlink("src/server.ts", join(root, "alias.ts"));
+    await execFileAsync("git", ["add", "alias.ts"], { cwd: root });
+    await execFileAsync("git", ["commit", "-qm", "add unsafe link"], { cwd: root });
+    const reviewedCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
+    await expect(createNonPlanningManifest({ repoDir: root, reviewedCommit })).rejects.toThrow("SOURCE_SET_UNSAFE_MODE");
   });
 });
