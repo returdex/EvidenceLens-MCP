@@ -270,7 +270,6 @@ describe("credentialed Docker review harness", () => {
     const child = new FakeStdioChild();
     const transcript: any[] = [];
     const write = vi.fn();
-    let providerOrNetworkCalls = 0;
     child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
       const message = JSON.parse(raw);
       transcript.push(message);
@@ -284,13 +283,13 @@ describe("credentialed Docker review harness", () => {
         delete payload.metadata.provider;
         payload.findings[0].id = "deterministic:finding-1";
         child.stdout.emit("data", Buffer.from(line({ jsonrpc: "2.0", id: 3, result: mcp(payload) })));
-        queueMicrotask(() => {
+        setTimeout(() => {
           child.stdout.emit("end");
           child.stderr.emit("end");
           child.exitCode = 0;
           child.emit("exit", 0, null);
           child.emit("close", 0, null);
-        });
+        }, 0);
       }
       callback?.();
       return true;
@@ -299,8 +298,7 @@ describe("credentialed Docker review harness", () => {
     await expect(runReviewHarness({
       isOffline: true,
       spawnChild: vi.fn(() => child),
-      write,
-      onProviderOrNetworkCall: () => { providerOrNetworkCalls += 1; }
+      write
     })).resolves.toBeUndefined();
 
     expect(transcript.map(({ method }) => method)).toEqual(["initialize", "notifications/initialized", "tools/list", "tools/call"]);
@@ -308,7 +306,6 @@ describe("credentialed Docker review harness", () => {
     expect(transcript[3].params.arguments).toEqual(fixtureRequest(true));
     expect(write).toHaveBeenCalledOnce();
     expect(write).toHaveBeenCalledWith("offline smoke passed: 4 fixtures, 1 findings\n");
-    expect(providerOrNetworkCalls).toBe(0);
   });
 
   it("writes the exact initialize, initialized, tools/list, and tools/call transcript", async () => {

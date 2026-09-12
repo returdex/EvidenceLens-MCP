@@ -438,28 +438,39 @@ export async function performMcpReview(client, isOffline = offline, expectedMode
   return assertStructuralReview(result, isOffline, expectedModel);
 }
 
-async function main() {
-  if (!offline && (!process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY.trim() === "")) {
+export async function runReviewHarness(options = {}) {
+  const isOffline = options.isOffline ?? offline;
+  const environment = options.environment ?? process.env;
+  const spawnChild = options.spawnChild ?? spawn;
+  const resolveProof = options.resolveProof ?? resolveLiveProof;
+  const write = options.write ?? ((message) => process.stdout.write(message));
+
+  if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
   }
 
-  const liveProof = offline ? undefined : await resolveLiveProof();
+  const liveProof = isOffline ? undefined : await resolveProof(undefined, environment);
   const expectedModel = liveProof?.model;
+  const selectedProfile = isOffline ? "smoke" : "review";
 
-  const child = spawn("docker", ["compose", "--profile", profile, "run", "--rm", "-T", service], {
+  const child = spawnChild("docker", ["compose", "--profile", selectedProfile, "run", "--rm", "-T", selectedProfile], {
     stdio: ["pipe", "pipe", "pipe"],
-    env: offline ? { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
+    env: isOffline ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
   });
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
-    const payload = await performMcpReview(client, offline, expectedModel);
-    await completeProofLifecycle(child, payload, offline);
+    const payload = await performMcpReview(client, isOffline, expectedModel);
+    await completeProofLifecycle(child, payload, isOffline, { write });
   } catch (error) {
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
     fail("protocol", error);
   } finally {
     if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
   }
+}
+
+async function main() {
+  await runReviewHarness();
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
