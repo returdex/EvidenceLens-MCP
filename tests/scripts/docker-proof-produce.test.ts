@@ -94,6 +94,22 @@ describe("irreversible proof build generation", () => {
     expect(buildOnce).toHaveBeenCalledTimes(1);
   });
 
+  it("allows only one build across concurrent producer claims", async () => {
+    const value = await fixture();
+    const buildOnce = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return buildEvidence(value.generation);
+    });
+    const options = { expectedPath: value.handoffPath, authenticatePlanning: vi.fn(async () => undefined), buildOnce };
+    const outcomes = await Promise.allSettled([
+      produceBuildGeneration(value.handoffPath, options),
+      produceBuildGeneration(value.handoffPath, options),
+    ]);
+    expect(outcomes.filter((entry) => entry.status === "fulfilled")).toHaveLength(1);
+    expect(outcomes.filter((entry) => entry.status === "rejected")).toHaveLength(1);
+    expect(buildOnce).toHaveBeenCalledOnce();
+  });
+
   it.each(["", "/absolute/10-22-BUILD.json", "./10-22-BUILD.json", "10-22-BUILD.json;docker build ."])
   ("rejects wrong argv spelling %s before any side effect", async (path) => {
     const value = await fixture();
