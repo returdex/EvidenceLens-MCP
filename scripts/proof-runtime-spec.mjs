@@ -120,8 +120,18 @@ export function proofDockerRunArgv(spec, imageId) {
   try {
     if (!ordinary(spec?.proof) || !/^sha256:[0-9a-f]{64}$/u.test(imageId)) fail("argv");
     const proof = spec.proof;
-    const argv = ["run", "--rm", "-i", "--read-only", "--tmpfs=/tmp", "--cap-drop=ALL", "--security-opt=no-new-privileges:true"];
-    if (proof.network !== "default") argv.push(`--network=${proof.network}`);
+    if (JSON.stringify(proof.entrypoint) !== JSON.stringify(["/usr/local/bin/docker-entrypoint.sh"])
+      || proof.command !== null || proof.workingDir !== "/app" || proof.user !== "node"
+      || proof.readOnly !== true || JSON.stringify(proof.tmpfs) !== JSON.stringify(["/tmp"])
+      || JSON.stringify(proof.capDrop) !== JSON.stringify(["ALL"])
+      || JSON.stringify(proof.securityOpt) !== JSON.stringify(["no-new-privileges:true"])
+      || proof.network !== "default" || !ordinary(proof.environment)
+      || JSON.stringify(Object.keys(proof.environment).sort()) !== JSON.stringify([...providerKeys].sort())) fail("argv");
+    for (const key of providerKeys) if (typeof proof.environment[key] !== "string") fail("argv");
+    if (proof.environment.DEEPSEEK_API_KEY !== SECRET_SLOT
+      || proof.environment.EVIDENCELENS_ALLOWED_ROOTS !== "course=/proof-fixtures"
+      || proof.environment.DEEPSEEK_MAX_RETRIES !== "0") fail("argv");
+    const argv = ["run", "--rm", "-i", "--read-only", "--tmpfs=/tmp", "--cap-drop=ALL", "--security-opt=no-new-privileges:true", "--network=bridge"];
     argv.push(`--workdir=${proof.workingDir}`, `--user=${proof.user}`, `--entrypoint=${proof.entrypoint[0]}`);
     for (const key of providerKeys) argv.push("--env", `${key}=${proof.environment[key]}`);
     argv.push(imageId);
