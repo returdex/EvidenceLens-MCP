@@ -135,8 +135,9 @@ async function extractGitTar(tar, destination) {
       const handle = await open(target, fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY | fsConstants.O_NOFOLLOW, 0o600);
       try { await handle.writeFile(tar.subarray(dataStart, dataEnd)); } finally { await handle.close(); }
       const mode = parseOctal(header.subarray(100, 108), "SOURCE_SET_BAD_ARCHIVE") & 0o777;
-      await chmod(target, mode === 0o755 ? 0o755 : 0o644);
-      files.set(path, { path, mode: mode === 0o755 ? "100755" : "100644", byteLength: size, sha256: sha256(tar.subarray(dataStart, dataEnd)) });
+      const executable = (mode & 0o111) !== 0;
+      await chmod(target, executable ? 0o755 : 0o644);
+      files.set(path, { path, mode: executable ? "100755" : "100644", byteLength: size, sha256: sha256(tar.subarray(dataStart, dataEnd)) });
     } else fail("SOURCE_SET_UNSAFE_ARCHIVE_TYPE");
     offset = dataStart + Math.ceil(size / 512) * 512;
   }
