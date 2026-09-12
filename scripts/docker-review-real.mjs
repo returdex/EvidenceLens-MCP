@@ -8,8 +8,6 @@ import { reviewResponseSchema } from "../dist/contracts/review.js";
 import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
 
 const offline = process.argv.includes("--offline");
-const profile = offline ? "smoke" : "review";
-const service = profile;
 const controlTimeoutMs = 30_000;
 const liveProofMarginMs = 30_000;
 const protocolVersion = "2025-11-25";
