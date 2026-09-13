@@ -94,6 +94,20 @@ describe("live evidence audit", () => {
   });
 
   it.each([
+    ["duplicate frontmatter status", verification("[docker-review:timeout] failed", "gaps_found").replace("status: gaps_found\n---", "status: gaps_found\nstatus: passed\n---"), requirements(false)],
+    ["body-only status", verification("[docker-review:timeout] failed", "gaps_found").replace(/^---\nstatus: gaps_found\n---\n/u, "status: gaps_found\n"), requirements(false)],
+    ["duplicate checklist", verification("[docker-review:timeout] failed", "gaps_found"), `${requirements(false)}- [ ] **PROV-01**: duplicate\n`],
+    ["duplicate trace", verification("[docker-review:timeout] failed", "gaps_found"), `${requirements(false)}| PROV-01 | Phase 10 | Gap: credentialed Docker MCP proof |\n`],
+  ])("rejects non-unique authority: %s", (_label, report, reqs) => {
+    expect(() => auditLiveEvidence(report, reqs)).toThrow("live evidence audit failed");
+  });
+
+  it("rejects duplicate or body-only status in sealed phase inputs", () => {
+    expect(() => auditLiveEvidence(proof("timeout"), "---\nphase: 7\nstatus: gaps_found\nstatus: passed\n---\n", phase(10, "gaps_found"), requirements(false))).toThrow("live evidence audit failed");
+    expect(() => auditLiveEvidence(proof("timeout"), "phase: 7\nstatus: gaps_found\n", phase(10, "gaps_found"), requirements(false))).toThrow("live evidence audit failed");
+  });
+
+  it.each([
     "raw stderr", '{"jsonrpc":"2.0"}', "/Users/private/file", "../private/file", "https://example.test/api",
     "DEEPSEEK_API_KEY=value", "model: private-model", "stack: secret", "cause: secret", "provider prose"
   ])("rejects forbidden or extra retained evidence: %s", (extra) => {

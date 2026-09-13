@@ -1,11 +1,35 @@
+import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { auditChainRecord, auditLiveProof, auditRepairSet, auditSourceAndReports } from "../../scripts/audit-proof-chain.mjs";
+import { auditChainRecord, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
 
 const h = (c: string) => c.repeat(64);
 const certifiers = { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") };
 const identity = { certifier_sha256: certifiers, manifest_sha256: h("c"), non_planning_tree: h("d"), reviewed_commit: "e".repeat(40) };
 
 describe("proof chain certifier", () => {
+  const source = { ...identity, schema: "evidencelens.source.v2", status: "ready" };
+  const deep = { ...identity, schema: "evidencelens.deep-review.v2", status: "ready" };
+  const asvs = { ...identity, schema: "evidencelens.asvs-review.v2", status: "ready" };
+  const build = { ...identity, schema: "evidencelens.build.v2", status: "ready" };
+  const execution = { ...identity, schema: "evidencelens.diagnostic.v2", status: "passed" };
+
+  it("publishes a frozen exact registry without draft modes", () => {
+    expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["source-review", "reviews", "build", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
+  });
+
+  it("enforces mode-specific schema order and cardinality", () => {
+    expect(auditModeRecords("build", [build, source, deep, asvs])).toMatchObject(identity);
+    for (const records of [[source], [build, source, asvs, deep], [build, source, deep], [build, source, deep, asvs, asvs]]) {
+      expect(() => auditModeRecords("build", records)).toThrow(/PROOF_CHAIN_(ARGV|SCHEMA|IDENTITY)/u);
+    }
+    expect(() => auditModeRecords("execution", [build, source, deep, asvs])).toThrow("PROOF_CHAIN_SCHEMA");
+  });
+
+  it("rejects the demonstrated SOURCE-as-build subprocess substitution", () => {
+    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", "build", ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-34-SOURCE.json"], { stdio: "pipe" })).toThrow();
+  });
   it.each([
     ["evidencelens.source.v2", "ready"], ["evidencelens.deep-review.v2", "ready"],
     ["evidencelens.asvs-review.v2", "ready"], ["evidencelens.build.v2", "ready"],
