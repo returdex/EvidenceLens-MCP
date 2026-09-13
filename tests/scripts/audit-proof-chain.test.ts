@@ -70,7 +70,7 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
   });
 

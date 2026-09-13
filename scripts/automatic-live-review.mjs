@@ -286,7 +286,7 @@ async function prepareBuild(source) {
  * shell. The proof producer owns the exclusive generation claim and single
  * archive build; its verifier only inspects that resulting image. */
 export async function runFixedAutomaticBuild() {
-  await runNodeScript("scripts/audit-proof-chain.mjs", ["reviews", ...fixedReviewPaths]);
+  await runNodeScript("scripts/audit-proof-chain.mjs", ["reviews-auto", ...fixedReviewPaths]);
   const source = await readCanonicalJson(fixedReviewPaths[0]);
   let prepared;
   try { prepared = await prepareBuild(source); } catch { fail("AUTOMATIC_BUILD_FAILED"); }
