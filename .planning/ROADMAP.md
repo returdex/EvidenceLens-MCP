@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(23 of 37 plans executed; verification 10/11 with PROV-01 still open after the sole authorized protocol non-pass.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(37 of 37 plans executed; verification 7/11 with PROV-01 and automatic proof-chain gaps still open.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -282,46 +282,46 @@ Plans:
 - [x] 10-23-PLAN.md — Committed challenge handoff, exact stdin authorization, and at-most-once paid proof
 
 **Wave 20** *(gap closure; blocked on Wave 19 completion)*
-- [ ] 10-24-PLAN.md — Non-secret protocol-stage diagnostics and exhaustive credential-free reproduction
+- [x] 10-24-PLAN.md — Non-secret protocol-stage diagnostics and exhaustive credential-free reproduction
 
 **Wave 21** *(gap closure; blocked on Wave 20 completion)*
-- [ ] 10-25-PLAN.md — Complete automatic build/live, nested terminal-state, and crash-recovery machinery
+- [x] 10-25-PLAN.md — Complete automatic build/live, nested terminal-state, and crash-recovery machinery
 
 **Wave 22** *(gap closure; blocked on Wave 21 completion)*
-- [ ] 10-26-PLAN.md — Certifying audit chain, four-input truth audit, and write-ahead synchronization
+- [x] 10-26-PLAN.md — Certifying audit chain, four-input truth audit, and write-ahead synchronization
 
 **Wave 23** *(gap closure; blocked on Wave 22 completion)*
-- [ ] 10-27-PLAN.md — Exact committed diagnostic-tooling deep and ASVS L1 security review
+- [x] 10-27-PLAN.md — Exact committed diagnostic-tooling deep and ASVS L1 security review
 
 **Wave 24** *(gap closure; blocked on Wave 23 completion)*
-- [ ] 10-28-PLAN.md — Fresh reviewed diagnostic image with embedded instrumentation identity
+- [x] 10-28-PLAN.md — Fresh reviewed diagnostic image with embedded instrumentation identity
 
 **Wave 25** *(gap closure; blocked on Wave 24 completion)*
-- [ ] 10-29-PLAN.md — One automatic diagnostic request and exclusive sealed repair routing
+- [x] 10-29-PLAN.md — One automatic diagnostic request and exclusive sealed repair routing
 
 **Wave 26** *(gap closure; blocked on Wave 25 completion)*
-- [ ] 10-30-PLAN.md — Conditional host-harness regression and correction
+- [x] 10-30-PLAN.md — Conditional host-harness regression and correction
 
 **Wave 27** *(gap closure; blocked on Wave 26 completion)*
-- [ ] 10-31-PLAN.md — Conditional DeepSeek provider-tier regression and correction
+- [x] 10-31-PLAN.md — Conditional DeepSeek provider-tier regression and correction
 
 **Wave 28** *(gap closure; blocked on Wave 27 completion)*
-- [ ] 10-32-PLAN.md — Conditional provenance-tier regression and correction
+- [x] 10-32-PLAN.md — Conditional provenance-tier regression and correction
 
 **Wave 29** *(gap closure; blocked on Wave 28 completion)*
-- [ ] 10-33-PLAN.md — Conditional orchestration, contract, or fixture regression and correction
+- [x] 10-33-PLAN.md — Conditional orchestration, contract, or fixture regression and correction
 
 **Wave 30** *(gap closure; blocked on Wave 29 completion)*
-- [ ] 10-34-PLAN.md — Exact final committed-source deep and ASVS L1 security review
+- [x] 10-34-PLAN.md — Exact final committed-source deep and ASVS L1 security review
 
 **Wave 31** *(gap closure; blocked on Wave 30 completion)*
-- [ ] 10-35-PLAN.md — Final certified immutable build with truthful terminal routing
+- [x] 10-35-PLAN.md — Final certified immutable build with truthful terminal routing
 
 **Wave 32** *(gap closure; blocked on Wave 31 completion)*
-- [ ] 10-36-PLAN.md — Conditional zero-or-one automatic final proof with sealed authority
+- [x] 10-36-PLAN.md — Conditional zero-or-one automatic final proof with sealed authority
 
 **Wave 33** *(gap closure; blocked on Wave 32 completion)*
-- [ ] 10-37-PLAN.md — Write-ahead crash-recoverable three-artifact synchronization and final audit
+- [x] 10-37-PLAN.md — Write-ahead crash-recoverable three-artifact synchronization and final audit
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -355,7 +355,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 23/23 | Gaps found (10/11) | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 37/37 | Gaps found (7/11) | - |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
