@@ -4,9 +4,16 @@ import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { StringDecoder } from "node:string_decoder";
 import { promisify } from "node:util";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { reviewResponseSchema } from "../dist/contracts/review.js";
 import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
+import {
+  CHILD_DIAGNOSTIC_GENERATION_ENV,
+  CHILD_DIAGNOSTIC_KEY_ENV,
+  CHILD_DIAGNOSTIC_MAX_BYTES,
+  CHILD_DIAGNOSTIC_PREFIX,
+  parseChildDiagnosticFrame
+} from "../dist/providers/diagnostics.js";
 
 const offline = process.argv.includes("--offline");
 const controlTimeoutMs = 30_000;
@@ -176,6 +183,47 @@ export function liveProofPreflight(resolvedEnvironment, baseEnvironment = proces
 export const MAX_STDOUT_LINE_BYTES = 32_000_000;
 export const MAX_STDERR_BYTES = 1_000_000;
 export const MAX_PENDING_EVENTS = 8;
+
+class ChildDiagnosticCollector {
+  constructor() {
+    this.buffer = Buffer.alloc(0);
+    this.frames = [];
+    this.terminalSeen = false;
+  }
+
+  consume(chunk) {
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    this.buffer = Buffer.concat([this.buffer, bytes]);
+    while (true) {
+      const newline = this.buffer.indexOf(0x0a);
+      if (newline < 0) {
+        if (this.buffer.length > CHILD_DIAGNOSTIC_MAX_BYTES && this.buffer.toString("utf8", 0, CHILD_DIAGNOSTIC_PREFIX.length) === CHILD_DIAGNOSTIC_PREFIX) {
+          this.frames.push(undefined);
+          this.buffer = Buffer.alloc(0);
+        }
+        return;
+      }
+      const line = this.buffer.subarray(0, newline + 1);
+      this.buffer = this.buffer.subarray(newline + 1);
+      if (line.toString("utf8", 0, CHILD_DIAGNOSTIC_PREFIX.length) !== CHILD_DIAGNOSTIC_PREFIX) continue;
+      this.frames.push(!this.terminalSeen && line.length <= CHILD_DIAGNOSTIC_MAX_BYTES ? line.toString("utf8") : undefined);
+    }
+  }
+
+  markTerminal() { this.terminalSeen = true; }
+
+  feature(expected) {
+    if (this.frames.length !== 1 || this.frames[0] === undefined) return undefined;
+    return parseChildDiagnosticFrame(this.frames[0], expected);
+  }
+
+  clear() {
+    this.buffer.fill(0);
+    this.buffer = Buffer.alloc(0);
+    this.frames.fill(undefined);
+    this.frames.length = 0;
+  }
+}
 
 export class StdioClient {
   static get MAX_PENDING_EVENTS() { return MAX_PENDING_EVENTS; }
@@ -604,6 +652,8 @@ export async function runReviewHarness(options = {}) {
   const spawnChild = options.spawnChild ?? spawn;
   const resolveProof = options.resolveProof ?? resolveLiveProof;
   const write = options.write ?? ((message) => process.stdout.write(message));
+  const classify = options.classify ?? classifyDiagnostic;
+  const retainDiagnostic = options.retainDiagnostic ?? (() => undefined);
 
   if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -612,11 +662,29 @@ export async function runReviewHarness(options = {}) {
   const liveProof = isOffline ? undefined : await resolveProof(undefined, environment);
   const expectedModel = liveProof?.model;
   const selectedProfile = isOffline ? "smoke" : "review";
+  const diagnosticKey = isOffline ? undefined : randomBytes(32);
+  let diagnosticGeneration = isOffline ? undefined : randomBytes(32).toString("hex");
+  const diagnosticCollector = isOffline ? undefined : new ChildDiagnosticCollector();
+  const childEnvironment = isOffline
+    ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" }
+    : {
+        ...liveProof.childEnv,
+        [CHILD_DIAGNOSTIC_GENERATION_ENV]: diagnosticGeneration,
+        [CHILD_DIAGNOSTIC_KEY_ENV]: diagnosticKey.toString("hex")
+      };
+  const childArguments = ["compose", "--profile", selectedProfile, "run", "--rm", "-T"];
+  if (!isOffline) childArguments.push("-e", CHILD_DIAGNOSTIC_GENERATION_ENV, "-e", CHILD_DIAGNOSTIC_KEY_ENV);
+  childArguments.push(selectedProfile);
 
-  const child = spawnChild("docker", ["compose", "--profile", selectedProfile, "run", "--rm", "-T", selectedProfile], {
+  const child = spawnChild("docker", childArguments, {
     stdio: ["pipe", "pipe", "pipe"],
-    env: isOffline ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
+    env: childEnvironment
   });
+  const onDiagnosticData = (chunk) => diagnosticCollector?.consume(chunk);
+  const onDiagnosticTerminal = () => diagnosticCollector?.markTerminal();
+  child.stderr?.on("data", onDiagnosticData);
+  child.on("exit", onDiagnosticTerminal);
+  child.on("close", onDiagnosticTerminal);
   const lifecycleTimeoutMs = (controlTimeoutMs * 3) + (liveProof?.toolsCallTimeoutMs ?? controlTimeoutMs);
   const lifecycle = captureChildLifecycle(child, lifecycleTimeoutMs);
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
@@ -624,9 +692,22 @@ export async function runReviewHarness(options = {}) {
     const payload = await performMcpReview(client, isOffline, expectedModel);
     await completeProofLifecycle(lifecycle, payload, isOffline, { write });
   } catch (error) {
+    if (!isOffline) {
+      const feature = diagnosticCollector.feature({ generation: diagnosticGeneration, key: diagnosticKey });
+      const diagnostic = classify(feature === undefined ? [] : [feature]);
+      try { retainDiagnostic(diagnostic); } catch { /* Diagnostic retention cannot mask the owning failure. */ }
+    }
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
     fail("protocol", error);
   } finally {
+    child.stderr?.off("data", onDiagnosticData);
+    child.off("exit", onDiagnosticTerminal);
+    child.off("close", onDiagnosticTerminal);
+    diagnosticCollector?.clear();
+    diagnosticKey?.fill(0);
+    delete childEnvironment[CHILD_DIAGNOSTIC_GENERATION_ENV];
+    delete childEnvironment[CHILD_DIAGNOSTIC_KEY_ENV];
+    diagnosticGeneration = undefined;
     if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
   }
 }

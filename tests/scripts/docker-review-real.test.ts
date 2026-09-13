@@ -343,10 +343,12 @@ describe("credentialed Docker review harness", () => {
   it.each([
     ["absent", () => undefined],
     ["multiple", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment) + diagnosticLine(environment))],
+    ["conflicting", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment) + diagnosticLine(environment, { path: ["provider", "choices"], code: "too_small" }))],
     ["bad MAC", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment).replace(/"mac":"[a-f0-9]/u, '"mac":"z'))],
     ["stale generation", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { generation: "f".repeat(64) }))],
     ["detail-bearing", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { detail: "private" }))],
     ["stdout confusion", (environment: Record<string, string>, child: FakeStdioChild) => child.stdout.emit("data", diagnosticLine(environment))],
+    ["late", (environment: Record<string, string>, child: FakeStdioChild) => { child.emit("exit", 1, null); child.stderr.emit("data", diagnosticLine(environment)); }],
     ["overflow", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", `${CHILD_DIAGNOSTIC_PREFIX}${"x".repeat(4097)}\n`)]
   ] as const)("routes %s child diagnostics to one ambiguous zero-budget result", async (_name, emitFrame) => {
     const child = failingLiveChild((environment, target) => emitFrame(environment, target));
