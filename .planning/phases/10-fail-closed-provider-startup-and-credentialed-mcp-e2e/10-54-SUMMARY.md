@@ -62,6 +62,7 @@ completed: 2026-09-13
 2. **Task 2: Define strict build-auto ready and terminal non-pass schemas** - `9927032`
 3. **Rule 3 fix: Authenticate the fixed automatic review tuple** - `192789b`
 4. **Deep-review fix: Route post-build audit through the fixed registry** - `6394335`
+5. **Deep-review test fix: Isolate invalid preflight fixture** - `5f3e1f1`
 
 ## Files Created/Modified
 
@@ -96,9 +97,17 @@ completed: 2026-09-13
 - **Verification:** Focused 64/64 and full provider-disabled 599/599 tests passed; TypeScript build and diff check passed.
 - **Committed in:** `6394335`
 
+**3. [Rule 1 - Test Isolation] Removed canonical artifact absence as a test precondition**
+- **Found during:** Plan 10-57 deep source review (`BL-57-02`)
+- **Issue:** The build preflight failure regression depended on 10-57 artifacts being absent, so current certification artifacts could change the branch and risk touching canonical build evidence.
+- **Fix:** Injected an explicit invalid tuple into the isolated pipeline seam, asserted every downstream counter stays zero, and preserved the separate PATH-stubbed one-build post-audit reachability test.
+- **Files modified:** `tests/scripts/automatic-live-review-cli.test.ts`
+- **Verification:** Focused 64/64 and full provider-disabled 599/599 tests passed with current 10-57 artifacts present; no canonical 10-58/10-59 evidence changed.
+- **Committed in:** `5f3e1f1`
+
 ---
 
-**Total deviations:** 2 auto-fixed (1 blocking issue, 1 correctness bug)
+**Total deviations:** 3 auto-fixed (1 blocking issue, 1 production bug, 1 test-isolation bug)
 **Impact on plan:** The fix is required for the planned new chain to be executable and does not broaden authority.
 
 ## External-Side-Effect Accounting
@@ -132,11 +141,12 @@ Plan 10-55 can consume the exact five-variant and build-auto contracts without r
 ## Self-Check: PASSED
 
 - All nine modified implementation/test files exist.
-- Task commits `84d83e8`, `9927032`, and `192789b` exist.
+- Task and repair commits `84d83e8`, `9927032`, `192789b`, `6394335`, and `5f3e1f1` exist.
 - `npm run build` passed.
 - Initial focused provider-disabled suite passed: 178/178.
 - Post-review focused suite passed: 64/64; full provider-disabled suite passed: 599/599.
 - Deep-review blocker `BL-57-01` is fixed by `6394335`.
+- Deep-review blocker `BL-57-02` is fixed by `5f3e1f1`; tests leave canonical build/live evidence untouched.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
