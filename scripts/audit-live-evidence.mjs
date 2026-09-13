@@ -15,6 +15,20 @@ const nonPasses = new Set(["diagnostic_failed", "preflight_failed", "review_fail
 function exact(value, keys) {
   return value !== null && typeof value === "object" && !Array.isArray(value) && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
 }
+function uniqueFrontmatterStatus(text) {
+  if (typeof text !== "string" || !text.startsWith("---\n")) throw new Error("live evidence audit failed");
+  const end = text.indexOf("\n---\n", 4);
+  if (end < 0 || text.indexOf("\n---\n", end + 5) >= 0) throw new Error("live evidence audit failed");
+  const matches = [...text.slice(4, end).matchAll(/^status:\s*(passed|gaps_found)\s*$/gmu)];
+  if (matches.length !== 1) throw new Error("live evidence audit failed");
+  return matches[0][1];
+}
+function uniqueRequirementState(text) {
+  const checklist = [...text.matchAll(/^- \[([ x])\] \*\*PROV-01\*\*:/gmu)];
+  const trace = [...text.matchAll(/^\| PROV-01 \| Phase 10 \| (Complete|Gap: credentialed Docker MCP proof) \|$/gmu)];
+  if (checklist.length !== 1 || trace.length !== 1) throw new Error("live evidence audit failed");
+  return { requirement: checklist[0][1], trace: trace[0][1] };
+}
 function auditSealed(proof, phase7, phase10, requirements) {
   const proofKeys = ["certifier_sha256", "clean_exit", "finding_count", "fixture_count", "manifest_sha256", "non_planning_tree", "outcome", "reviewed_commit", "schema", "status"];
   const certKeys = ["audit_live_evidence_sha256", "audit_proof_chain_sha256"];
@@ -25,10 +39,9 @@ function auditSealed(proof, phase7, phase10, requirements) {
   if (!passed && !nonPasses.has(proof.outcome)) throw new Error("live evidence audit failed");
   if (passed ? (proof.status !== "passed" || proof.clean_exit !== true || proof.fixture_count !== 4 || !Number.isSafeInteger(proof.finding_count) || proof.finding_count < 1)
     : (proof.status !== "gaps_found" || proof.clean_exit !== false || proof.fixture_count !== 0 || proof.finding_count !== 0)) throw new Error("live evidence audit failed");
-  const p7 = phase7.match(/^status: (passed|gaps_found)$/mu)?.[1];
-  const p10 = phase10.match(/^status: (passed|gaps_found)$/mu)?.[1];
-  const requirement = requirements.match(/^- \[([ x])\] \*\*PROV-01\*\*:/mu)?.[1];
-  const trace = requirements.match(/^\| PROV-01 \| Phase 10 \| (Complete|Gap: credentialed Docker MCP proof) \|$/mu)?.[1];
+  const p7 = uniqueFrontmatterStatus(phase7);
+  const p10 = uniqueFrontmatterStatus(phase10);
+  const { requirement, trace } = uniqueRequirementState(requirements);
   if (passed ? (p7 !== "passed" || p10 !== "passed" || requirement !== "x" || trace !== "Complete")
     : (p7 !== "gaps_found" || p10 !== "gaps_found" || requirement !== " " || trace !== "Gap: credentialed Docker MCP proof")) throw new Error("live evidence audit failed");
   return { passed };
@@ -55,9 +68,8 @@ export function auditLiveEvidence(verification, requirements, phase10, requireme
   const expectedStatus = passedOutcome ? "status: passed" : "status: gaps_found";
   if (interpretation !== expectedInterpretation || retainedStatus !== expectedStatus) throw new Error("live evidence audit failed");
 
-  const phaseStatus = verification.match(/^status: (passed|gaps_found)$/mu)?.[1];
-  const requirement = requirements.match(/^- \[([ x])\] \*\*PROV-01\*\*:/mu)?.[1];
-  const trace = requirements.match(/^\| PROV-01 \| Phase 10 \| (Complete|Gap: credentialed Docker MCP proof) \|$/mu)?.[1];
+  const phaseStatus = uniqueFrontmatterStatus(verification);
+  const { requirement, trace } = uniqueRequirementState(requirements);
   if (passedOutcome) {
     if (phaseStatus !== "passed" || requirement !== "x" || trace !== "Complete") throw new Error("live evidence audit failed");
   } else if (phaseStatus !== "gaps_found" || requirement !== " " || trace !== "Gap: credentialed Docker MCP proof") {
