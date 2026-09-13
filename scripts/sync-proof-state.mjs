@@ -10,7 +10,23 @@ import { auditLiveEvidence } from "./audit-live-evidence.mjs";
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 
 const names = ["phase7", "phase10", "requirements"];
-const tupleNames = ["proof", "execution", "build", "source", "review", "security"];
+const legacyTupleNames = ["proof", "execution", "build", "source", "review", "security"];
+const preflightTupleNames = ["forensic", "transition", "execution", "proof", "local_validation"];
+const liveTupleNames = ["forensic", "source", "review", "security", "build", "transition", "execution", "proof", "local_validation"];
+function tupleNamesFor(length) {
+  if (length === 5) return preflightTupleNames;
+  if (length === 9) return liveTupleNames;
+  if (length === 6) return legacyTupleNames;
+  fail("PROOF_SYNC_AUTHORITY");
+}
+const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+export const FIXED_SYNC_PATHS = Object.freeze({
+  forensic: `${phaseDirectory}/10-53-FORENSIC.json`, source: `${phaseDirectory}/10-57-SOURCE.json`, review: `${phaseDirectory}/10-57-REVIEW.md`,
+  security: `${phaseDirectory}/10-57-SECURITY.md`, build: `${phaseDirectory}/10-58-FINAL-BUILD.json`, transition: `${phaseDirectory}/10-59-TRANSITION.json`,
+  execution: `${phaseDirectory}/10-59-EXECUTION.json`, proof: `${phaseDirectory}/10-59-PROOF.json`, localValidation: `${phaseDirectory}/10-59-LOCAL-VALIDATION.json`,
+  claim: `${phaseDirectory}/10-60-SYNC-CLAIM.json`, journal: `${phaseDirectory}/10-60-SYNC-JOURNAL.json`,
+  phase7: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md", phase10: `${phaseDirectory}/10-VERIFICATION.md`, requirements: ".planning/REQUIREMENTS.md",
+});
 const execFileAsync = promisify(execFile);
 const hash = /^[0-9a-f]{64}$/u;
 function fail(code) { throw new Error(code); }
@@ -68,10 +84,13 @@ function replacements(proof, originals) {
   return { phase7: Buffer.from(phase7), phase10: Buffer.from(phase10), requirements: Buffer.from(requirements) };
 }
 function validateClaim(value) {
-  if (!exact(value, ["intended_state", "original_sha256", "replacement_sha256", "schema", "tuple_sha256"]) || value.schema !== "evidencelens.sync-claim.v2"
+  if (!exact(value, ["intended_state", "original_sha256", "replacement_sha256", "schema", "tuple_sha256"])
+    || !["evidencelens.sync-claim.v2", "evidencelens.preflight-sync-claim.v1", "evidencelens.live-sync-claim.v1"].includes(value.schema)
     || !["passed", "gaps_found"].includes(value.intended_state)) fail("PROOF_SYNC_TAMPERED");
   for (const field of ["original_sha256", "replacement_sha256"]) if (!exact(value[field], names) || names.some((name) => !hash.test(value[field][name]))) fail("PROOF_SYNC_TAMPERED");
-  if (!exact(value.tuple_sha256, tupleNames) || tupleNames.some((name) => !hash.test(value.tuple_sha256[name]))) fail("PROOF_SYNC_TAMPERED");
+  const tupleNames = Object.keys(value.tuple_sha256 ?? {}).sort();
+  const allowed = [legacyTupleNames, preflightTupleNames, liveTupleNames].some((names) => JSON.stringify([...names].sort()) === JSON.stringify(tupleNames));
+  if (!allowed || tupleNames.some((name) => !hash.test(value.tuple_sha256[name]))) fail("PROOF_SYNC_TAMPERED");
   return value;
 }
 function validateJournal(value, claimSha256) {
@@ -93,23 +112,25 @@ async function createJournal(path, claimSha256) { const value = { claim_sha256: 
 
 async function defaultAuthorityValidator(authorityPaths) {
   try {
-    await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority", ...authorityPaths], {
+    await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
       cwd: process.cwd(), env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
     });
   } catch { fail("PROOF_SYNC_AUTHORITY"); }
 }
 
 async function authenticateAuthority(paths, validator = defaultAuthorityValidator) {
-  if (!Array.isArray(paths.authorityPaths) || paths.authorityPaths.length !== tupleNames.length
-    || new Set(paths.authorityPaths).size !== tupleNames.length || paths.authorityPaths[0] !== paths.proofPath
+  if (!Array.isArray(paths.authorityPaths) || ![5, 6, 9].includes(paths.authorityPaths.length)
+    || new Set(paths.authorityPaths).size !== paths.authorityPaths.length || !paths.authorityPaths.includes(paths.proofPath)
     || typeof validator !== "function") fail("PROOF_SYNC_AUTHORITY");
   try { await validator(paths.authorityPaths); } catch (error) {
     if (error instanceof Error && error.message.startsWith("PROOF_SYNC_")) throw error;
     fail("PROOF_SYNC_AUTHORITY");
   }
   const bytes = await Promise.all(paths.authorityPaths.map((path) => readBytes(path)));
+  const tupleNames = tupleNamesFor(paths.authorityPaths.length);
+  const proofIndex = paths.authorityPaths.indexOf(paths.proofPath);
   return {
-    proof: bytes[0],
+    proof: bytes[proofIndex],
     tuple_sha256: Object.fromEntries(tupleNames.map((name, index) => [name, sha256Hex(bytes[index])])),
   };
 }
@@ -138,9 +159,12 @@ export async function synchronizeProofState(paths, options = {}) {
   const authority = await authenticateAuthority(paths, options.authorityValidator);
   const sealed = await loadProof(paths.proofPath);
   if (!sealed.bytes.equals(authority.proof)) fail("PROOF_SYNC_AUTHORITY");
+  const authorityNames = tupleNamesFor(paths.authorityPaths.length);
+  if (authorityNames === preflightTupleNames && (sealed.value.status !== "gaps_found" || sealed.value.outcome === "passed")) fail("PROOF_SYNC_AUTHORITY");
   const targets = targetPaths(paths); const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targets[name])])));
   const next = replacements(sealed.value, originals);
-  const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: "evidencelens.sync-claim.v2", tuple_sha256: authority.tuple_sha256 });
+  const claimSchema = paths.authorityPaths.length === 5 ? "evidencelens.preflight-sync-claim.v1" : paths.authorityPaths.length === 9 ? "evidencelens.live-sync-claim.v1" : "evidencelens.sync-claim.v2";
+  const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: claimSchema, tuple_sha256: authority.tuple_sha256 });
   const claimBytes = Buffer.from(canonicalJson(claim)); await exclusive(paths.claimPath, claimBytes);
   if (options.interruptAt === "after-claim") fail("PROOF_SYNC_INTERRUPTED");
   const journal = await createJournal(paths.journalPath, sha256Hex(claimBytes));
@@ -150,6 +174,7 @@ export async function synchronizeProofState(paths, options = {}) {
 export async function recoverProofSynchronization(paths, _sideEffects = undefined, options = {}) {
   const authority = await authenticateAuthority(paths, options.authorityValidator);
   const sealed = await loadProof(paths.proofPath); const claimRecord = await readCanonical(paths.claimPath, validateClaim);
+  const tupleNames = tupleNamesFor(paths.authorityPaths.length);
   if (!sealed.bytes.equals(authority.proof) || tupleNames.some((name) => authority.tuple_sha256[name] !== claimRecord.value.tuple_sha256[name])) fail("PROOF_SYNC_TAMPERED");
   const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targetPaths(paths)[name])])));
   // Derive replacements from any still-original target, or reconstruct them from
@@ -174,17 +199,21 @@ export async function recoverProofSynchronization(paths, _sideEffects = undefine
 }
 
 async function main() {
-  if (process.argv.length !== 4 || process.argv[2] !== "recover") fail("PROOF_SYNC_USAGE");
-  const proofPath = process.argv[3];
-  const phaseDir = dirname(proofPath);
+  if (process.argv.length !== 3 || process.argv[2] !== "recover") fail("PROOF_SYNC_USAGE");
+  let authority;
+  try {
+    authority = JSON.parse((await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
+      cwd: process.cwd(), encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
+    })).stdout.trim().split("\n")[0]);
+  } catch { fail("PROOF_SYNC_AUTHORITY"); }
+  const isPreflight = authority.branch === "preflight_started";
   const paths = {
-    proofPath,
-    authorityPaths: [proofPath, `${phaseDir}/10-51-EXECUTION.json`, `${phaseDir}/10-50-FINAL-BUILD.json`, `${phaseDir}/10-49-SOURCE.json`, `${phaseDir}/10-49-REVIEW.md`, `${phaseDir}/10-49-SECURITY.md`],
-    claimPath: `${phaseDir}/10-37-SYNC-CLAIM.json`,
-    journalPath: `${phaseDir}/10-37-SYNC-JOURNAL.json`,
-    phase7Path: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
-    phase10Path: `${phaseDir}/10-VERIFICATION.md`,
-    requirementsPath: ".planning/REQUIREMENTS.md",
+    proofPath: FIXED_SYNC_PATHS.proof,
+    authorityPaths: isPreflight
+      ? [FIXED_SYNC_PATHS.forensic, FIXED_SYNC_PATHS.transition, FIXED_SYNC_PATHS.execution, FIXED_SYNC_PATHS.proof, FIXED_SYNC_PATHS.localValidation]
+      : [FIXED_SYNC_PATHS.forensic, FIXED_SYNC_PATHS.source, FIXED_SYNC_PATHS.review, FIXED_SYNC_PATHS.security, FIXED_SYNC_PATHS.build, FIXED_SYNC_PATHS.transition, FIXED_SYNC_PATHS.execution, FIXED_SYNC_PATHS.proof, FIXED_SYNC_PATHS.localValidation],
+    claimPath: FIXED_SYNC_PATHS.claim, journalPath: FIXED_SYNC_PATHS.journal,
+    phase7Path: FIXED_SYNC_PATHS.phase7, phase10Path: FIXED_SYNC_PATHS.phase10, requirementsPath: FIXED_SYNC_PATHS.requirements,
   };
   try {
     await lstat(paths.claimPath);
