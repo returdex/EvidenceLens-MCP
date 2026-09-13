@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyFailure, completeProofLifecycle, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyDiagnostic, classifyFailure, completeProofLifecycle, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -266,6 +266,40 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it("defines a closed, collision-free and secret-free diagnostic invariant registry", () => {
+    const entries = Object.entries(DIAGNOSTIC_INVARIANT_MAP);
+    expect(entries.length).toBeGreaterThan(30);
+    expect(new Set(entries.map(([id]) => id)).size).toBe(entries.length);
+    expect(new Set(entries.map(([, entry]: any) => entry.regression_id)).size).toBe(entries.length);
+    expect(new Set(entries.map(([, entry]: any) => entry.feature_fingerprint)).size).toBe(entries.length);
+    for (const [id, entry] of entries as any) {
+      expect(entry).toEqual({
+        invariant_id: id,
+        tier: expect.stringMatching(/^(?:transport|mcp|public|provider|provenance|orchestration)$/u),
+        production_file: expect.stringMatching(/^(?:scripts|src)\//u),
+        test_file: expect.stringMatching(/^tests\//u),
+        regression_id: expect.stringMatching(/^P10-24-/u),
+        permitted_files: expect.arrayContaining([entry.production_file]),
+        feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u)
+      });
+      expect(JSON.stringify(entry)).not.toMatch(/secret|\/Users\/private|\/workspace\/private/u);
+    }
+  });
+
+  it("classifies only one allowlisted structural feature and fails closed otherwise", () => {
+    const first = Object.values(DIAGNOSTIC_INVARIANT_MAP)[0] as any;
+    expect(classifyDiagnostic([{ path: first.feature_path, code: first.feature_code }])).toEqual({
+      invariant_id: first.invariant_id,
+      feature_fingerprint: first.feature_fingerprint,
+      tier: first.tier,
+      regression_id: first.regression_id,
+      permitted_files: first.permitted_files,
+      repair: "allowlisted"
+    });
+    for (const features of [[], [{ path: ["private-secret"], code: "custom" }], [{ path: first.feature_path, code: first.feature_code }, { path: ["unknown"], code: "custom" }]]) {
+      expect(classifyDiagnostic(features)).toEqual({ invariant_id: "ambiguous", feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u), repair: "no_repair", follow_up_request_budget: 0 });
+    }
+  });
   it("drives the production orchestration seam through the complete offline-shaped lifecycle", async () => {
     const child = new FakeStdioChild();
     const transcript: any[] = [];
