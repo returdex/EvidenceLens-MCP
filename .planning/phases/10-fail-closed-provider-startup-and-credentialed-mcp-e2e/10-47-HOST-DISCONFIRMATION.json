@@ -1,0 +1,106 @@
+{
+  "schema": "evidencelens.host-disconfirmation.v1",
+  "phase": "10",
+  "plan": "10-47",
+  "outcome": "passed",
+  "command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test -- --run tests/scripts/automatic-live-review-cli.test.ts tests/scripts/automatic-live-review.test.ts tests/scripts/docker-review-real.test.ts tests/scripts/audit-proof-chain.test.ts tests/scripts/audit-live-evidence.test.ts tests/scripts/sync-proof-state.test.ts && npm run build && git diff --check",
+  "command_sha256": "d05809d26e53f5ad79912deb62a97038fb6534f0e85fa05061a2b7f35c91b20f",
+  "test_files_passed": 6,
+  "tests_passed": 229,
+  "findings": [
+    {
+      "id": "BL-01",
+      "status": "disconfirmed",
+      "tests": [
+        "tests/scripts/automatic-live-review-cli.test.ts :: rejects caller argv before every external side effect: review:auto-build",
+        "tests/scripts/automatic-live-review-cli.test.ts :: rejects caller argv before every external side effect: review:auto-live-once",
+        "tests/scripts/automatic-live-review-cli.test.ts :: reaches the real fixed build preflight and reports only a stable code",
+        "tests/scripts/automatic-live-review-cli.test.ts :: reaches the real fixed live preflight before credential access",
+        "tests/scripts/automatic-live-review.test.ts :: exports substantive fixed production dispatchers without the unconditional stub"
+      ],
+      "actual_package_cli_subprocesses": 4,
+      "accepted_caller_argv": 0,
+      "external_side_effects_before_rejection": 0
+    },
+    {
+      "id": "BL-03",
+      "status": "disconfirmed",
+      "tests": [
+        "tests/scripts/audit-proof-chain.test.ts :: publishes a frozen exact registry without draft modes",
+        "tests/scripts/audit-proof-chain.test.ts :: enforces mode-specific schema order and cardinality",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects the demonstrated SOURCE-as-build subprocess substitution",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects missing CLI tuples before loading evidence",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects extra CLI tuples before loading evidence",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects reordered CLI tuples before loading evidence",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects duplicate CLI tuples before loading evidence",
+        "tests/scripts/audit-proof-chain.test.ts :: rejects removed draft mode CLI tuples before loading evidence"
+      ],
+      "accepted_wrong_schema_tuples": 0,
+      "accepted_wrong_cardinality_tuples": 0,
+      "accepted_cross_mode_tuples": 0
+    },
+    {
+      "id": "BL-04",
+      "status": "disconfirmed",
+      "tests": [
+        "tests/scripts/audit-proof-chain.test.ts :: authenticates a real tools/call, adapter receipt, immutable build and observed lifecycle",
+        "tests/scripts/audit-proof-chain.test.ts :: binds terminal proof to exact tuple digests and rejects self-asserted legacy proof",
+        "tests/scripts/audit-live-evidence.test.ts :: rejects false success and contradictory four-input state",
+        "tests/scripts/sync-proof-state.test.ts :: authenticates and binds every tuple member before creating a claim",
+        "tests/scripts/sync-proof-state.test.ts :: rejects a standalone owner-only proof before creating claim or journal",
+        "tests/scripts/sync-proof-state.test.ts :: rejects changed tuple members and changed certifier authority during recovery"
+      ],
+      "accepted_forged_standalone_proofs": 0,
+      "authenticated_tuple_members": 6,
+      "live_imports_during_recovery": 0
+    },
+    {
+      "id": "BL-06",
+      "status": "disconfirmed",
+      "tests": [
+        "tests/scripts/docker-review-real.test.ts :: emits success only after one observed, stream-complete exit and close pair",
+        "tests/scripts/docker-review-real.test.ts :: does not infer lifecycle evidence from child process properties",
+        "tests/scripts/docker-review-real.test.ts :: rejects a missing exit event at the absolute deadline",
+        "tests/scripts/docker-review-real.test.ts :: rejects a missing close event at the absolute deadline",
+        "tests/scripts/docker-review-real.test.ts :: accepts the exit-first order only after both matching events",
+        "tests/scripts/docker-review-real.test.ts :: accepts the close-first order only after both matching events",
+        "tests/scripts/docker-review-real.test.ts :: rejects exit/close code disagreement",
+        "tests/scripts/docker-review-real.test.ts :: rejects exit/close signal disagreement",
+        "tests/scripts/docker-review-real.test.ts :: rejects late stdout-data, stderr-data, stdout-error, and child-error races after terminal events"
+      ],
+      "accepted_exit_without_close": 0,
+      "accepted_close_without_exit": 0,
+      "accepted_lifecycle_disagreements": 0,
+      "accepted_late_races": 0
+    },
+    {
+      "id": "WR-02",
+      "status": "disconfirmed",
+      "tests": [
+        "tests/scripts/audit-live-evidence.test.ts :: rejects non-unique authority: duplicate frontmatter status",
+        "tests/scripts/audit-live-evidence.test.ts :: rejects non-unique authority: body-only status",
+        "tests/scripts/audit-live-evidence.test.ts :: rejects non-unique authority: duplicate checklist",
+        "tests/scripts/audit-live-evidence.test.ts :: rejects non-unique authority: duplicate trace",
+        "tests/scripts/audit-live-evidence.test.ts :: rejects duplicate or body-only status in sealed phase inputs",
+        "tests/scripts/sync-proof-state.test.ts :: recovers interruption idempotently without a live import"
+      ],
+      "accepted_duplicate_frontmatter_status": 0,
+      "accepted_duplicate_checklists": 0,
+      "accepted_duplicate_traces": 0,
+      "recovery_external_side_effects": 0
+    }
+  ],
+  "side_effects": {
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "credential_reads": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "gh_dispatches": 0,
+    "git_pushes": 0
+  }
+}
