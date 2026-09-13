@@ -21,6 +21,7 @@ import {
   PROVIDER_REQUEST_RECEIPT_PREFIX,
   verifyProviderRequestReceipt
 } from "../dist/providers/request-budget.js";
+import { createAuthenticatedTerminalSnapshot } from "./live-proof-state.mjs";
 
 const offline = process.argv.includes("--offline");
 const controlTimeoutMs = 30_000;
@@ -692,6 +693,7 @@ export async function runReviewHarness(options = {}) {
   const classify = options.classify ?? classifyDiagnostic;
   const retainDiagnostic = options.retainDiagnostic ?? (() => undefined);
   const retainRequestEvidence = options.retainRequestEvidence ?? (() => undefined);
+  const retainTerminalSnapshot = options.retainTerminalSnapshot;
 
   if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -700,12 +702,21 @@ export async function runReviewHarness(options = {}) {
   const liveProof = isOffline ? undefined : await resolveProof(undefined, environment);
   const expectedModel = liveProof?.model;
   const selectedProfile = isOffline ? "smoke" : "review";
-  const diagnosticKey = isOffline ? undefined : randomBytes(32);
-  let diagnosticGeneration = isOffline ? undefined : randomBytes(32).toString("hex");
+  const ownsDiagnosticKey = !isOffline && options.terminalKey === undefined;
+  const diagnosticKey = isOffline ? undefined : (options.terminalKey ?? randomBytes(32));
+  let diagnosticGeneration = isOffline ? undefined : (options.terminalGeneration ?? randomBytes(32).toString("hex"));
   const diagnosticCollector = isOffline ? undefined : new ChildDiagnosticCollector();
   const receiptCollector = isOffline ? undefined : new ProviderRequestReceiptCollector();
   let mcpToolsCallCount = 0;
   let requestEvidenceRetained = false;
+  let terminalSnapshotRetained = false;
+  const retainTerminal = (input) => {
+    if (typeof retainTerminalSnapshot !== "function") return;
+    if (terminalSnapshotRetained) fail("protocol");
+    const snapshot = createAuthenticatedTerminalSnapshot({ ...input, generation: diagnosticGeneration }, diagnosticKey);
+    retainTerminalSnapshot(snapshot);
+    terminalSnapshotRetained = true;
+  };
   const retainAuthenticatedRequestEvidence = (receipt) => {
     if (requestEvidenceRetained) fail("protocol");
     const evidence = Object.freeze({ mcp_tools_call_count: mcpToolsCallCount, reservation_count: 1, observed_provider_requests: receipt?.observed_provider_requests ?? 0 });
@@ -742,11 +753,20 @@ export async function runReviewHarness(options = {}) {
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
     const payload = await performMcpReview(client, isOffline, expectedModel, { onToolsCall: () => { mcpToolsCallCount += 1; } });
-    await completeProofLifecycle(lifecycle, payload, isOffline, { write });
+    try { child.stdin.end(); } catch { fail("docker"); }
+    const terminal = await lifecycle.wait();
+    if (terminal.code !== 0 || terminal.signal !== null) fail("protocol");
+    write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
     if (!isOffline) {
       const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
       if (receipt === undefined || receipt.observed_provider_requests !== 1) fail("protocol");
       retainAuthenticatedRequestEvidence(receipt);
+      retainTerminal({
+        branch: "passed", close: { ...terminal, observed: true }, diagnostic: null,
+        exit: { ...terminal, observed: true }, request_receipt: receipt,
+        result: { finding_count: payload.findings.length, fixture_count: payload.normalizedEvidence.length },
+        transcript: { mcp_method: "tools/call", tool: "review_evidence" }, stream_truncated: false,
+      });
     }
   } catch (error) {
     if (!isOffline) {
@@ -755,6 +775,15 @@ export async function runReviewHarness(options = {}) {
       const feature = diagnosticCollector.feature({ generation: diagnosticGeneration, key: diagnosticKey });
       const diagnostic = classify(feature === undefined ? [] : [feature]);
       try { retainDiagnostic(diagnostic); } catch { /* Diagnostic retention cannot mask the owning failure. */ }
+      const observed = receipt?.observed_provider_requests ?? 0;
+      const branch = mcpToolsCallCount === 0 ? "pre_tools_post_reservation" : observed === 1 ? "post_fetch_non_pass" : "post_tools_pre_fetch";
+      try {
+        retainTerminal({
+          branch, diagnostic: { code: diagnostic.invariant_id ?? "ambiguous" }, request_receipt: receipt ?? null,
+          result: null, transcript: mcpToolsCallCount === 1 ? { mcp_method: "tools/call", tool: "review_evidence" } : null,
+          stream_truncated: feature === undefined,
+        });
+      } catch { fail("protocol"); }
     }
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
     fail("protocol", error);
@@ -765,7 +794,7 @@ export async function runReviewHarness(options = {}) {
     child.off("close", onDiagnosticTerminal);
     diagnosticCollector?.clear();
     receiptCollector?.clear();
-    diagnosticKey?.fill(0);
+    if (ownsDiagnosticKey) diagnosticKey?.fill(0);
     delete childEnvironment[CHILD_DIAGNOSTIC_GENERATION_ENV];
     delete childEnvironment[CHILD_DIAGNOSTIC_KEY_ENV];
     diagnosticGeneration = undefined;

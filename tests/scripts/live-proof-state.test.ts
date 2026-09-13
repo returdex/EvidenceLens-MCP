@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  authenticateTerminalSnapshot,
   completeWrapper,
   createProofState,
   readProofState,
@@ -11,6 +12,8 @@ import {
   recordRequestEvidence,
   recoverProofState,
   transitionProofState,
+  createAuthenticatedTerminalSnapshot,
+  TERMINAL_VARIANTS,
 } from "../../scripts/live-proof-state.mjs";
 
 const generation = "a".repeat(64);
@@ -23,6 +26,34 @@ async function state(kind: "build" | "live") {
 }
 
 describe("durable live proof state", () => {
+  it("authenticates five exact disjoint terminal variants and rejects crossover", () => {
+    const key = Buffer.alloc(32, 7);
+    const common = { diagnostic: { code: "closed" }, generation };
+    const inputs: Record<string, any> = {
+      passed: { ...common, close: { code: 0 }, diagnostic: null, exit: { code: 0 }, request_receipt: {}, result: {}, transcript: {} },
+      post_fetch_non_pass: { ...common, close: { code: 1 }, exit: { code: 1 }, request_receipt: {}, transcript: {} },
+      post_tools_pre_fetch: { ...common, close: { code: 1 }, exit: { code: 1 }, request_receipt: {}, transcript: {} },
+      pre_tools_post_reservation: common,
+      pre_reservation_preflight: common,
+    };
+    for (const branch of TERMINAL_VARIANTS) {
+      const snapshot = createAuthenticatedTerminalSnapshot({ ...inputs[branch], branch }, key);
+      expect(authenticateTerminalSnapshot(snapshot, { generation, key }).branch).toBe(branch);
+      expect(Object.isFrozen(snapshot)).toBe(true);
+      if (branch !== "passed") expect(() => authenticateTerminalSnapshot({ ...snapshot, branch: "passed" }, { generation, key })).toThrow();
+    }
+  });
+
+  it("rejects terminal snapshot key, generation, keyset and count mutation", () => {
+    const key = Buffer.alloc(32, 3);
+    const snapshot = createAuthenticatedTerminalSnapshot({ branch: "pre_reservation_preflight", diagnostic: { code: "preflight" }, generation }, key);
+    for (const candidate of [
+      { ...snapshot, extra: true },
+      { ...snapshot, generation: "b".repeat(64) },
+      { ...snapshot, observed_provider_requests: 1 },
+    ]) expect(() => authenticateTerminalSnapshot(candidate, { generation, key })).toThrow();
+    expect(() => authenticateTerminalSnapshot(snapshot, { generation, key: Buffer.alloc(32, 4) })).toThrow("PROOF_TERMINAL_AUTH");
+  });
   it("records build non-pass inside a completed wrapper", async () => {
     const path = await state("build");
     await transitionProofState(path, "started");

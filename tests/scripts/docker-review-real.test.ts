@@ -347,6 +347,7 @@ describe("credentialed Docker review harness", () => {
       target.stderr.emit("data", `ordinary private stderr\n${diagnosticLine(environment)}`);
     });
     const diagnostics: unknown[] = [];
+    const terminalSnapshots: any[] = [];
     const classifier = vi.fn(classifyDiagnostic);
     const spawnChild = vi.fn((_command, args, options) => {
       expect(args).toContain(CHILD_DIAGNOSTIC_KEY_ENV);
@@ -361,10 +362,15 @@ describe("credentialed Docker review harness", () => {
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
       classify: classifier,
-      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic)
+      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+      retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
     })).rejects.toThrow("[docker-review:tools/call] failed");
 
     expect(classifier).toHaveBeenCalledOnce();
+    expect(terminalSnapshots).toEqual([expect.objectContaining({
+      branch: "post_tools_pre_fetch", mcp_tools_call_count: 1, observed_provider_requests: 0,
+      reservation_count: 1, schema: "evidencelens.terminal-snapshot.v1", mac: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    })]);
     expect(diagnostics).toEqual([expect.objectContaining({
       invariant_id: "provider-http-json-decode",
       feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u),

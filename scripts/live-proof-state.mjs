@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import { open, rename, unlink } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -7,15 +7,63 @@ import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 
 const lower64 = /^[0-9a-f]{64}$/u;
 const buildStatuses = new Set(["prepared", "started", "ready", "preflight_failed", "build_failed", "verification_failed"]);
-const liveStatuses = new Set(["prepared", "consumed", "passed", "failed"]);
+const liveStatuses = new Set(["prepared", "preflight_started", "preflight_authenticated", "consumed", "passed", "failed"]);
 const terminalBuild = new Set(["ready", "preflight_failed", "build_failed", "verification_failed"]);
 const terminalLive = new Set(["passed", "failed"]);
+export const TERMINAL_VARIANTS = Object.freeze([
+  "passed", "post_fetch_non_pass", "post_tools_pre_fetch",
+  "pre_tools_post_reservation", "pre_reservation_preflight",
+]);
+const terminalVariants = new Set(TERMINAL_VARIANTS);
 
 function fail(code) { throw new Error(code); }
 function isPlain(value) {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
   const prototype = Object.getPrototypeOf(value);
   return prototype === Object.prototype || prototype === null;
+}
+function exactKeys(value, expected) {
+  return isPlain(value) && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...expected].sort());
+}
+
+const terminalKeys = ["branch", "close", "diagnostic", "exit", "generation", "mac", "mcp_tools_call_count", "observed_provider_requests", "request_receipt", "reservation_count", "result", "schema", "stream_truncated", "transcript"];
+function terminalBody(value) { const { mac: _mac, ...body } = value; return body; }
+function terminalMac(body, key) { return createHmac("sha256", key).update(canonicalJson(body)).digest("hex"); }
+
+export function createAuthenticatedTerminalSnapshot(input, key) {
+  if (!isPlain(input) || !Buffer.isBuffer(key) || key.length !== 32 || !terminalVariants.has(input.branch)
+    || !lower64.test(input.generation)) fail("PROOF_TERMINAL_MALFORMED");
+  const counts = {
+    passed: [1, 1, 1], post_fetch_non_pass: [1, 1, 1], post_tools_pre_fetch: [1, 1, 0],
+    pre_tools_post_reservation: [0, 1, 0], pre_reservation_preflight: [0, 0, 0],
+  }[input.branch];
+  const body = {
+    branch: input.branch, close: input.close ?? null, diagnostic: input.diagnostic ?? null,
+    exit: input.exit ?? null, generation: input.generation, mcp_tools_call_count: counts[0],
+    observed_provider_requests: counts[2], request_receipt: input.request_receipt ?? null,
+    reservation_count: counts[1], result: input.result ?? null,
+    schema: "evidencelens.terminal-snapshot.v1", stream_truncated: input.stream_truncated === true,
+    transcript: input.transcript ?? null,
+  };
+  return Object.freeze({ ...body, mac: terminalMac(body, key) });
+}
+
+export function authenticateTerminalSnapshot(value, { generation, key }) {
+  if (!exactKeys(value, terminalKeys) || value.schema !== "evidencelens.terminal-snapshot.v1"
+    || value.generation !== generation || !terminalVariants.has(value.branch) || !lower64.test(value.mac)
+    || !Buffer.isBuffer(key) || key.length !== 32) fail("PROOF_TERMINAL_MALFORMED");
+  const expected = Buffer.from(terminalMac(terminalBody(value), key), "hex");
+  if (!timingSafeEqual(expected, Buffer.from(value.mac, "hex"))) fail("PROOF_TERMINAL_AUTH");
+  const counts = {
+    passed: [1, 1, 1], post_fetch_non_pass: [1, 1, 1], post_tools_pre_fetch: [1, 1, 0],
+    pre_tools_post_reservation: [0, 1, 0], pre_reservation_preflight: [0, 0, 0],
+  }[value.branch];
+  if (value.mcp_tools_call_count !== counts[0] || value.reservation_count !== counts[1] || value.observed_provider_requests !== counts[2]) fail("PROOF_TERMINAL_STATE");
+  if (value.branch === "passed" && (value.diagnostic !== null || value.result === null || value.transcript === null || value.exit === null || value.close === null)) fail("PROOF_TERMINAL_STATE");
+  if (value.branch === "pre_reservation_preflight" && [value.request_receipt, value.result, value.transcript, value.exit, value.close].some((entry) => entry !== null)) fail("PROOF_TERMINAL_STATE");
+  if (value.branch === "pre_tools_post_reservation" && [value.request_receipt, value.result, value.transcript].some((entry) => entry !== null)) fail("PROOF_TERMINAL_STATE");
+  if (value.branch !== "passed" && value.diagnostic === null) fail("PROOF_TERMINAL_STATE");
+  return Object.freeze(value);
 }
 async function syncDirectory(path) {
   const handle = await open(path, fsConstants.O_RDONLY);
@@ -101,7 +149,7 @@ export async function transitionProofState(path, nextStatus, counts = {}) {
   if (value.wrapper_status !== "pending") fail("PROOF_STATE_TRANSITION");
   const allowed = value.kind === "build"
     ? { prepared: ["started", "preflight_failed"], started: ["ready", "build_failed", "verification_failed"] }
-    : { prepared: ["consumed"], consumed: ["passed", "failed"] };
+    : { prepared: ["preflight_started", "consumed"], preflight_started: ["preflight_authenticated", "failed"], preflight_authenticated: ["consumed", "failed"], consumed: ["passed", "failed"] };
   if (!allowed[value.inner_status]?.includes(nextStatus)) fail("PROOF_STATE_TRANSITION");
   const buildCount = nextStatus === "started" ? 1 : value.build_count;
   const nextCounts = { mcp_tools_call_count: counts.mcp_tools_call_count ?? value.mcp_tools_call_count, reservation_count: counts.reservation_count ?? value.reservation_count, observed_provider_requests: counts.observed_provider_requests ?? value.observed_provider_requests };

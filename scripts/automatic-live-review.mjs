@@ -11,7 +11,7 @@ import { promisify } from "node:util";
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 import { produceBuildGeneration } from "./docker-proof-produce.mjs";
 import { verifyExistingBuild } from "./docker-proof-verify-existing.mjs";
-import { completeWrapper, createProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
+import { authenticateTerminalSnapshot, completeWrapper, createAuthenticatedTerminalSnapshot, createProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
 import { runReviewHarness } from "./docker-review-real.mjs";
 
 export const AUTOMATIC_BUILD_CONTROLS = Object.freeze({ build_count: 1, verifier_build_count: 0 });
@@ -28,13 +28,29 @@ const imageId = /^sha256:[0-9a-f]{64}$/u;
 const allowedModes = new Set(["auto-build", "auto-live-once"]);
 const execFileAsync = promisify(execFile);
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+export const FIXED_AUTOMATIC_PATHS = Object.freeze({
+  source: `${phaseDirectory}/10-57-SOURCE.json`,
+  review: `${phaseDirectory}/10-57-REVIEW.md`,
+  security: `${phaseDirectory}/10-57-SECURITY.md`,
+  build: `${phaseDirectory}/10-58-FINAL-BUILD.json`,
+  state: `${phaseDirectory}/.10-59-live-state.json`,
+  terminal: `${phaseDirectory}/.10-59-terminal-snapshot.json`,
+  transition: `${phaseDirectory}/10-59-TRANSITION.json`,
+  execution: `${phaseDirectory}/10-59-EXECUTION.json`,
+  proof: `${phaseDirectory}/10-59-PROOF.json`,
+});
 const fixedReviewPaths = Object.freeze([
-  `${phaseDirectory}/10-49-SOURCE.json`,
-  `${phaseDirectory}/10-49-REVIEW.md`,
-  `${phaseDirectory}/10-49-SECURITY.md`,
+  FIXED_AUTOMATIC_PATHS.source,
+  FIXED_AUTOMATIC_PATHS.review,
+  FIXED_AUTOMATIC_PATHS.security,
 ]);
-const fixedBuildPath = `${phaseDirectory}/10-50-FINAL-BUILD.json`;
-const fixedLiveStatePath = `${phaseDirectory}/.10-51-live-state.json`;
+const fixedBuildPath = FIXED_AUTOMATIC_PATHS.build;
+const fixedLiveStatePath = FIXED_AUTOMATIC_PATHS.state;
+const fixedTerminalPath = FIXED_AUTOMATIC_PATHS.terminal;
+const forensicCompatibilityPaths = Object.freeze({
+  build: `${phaseDirectory}/10-50-FINAL-BUILD.json`, forensic: `${phaseDirectory}/10-53-FORENSIC.json`,
+  source: `${phaseDirectory}/10-49-SOURCE.json`, state: `${phaseDirectory}/.10-51-live-state.json`,
+});
 
 function fail(code) { throw new Error(code); }
 function plain(value) {
@@ -95,32 +111,68 @@ export async function runAutomaticBuild(options) {
 }
 
 export async function runStatefulAutomaticLive(options) {
-  if (!plain(options) || typeof options.path !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
+  if (!plain(options) || typeof options.path !== "string" || typeof options.terminalPath !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
   const interrupt = typeof options.interrupt === "function" ? options.interrupt : async () => undefined;
-  try { await options.authenticateReadyBuild(); } catch { fail("AUTOMATIC_PREFLIGHT"); }
+  const terminalKey = randomBytes(32);
   await createProofState(options.path, "live", options.generation);
+  await transitionProofState(options.path, "preflight_started");
+  try { await options.authenticateReadyBuild(); } catch {
+    const snapshot = createAuthenticatedTerminalSnapshot({
+      branch: "pre_reservation_preflight", diagnostic: { code: "preflight" }, generation: options.generation,
+    }, terminalKey);
+    await sealTerminal(options.terminalPath, snapshot, terminalKey);
+    await transitionProofState(options.path, "failed");
+    await completeWrapper(options.path);
+    terminalKey.fill(0);
+    fail("AUTOMATIC_PREFLIGHT");
+  }
+  await transitionProofState(options.path, "preflight_authenticated");
   await interrupt("before-consume");
   await transitionProofState(options.path, "consumed");
   await interrupt("after-consume");
   let credential;
-  try { credential = await options.readCredential(); } catch { fail("AUTOMATIC_CREDENTIAL"); }
-  if (typeof credential !== "string" || credential.trim() === "") fail("AUTOMATIC_CREDENTIAL");
+  try { credential = await options.readCredential(); } catch { credential = undefined; }
+  if (typeof credential !== "string" || credential.trim() === "") {
+    const snapshot = createAuthenticatedTerminalSnapshot({
+      branch: "pre_reservation_preflight", diagnostic: { code: "credential" }, generation: options.generation,
+    }, terminalKey);
+    await sealTerminal(options.terminalPath, snapshot, terminalKey);
+    await transitionProofState(options.path, "failed");
+    await completeWrapper(options.path);
+    terminalKey.fill(0);
+    fail("AUTOMATIC_CREDENTIAL");
+  }
   let status = "failed";
   let requestEvidence;
+  let terminalSnapshot;
   await interrupt("before-spawn");
   await recordProviderAttempt(options.path);
   try {
-    await runReviewHarness({
+    await (options.runHarness ?? runReviewHarness)({
       ...(plain(options.harnessOptions) ? options.harnessOptions : {}),
       isOffline: false,
       environment: { ...(options.harnessOptions?.environment ?? process.env), DEEPSEEK_API_KEY: credential },
+      terminalGeneration: options.generation,
+      terminalKey,
       retainRequestEvidence: (evidence) => { requestEvidence = evidence; },
+      retainTerminalSnapshot: (snapshot) => {
+        if (terminalSnapshot !== undefined) fail("AUTOMATIC_TERMINAL_DUPLICATE");
+        terminalSnapshot = snapshot;
+      },
     });
     status = "passed";
   } catch { status = "failed"; }
   credential = undefined;
-  if (requestEvidence === undefined) requestEvidence = { mcp_tools_call_count: 0, reservation_count: 1, observed_provider_requests: 0 };
-  if (requestEvidence.mcp_tools_call_count === 1) await recordRequestEvidence(options.path, requestEvidence);
+  if (terminalSnapshot === undefined) {
+    await transitionProofState(options.path, "failed");
+    await completeWrapper(options.path);
+    terminalKey.fill(0);
+    fail("AUTOMATIC_TERMINAL_MISSING");
+  }
+  authenticateTerminalSnapshot(terminalSnapshot, { generation: options.generation, key: terminalKey });
+  await sealTerminal(options.terminalPath, terminalSnapshot, terminalKey);
+  if (requestEvidence?.mcp_tools_call_count === 1) await recordRequestEvidence(options.path, requestEvidence);
+  else if (terminalSnapshot.branch !== "pre_tools_post_reservation") fail("AUTOMATIC_TERMINAL_STATE");
   await interrupt("after-spawn");
   await interrupt("before-result");
   await transitionProofState(options.path, status);
@@ -128,7 +180,8 @@ export async function runStatefulAutomaticLive(options) {
   await interrupt("before-wrapper");
   const result = await completeWrapper(options.path);
   await interrupt("after-wrapper");
-  return result;
+  terminalKey.fill(0);
+  return Object.freeze({ ...result, terminal_branch: terminalSnapshot.branch, terminal_sha256: sha256Hex(Buffer.from(canonicalJson(terminalSnapshot))) });
 }
 
 async function runNodeScript(script, argv) {
@@ -171,6 +224,21 @@ async function atomicJson(path, value) {
     await handle?.close().catch(() => undefined);
     fail("AUTOMATIC_BUILD_FAILED");
   }
+}
+
+async function sealTerminal(path, snapshot, key) {
+  const claim = `${path}.claim`;
+  await claimExclusive(claim, { generation: snapshot.generation, kind: "live" });
+  const sealed = await atomicJson(path, snapshot);
+  authenticateTerminalSnapshot(sealed, { generation: snapshot.generation, key });
+  return Object.freeze(sealed);
+}
+
+/** The old 10-49/50/51 tuple is readable only through its dedicated forensic
+ * audit. It has no build, live, claim, proof, or synchronization callback. */
+export async function readForensicCompatibility() {
+  await runNodeScript("scripts/audit-proof-chain.mjs", ["forensic-consumed-generation", forensicCompatibilityPaths.forensic]);
+  return Object.freeze(await readCanonicalJson(forensicCompatibilityPaths.forensic));
 }
 
 async function prepareBuild(source) {
@@ -257,13 +325,16 @@ export async function runFixedAutomaticBuild() {
  * and credential access; the state machine consumes the generation before the
  * only guarded harness invocation. */
 export async function runFixedAutomaticLive() {
-  await runNodeScript("scripts/audit-proof-chain.mjs", ["build", fixedBuildPath, ...fixedReviewPaths]);
-  const build = await readCanonicalJson(fixedBuildPath);
-  if (!lower64.test(build.generation) || !imageId.test(build.image_id)) fail("AUTOMATIC_PREFLIGHT");
+  const generation = randomBytes(32).toString("hex");
   return runStatefulAutomaticLive({
-    authenticateReadyBuild: async () => runNodeScript("scripts/audit-proof-chain.mjs", ["build", fixedBuildPath, ...fixedReviewPaths]),
-    generation: build.generation,
+    authenticateReadyBuild: async () => {
+      await runNodeScript("scripts/audit-proof-chain.mjs", ["build-auto", fixedBuildPath, ...fixedReviewPaths]);
+      const build = await readCanonicalJson(fixedBuildPath);
+      if (build.status !== "ready" || !lower64.test(build.generation) || !imageId.test(build.image_id)) fail("AUTOMATIC_PREFLIGHT");
+    },
+    generation,
     path: fixedLiveStatePath,
+    terminalPath: fixedTerminalPath,
     readCredential: async () => process.env.DEEPSEEK_API_KEY,
   });
 }

@@ -38,9 +38,20 @@ describe("automatic immutable review runner", () => {
   it("binds live execution to the authenticated production harness without a spawnOnce authority", async () => {
     const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
     expect(source).toContain('import { runReviewHarness } from "./docker-review-real.mjs"');
-    expect(source).toContain("await runReviewHarness({");
+    expect(source).toContain("options.runHarness ?? runReviewHarness");
     expect(source).not.toContain("spawnOnce");
     expect(source).toContain("recordRequestEvidence(options.path, requestEvidence)");
+    expect(source).not.toContain("requestEvidence === undefined");
+    expect(source).toContain("AUTOMATIC_TERMINAL_MISSING");
+  });
+
+  it("pins production to 10-57/58/59 and isolates 10-49/50/51 behind forensic compatibility", async () => {
+    const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
+    expect(source).toContain("10-57-SOURCE.json");
+    expect(source).toContain("10-58-FINAL-BUILD.json");
+    expect(source).toContain(".10-59-live-state.json");
+    expect(source).toContain("readForensicCompatibility");
+    expect(source.match(/10-51-live-state\.json/gu)).toHaveLength(1);
   });
 
   it("uses O_EXCL for claims and refuses replay or concurrency", async () => {
