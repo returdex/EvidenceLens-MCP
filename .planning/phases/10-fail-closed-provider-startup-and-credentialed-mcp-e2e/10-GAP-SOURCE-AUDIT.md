@@ -41,3 +41,36 @@
 ## Result
 
 All authoritative GOAL, REQ, CONTEXT, verification, review, history, and Phase 7 state items are covered. No source item is missing or silently deferred.
+
+## Post-10-51 Failure Cycle: Plans 10-53 through 10-60
+
+The prior table remains historical coverage for Plans 10-38 through 10-52. The following audit covers the newer committed failure at `1b62227`, which supersedes the stale 10-VERIFICATION diagnosis for execution planning.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 53-59 | COVERED |
+| REQ | SAFE-04 | Stable sanitized failures; no secret/raw output in evidence or CLI | 53-56, 58-59 | COVERED |
+| REQ | PROV-01 | Only a complete new credentialed chain can close provenance | 53-59 | COVERED |
+| CONTEXT | API-AUTO | New Phase 10 API test is automatically authorized; no nonce/checkpoint | 58 | COVERED |
+| CONTEXT | API-BOUND | At most one observed provider send, retries/fallback/diagnostic second calls zero | 54-55, 58 | COVERED |
+| CONTEXT | LOCAL-AUTH | Atomic fsynced write/rename, reopen/hash, immutable inputs and same-process validation | 53-59 | COVERED |
+| CONTEXT | GHA-BUDGET | Every plan has exact GitHub Actions budget 0 and prohibits push/dispatch | 53-59 | COVERED |
+| CURRENT FAILURE | OLD-GENERATION | Preserve `1b62227` state exactly; tools=0/reservation=1/observed=0; discarded fields unavailable | 53, 55, 58 | COVERED |
+| CURRENT FAILURE | DURABILITY | Every terminal CLI branch seals authenticated EXECUTION/PROOF-compatible evidence before return | 54-55 | COVERED |
+| CURRENT FAILURE | AUDIT-STATES | Strict passed; exact post-tools/pre-fetch; tightly scoped pre-tools/post-reservation | 54-55 | COVERED |
+| TEST | HOSTILE | Exit/throw/truncation/concurrency, missing MAC/evidence, tampering and sync refusal | 55 | COVERED |
+| REVIEW | EXACT-SOURCE | Deep review plus ASVS L1 with zero unresolved relevant warning or higher before build/live | 56 | COVERED |
+| BUILD | UNIQUE | At most one credential-free immutable build with no retry/alternate | 57 | COVERED |
+| LIVE | NEW-GENERATION | Preserve old identity; one new generation, at most one paid send, durable non-pass on every failed gate | 58 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Phase 7, Phase 10 and PROV-01 derive only from the committed exact 10-53/10-57/10-58/10-59 selected branch | 60 | COVERED |
+| PRIOR DEPENDENCY | 10-52 | Leave unexecuted/superseded; never depend on missing 10-51 EXECUTION/PROOF | 59 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT has no deferred ideas.
+- Plans 10-53 through 10-57 and 10-60 perform zero Docker builds/runs, credential reads and provider requests.
+- Plan 10-58 permits at most one credential-free Docker build and zero provider requests.
+- Only Plan 10-59 may read credentials and permits at most one observed provider HTTP send; it has no retry, fallback, alternate image or diagnostic second call.
+- Every new plan has `github_actions_run_budget: 0`; Git push and all GitHub workflow/repository/API dispatch paths are prohibited.
+
+**Audit result:** Every roadmap goal, SAFE-04/PROV-01 requirement, locked context decision, pattern-map guardrail, current committed failure fact, and prior-plan dependency is covered. No item is missing or silently deferred.
