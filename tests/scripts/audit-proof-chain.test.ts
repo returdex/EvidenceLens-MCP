@@ -4,7 +4,7 @@ import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -70,8 +70,26 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "build", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
+  });
+
+  it("discriminates strict build-auto ready and terminal non-pass without mixed authority", () => {
+    expect(auditBuildAuto(buildRecord)).toEqual({ branch: "ready", status: "ready" });
+    const terminal = {
+      ...identity,
+      attempted_input_paths: PROOF_CHAIN_MODES["build-auto"].paths.slice(1), build_count: 0,
+      diagnostic: { code: "input_invalid" }, generation: h("7"),
+      input_sha256: { review: "unavailable", security: h("8"), source: h("9") },
+      schema: "evidencelens.build-terminal.v1", status: "terminal_non_pass", verifier_build_count: 0,
+    };
+    expect(auditBuildAuto(terminal)).toEqual({ branch: "terminal_non_pass", status: "gaps_found" });
+    for (const changed of [
+      { ...terminal, image_id: `sha256:${h("1")}` },
+      { ...terminal, status: "ready" },
+      { ...terminal, attempted_input_paths: [...terminal.attempted_input_paths].reverse() },
+      { ...terminal, build_count: 2 },
+    ]) expect(() => auditBuildAuto(changed)).toThrow();
   });
 
   it("accepts only the exact consumed-generation forensic non-pass", () => {

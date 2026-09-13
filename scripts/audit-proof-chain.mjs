@@ -39,6 +39,7 @@ export const PROOF_CHAIN_MODES = Object.freeze({
   "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
   reviews: mode(["10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
   build: mode(["10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  "build-auto": mode(["10-58-FINAL-BUILD.json", "10-57-SOURCE.json", "10-57-REVIEW.md", "10-57-SECURITY.md"], ["evidencelens.build-auto.branch", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
   diagnostic: mode(["10-29-DIAGNOSTIC.json", "10-28-DIAGNOSTIC-BUILD.json"], ["evidencelens.diagnostic.v2", "evidencelens.build.v2"]),
   repair: mode(["10-30-REPAIR.json", "10-29-DIAGNOSTIC.json"], ["evidencelens.repair.v2", "evidencelens.diagnostic.v2"]),
   "repair-set": mode(["10-29-DIAGNOSTIC.json", ...repairNames], ["evidencelens.diagnostic.v2", ...repairNames.map(() => "evidencelens.repair.v2")], true),
@@ -74,6 +75,10 @@ export function auditChainRecord(value) {
   if (plain(value) && value.schema === "evidencelens.consumed-generation-forensic.v1") return auditConsumedGenerationForensic(value);
   if (plain(value) && value.schema === "evidencelens.live-proof.v3") return auditLiveProof(value);
   if (plain(value) && value.schema === "evidencelens.execution.v2") return auditExecution(value);
+  if (plain(value) && (value.schema === "evidencelens.build-terminal.v1" || value.schema === "evidencelens.build.v2" && exactKeys(value, buildKeys))) {
+    auditBuildAuto(value);
+    return sourceIdentity(value);
+  }
   if (plain(value) && value.schema === "evidencelens.build.v2" && exactKeys(value, buildKeys)) {
     auditBuild(value);
     return sourceIdentity(value);
@@ -131,6 +136,7 @@ export function auditLiveProof(value) {
 }
 
 const buildKeys = [...keys, "build_count", "daemon_identity_sha256", "fixture_sha256", "generation", "image_config_sha256", "image_content_sha256", "image_id", "runtime_sha256", "verifier_build_count"];
+const terminalBuildKeys = [...keys, "attempted_input_paths", "build_count", "diagnostic", "generation", "input_sha256", "verifier_build_count"];
 const receiptKeys = ["diagnostic_second_call", "fallback", "generation", "mac", "max_retries", "observed_provider_requests", "reservation_count", "schema"];
 const lifecycleKeys = ["code", "observed", "signal"];
 const resultKeys = ["finding_count", "fixture_count", "model", "provider", "provenance", "public_schema"];
@@ -144,6 +150,23 @@ function auditBuild(value) {
     || !/^sha256:[0-9a-f]{64}$/u.test(value.image_id)
     || ["daemon_identity_sha256", "image_config_sha256", "image_content_sha256", "runtime_sha256"].some((key) => !hash.test(value[key]))
     || !Array.isArray(value.fixture_sha256) || value.fixture_sha256.length !== 4 || value.fixture_sha256.some((entry) => !hash.test(entry))) fail("PROOF_CHAIN_BUILD");
+}
+
+export function auditBuildAuto(value) {
+  if (value?.schema === "evidencelens.build.v2") {
+    auditBuild(value);
+    return Object.freeze({ branch: "ready", status: "ready" });
+  }
+  const expectedPaths = PROOF_CHAIN_MODES["build-auto"].paths.slice(1);
+  if (!exactKeys(value, terminalBuildKeys) || value.schema !== "evidencelens.build-terminal.v1"
+    || value.status !== "terminal_non_pass" || ![0, 1].includes(value.build_count) || value.verifier_build_count !== 0
+    || !hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)
+    || !hash.test(value.generation) || JSON.stringify(value.attempted_input_paths) !== JSON.stringify(expectedPaths)
+    || !exactKeys(value.diagnostic, ["code"]) || !["input_unavailable", "input_invalid", "build_failed", "verification_failed"].includes(value.diagnostic.code)
+    || !exactKeys(value.input_sha256, ["review", "security", "source"])
+    || Object.values(value.input_sha256).some((entry) => entry !== "unavailable" && !hash.test(entry))) fail("PROOF_CHAIN_BUILD_AUTO");
+  validateCertifiers(value.certifier_sha256);
+  return Object.freeze({ branch: "terminal_non_pass", status: "gaps_found" });
 }
 
 function auditLifecycle(value) {
@@ -222,14 +245,16 @@ export function auditModeRecords(modeName, records) {
   if (!specification || !Array.isArray(records) || records.length !== specification.schemas.length) fail("PROOF_CHAIN_ARGV");
   records.forEach((record, index) => {
     auditChainRecord(record);
-    if (record.schema !== specification.schemas[index]) fail("PROOF_CHAIN_SCHEMA");
+    if (modeName === "build-auto" && index === 0) {
+      if (!["evidencelens.build.v2", "evidencelens.build-terminal.v1"].includes(record.schema)) fail("PROOF_CHAIN_SCHEMA");
+    } else if (record.schema !== specification.schemas[index]) fail("PROOF_CHAIN_SCHEMA");
   });
   const identity = JSON.stringify(sourceIdentity(records[0]));
   if (records.slice(1).some((record) => JSON.stringify(sourceIdentity(record)) !== identity)) fail("PROOF_CHAIN_IDENTITY");
   if (modeName === "repair-set") auditRepairSet(records[0], records.slice(1));
-  if (["build", "execution", "proof", "sync-authority"].includes(modeName)) {
-    const buildIndex = modeName === "build" ? 0 : modeName === "execution" ? 1 : 2;
-    auditBuild(records[buildIndex]);
+  if (["build", "build-auto", "execution", "proof", "sync-authority"].includes(modeName)) {
+    const buildIndex = ["build", "build-auto"].includes(modeName) ? 0 : modeName === "execution" ? 1 : 2;
+    if (modeName === "build-auto") auditBuildAuto(records[buildIndex]); else auditBuild(records[buildIndex]);
   }
   if (modeName === "execution") {
     if (records[0].build_generation !== records[1].generation || records[0].image_id !== records[1].image_id) fail("PROOF_CHAIN_IDENTITY");
@@ -333,6 +358,10 @@ async function main(argv) {
   if (mode !== "forensic-consumed-generation") await Promise.all(records.map((record) => auditGitIdentity(record)));
   if (mode === "forensic-consumed-generation") {
     process.stdout.write(`${canonicalJson({ status: "gaps_found" })}\n`);
+    return;
+  }
+  if (mode === "build-auto") {
+    process.stdout.write(`${canonicalJson(auditBuildAuto(records[0]))}\n`);
     return;
   }
   if (mode === "repair-set") {
