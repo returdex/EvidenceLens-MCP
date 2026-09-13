@@ -473,50 +473,112 @@ export function assertStructuralReview(result, isOffline = offline, expectedMode
   return payload;
 }
 
-function waitForChildClose(child, timeoutMs) {
-  return new Promise((resolve, reject) => {
-    let timer;
-    let exitMetadata;
-    const cleanup = () => {
-      clearTimeout(timer);
-      child.off("exit", onExit);
-      child.off("close", onClose);
-      child.off("error", onError);
-    };
-    const settleClose = (code, signal) => {
-      cleanup();
-      if (exitMetadata !== undefined && (exitMetadata.code !== code || exitMetadata.signal !== signal)) {
-        try { fail("protocol"); } catch (error) { reject(error); }
+export function captureChildLifecycle(child, timeoutMs = controlTimeoutMs) {
+  let exitMetadata;
+  let closeMetadata;
+  let exitCount = 0;
+  let closeCount = 0;
+  let stdoutComplete = child.stdout === undefined;
+  let stderrComplete = child.stderr === undefined;
+  let outcome;
+  let evaluation;
+  const waiters = [];
+
+  const cleanup = () => {
+    clearTimeout(timer);
+    if (evaluation !== undefined) clearImmediate(evaluation);
+    child.off("exit", onExit);
+    child.off("close", onClose);
+    child.off("error", onChildError);
+    child.stdout?.off("data", onLateOutput);
+    child.stdout?.off("end", onStdoutComplete);
+    child.stdout?.off("close", onStdoutComplete);
+    child.stdout?.off("error", onStreamError);
+    child.stderr?.off("data", onLateOutput);
+    child.stderr?.off("end", onStderrComplete);
+    child.stderr?.off("close", onStderrComplete);
+    child.stderr?.off("error", onStreamError);
+    child.stdin?.off?.("error", onStreamError);
+  };
+  const settle = (next) => {
+    if (outcome !== undefined) return;
+    outcome = next;
+    cleanup();
+    while (waiters.length > 0) waiters.shift()(outcome);
+  };
+  const rejectAs = (phase) => {
+    try { fail(phase); } catch (error) { settle({ error }); }
+  };
+  const terminalPairSeen = () => exitCount > 0 && closeCount > 0;
+  const evaluate = () => {
+    if (outcome !== undefined || evaluation !== undefined) return;
+    if (!terminalPairSeen() || !stdoutComplete || !stderrComplete) return;
+    evaluation = setImmediate(() => {
+      evaluation = undefined;
+      if (outcome !== undefined) return;
+      if (exitCount !== 1 || closeCount !== 1
+        || exitMetadata.code !== closeMetadata.code
+        || exitMetadata.signal !== closeMetadata.signal) {
+        rejectAs("protocol");
         return;
       }
-      resolve({ code, signal });
-    };
-    const onExit = (code, signal) => { exitMetadata = { code, signal }; };
-    const onClose = (code, signal) => settleClose(code, signal);
-    const onError = () => {
-      cleanup();
-      try { fail("docker"); } catch (error) { reject(error); }
-    };
+      settle({ value: exitMetadata });
+    });
+  };
+  const onExit = (code, signal) => {
+    exitCount += 1;
+    if (exitCount !== 1) { rejectAs("protocol"); return; }
+    exitMetadata = { code, signal };
+    evaluate();
+  };
+  const onClose = (code, signal) => {
+    closeCount += 1;
+    if (closeCount !== 1) { rejectAs("protocol"); return; }
+    closeMetadata = { code, signal };
+    evaluate();
+  };
+  const onLateOutput = () => {
+    if (terminalPairSeen()) rejectAs("protocol");
+  };
+  const onStdoutComplete = () => { stdoutComplete = true; evaluate(); };
+  const onStderrComplete = () => { stderrComplete = true; evaluate(); };
+  const onChildError = () => rejectAs("docker");
+  const onStreamError = () => rejectAs("docker");
 
-    child.once("exit", onExit);
-    child.once("close", onClose);
-    child.once("error", onError);
-    timer = setTimeout(() => {
-      cleanup();
-      try { fail("shutdown"); } catch (error) { reject(error); }
-    }, timeoutMs);
+  child.on("exit", onExit);
+  child.on("close", onClose);
+  child.on("error", onChildError);
+  child.stdout?.on("data", onLateOutput);
+  child.stdout?.on("end", onStdoutComplete);
+  child.stdout?.on("close", onStdoutComplete);
+  child.stdout?.on("error", onStreamError);
+  child.stderr?.on("data", onLateOutput);
+  child.stderr?.on("end", onStderrComplete);
+  child.stderr?.on("close", onStderrComplete);
+  child.stderr?.on("error", onStreamError);
+  child.stdin?.on?.("error", onStreamError);
 
-    if (child.exitCode !== null || child.signalCode !== null) {
-      settleClose(child.exitCode, child.signalCode);
+  const timer = setTimeout(() => rejectAs("shutdown"), timeoutMs);
+  timer.unref?.();
+
+  return Object.freeze({
+    child,
+    wait() {
+      if (outcome !== undefined) {
+        return outcome.error === undefined ? Promise.resolve(outcome.value) : Promise.reject(outcome.error);
+      }
+      return new Promise((resolve, reject) => {
+        waiters.push((result) => result.error === undefined ? resolve(result.value) : reject(result.error));
+      });
     }
   });
 }
 
-export async function completeProofLifecycle(child, payload, isOffline = offline, options = {}) {
+export async function completeProofLifecycle(lifecycle, payload, isOffline = offline, options = {}) {
   const write = options.write ?? ((message) => process.stdout.write(message));
-  const timeoutMs = options.timeoutMs ?? controlTimeoutMs;
+  const child = lifecycle.child;
   try { child.stdin.end(); } catch { fail("docker"); }
-  const { code, signal } = await waitForChildClose(child, timeoutMs);
+  const { code, signal } = await lifecycle.wait();
   if (code !== 0 || signal !== null) fail("protocol", code, signal);
   write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
 }
@@ -555,10 +617,12 @@ export async function runReviewHarness(options = {}) {
     stdio: ["pipe", "pipe", "pipe"],
     env: isOffline ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" } : liveProof.childEnv
   });
+  const lifecycleTimeoutMs = (controlTimeoutMs * 3) + (liveProof?.toolsCallTimeoutMs ?? controlTimeoutMs);
+  const lifecycle = captureChildLifecycle(child, lifecycleTimeoutMs);
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
     const payload = await performMcpReview(client, isOffline, expectedModel);
-    await completeProofLifecycle(child, payload, isOffline, { write });
+    await completeProofLifecycle(lifecycle, payload, isOffline, { write });
   } catch (error) {
     if (error instanceof Error && /^\[docker-review:(?:preflight|docker|initialize|tools\/list|tools\/call|protocol|timeout)\] failed$/u.test(error.message)) throw error;
     fail("protocol", error);

@@ -509,6 +509,22 @@ describe("credentialed Docker review harness", () => {
     } finally { vi.useRealTimers(); }
   });
 
+  it("rejects a close that arrives after the absolute deadline", async () => {
+    vi.useFakeTimers();
+    try {
+      const child = new FakeChild();
+      const write = vi.fn();
+      const lifecycle = captureChildLifecycle(child, 50);
+      const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+      child.stdout.emit("end"); child.stderr.emit("end"); child.emit("exit", 0, null);
+      const rejection = expect(completion).rejects.toThrow("[docker-review:timeout] failed");
+      await vi.advanceTimersByTimeAsync(50);
+      child.emit("close", 0, null);
+      await rejection;
+      expect(write).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
   it.each(["exit-first", "close-first"])("accepts the %s order only after both matching events", async (order) => {
     const child = new FakeChild();
     const write = vi.fn();
