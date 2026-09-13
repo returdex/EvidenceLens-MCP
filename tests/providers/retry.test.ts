@@ -39,4 +39,24 @@ describe("bounded provider retries", () => {
     await expect(fetchWithRetry({ maxRetries: 1, timeoutMs: 100, maxTotalWaitMs: 10_000, clock: { ...injected, random: () => 1 }, operation: async () => { calls += 1; return new Response("", { status: 500 }); } })).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED" });
     expect(calls).toBe(2); expect(injected.sleeps[0]).toBeGreaterThanOrEqual(125); expect(injected.sleeps[0]).toBeLessThanOrEqual(375);
   });
+
+  it("uses an explicit no-retry policy that cannot loop", async () => {
+    let calls = 0;
+    await expect(fetchWithRetry({
+      retryPolicy: "none",
+      maxRetries: 0,
+      timeoutMs: 100,
+      maxTotalWaitMs: 10_000,
+      operation: async () => { calls += 1; return new Response("", { status: 503 }); }
+    })).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED", retryCount: 0 });
+    expect(calls).toBe(1);
+
+    await expect(fetchWithRetry({
+      retryPolicy: "none",
+      maxRetries: 1,
+      timeoutMs: 100,
+      maxTotalWaitMs: 10_000,
+      operation: async () => new Response()
+    })).rejects.toThrow("PROVIDER_RETRY_POLICY_INVALID");
+  });
 });

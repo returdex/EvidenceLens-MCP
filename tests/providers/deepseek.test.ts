@@ -3,6 +3,8 @@ import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekT
 import { serializeProviderError } from "../../src/providers/errors.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
 import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
+import { createProviderRequestBudget } from "../../src/providers/request-budget.js";
+import type { ProviderRequestReceipt } from "../../src/providers/types.js";
 
 const hash = "a".repeat(64);
 const requestWithoutFingerprint = {
@@ -27,6 +29,55 @@ function recordingSink(): DiagnosticSink & { features: DiagnosticFeature[] } {
 }
 
 describe("DeepSeek provider adapter", () => {
+  it("acquires immediately around transport.fetch and permanently blocks a second send", async () => {
+    let calls = 0;
+    const receipts: ProviderRequestReceipt[] = [];
+    const transport: DeepSeekTransport = {
+      fetch: async () => {
+        calls += 1;
+        throw new TypeError("uncertain network outcome");
+      }
+    };
+    const budget = createProviderRequestBudget({ generation: "a".repeat(64), key: Buffer.alloc(32, 7) });
+    const provider = createDeepSeekProvider(config, transport, undefined, {
+      requestBudget: budget,
+      receiptSink: (receipt) => { receipts.push(receipt); }
+    });
+
+    await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED" });
+    await expect(provider.review(request)).rejects.toThrow("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
+    expect(calls).toBe(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1, max_retries: 0 });
+  });
+
+  it("reports observed zero when request construction fails before fetch", async () => {
+    let calls = 0;
+    const receipts: ProviderRequestReceipt[] = [];
+    const invalidWithoutFingerprint = {
+      ...requestWithoutFingerprint,
+      evidence: [{ ...requestWithoutFingerprint.evidence[0], visualPayloads: [{ mimeType: "image/png" as const, base64: "AA==", byteLength: 2, sha256: hash, width: 1, height: 1, evidenceId: "brief", location: { kind: "image" as const, width: 1, height: 1 } }] }]
+    };
+    const invalid: ProviderReviewRequest = { ...invalidWithoutFingerprint, inputFingerprint: computeProviderInputFingerprint(invalidWithoutFingerprint) };
+    const budget = createProviderRequestBudget({ generation: "b".repeat(64), key: Buffer.alloc(32, 8) });
+    const provider = createDeepSeekProvider(config, { fetch: async () => { calls += 1; return new Response(); } }, undefined, {
+      requestBudget: budget,
+      receiptSink: (receipt) => { receipts.push(receipt); }
+    });
+
+    await expect(provider.review(invalid)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+    expect(calls).toBe(0);
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 0, max_retries: 0 });
+  });
+
+  it("rejects proof mode unless maxRetries is exactly zero", () => {
+    const budget = createProviderRequestBudget({ generation: "c".repeat(64), key: Buffer.alloc(32, 9) });
+    expect(() => createDeepSeekProvider({ ...config, maxRetries: 1 }, transportFor(draft), undefined, {
+      requestBudget: budget,
+      receiptSink: () => undefined
+    })).toThrow("PROVIDER_PROOF_RETRIES_FORBIDDEN");
+  });
+
   it("sends an ordered JSON multimodal request and validates returned provenance", async () => {
     const visualRequestWithoutFingerprint = { ...requestWithoutFingerprint, evidence: [...requestWithoutFingerprint.evidence, { evidenceId: "screenshot", role: "other" as const, type: "screenshot" as const, contentHash: "b".repeat(64), sourceReference: "inline://screenshot", references: [{ kind: "image" as const, width: 1, height: 1 }], visualPayloads: [{ mimeType: "image/png" as const, base64: "iVBORw0KGgo=", byteLength: 8, sha256: "b".repeat(64), width: 1, height: 1, evidenceId: "screenshot", location: { kind: "image" as const, width: 1, height: 1 } }] }] };
     const visualRequest: ProviderReviewRequest = { ...visualRequestWithoutFingerprint, inputFingerprint: computeProviderInputFingerprint(visualRequestWithoutFingerprint) };
