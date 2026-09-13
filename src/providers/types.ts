@@ -118,3 +118,19 @@ export interface ReviewProvider {
   readonly name: string;
   review(request: ProviderReviewRequest): Promise<ProviderReviewResult>;
 }
+
+export interface ProviderRequestReceipt {
+  readonly schema: "evidencelens.provider-request-receipt.v1";
+  readonly generation: string;
+  readonly reservation_count: 1;
+  readonly observed_provider_requests: 0 | 1;
+  readonly max_retries: 0;
+  readonly fallback: false;
+  readonly diagnostic_second_call: false;
+  readonly mac: string;
+}
+
+export interface ProviderRequestBudget {
+  acquireHttpSend(): void;
+  receipt(): ProviderRequestReceipt;
+}
