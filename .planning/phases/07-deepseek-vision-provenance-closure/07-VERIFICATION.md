@@ -24,7 +24,7 @@ Verify that DeepSeek Vision can be invoked through the production provider and c
 
 | Requirement | Offline evidence | Authorized live evidence | Status |
 |---|---|---|---|
-| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | A fresh corrected-lifecycle `npm run docker:review:real` execution was separately authorized after every hardened offline gate passed; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
+| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | A fresh committed-challenge `npm run review:authorized-once` execution was separately authorized for the immutable proof image after every hardened offline gate passed; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
 
 ## Evidence
 
@@ -40,16 +40,16 @@ These commands validate configuration redaction, local provenance, documentation
 
 <!-- live-proof:start -->
 command: npm run docker:review:real
-timestamp: 2026-09-07T03:03:21.000Z
+timestamp: 2026-09-13T05:50:10.000Z
 outcome: [docker-review:protocol] failed
 interpretation: complete credentialed Docker MCP structural proof remains unproven
 status: gaps_found
 <!-- live-proof:end -->
 
-The fresh corrected-lifecycle command was separately authorized and executed exactly once with retries forced to zero and finite absolute deadlines. It completed with a nonzero exit and the sanitized protocol outcome above. No fallback, timeout extension, alternate provider command, diagnostic provider call, or second attempt was run.
+The fresh committed-challenge command was separately authorized and executed exactly once against the immutable image with retries forced to zero and finite absolute deadlines. The durable outcome was `failed`, retained above as the bounded sanitized protocol non-pass. No fallback, timeout extension, alternate provider command, diagnostic provider call, or second attempt was run.
 
 ## Scope and Conclusion
 
 Phase 7's earlier adapter-level live result is narrower evidence: it does not substitute for the complete Docker MCP stdio proof. Routine tests remain credential-free and no-network, and injected-provider E2E is not credentialed proof. Provider-backed model prose is variable; neither live command promises byte-for-byte prose equality.
 
-PROV-01 must not be claimed complete from the current Phase 10 evidence. A future separately authorized `npm run docker:review:real` run must complete all structural assertions before this report can be changed to `status: passed`.
+PROV-01 must not be claimed complete from the current Phase 10 evidence. A future separately authorized atomic immutable-image run must complete all structural assertions before this report can be changed to `status: passed`.
