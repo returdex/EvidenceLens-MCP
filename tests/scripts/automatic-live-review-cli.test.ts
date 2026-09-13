@@ -65,16 +65,24 @@ describe("automatic review package CLI", () => {
     await expect(readFile(marker, "utf8")).rejects.toThrow();
   });
 
-  it("reaches the real fixed build preflight and reports only a stable code", async () => {
-    const root = await mkdtemp(join(tmpdir(), "automatic-cli-docker-"));
+  it("fails an explicit isolated invalid build tuple before Docker regardless of workspace artifacts", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-invalid-preflight-"));
     const marker = join(root, "docker-called");
     const docker = join(root, "docker");
-    await writeFile(docker, `#!/bin/sh\nprintf called > '${marker}'\nexit 99\n`);
-    await chmod(docker, 0o700);
-    const result = await invoke("review:auto-build", [], { PATH: `${root}:${process.env.PATH}` });
-    expect(result.code).toBe(50);
-    expect(result.stderr).toContain("automatic-live-review: AUTOMATIC_PREFLIGHT");
-    expect(result.stderr).not.toMatch(/DEEPSEEK_API_KEY|\/Users\/|stack|cause/iu);
+    await writeFile(docker, `#!/bin/sh\nprintf called > '${marker}'\nexit 99\n`); await chmod(docker, 0o700);
+    const counters = { readSource: 0, prepare: 0, produce: 0, verify: 0, seal: 0 };
+    await expect(runAutomaticBuildPipeline({
+      audit: async (mode: string, paths: string[]) => {
+        expect(mode).toBe("reviews-auto");
+        expect(paths.every((path) => path.includes("10-57-"))).toBe(true);
+        throw new Error("explicit isolated invalid tuple");
+      },
+      readSource: async () => { counters.readSource += 1; },
+      prepare: async () => { counters.prepare += 1; await execFileAsync("docker", ["build"], { env: { ...process.env, PATH: `${root}:${process.env.PATH}` } }); },
+      produce: async () => { counters.produce += 1; }, verify: async () => { counters.verify += 1; },
+      seal: async () => { counters.seal += 1; },
+    })).rejects.toThrow("explicit isolated invalid tuple");
+    expect(counters).toEqual({ readSource: 0, prepare: 0, produce: 0, verify: 0, seal: 0 });
     await expect(readFile(marker, "utf8")).rejects.toThrow();
   });
 
