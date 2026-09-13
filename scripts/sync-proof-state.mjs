@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import { lstat, open, rename, unlink } from "node:fs/promises";
 import { dirname } from "node:path";
+import { pathToFileURL } from "node:url";
 import { auditLiveEvidence } from "./audit-live-evidence.mjs";
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 
@@ -45,10 +46,17 @@ function once(text, pattern, replacement) {
   if (matches?.length !== 1) fail("PROOF_SYNC_STALE");
   return text.replace(pattern, replacement);
 }
+function replaceFrontmatterStatus(text, state) {
+  if (!text.startsWith("---\n")) fail("PROOF_SYNC_STALE");
+  const end = text.indexOf("\n---", 4);
+  if (end < 0) fail("PROOF_SYNC_STALE");
+  const frontmatter = once(text.slice(0, end), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
+  return `${frontmatter}${text.slice(end)}`;
+}
 function replacements(proof, originals) {
   const state = proof.outcome === "passed" ? "passed" : "gaps_found";
-  const phase7 = once(originals.phase7.toString("utf8"), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
-  const phase10 = once(originals.phase10.toString("utf8"), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
+  const phase7 = replaceFrontmatterStatus(originals.phase7.toString("utf8"), state);
+  const phase10 = replaceFrontmatterStatus(originals.phase10.toString("utf8"), state);
   let requirements = originals.requirements.toString("utf8");
   requirements = once(requirements, /^- \[[ x]\] \*\*PROV-01\*\*:/mu, `- [${state === "passed" ? "x" : " "}] **PROV-01**:`);
   requirements = once(requirements, /^\| PROV-01 \| Phase 10 \| (?:Complete|Gap: credentialed Docker MCP proof) \|$/mu, `| PROV-01 | Phase 10 | ${state === "passed" ? "Complete" : "Gap: credentialed Docker MCP proof"} |`);
@@ -132,4 +140,33 @@ export async function recoverProofSynchronization(paths, _sideEffects = undefine
     journal = await createJournal(paths.journalPath, sha256Hex(claimRecord.bytes));
   }
   return apply(paths, sealed.value, claimRecord.value, journal, next);
+}
+
+async function main() {
+  if (process.argv.length !== 4 || process.argv[2] !== "recover") fail("PROOF_SYNC_USAGE");
+  const proofPath = process.argv[3];
+  const phaseDir = dirname(proofPath);
+  const paths = {
+    proofPath,
+    claimPath: `${phaseDir}/10-37-SYNC-CLAIM.json`,
+    journalPath: `${phaseDir}/10-37-SYNC-JOURNAL.json`,
+    phase7Path: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
+    phase10Path: `${phaseDir}/10-VERIFICATION.md`,
+    requirementsPath: ".planning/REQUIREMENTS.md",
+  };
+  try {
+    await lstat(paths.claimPath);
+    await recoverProofSynchronization(paths);
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    await synchronizeProofState(paths);
+  }
+  process.stdout.write("proof state synchronization complete\n");
+}
+
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    process.stderr.write(`${error instanceof Error ? error.message : "PROOF_SYNC_FAILED"}\n`);
+    process.exitCode = 1;
+  });
 }

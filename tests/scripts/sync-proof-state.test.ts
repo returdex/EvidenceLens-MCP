@@ -7,7 +7,7 @@ import { recoverProofSynchronization, synchronizeProofState } from "../../script
 
 const h = (c: string) => c.repeat(64);
 const requirements = (complete: boolean) => `- [${complete ? "x" : " "}] **PROV-01**: requirement\n| PROV-01 | Phase 10 | ${complete ? "Complete" : "Gap: credentialed Docker MCP proof"} |\n`;
-const phase = (n: number, status = "gaps_found") => `---\nphase: ${n}\nstatus: ${status}\n---\n`;
+const phase = (n: number, status = "gaps_found") => `---\nphase: ${n}\nstatus: ${status}\n---\n\nstatus: retained-evidence-status\n`;
 const proof = (passed: boolean) => ({ certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") }, clean_exit: passed, finding_count: passed ? 1 : 0, fixture_count: passed ? 4 : 0, manifest_sha256: h("c"), non_planning_tree: h("d"), outcome: passed ? "passed" : "timeout", reviewed_commit: "e".repeat(40), schema: "evidencelens.live-proof.v2", status: passed ? "passed" : "gaps_found" });
 
 async function fixture(passed = true) {
