@@ -258,32 +258,32 @@ Plans:
 - [x] 10-15-PLAN.md — Freshly authorized single-attempt credentialed proof after lifecycle hardening
 
 **Wave 12** *(gap closure; blocked on Wave 11 completion)*
-- [ ] 10-16-PLAN.md — Exhaustive subprocess I/O state machine, bounded teardown, and adversarial race coverage
+- [x] 10-16-PLAN.md — Exhaustive subprocess I/O state machine, bounded teardown, and adversarial race coverage
 
 **Wave 13** *(gap closure; blocked on Wave 12 completion)*
-- [ ] 10-17-PLAN.md — Deterministic full MCP transcript simulation and provider-disabled Docker diagnosis
+- [x] 10-17-PLAN.md — Deterministic full MCP transcript simulation and provider-disabled Docker diagnosis
 
 **Wave 14** *(gap closure; blocked on Wave 13 completion)*
-- [ ] 10-18-PLAN.md — Reviewed-commit archive as the sole immutable proof-image context
+- [x] 10-18-PLAN.md — Reviewed-commit archive as the sole immutable proof-image context
 
 **Wave 15** *(gap closure; blocked on Wave 14 completion)*
-- [ ] 10-19-PLAN.md — Credential-free dual-sentinel Compose and exact proof runtime contracts
+- [x] 10-19-PLAN.md — Credential-free dual-sentinel Compose and exact proof runtime contracts
 
 **Wave 16** *(gap closure; blocked on Wave 15 completion)*
-- [ ] 10-20-PLAN.md — Evidence schemas and irreversible single-generation proof-image boundary
+- [x] 10-20-PLAN.md — Evidence schemas and irreversible single-generation proof-image boundary
 
 **Wave 17** *(gap closure; blocked on Wave 16 completion)*
-- [ ] 10-21-PLAN.md — Evidence sealing, replay protection, durable challenge publication, and atomic authorization
+- [x] 10-21-PLAN.md — Evidence sealing, replay protection, durable challenge publication, and atomic authorization
 
 **Wave 18** *(gap closure; blocked on Wave 17 completion)*
-- [ ] 10-22-PLAN.md — Committed build handoff, deep/security review, one build, and read-only validation
+- [x] 10-22-PLAN.md — Committed build handoff, deep/security review, one build, and read-only validation
 
 **Wave 19** *(gap closure; blocked on Wave 18 completion)*
-- [ ] 10-23-PLAN.md — Committed challenge handoff, exact stdin authorization, and at-most-once paid proof
+- [x] 10-23-PLAN.md — Committed challenge handoff, exact stdin authorization, and at-most-once paid proof
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
-- Live proof requires fresh human authorization for exactly one paid provider request, with retries disabled and no fallback or masked failure.
+- Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
