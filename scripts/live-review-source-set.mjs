@@ -176,8 +176,10 @@ function assertInventory(manifest, inventory, code) {
 
 export async function verifyPrivateContext(snapshot) {
   if (snapshot.tainted?.()) fail("SOURCE_SET_SNAPSHOT_DRIFT");
+  if (snapshot.verifyMetadata && !(await snapshot.verifyMetadata())) fail("SOURCE_SET_SNAPSHOT_DRIFT");
   const inventory = await inventoryContext(snapshot.contextPath);
   assertInventory(snapshot.manifest, inventory, "SOURCE_SET_SNAPSHOT_DRIFT");
+  if (snapshot.verifyMetadata && !(await snapshot.verifyMetadata())) fail("SOURCE_SET_SNAPSHOT_DRIFT");
   if (snapshot.tainted?.()) fail("SOURCE_SET_SNAPSHOT_DRIFT");
   return true;
 }
@@ -185,15 +187,28 @@ export async function verifyPrivateContext(snapshot) {
 async function monitorTree(contextPath) {
   let changed = false;
   const watchers = [];
+  const metadata = new Map();
+  const identity = (stat) => `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
   async function add(directory) {
     watchers.push(watch(directory, { persistent: false }, () => { changed = true; }));
     for (const name of await readdir(directory)) {
       const absolute = join(directory, name);
-      if ((await lstat(absolute)).isDirectory()) await add(absolute);
+      const stat = await lstat(absolute, { bigint: true });
+      if (stat.isDirectory()) await add(absolute);
+      else if (stat.isFile()) metadata.set(absolute, identity(stat));
     }
   }
   await add(contextPath);
-  return { tainted: () => changed, close: () => watchers.forEach((entry) => entry.close()) };
+  const verifyMetadata = async () => {
+    if (changed) return false;
+    for (const [absolute, expected] of metadata) {
+      let stat;
+      try { stat = await lstat(absolute, { bigint: true }); } catch { return false; }
+      if (!stat.isFile() || identity(stat) !== expected) return false;
+    }
+    return !changed;
+  };
+  return { tainted: () => changed, verifyMetadata, close: () => watchers.forEach((entry) => entry.close()) };
 }
 
 export async function runWithVerifiedPrivateContext(snapshot, operation) {
@@ -226,7 +241,7 @@ export async function materializePrivateContext({ repoDir, reviewedCommit, preAr
     assertInventory(manifest, extracted, "SOURCE_SET_ARCHIVE_MISMATCH");
     await verifyPrivateContext({ contextPath, manifest });
     monitor = await monitorTree(contextPath);
-    return { reviewedCommit: manifest.reviewedCommit, nonPlanningTree: manifest.nonPlanningTree, manifest, contextPath, dockerfilePath: join(contextPath, "Dockerfile.proof"), tainted: monitor.tainted, cleanup };
+    return { reviewedCommit: manifest.reviewedCommit, nonPlanningTree: manifest.nonPlanningTree, manifest, contextPath, dockerfilePath: join(contextPath, "Dockerfile.proof"), tainted: monitor.tainted, verifyMetadata: monitor.verifyMetadata, cleanup };
   } catch (error) {
     await cleanup().catch(() => undefined);
     throw error;
