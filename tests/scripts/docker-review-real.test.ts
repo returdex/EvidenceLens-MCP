@@ -1,9 +1,11 @@
 import { execFile } from "node:child_process";
+import { createHmac } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
 import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { CHILD_DIAGNOSTIC_GENERATION_ENV, CHILD_DIAGNOSTIC_KEY_ENV, CHILD_DIAGNOSTIC_PREFIX, CHILD_DIAGNOSTIC_SCHEMA } from "../../src/providers/diagnostics.js";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -49,6 +51,39 @@ class FakeStdioChild extends EventEmitter {
 }
 
 const line = (value: unknown) => `${JSON.stringify(value)}\n`;
+
+function diagnosticLine(environment: Record<string, string>, overrides: Record<string, unknown> = {}): string {
+  const unsigned = {
+    schema: CHILD_DIAGNOSTIC_SCHEMA,
+    generation: environment[CHILD_DIAGNOSTIC_GENERATION_ENV],
+    sequence: 1,
+    path: ["provider", "http", "json"],
+    code: "invalid_format",
+    ...overrides
+  };
+  const mac = createHmac("sha256", Buffer.from(environment[CHILD_DIAGNOSTIC_KEY_ENV], "hex"))
+    .update(JSON.stringify(unsigned))
+    .digest("hex");
+  return `${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...unsigned, mac })}\n`;
+}
+
+function failingLiveChild(frame: (environment: Record<string, string>, child: FakeStdioChild) => void) {
+  const child = new FakeStdioChild();
+  child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
+    const message = JSON.parse(raw);
+    if (message.method === "initialize") {
+      child.stdout.emit("data", line({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: {}, serverInfo: { name: "evidencelens", version: "0.1.3" } } }));
+    } else if (message.method === "tools/list") {
+      child.stdout.emit("data", line({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "review_evidence", annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true } }] } }));
+    } else if (message.method === "tools/call") {
+      frame((child as any).diagnosticEnvironment, child);
+      child.stdout.emit("data", line({ jsonrpc: "2.0", id: 3, error: { code: -32000, message: "private" } }));
+    }
+    callback?.();
+    return true;
+  });
+  return child;
+}
 
 describe("bounded Docker stdio event delivery", () => {
   it("exports the exact byte ceilings", () => {
@@ -268,6 +303,67 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it("authenticates one production child frame and classifies it exactly once at the harness failure boundary", async () => {
+    const child = failingLiveChild((environment, target) => {
+      target.stderr.emit("data", `ordinary private stderr\n${diagnosticLine(environment)}`);
+    });
+    const diagnostics: unknown[] = [];
+    const classifier = vi.fn(classifyDiagnostic);
+    const spawnChild = vi.fn((_command, args, options) => {
+      expect(args).toContain(CHILD_DIAGNOSTIC_KEY_ENV);
+      expect(args).toContain(CHILD_DIAGNOSTIC_GENERATION_ENV);
+      (child as any).diagnosticEnvironment = options.env;
+      return child;
+    });
+
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild,
+      classify: classifier,
+      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic)
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+
+    expect(classifier).toHaveBeenCalledOnce();
+    expect(diagnostics).toEqual([expect.objectContaining({
+      invariant_id: "provider-http-json-decode",
+      feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      tier: "provider",
+      regression_id: expect.stringMatching(/^P10-24-/u),
+      permitted_files: ["src/providers/deepseek.ts"],
+      repair: "allowlisted"
+    })]);
+    const childEnvironment = (child as any).diagnosticEnvironment;
+    expect(childEnvironment).not.toHaveProperty(CHILD_DIAGNOSTIC_KEY_ENV);
+    expect(childEnvironment).not.toHaveProperty(CHILD_DIAGNOSTIC_GENERATION_ENV);
+    expect(JSON.stringify(diagnostics)).not.toMatch(/injected-test-only|ordinary private stderr|apiKey|mac|generation/u);
+  });
+
+  it.each([
+    ["absent", () => undefined],
+    ["multiple", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment) + diagnosticLine(environment))],
+    ["bad MAC", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment).replace(/"mac":"[a-f0-9]/u, '"mac":"z'))],
+    ["stale generation", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { generation: "f".repeat(64) }))],
+    ["detail-bearing", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { detail: "private" }))],
+    ["stdout confusion", (environment: Record<string, string>, child: FakeStdioChild) => child.stdout.emit("data", diagnosticLine(environment))],
+    ["overflow", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", `${CHILD_DIAGNOSTIC_PREFIX}${"x".repeat(4097)}\n`)]
+  ] as const)("routes %s child diagnostics to one ambiguous zero-budget result", async (_name, emitFrame) => {
+    const child = failingLiveChild((environment, target) => emitFrame(environment, target));
+    const diagnostics: any[] = [];
+    const classifier = vi.fn(classifyDiagnostic);
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild: vi.fn((_command, _args, options) => { (child as any).diagnosticEnvironment = options.env; return child; }),
+      classify: classifier,
+      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic)
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+    expect(classifier).toHaveBeenCalledOnce();
+    expect(diagnostics).toEqual([{ invariant_id: "ambiguous", feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u), repair: "no_repair", follow_up_request_budget: 0 }]);
+  });
+
   it("defines a closed, collision-free and secret-free diagnostic invariant registry", () => {
     const entries = Object.entries(DIAGNOSTIC_INVARIANT_MAP);
     expect(entries.length).toBeGreaterThan(30);
