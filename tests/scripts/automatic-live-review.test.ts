@@ -84,7 +84,7 @@ describe("automatic immutable review runner", () => {
     });
   });
 
-  it.each(["after-consume", "after-result", "before-wrapper"])("recovers interruption %s without respawn", async (point) => {
+  it.each(["before-consume", "after-consume", "before-spawn", "after-spawn", "before-result", "after-result", "before-wrapper", "after-wrapper"])("recovers interruption %s without respawn", async (point) => {
     const root = await mkdtemp(join(tmpdir(), "automatic-crash-"));
     const path = join(root, "live.json");
     const counters = { credential: 0, spawn: 0 };

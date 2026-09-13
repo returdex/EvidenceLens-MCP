@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { canonicalJson } from "./audit-live-readiness.mjs";
+import { completeWrapper, createProofState, recordProviderAttempt, transitionProofState } from "./live-proof-state.mjs";
 
 export const AUTOMATIC_BUILD_CONTROLS = Object.freeze({ build_count: 1, verifier_build_count: 0 });
 export const AUTOMATIC_LIVE_CONTROLS = Object.freeze({
@@ -90,6 +91,33 @@ export async function runAutomaticLiveOnce(options) {
   try { outcome = await spawnOnce(AUTOMATIC_LIVE_CONTROLS, credential); } catch { outcome = { status: "failed" }; }
   credential = undefined;
   return Object.freeze({ status: outcome?.status === "passed" ? "passed" : "failed" });
+}
+
+export async function runStatefulAutomaticLive(options) {
+  if (!plain(options) || typeof options.path !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
+  const interrupt = typeof options.interrupt === "function" ? options.interrupt : async () => undefined;
+  try { await options.authenticateReadyBuild(); } catch { fail("AUTOMATIC_PREFLIGHT"); }
+  await createProofState(options.path, "live", options.generation);
+  await interrupt("before-consume");
+  await transitionProofState(options.path, "consumed");
+  await interrupt("after-consume");
+  let credential;
+  try { credential = await options.readCredential(); } catch { fail("AUTOMATIC_CREDENTIAL"); }
+  if (typeof credential !== "string" || credential.trim() === "") fail("AUTOMATIC_CREDENTIAL");
+  let outcome;
+  await interrupt("before-spawn");
+  await recordProviderAttempt(options.path);
+  try { outcome = await options.spawnOnce(AUTOMATIC_LIVE_CONTROLS, credential); } catch { outcome = { status: "failed" }; }
+  credential = undefined;
+  await interrupt("after-spawn");
+  const status = outcome?.status === "passed" ? "passed" : "failed";
+  await interrupt("before-result");
+  await transitionProofState(options.path, status, { provider_request_count: 1 });
+  await interrupt("after-result");
+  await interrupt("before-wrapper");
+  const result = await completeWrapper(options.path);
+  await interrupt("after-wrapper");
+  return result;
 }
 
 async function main(argv) {

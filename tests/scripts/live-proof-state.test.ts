@@ -7,6 +7,7 @@ import {
   completeWrapper,
   createProofState,
   readProofState,
+  recordProviderAttempt,
   recoverProofState,
   transitionProofState,
 } from "../../scripts/live-proof-state.mjs";
@@ -59,6 +60,14 @@ describe("durable live proof state", () => {
     await transitionProofState(path, "passed", { provider_request_count: 1 });
     expect((await readProofState(path)).wrapper_status).toBe("pending");
     expect(await recoverProofState(path)).toMatchObject({ inner_status: "passed", wrapper_status: "completed", provider_request_count: 1 });
+  });
+
+  it("writes request intent before spawn and refuses a second attempt", async () => {
+    const path = await state("live");
+    await transitionProofState(path, "consumed");
+    await recordProviderAttempt(path);
+    expect(await readProofState(path)).toMatchObject({ inner_status: "consumed", provider_request_count: 1 });
+    await expect(recordProviderAttempt(path)).rejects.toThrow("PROOF_STATE_TRANSITION");
   });
 
   it("rejects malformed, noncanonical, and rollback state", async () => {
