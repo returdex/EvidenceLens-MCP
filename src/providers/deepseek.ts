@@ -6,6 +6,7 @@ import { ProviderError } from "./errors.js";
 import { fetchWithRetry, type RetryClock } from "./retry.js";
 import type { ProviderConfig } from "./config.js";
 import type { DiagnosticSink } from "./diagnostics.js";
+import { ProviderRequestBudgetError } from "./request-budget.js";
 
 export interface DeepSeekTransport {
   fetch(input: string, init: RequestInit): Promise<Response>;
@@ -147,9 +148,14 @@ export function createDeepSeekProvider(
   proof?: DeepSeekProofOptions
 ): ReviewProvider {
   if (proof !== undefined && config.maxRetries !== 0) throw new Error("PROVIDER_PROOF_RETRIES_FORBIDDEN");
+  let proofInvocationClaimed = false;
   const provider: ReviewProvider = {
     name: "deepseek",
     async review(request: ProviderReviewRequest): Promise<ProviderReviewResult> {
+      if (proof !== undefined) {
+        if (proofInvocationClaimed) throw new ProviderRequestBudgetError("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
+        proofInvocationClaimed = true;
+      }
       try {
         if (request.promptVersion !== PROVIDER_PROMPT_VERSION) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
         assertFingerprint(request);

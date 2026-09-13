@@ -79,7 +79,7 @@ function isExactFrame(value: unknown): value is DiagnosticFrame {
   const object = value as Record<string, unknown>;
   const keys = Object.keys(object);
   return keys.length === 6
-    && keys.every((key) => ["schema", "generation", "sequence", "path", "code", "mac"].includes(key))
+    && keys.every((key, index) => key === ["schema", "generation", "sequence", "path", "code", "mac"][index])
     && object.schema === CHILD_DIAGNOSTIC_SCHEMA
     && validGeneration(object.generation)
     && object.sequence === 1

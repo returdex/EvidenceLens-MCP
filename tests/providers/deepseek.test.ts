@@ -50,6 +50,38 @@ describe("DeepSeek provider adapter", () => {
     expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1, max_retries: 0 });
   });
 
+  it("rejects a concurrent hostile second review before its transport.fetch invocation", async () => {
+    let calls = 0;
+    let releaseFirst: (() => void) | undefined;
+    const firstFetchEntered = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const transport: DeepSeekTransport = {
+      async fetch() {
+        calls += 1;
+        await firstFetchEntered;
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }), {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        });
+      }
+    };
+    const budget = createProviderRequestBudget({ generation: "d".repeat(64), key: Buffer.alloc(32, 10) });
+    const receipts: ProviderRequestReceipt[] = [];
+    const provider = createDeepSeekProvider(config, transport, undefined, {
+      requestBudget: budget,
+      receiptSink: (receipt) => { receipts.push(receipt); }
+    });
+
+    const first = provider.review(request);
+    const second = provider.review(request);
+    await expect(second).rejects.toThrow("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
+    releaseFirst?.();
+    await expect(first).resolves.toMatchObject({ provider: "deepseek" });
+
+    expect(calls).toBe(1);
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1 });
+  });
+
   it("reports observed zero when request construction fails before fetch", async () => {
     let calls = 0;
     const receipts: ProviderRequestReceipt[] = [];

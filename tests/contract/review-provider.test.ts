@@ -7,6 +7,7 @@ import type { ProviderConfig } from "../../src/providers/config.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest, handleReviewRequestForTest, type ReviewHandlerOptions } from "../../src/tools/review.js";
 import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
+import { createProviderRequestBudget } from "../../src/providers/request-budget.js";
 
 const request = {
   reviewId: "provider-contract-001",
@@ -128,6 +129,32 @@ function expectRetainedAnalysisScrubbed(retained: ReturnType<typeof retainAnalys
 }
 
 describe("provider review MCP boundary", () => {
+  it("records a tools/call-side pre-fetch failure as reservation one and observed zero", async () => {
+    const budget = createProviderRequestBudget({ generation: "e".repeat(64), key: Buffer.alloc(32, 11) });
+    let providerCalls = 0;
+    const result = payload(await handleReviewRequest({ ...request, evidence: [] }, {
+      provider: {
+        name: "must-not-run",
+        async review() {
+          providerCalls += 1;
+          budget.acquireHttpSend();
+          throw new Error("private-provider-sentinel");
+        }
+      }
+    }));
+
+    expect(result).toEqual({ ok: false, code: "INVALID_REVIEW_ROLES", message: "Review evidence roles are invalid" });
+    expect(providerCalls).toBe(0);
+    expect(budget.receipt()).toMatchObject({
+      reservation_count: 1,
+      observed_provider_requests: 0,
+      max_retries: 0,
+      fallback: false,
+      diagnostic_second_call: false
+    });
+    expect(JSON.stringify(result)).not.toMatch(/private-provider-sentinel|diagnostic|credential|stack/iu);
+  });
+
   it("emits one canonical orchestration identity feature while preserving sanitized public bytes", async () => {
     const features: DiagnosticFeature[] = [];
     const diagnosticSink: DiagnosticSink = { emit(feature) { features.push(feature); return true; } };

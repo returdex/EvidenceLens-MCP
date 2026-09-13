@@ -41,6 +41,15 @@ describe("proof child diagnostic channel", () => {
     expect(parseChildDiagnosticFrame(`${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...unknown, mac: sign(unknown) })}\n`, { generation, key })).toBeUndefined();
     const disclosed = { ...unsigned, detail: "secret" };
     expect(parseChildDiagnosticFrame(`${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...disclosed, mac: sign(disclosed) })}\n`, { generation, key })).toBeUndefined();
+
+    const reordered = {
+      generation,
+      schema: CHILD_DIAGNOSTIC_SCHEMA,
+      sequence: 1,
+      path: [...feature.path],
+      code: feature.code
+    };
+    expect(parseChildDiagnosticFrame(`${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...reordered, mac: sign(reordered) })}\n`, { generation, key })).toBeUndefined();
   });
 
   it("erases proof environment values and remains a no-op outside proof mode", () => {

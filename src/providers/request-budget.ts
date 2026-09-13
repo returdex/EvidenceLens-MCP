@@ -85,6 +85,8 @@ export function createProviderRequestProofFromEnvironment(
 ): ProviderRequestProof | undefined {
   const generation = environment[PROVIDER_REQUEST_GENERATION_ENV];
   const encodedKey = environment[PROVIDER_REQUEST_KEY_ENV];
+  delete environment[PROVIDER_REQUEST_GENERATION_ENV];
+  delete environment[PROVIDER_REQUEST_KEY_ENV];
   if (!validGeneration(generation) || typeof encodedKey !== "string" || !/^[a-f0-9]{64}$/u.test(encodedKey)) return undefined;
   const key = Buffer.from(encodedKey, "hex");
   try {
