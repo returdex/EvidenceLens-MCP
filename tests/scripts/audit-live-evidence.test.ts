@@ -6,6 +6,30 @@ const verification = (outcome: string, status: "passed" | "gaps_found", interpre
 const requirements = (complete: boolean) => `- [${complete ? "x" : " "}] **PROV-01**: requirement\n| PROV-01 | Phase 10 | ${complete ? "Complete" : "Gap: credentialed Docker MCP proof"} |\n`;
 
 describe("live evidence audit", () => {
+  const h = (c: string) => c.repeat(64);
+  const proof = (outcome: string, overrides: Record<string, unknown> = {}) => ({
+    certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") },
+    clean_exit: outcome === "passed", fixture_count: outcome === "passed" ? 4 : 0,
+    finding_count: outcome === "passed" ? 1 : 0, manifest_sha256: h("c"), non_planning_tree: h("d"),
+    outcome, reviewed_commit: "e".repeat(40), schema: "evidencelens.live-proof.v2",
+    status: outcome === "passed" ? "passed" : "gaps_found", ...overrides,
+  });
+  const phase = (n: 7 | 10, status: "passed" | "gaps_found") => `---\nphase: ${n}\nstatus: ${status}\n---\n`;
+
+  it("audits sealed proof, Phase 7, Phase 10 and requirements together", () => {
+    expect(auditLiveEvidence(proof("passed"), phase(7, "passed"), phase(10, "passed"), requirements(true))).toEqual({ passed: true });
+  });
+
+  it.each(["diagnostic_failed", "preflight_failed", "review_failed", "build_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close"])("forces %s to the three-way gap state", (outcome) => {
+    expect(auditLiveEvidence(proof(outcome), phase(7, "gaps_found"), phase(10, "gaps_found"), requirements(false))).toEqual({ passed: false });
+  });
+
+  it("rejects false success and contradictory four-input state", () => {
+    expect(() => auditLiveEvidence(proof("passed", { clean_exit: false }), phase(7, "passed"), phase(10, "passed"), requirements(true))).toThrow("live evidence audit failed");
+    expect(() => auditLiveEvidence(proof("timeout"), phase(7, "passed"), phase(10, "gaps_found"), requirements(false))).toThrow("live evidence audit failed");
+    expect(() => auditLiveEvidence({ ...proof("passed"), extra: true }, phase(7, "passed"), phase(10, "passed"), requirements(true))).toThrow("live evidence audit failed");
+  });
+
   it.each([
     "credentialed review passed: 4 fixtures, 1 findings",
     "credentialed review passed: 4 fixtures, 2 findings"
