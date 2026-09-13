@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditChainRecord, auditSourceAndReports } from "../../scripts/audit-proof-chain.mjs";
+import { auditChainRecord, auditRepairSet, auditSourceAndReports } from "../../scripts/audit-proof-chain.mjs";
 
 const h = (c: string) => c.repeat(64);
 const certifiers = { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") };
@@ -30,5 +30,45 @@ describe("proof chain certifier", () => {
     const source = { ...identity, schema: "evidencelens.source.v2", status: "ready" };
     expect(() => auditSourceAndReports(source, { ...identity, certifier_sha256: { ...certifiers, audit_proof_chain_sha256: h("0") }, schema: "evidencelens.deep-review.v2", status: "ready" }, { ...identity, schema: "evidencelens.asvs-review.v2", status: "ready" })).toThrow("PROOF_CHAIN_IDENTITY");
     expect(() => auditChainRecord({ ...identity, schema: "evidencelens.deep-review.v2", status: "blocked" })).toThrow("PROOF_CHAIN_STATE");
+  });
+
+  it("accepts the exclusive four-record no-repair route", () => {
+    const diagnostic = { ...identity, schema: "evidencelens.diagnostic.v2", status: "blocked_by_build" };
+    const repairs = Array.from({ length: 4 }, () => ({ ...identity, schema: "evidencelens.repair.v2", status: "not_required" }));
+    expect(auditRepairSet(diagnostic, repairs)).toEqual({ production_correction: false, source_identity: identity });
+  });
+
+  it("accepts exactly one authenticated production correction for a repairable diagnostic", () => {
+    const diagnostic = { ...identity, schema: "evidencelens.diagnostic.v2", status: "protocol_failed" };
+    const repairs = Array.from({ length: 4 }, (_, index) => ({
+      ...identity,
+      schema: "evidencelens.repair.v2",
+      status: index === 2 ? "ready" : "not_required",
+    }));
+    expect(auditRepairSet(diagnostic, repairs)).toEqual({ production_correction: true, source_identity: identity });
+  });
+
+  it.each([
+    ["missing", 3, undefined],
+    ["extra", 5, undefined],
+    ["multiple corrections", 4, [0, 1]],
+  ])("rejects a %s repair set", (_label, count, readyIndexes) => {
+    const diagnostic = { ...identity, schema: "evidencelens.diagnostic.v2", status: "protocol_failed" };
+    const ready = new Set(readyIndexes ?? []);
+    const repairs = Array.from({ length: count }, (_, index) => ({
+      ...identity,
+      schema: "evidencelens.repair.v2",
+      status: ready.has(index) ? "ready" : "not_required",
+    }));
+    expect(() => auditRepairSet(diagnostic, repairs)).toThrow("PROOF_CHAIN_REPAIR_SET");
+  });
+
+  it("rejects mixed schemas, unknown state, identity tampering, and a correction on the no-repair route", () => {
+    const diagnostic = { ...identity, schema: "evidencelens.diagnostic.v2", status: "blocked_by_build" };
+    const valid = Array.from({ length: 4 }, () => ({ ...identity, schema: "evidencelens.repair.v2", status: "not_required" }));
+    expect(() => auditRepairSet(diagnostic, valid.map((entry, index) => index === 1 ? { ...entry, schema: "evidencelens.source.v2", status: "ready" } : entry))).toThrow("PROOF_CHAIN_REPAIR_SET");
+    expect(() => auditRepairSet(diagnostic, valid.map((entry, index) => index === 1 ? { ...entry, status: "unknown" } : entry))).toThrow("PROOF_CHAIN_STATE");
+    expect(() => auditRepairSet(diagnostic, valid.map((entry, index) => index === 1 ? { ...entry, manifest_sha256: h("f") } : entry))).toThrow("PROOF_CHAIN_IDENTITY");
+    expect(() => auditRepairSet(diagnostic, valid.map((entry, index) => index === 1 ? { ...entry, status: "ready" } : entry))).toThrow("PROOF_CHAIN_REPAIR_SET");
   });
 });
