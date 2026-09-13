@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { createNonPlanningManifest } from "./live-review-source-set.mjs";
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 
@@ -17,6 +19,8 @@ const schemas = new Map([
   ["evidencelens.live-proof.v2", new Set(["passed", "gaps_found"])],
 ]);
 const keys = ["certifier_sha256", "manifest_sha256", "non_planning_tree", "reviewed_commit", "schema", "status"];
+const execFileAsync = promisify(execFile);
+const repairNames = ["10-30-REPAIR.json", "10-31-REPAIR.json", "10-32-REPAIR.json", "10-33-REPAIR.json"];
 
 function fail(code) { throw new Error(code); }
 function plain(value) {
@@ -61,6 +65,23 @@ export function auditSourceAndReports(source, deepReview, asvsReview) {
   return sourceIdentity(source);
 }
 
+export function auditRepairSet(diagnostic, repairs) {
+  auditChainRecord(diagnostic);
+  if (diagnostic.schema !== "evidencelens.diagnostic.v2" || repairs.length !== repairNames.length) fail("PROOF_CHAIN_REPAIR_SET");
+  const expectedIdentity = JSON.stringify(sourceIdentity(diagnostic));
+  let corrections = 0;
+  for (const repair of repairs) {
+    auditChainRecord(repair);
+    if (repair.schema !== "evidencelens.repair.v2") fail("PROOF_CHAIN_REPAIR_SET");
+    if (JSON.stringify(sourceIdentity(repair)) !== expectedIdentity) fail("PROOF_CHAIN_IDENTITY");
+    if (repair.status === "ready") corrections += 1;
+    else if (repair.status !== "not_required") fail("PROOF_CHAIN_REPAIR_SET");
+  }
+  const noRepairRoute = diagnostic.status === "passed" || diagnostic.status === "blocked_by_build";
+  if ((noRepairRoute && corrections !== 0) || (!noRepairRoute && corrections !== 1)) fail("PROOF_CHAIN_REPAIR_SET");
+  return { production_correction: corrections === 1, source_identity: sourceIdentity(diagnostic) };
+}
+
 export async function auditGitIdentity(record, repoDir = process.cwd()) {
   auditChainRecord(record);
   const manifest = await createNonPlanningManifest({ repoDir, reviewedCommit: record.reviewed_commit });
@@ -81,8 +102,27 @@ async function load(path) {
   const text = await readFile(path, "utf8");
   try { return JSON.parse(text); } catch { return evidence(text); }
 }
+async function assertCommittedInputs(paths, repoDir = process.cwd()) {
+  for (const path of paths) {
+    let committed;
+    try { committed = (await execFileAsync("git", ["show", `HEAD:${path}`], { cwd: repoDir, encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
+    catch { fail("PROOF_CHAIN_REPAIR_SET"); }
+    const working = await readFile(path);
+    if (!working.equals(committed)) fail("PROOF_CHAIN_REPAIR_SET");
+  }
+}
 async function main(argv) {
   const [mode, ...paths] = argv;
+  if (mode === "repair-set" && paths.length === 5) {
+    const expectedPrefix = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/";
+    const expected = ["10-29-DIAGNOSTIC.json", ...repairNames].map((name) => `${expectedPrefix}${name}`);
+    if (paths.some((path, index) => path !== expected[index]) || new Set(paths).size !== paths.length) fail("PROOF_CHAIN_REPAIR_SET");
+    await assertCommittedInputs(paths);
+    const [diagnostic, ...repairs] = await Promise.all(paths.map(load));
+    const result = auditRepairSet(diagnostic, repairs);
+    process.stdout.write(`${canonicalJson({ production_correction: result.production_correction, status: "ready" })}\n`);
+    return;
+  }
   if (mode === "source-review" && paths.length === 2) {
     const [source, review] = await Promise.all(paths.map(load));
     await Promise.all([auditGitIdentity(source), auditGitIdentity(review)]);
