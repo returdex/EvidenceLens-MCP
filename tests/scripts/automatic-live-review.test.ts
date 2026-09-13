@@ -8,6 +8,8 @@ import {
   AUTOMATIC_LIVE_CONTROLS,
   claimExclusive,
   runAutomaticBuild,
+  runFixedAutomaticBuild,
+  runFixedAutomaticLive,
   validateFixedInvocation,
 } from "../../scripts/automatic-live-review.mjs";
 
@@ -61,6 +63,15 @@ describe("automatic immutable review runner", () => {
       max_retries: 0,
       max_tools_calls: 1,
     });
+  });
+
+  it("exports substantive fixed production dispatchers without the unconditional stub", async () => {
+    expect(runFixedAutomaticBuild).toBeTypeOf("function");
+    expect(runFixedAutomaticLive).toBeTypeOf("function");
+    const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
+    expect(source).not.toContain('// Concrete source sets and generation locators are supplied only by reviewed');
+    expect(source).toContain('mode === "auto-build"');
+    expect(source).toContain("runFixedAutomaticLive()");
   });
 
 });
