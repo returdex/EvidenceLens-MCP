@@ -9,6 +9,7 @@ import {
   claimExclusive,
   runAutomaticBuild,
   runAutomaticLiveOnce,
+  runStatefulAutomaticLive,
   validateFixedInvocation,
 } from "../../scripts/automatic-live-review.mjs";
 
@@ -81,5 +82,24 @@ describe("automatic immutable review runner", () => {
       max_retries: 0,
       max_tools_calls: 1,
     });
+  });
+
+  it.each(["after-consume", "after-result", "before-wrapper"])("recovers interruption %s without respawn", async (point) => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-crash-"));
+    const path = join(root, "live.json");
+    const counters = { credential: 0, spawn: 0 };
+    await expect(runStatefulAutomaticLive({
+      generation: "b".repeat(64),
+      path,
+      authenticateReadyBuild: async () => undefined,
+      readCredential: async () => { counters.credential += 1; return "private"; },
+      spawnOnce: async () => { counters.spawn += 1; return { status: "failed" }; },
+      interrupt: async (at) => { if (at === point) throw new Error("crash"); },
+    })).rejects.toThrow("crash");
+    const before = { ...counters };
+    const { recoverProofState } = await import("../../scripts/live-proof-state.mjs");
+    const recovered = await recoverProofState(path);
+    expect(recovered.wrapper_status).toBe("completed");
+    expect(counters).toEqual(before);
   });
 });
