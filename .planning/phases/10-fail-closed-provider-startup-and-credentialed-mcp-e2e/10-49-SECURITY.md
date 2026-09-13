@@ -2,7 +2,7 @@
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
 plan: 49
 standard: OWASP ASVS 4.0.3 Level 1
-reviewed_commit: 7ba2c1977a53232644017f3225d0597f1fec9419
+reviewed_commit: 5751312a28da639ebe0b24834b18d90655efe4b3
 status: ready
 open_blocker_critical_high: 0
 open_warning: 0
@@ -13,7 +13,7 @@ open_warning: 0
 Status: **READY**. This review certifies the identical 109-blob identity in `10-49-SOURCE.json` and `10-49-REVIEW.md`. Open findings: **0 Blocker, 0 Critical, 0 High, 0 Warning**.
 
 ```json evidencelens-evidence
-{"certifier_sha256":{"audit_live_evidence_sha256":"62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500","audit_proof_chain_sha256":"ee6e0fe5a3c9e3a9aa2f408d3dda31bcb182c2c825afc9ed51a6472e2594e802"},"manifest_sha256":"03317a6b68f8bc9a13b3569ba903e73219c1f30f44badfacc9ed288a1b3e1e99","non_planning_tree":"dcb94fc7eb5c8b5cee3577beb0a9893907eabb815fe64a358be60c2284cef846","reviewed_commit":"7ba2c1977a53232644017f3225d0597f1fec9419","schema":"evidencelens.asvs-review.v2","status":"ready"}
+{"certifier_sha256":{"audit_live_evidence_sha256":"62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500","audit_proof_chain_sha256":"ee6e0fe5a3c9e3a9aa2f408d3dda31bcb182c2c825afc9ed51a6472e2594e802"},"manifest_sha256":"8a8556d3eb5bd93f04e27ba5becb369aa2fecf9ffbe596f443f1b42732ce76fd","non_planning_tree":"4f9b2179939056aaa632d06f0b7405eddfde2322c7fcd207de5b6817f88dd79a","reviewed_commit":"5751312a28da639ebe0b24834b18d90655efe4b3","schema":"evidencelens.asvs-review.v2","status":"ready"}
 ```
 
 ## ASVS 4.0.3 Level 1 assessment
@@ -56,6 +56,6 @@ Status: **READY**. This review certifies the identical 109-blob identity in `10-
 
 ## Side-effect accounting
 
-Docker builds/runs: **0/0**; credential reads: **0**; network/provider/paid requests: **0/0/0**; GitHub Actions runs, workflow dispatches, repository dispatches, `gh` dispatches and Git pushes: **0/0/0/0/0**.
+Docker build command attempts: **1 unintended ambient attempt during validation**, terminated by the test timeout with no retained build artifact; completed Docker builds/runs: **0/0**. The test was made hermetic before recertification. Credential reads: **0**; provider/paid requests: **0/0**; GitHub Actions runs, workflow dispatches, repository dispatches, `gh` dispatches and Git pushes: **0/0/0/0/0**.
 
 The identical source identity is approved for exactly the later immutable-build gate. No security-relevant exception or unresolved warning remains.
