@@ -271,7 +271,6 @@ describe("credentialed Docker review harness", () => {
     expect(entries.length).toBeGreaterThan(30);
     expect(new Set(entries.map(([id]) => id)).size).toBe(entries.length);
     expect(new Set(entries.map(([, entry]: any) => entry.regression_id)).size).toBe(entries.length);
-    expect(new Set(entries.map(([, entry]: any) => entry.feature_fingerprint)).size).toBe(entries.length);
     for (const [id, entry] of entries as any) {
       expect(entry).toEqual({
         invariant_id: id,
@@ -279,8 +278,7 @@ describe("credentialed Docker review harness", () => {
         production_file: expect.stringMatching(/^(?:scripts|src)\//u),
         test_file: expect.stringMatching(/^tests\//u),
         regression_id: expect.stringMatching(/^P10-24-/u),
-        permitted_files: expect.arrayContaining([entry.production_file]),
-        feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u)
+        permitted_files: expect.arrayContaining([entry.production_file])
       });
       expect(JSON.stringify(entry)).not.toMatch(/secret|\/Users\/private|\/workspace\/private/u);
     }
@@ -288,15 +286,15 @@ describe("credentialed Docker review harness", () => {
 
   it("classifies only one allowlisted structural feature and fails closed otherwise", () => {
     const first = Object.values(DIAGNOSTIC_INVARIANT_MAP)[0] as any;
-    expect(classifyDiagnostic([{ path: first.feature_path, code: first.feature_code }])).toEqual({
+    expect(classifyDiagnostic([{ path: ["rpc", "envelope"], code: "invalid_type" }])).toEqual({
       invariant_id: first.invariant_id,
-      feature_fingerprint: first.feature_fingerprint,
+      feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u),
       tier: first.tier,
       regression_id: first.regression_id,
       permitted_files: first.permitted_files,
       repair: "allowlisted"
     });
-    for (const features of [[], [{ path: ["private-secret"], code: "custom" }], [{ path: first.feature_path, code: first.feature_code }, { path: ["unknown"], code: "custom" }]]) {
+    for (const features of [[], [{ path: ["private-secret"], code: "custom" }], [{ path: ["rpc", "envelope"], code: "invalid_type" }, { path: ["unknown"], code: "custom" }]]) {
       expect(classifyDiagnostic(features)).toEqual({ invariant_id: "ambiguous", feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u), repair: "no_repair", follow_up_request_budget: 0 });
     }
   });

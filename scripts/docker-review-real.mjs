@@ -4,6 +4,7 @@ import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { StringDecoder } from "node:string_decoder";
 import { promisify } from "node:util";
+import { createHash } from "node:crypto";
 import { reviewResponseSchema } from "../dist/contracts/review.js";
 import { DEEPSEEK_MODELS } from "../dist/providers/config.js";
 
@@ -21,6 +22,97 @@ const rawFixtureMarkers = ["Read the assignment brief.", "Criterion,Excellent"];
 
 const failurePhases = new Set(["preflight", "docker", "initialize", "tools/list", "tools/call", "protocol", "timeout"]);
 const execFileAsync = promisify(execFile);
+
+const diagnosticSpecs = [
+  ["rpc-envelope-plain-object", "mcp", "scripts/docker-review-real.mjs", ["rpc", "envelope"], "invalid_type"],
+  ["rpc-envelope-version", "mcp", "scripts/docker-review-real.mjs", ["rpc", "jsonrpc"], "invalid_value"],
+  ["rpc-envelope-id", "mcp", "scripts/docker-review-real.mjs", ["rpc", "id"], "invalid_value"],
+  ["rpc-error-result-exclusive", "mcp", "scripts/docker-review-real.mjs", ["rpc", "result_error"], "custom"],
+  ["tool-result-envelope", "mcp", "scripts/docker-review-real.mjs", ["tool", "result"], "invalid_type"],
+  ["tool-content-cardinality", "mcp", "scripts/docker-review-real.mjs", ["tool", "content", "length"], "too_big"],
+  ["tool-content-type", "mcp", "scripts/docker-review-real.mjs", ["tool", "content", 0, "type"], "invalid_value"],
+  ["tool-content-text-json", "mcp", "scripts/docker-review-real.mjs", ["tool", "content", 0, "text"], "invalid_format"],
+  ["public-schema-keyset", "public", "src/contracts/review.ts", ["response"], "unrecognized_keys"],
+  ["public-schema-status", "public", "src/contracts/review.ts", ["status"], "invalid_value"],
+  ["public-schema-request-id", "public", "src/contracts/review.ts", ["requestId"], "invalid_type"],
+  ["public-schema-normalized-evidence", "public", "src/contracts/review.ts", ["normalizedEvidence"], "invalid_type"],
+  ["public-schema-findings", "public", "src/contracts/review.ts", ["findings"], "invalid_type"],
+  ["public-schema-metadata", "public", "src/contracts/review.ts", ["metadata"], "invalid_type"],
+  ["provider-identity-name", "provider", "src/tools/review.ts", ["metadata", "provider", "name"], "invalid_value"],
+  ["provider-identity-model", "provider", "src/tools/review.ts", ["metadata", "provider", "model"], "invalid_value"],
+  ["fixture-set-cardinality", "orchestration", "scripts/docker-review-real.mjs", ["normalizedEvidence", "length"], "too_small"],
+  ["fixture-set-identity", "orchestration", "scripts/docker-review-real.mjs", ["normalizedEvidence", "source", "reference"], "invalid_value"],
+  ["fixture-set-role", "orchestration", "scripts/docker-review-real.mjs", ["normalizedEvidence", "role"], "invalid_value"],
+  ["fixture-set-hash", "provenance", "src/providers/provenance.ts", ["normalizedEvidence", "contentHash"], "invalid_format"],
+  ["citation-provenance-evidence-id", "provenance", "src/providers/provenance.ts", ["citations", "evidenceId"], "invalid_value"],
+  ["citation-provenance-location", "provenance", "src/providers/provenance.ts", ["citations", "location"], "invalid_value"],
+  ["citation-provenance-hash", "provenance", "src/providers/provenance.ts", ["citations", "contentHash"], "invalid_value"],
+  ["citation-provenance-source", "provenance", "src/providers/provenance.ts", ["citations", "sourceReference"], "invalid_value"],
+  ["citation-provenance-visual", "provenance", "src/providers/provenance.ts", ["citations", "visual"], "custom"],
+  ["disclosure-guard-key", "public", "src/tools/review.ts", ["disclosure", "key"], "custom"],
+  ["disclosure-guard-path", "public", "scripts/docker-review-real.mjs", ["disclosure", "path"], "custom"],
+  ["disclosure-guard-fixture", "public", "scripts/docker-review-real.mjs", ["disclosure", "fixture"], "custom"],
+  ["child-exit-code", "transport", "scripts/docker-review-real.mjs", ["child", "code"], "invalid_value"],
+  ["child-exit-signal", "transport", "scripts/docker-review-real.mjs", ["child", "signal"], "invalid_value"],
+  ["child-exit-close-agreement", "transport", "scripts/docker-review-real.mjs", ["child", "close"], "custom"],
+  ["bounded-io-stdout-line", "transport", "scripts/docker-review-real.mjs", ["bounds", "stdout"], "too_big"],
+  ["bounded-io-stderr", "transport", "scripts/docker-review-real.mjs", ["bounds", "stderr"], "too_big"],
+  ["bounded-io-queue", "transport", "scripts/docker-review-real.mjs", ["bounds", "queue"], "too_big"],
+  ["bounded-io-deadline", "transport", "scripts/docker-review-real.mjs", ["bounds", "deadline"], "too_big"],
+  ["provider-http-json-decode", "provider", "src/providers/deepseek.ts", ["provider", "http", "json"], "invalid_format"],
+  ["provider-choice-cardinality", "provider", "src/providers/deepseek.ts", ["provider", "choices"], "too_small"],
+  ["provider-message-content", "provider", "src/providers/deepseek.ts", ["provider", "message", "content"], "invalid_type"],
+  ["provider-reasoning-selection", "provider", "src/providers/deepseek.ts", ["provider", "message", "reasoning_content"], "invalid_type"],
+  ["provider-content-size", "provider", "src/providers/deepseek.ts", ["provider", "content", "bytes"], "too_big"],
+  ["provider-json-object-extraction", "provider", "src/providers/deepseek.ts", ["provider", "content", "object"], "invalid_format"],
+  ["finding-presence", "provider", "src/providers/provenance.ts", ["findings"], "too_small"],
+  ["finding-draft-keyset", "provider", "src/providers/provenance.ts", ["findings", "keyset"], "unrecognized_keys"],
+  ["finding-draft-id", "provider", "src/providers/provenance.ts", ["findings", "id"], "invalid_type"],
+  ["finding-draft-type", "provider", "src/providers/provenance.ts", ["findings", "type"], "invalid_value"],
+  ["finding-draft-enums", "provider", "src/providers/provenance.ts", ["findings", "enum"], "invalid_value"],
+  ["finding-draft-text-bound", "provider", "src/providers/provenance.ts", ["findings", "text"], "too_big"],
+  ["finding-follow-up", "provider", "src/providers/provenance.ts", ["findings", "followUpChecks"], "too_small"],
+  ["finding-evidence-ids", "provenance", "src/providers/provenance.ts", ["findings", "evidenceIds"], "custom"],
+  ["finding-citations", "provenance", "src/providers/provenance.ts", ["findings", "citations"], "custom"],
+  ["provenance-order", "provenance", "src/providers/provenance.ts", ["provenance", "order"], "custom"],
+  ["provenance-uniqueness", "provenance", "src/providers/provenance.ts", ["provenance", "unique"], "custom"],
+  ["orchestration-plain-object", "orchestration", "src/tools/review.ts", ["orchestration", "object"], "invalid_type"],
+  ["orchestration-keyset", "orchestration", "src/tools/review.ts", ["orchestration", "keyset"], "unrecognized_keys"],
+  ["orchestration-schema", "orchestration", "src/tools/review.ts", ["orchestration", "schema"], "custom"],
+  ["orchestration-identity", "orchestration", "src/tools/review.ts", ["orchestration", "identity"], "custom"],
+  ["orchestration-namespace", "orchestration", "src/tools/review.ts", ["orchestration", "namespace"], "custom"],
+  ["orchestration-collision", "orchestration", "src/tools/review.ts", ["orchestration", "collision"], "custom"],
+  ["orchestration-merged-schema", "orchestration", "src/tools/review.ts", ["orchestration", "merged"], "custom"]
+];
+
+const featureKey = (path, code) => JSON.stringify({ path, code });
+const fingerprint = (key) => createHash("sha256").update(`evidencelens-diagnostic-v1:${key}`).digest("hex");
+const diagnosticFeatureIndex = new Map();
+export const DIAGNOSTIC_INVARIANT_MAP = Object.freeze(Object.fromEntries(diagnosticSpecs.map(([invariant_id, tier, production_file, path, code], index) => {
+  const key = featureKey(path, code);
+  const entry = Object.freeze({ invariant_id, tier, production_file, test_file: "tests/scripts/docker-review-real.test.ts", regression_id: `P10-24-${String(index + 1).padStart(3, "0")}`, permitted_files: Object.freeze([production_file]) });
+  if (diagnosticFeatureIndex.has(key)) throw new Error("diagnostic registry collision");
+  diagnosticFeatureIndex.set(key, { entry, feature_fingerprint: fingerprint(key) });
+  return [invariant_id, entry];
+})));
+
+const registryEntries = Object.values(DIAGNOSTIC_INVARIANT_MAP);
+if (new Set(registryEntries.map(({ invariant_id }) => invariant_id)).size !== registryEntries.length
+  || new Set(registryEntries.map(({ regression_id }) => regression_id)).size !== registryEntries.length
+  || new Set([...diagnosticFeatureIndex.values()].map(({ feature_fingerprint }) => feature_fingerprint)).size !== registryEntries.length) {
+  throw new Error("diagnostic registry collision");
+}
+
+export function classifyDiagnostic(features) {
+  if (!Array.isArray(features) || features.length !== 1) {
+    return { invariant_id: "ambiguous", feature_fingerprint: fingerprint("ambiguous"), repair: "no_repair", follow_up_request_budget: 0 };
+  }
+  const feature = features[0];
+  const match = diagnosticFeatureIndex.get(featureKey(feature?.path, feature?.code));
+  if (match === undefined) return { invariant_id: "ambiguous", feature_fingerprint: fingerprint("ambiguous"), repair: "no_repair", follow_up_request_budget: 0 };
+  const { entry, feature_fingerprint } = match;
+  return { invariant_id: entry.invariant_id, feature_fingerprint, tier: entry.tier, regression_id: entry.regression_id, permitted_files: entry.permitted_files, repair: "allowlisted" };
+}
 
 export function classifyFailure(phase, ..._privateDetails) {
   if (failurePhases.has(phase)) return phase;
