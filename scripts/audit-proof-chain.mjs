@@ -16,9 +16,10 @@ const schemas = new Map([
   ["evidencelens.build.v2", new Set(["ready", "preflight_failed", "build_failed", "verification_failed"])],
   ["evidencelens.diagnostic.v2", new Set(["passed", "diagnostic_failed", "preflight_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close", "blocked_by_build"])],
   ["evidencelens.repair.v2", new Set(["not_required", "ready", "blocked"])],
-  ["evidencelens.live-proof.v2", new Set(["passed", "gaps_found"])],
 ]);
 const keys = ["certifier_sha256", "manifest_sha256", "non_planning_tree", "reviewed_commit", "schema", "status"];
+const proofKeys = [...keys, "clean_exit", "finding_count", "fixture_count", "outcome"];
+const nonPassOutcomes = new Set(["diagnostic_failed", "preflight_failed", "review_failed", "build_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close"]);
 const execFileAsync = promisify(execFile);
 const repairNames = ["10-30-REPAIR.json", "10-31-REPAIR.json", "10-32-REPAIR.json", "10-33-REPAIR.json"];
 
@@ -46,10 +47,23 @@ export function sourceIdentity(value) {
 }
 
 export function auditChainRecord(value) {
+  if (plain(value) && value.schema === "evidencelens.live-proof.v2") return auditLiveProof(value);
   if (!exactKeys(value, keys) || !schemas.has(value.schema)) fail("PROOF_CHAIN_SCHEMA");
   validateCertifiers(value.certifier_sha256);
   if (!hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)) fail("PROOF_CHAIN_SCHEMA");
   if (!schemas.get(value.schema).has(value.status)) fail("PROOF_CHAIN_STATE");
+  return sourceIdentity(value);
+}
+
+export function auditLiveProof(value) {
+  if (!exactKeys(value, proofKeys) || value.schema !== "evidencelens.live-proof.v2") fail("PROOF_CHAIN_SCHEMA");
+  validateCertifiers(value.certifier_sha256);
+  if (!hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)) fail("PROOF_CHAIN_SCHEMA");
+  const passed = value.outcome === "passed";
+  if (!passed && !nonPassOutcomes.has(value.outcome)) fail("PROOF_CHAIN_STATE");
+  if (passed
+    ? value.status !== "passed" || value.clean_exit !== true || value.fixture_count !== 4 || !Number.isSafeInteger(value.finding_count) || value.finding_count < 1
+    : value.status !== "gaps_found" || value.clean_exit !== false || value.fixture_count !== 0 || value.finding_count !== 0) fail("PROOF_CHAIN_STATE");
   return sourceIdentity(value);
 }
 
@@ -132,7 +146,8 @@ async function main(argv) {
   if (mode === "reviews" && paths.length === 3) {
     const [source, deep, asvs] = await Promise.all(paths.map(load)); auditSourceAndReports(source, deep, asvs); await Promise.all([source, deep, asvs].map((record) => auditGitIdentity(record))); return;
   }
-  if (["build", "diagnostic", "repair", "proof"].includes(mode) && paths.length >= 1) {
+  if (["build", "diagnostic", "repair", "proof", "proof-preflight"].includes(mode) && paths.length >= 1) {
+    if (mode === "proof-preflight" && paths.length !== 1) fail("PROOF_CHAIN_ARGV");
     const records = await Promise.all(paths.map(load)); records.forEach(auditChainRecord);
     const identity = JSON.stringify(sourceIdentity(records[0]));
     if (records.slice(1).some((record) => JSON.stringify(sourceIdentity(record)) !== identity)) fail("PROOF_CHAIN_IDENTITY");
