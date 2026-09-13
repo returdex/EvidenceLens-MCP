@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -27,7 +27,9 @@ function rejectProtocol(value: unknown, model = "deepseek-v4-flash-vision-exp") 
 class FakeChild extends EventEmitter {
   exitCode: number | null = null;
   signalCode: NodeJS.Signals | null = null;
-  stdin = { end: vi.fn() };
+  stdout = new FakeStream();
+  stderr = new FakeStream();
+  stdin = Object.assign(new FakeStream(), { end: vi.fn() });
 }
 
 class FakeStream extends EventEmitter {
@@ -413,15 +415,18 @@ describe("credentialed Docker review harness", () => {
     expect(JSON.parse(child.stdin.write.mock.calls[0][0]).method).toBe("initialize");
   });
 
-  it("emits success only after a clean child exit", async () => {
+  it("emits success only after one observed, stream-complete exit and close pair", async () => {
     const child = new FakeChild();
     const write = vi.fn();
-    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), false, { write });
 
     expect(child.stdin.end).toHaveBeenCalledOnce();
     expect(write).not.toHaveBeenCalled();
     child.exitCode = 0;
     child.emit("exit", 0, null);
+    child.stdout.emit("end");
+    child.stderr.emit("end");
     child.emit("close", 0, null);
 
     await expect(completion).resolves.toBeUndefined();
@@ -434,10 +439,13 @@ describe("credentialed Docker review harness", () => {
   ] as const)("rejects %s/%s %s without success or private lifecycle detail", async (code, signal) => {
     const child = new FakeChild();
     const write = vi.fn();
-    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), false, { write });
     child.exitCode = code;
     child.signalCode = signal;
     child.emit("exit", code, signal);
+    child.stdout.emit("end");
+    child.stderr.emit("end");
     child.emit("close", code, signal);
 
     await expect(completion).rejects.toThrow("[docker-review:protocol] failed");
@@ -447,7 +455,8 @@ describe("credentialed Docker review harness", () => {
   it("rejects a spawn error without exposing its details or emitting success", async () => {
     const child = new FakeChild();
     const write = vi.fn();
-    const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 100 });
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), false, { write });
     const rejection = expect(completion).rejects.toThrow("[docker-review:docker] failed");
     child.emit("error", new Error("private stderr /Users/private cause stack response-body"));
 
@@ -460,7 +469,8 @@ describe("credentialed Docker review harness", () => {
     try {
       const child = new FakeChild();
       const write = vi.fn();
-      const completion = completeProofLifecycle(child, successPayload(), false, { write, timeoutMs: 50 });
+      const lifecycle = captureChildLifecycle(child, 50);
+      const completion = completeProofLifecycle(lifecycle, successPayload(), false, { write });
       const rejection = expect(completion).rejects.toThrow("[docker-review:timeout] failed");
       await vi.advanceTimersByTimeAsync(50);
       await rejection;
@@ -470,15 +480,88 @@ describe("credentialed Docker review harness", () => {
     }
   });
 
-  it("observes a child that exited before the shutdown waiter was attached", async () => {
+  it("does not infer lifecycle evidence from child process properties", async () => {
+    vi.useFakeTimers();
     const child = new FakeChild();
     child.exitCode = 0;
     const write = vi.fn();
+    const lifecycle = captureChildLifecycle(child, 50);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+    const rejection = expect(completion).rejects.toThrow("[docker-review:timeout] failed");
+    await vi.advanceTimersByTimeAsync(50);
+    await rejection;
+    expect(write).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 
-    await expect(completeProofLifecycle(child, successPayload(), true, { write, timeoutMs: 100 })).resolves.toBeUndefined();
-    expect(write).toHaveBeenCalledWith("offline smoke passed: 4 fixtures, 1 findings\n");
-    expect(child.listenerCount("exit")).toBe(0);
-    expect(child.listenerCount("error")).toBe(0);
+  it.each(["exit", "close"])("rejects a missing %s event at the absolute deadline", async (missing) => {
+    vi.useFakeTimers();
+    try {
+      const child = new FakeChild();
+      const lifecycle = captureChildLifecycle(child, 50);
+      const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write: vi.fn() });
+      child.stdout.emit("end"); child.stderr.emit("end");
+      if (missing === "exit") child.emit("close", 0, null);
+      else child.emit("exit", 0, null);
+      const rejection = expect(completion).rejects.toThrow("[docker-review:timeout] failed");
+      await vi.advanceTimersByTimeAsync(50);
+      await rejection;
+    } finally { vi.useRealTimers(); }
+  });
+
+  it.each(["exit-first", "close-first"])("accepts the %s order only after both matching events", async (order) => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+    child.stdout.emit("end"); child.stderr.emit("end");
+    const events = order === "exit-first" ? ["exit", "close"] : ["close", "exit"];
+    child.emit(events[0], 0, null);
+    expect(write).not.toHaveBeenCalled();
+    child.emit(events[1], 0, null);
+    await expect(completion).resolves.toBeUndefined();
+  });
+
+  it.each([
+    [0, null, 1, null, "code"],
+    [null, "SIGTERM", null, "SIGKILL", "signal"]
+  ] as const)("rejects exit/close %s disagreement", async (exitCode, exitSignal, closeCode, closeSignal) => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+    child.stdout.emit("end"); child.stderr.emit("end");
+    child.emit("exit", exitCode, exitSignal);
+    child.emit("close", closeCode, closeSignal);
+    await expect(completion).rejects.toThrow("[docker-review:protocol] failed");
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it.each(["exit", "close"])("rejects a duplicate %s event", async (duplicate) => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+    child.stdout.emit("end"); child.stderr.emit("end");
+    child.emit(duplicate, 0, null);
+    child.emit(duplicate, 0, null);
+    await expect(completion).rejects.toThrow("[docker-review:protocol] failed");
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it.each(["stdout-data", "stderr-data", "stdout-error", "child-error"])("rejects a late %s race after terminal events", async (kind) => {
+    const child = new FakeChild();
+    const write = vi.fn();
+    const lifecycle = captureChildLifecycle(child, 100);
+    const completion = completeProofLifecycle(lifecycle, successPayload(), true, { write });
+    child.stdout.emit("end"); child.stderr.emit("end");
+    child.emit("exit", 0, null); child.emit("close", 0, null);
+    if (kind === "stdout-data") child.stdout.emit("data", "late");
+    if (kind === "stderr-data") child.stderr.emit("data", "late");
+    if (kind === "stdout-error") child.stdout.emit("error", new Error("private"));
+    if (kind === "child-error") child.emit("error", new Error("private"));
+    await expect(completion).rejects.toThrow(/\[docker-review:(?:docker|protocol)\] failed/u);
+    expect(write).not.toHaveBeenCalled();
   });
   it("forces a literal zero-retry child environment and encloses one provider attempt", () => {
     const result = liveProofPreflight({ DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "0" }, { DEEPSEEK_MAX_RETRIES: "2", KEEP: "yes" });
