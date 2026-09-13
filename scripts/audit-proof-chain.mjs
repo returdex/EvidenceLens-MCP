@@ -25,6 +25,9 @@ const nonPassOutcomes = new Set(["diagnostic_failed", "preflight_failed", "revie
 const execFileAsync = promisify(execFile);
 const repairNames = ["10-30-REPAIR.json", "10-31-REPAIR.json", "10-32-REPAIR.json", "10-33-REPAIR.json"];
 const phase = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+const consumedStateCommit = "1b62227f8c38b12a8c287f670d9300241a11686b";
+const consumedStatePath = `${phase}/.10-51-live-state.json`;
+const unavailable = "unavailable_from_committed_state";
 const mode = (paths, schemas, committed = false) => Object.freeze({
   paths: Object.freeze(paths.map((name) => `${phase}/${name}`)),
   schemas: Object.freeze(schemas),
@@ -32,6 +35,7 @@ const mode = (paths, schemas, committed = false) => Object.freeze({
 });
 
 export const PROOF_CHAIN_MODES = Object.freeze({
+  "forensic-consumed-generation": mode(["10-53-FORENSIC.json"], ["evidencelens.consumed-generation-forensic.v1"]),
   "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
   reviews: mode(["10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
   build: mode(["10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
@@ -67,6 +71,7 @@ export function sourceIdentity(value) {
 }
 
 export function auditChainRecord(value) {
+  if (plain(value) && value.schema === "evidencelens.consumed-generation-forensic.v1") return auditConsumedGenerationForensic(value);
   if (plain(value) && value.schema === "evidencelens.live-proof.v3") return auditLiveProof(value);
   if (plain(value) && value.schema === "evidencelens.execution.v2") return auditExecution(value);
   if (plain(value) && value.schema === "evidencelens.build.v2" && exactKeys(value, buildKeys)) {
@@ -77,6 +82,38 @@ export function auditChainRecord(value) {
   validateCertifiers(value.certifier_sha256);
   if (!hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)) fail("PROOF_CHAIN_SCHEMA");
   if (!schemas.get(value.schema).has(value.status)) fail("PROOF_CHAIN_STATE");
+  return sourceIdentity(value);
+}
+
+const forensicKeys = [
+  "build_generation", "build_image_id", "build_sha256", "canonical_encoding", "certifier_sha256",
+  "committed_state_commit", "committed_state_mode", "committed_state_path", "committed_state_sha256",
+  "diagnostic", "generation", "inner_status", "lifecycle_close", "lifecycle_exit", "manifest_sha256",
+  "mcp_tools_call_count", "non_planning_tree", "observed_provider_requests", "outcome", "previous_sha256",
+  "request_receipt", "request_receipt_mac", "reservation_count", "result", "reviewed_commit", "schema",
+  "sequence", "status", "transcript", "wrapper_status",
+];
+
+export function auditConsumedGenerationForensic(value) {
+  if (!exactKeys(value, forensicKeys) || value.schema !== "evidencelens.consumed-generation-forensic.v1") fail("PROOF_CHAIN_SCHEMA");
+  validateCertifiers(value.certifier_sha256);
+  if (value.status !== "gaps_found" || value.outcome !== "terminal_evidence_incomplete"
+    || value.committed_state_commit !== consumedStateCommit || value.committed_state_path !== consumedStatePath
+    || value.committed_state_sha256 !== "fccf4bf8244b73cea24ac00a47653762164906ec451d1373de1260a43e30a387"
+    || value.canonical_encoding !== "utf-8/canonical-json" || value.committed_state_mode !== "0600"
+    || value.generation !== "aa9559e40fb797ce19457fdbbecb5a59913befb124d6258b4ea506e7596ce19f"
+    || value.sequence !== 4 || value.previous_sha256 !== "ba48bb767a5dc0648e58c062364e79865235056b4bcfaa1eb0d3ceadfca08a09"
+    || value.wrapper_status !== "completed" || value.inner_status !== "failed"
+    || value.reservation_count !== 1 || value.mcp_tools_call_count !== 0 || value.observed_provider_requests !== 0
+    || ["diagnostic", "request_receipt", "request_receipt_mac", "lifecycle_exit", "lifecycle_close", "transcript", "result"].some((key) => value[key] !== unavailable)
+    || value.reviewed_commit !== "5751312a28da639ebe0b24834b18d90655efe4b3"
+    || value.non_planning_tree !== "4f9b2179939056aaa632d06f0b7405eddfde2322c7fcd207de5b6817f88dd79a"
+    || value.manifest_sha256 !== "8a8556d3eb5bd93f04e27ba5becb369aa2fecf9ffbe596f443f1b42732ce76fd"
+    || value.certifier_sha256.audit_live_evidence_sha256 !== "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500"
+    || value.certifier_sha256.audit_proof_chain_sha256 !== "ee6e0fe5a3c9e3a9aa2f408d3dda31bcb182c2c825afc9ed51a6472e2594e802"
+    || value.build_generation !== "aa9559e40fb797ce19457fdbbecb5a59913befb124d6258b4ea506e7596ce19f"
+    || value.build_image_id !== "sha256:5766201ff50c1fb4f0688443d11793eb4192ea209cc6d99f435f498deec4d270"
+    || value.build_sha256 !== "d0af8988e0e9c070b9dcd5c6095ae3a86536c00821a05b6b7d4a5d88b427d3be") fail("PROOF_CHAIN_FORENSIC");
   return sourceIdentity(value);
 }
 
@@ -232,12 +269,13 @@ function evidence(text) {
   if (!match) fail("PROOF_CHAIN_SCHEMA");
   try { return JSON.parse(match[1]); } catch { fail("PROOF_CHAIN_SCHEMA"); }
 }
-async function load(path) {
+async function load(path, canonicalOwnerOnly = false) {
   let handle;
   try {
     handle = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
     const before = await handle.stat({ bigint: true });
-    if (!before.isFile() || before.size < 3n || before.size > 1024n * 1024n || before.nlink !== 1n) fail("PROOF_CHAIN_FILE");
+    if (!before.isFile() || before.size < 3n || before.size > 1024n * 1024n || before.nlink !== 1n
+      || (canonicalOwnerOnly && (before.mode & 0o077n) !== 0n)) fail("PROOF_CHAIN_FILE");
     const bytes = await handle.readFile();
     const after = await handle.stat({ bigint: true });
     if (before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs) fail("PROOF_CHAIN_FILE");
@@ -246,11 +284,33 @@ async function load(path) {
     try { second = await reopened.readFile(); } finally { await reopened.close(); }
     if (sha256Hex(bytes) !== sha256Hex(second)) fail("PROOF_CHAIN_FILE");
     const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    try { return JSON.parse(text); } catch { return evidence(text); }
+    try {
+      const value = JSON.parse(text);
+      if (canonicalOwnerOnly && text !== canonicalJson(value)) fail("PROOF_CHAIN_FILE");
+      return value;
+    } catch (error) {
+      if (error instanceof Error && /^PROOF_CHAIN_/u.test(error.message)) throw error;
+      return evidence(text);
+    }
   } catch (error) {
     if (error instanceof Error && /^PROOF_CHAIN_/u.test(error.message)) throw error;
     fail("PROOF_CHAIN_FILE");
   } finally { await handle?.close().catch(() => undefined); }
+}
+async function assertConsumedState() {
+  const state = await load(consumedStatePath, true);
+  let committed;
+  try {
+    committed = (await execFileAsync("git", ["show", `${consumedStateCommit}:${consumedStatePath}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout;
+  } catch { fail("PROOF_CHAIN_FORENSIC"); }
+  const working = await readFile(consumedStatePath);
+  if (!working.equals(committed) || sha256Hex(committed) !== "fccf4bf8244b73cea24ac00a47653762164906ec451d1373de1260a43e30a387"
+    || canonicalJson(state) !== committed.toString("utf8")) fail("PROOF_CHAIN_FORENSIC");
+}
+export async function auditConsumedGenerationForensicFile(path) {
+  const value = await load(path, true);
+  auditConsumedGenerationForensic(value);
+  return value;
 }
 async function assertCommittedInputs(paths, repoDir = process.cwd()) {
   for (const path of paths) {
@@ -267,9 +327,14 @@ async function main(argv) {
   if (!specification || paths.length !== specification.paths.length || new Set(paths).size !== paths.length
     || paths.some((path, index) => path !== specification.paths[index])) fail("PROOF_CHAIN_ARGV");
   if (specification.committed) await assertCommittedInputs(paths);
-  const records = await Promise.all(paths.map(load));
+  if (mode === "forensic-consumed-generation") await assertConsumedState();
+  const records = await Promise.all(paths.map((path) => load(path, mode === "forensic-consumed-generation")));
   auditModeRecords(mode, records);
-  await Promise.all(records.map((record) => auditGitIdentity(record)));
+  if (mode !== "forensic-consumed-generation") await Promise.all(records.map((record) => auditGitIdentity(record)));
+  if (mode === "forensic-consumed-generation") {
+    process.stdout.write(`${canonicalJson({ status: "gaps_found" })}\n`);
+    return;
+  }
   if (mode === "repair-set") {
     const result = auditRepairSet(records[0], records.slice(1));
     process.stdout.write(`${canonicalJson({ production_correction: result.production_correction, status: "ready" })}\n`);
@@ -277,7 +342,9 @@ async function main(argv) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
-  main(process.argv.slice(2)).then(() => process.stdout.write("proof chain audit passed\n")).catch((error) => {
+  main(process.argv.slice(2)).then(() => {
+    if (process.argv[2] !== "forensic-consumed-generation") process.stdout.write("proof chain audit passed\n");
+  }).catch((error) => {
     process.stderr.write(`${error instanceof Error && /^PROOF_CHAIN_/u.test(error.message) ? error.message : "PROOF_CHAIN_FAILED"}\n`);
     process.exitCode = 1;
   });

@@ -1,7 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditChainRecord, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
+import { auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -30,6 +33,27 @@ const executionRecord = {
   result_sha256: digest(result), schema: "evidencelens.execution.v2", status: "passed", transcript,
   transcript_sha256: digest(transcript),
 };
+const forensicRecord = {
+  build_generation: "aa9559e40fb797ce19457fdbbecb5a59913befb124d6258b4ea506e7596ce19f",
+  build_image_id: "sha256:5766201ff50c1fb4f0688443d11793eb4192ea209cc6d99f435f498deec4d270",
+  build_sha256: "d0af8988e0e9c070b9dcd5c6095ae3a86536c00821a05b6b7d4a5d88b427d3be",
+  canonical_encoding: "utf-8/canonical-json", certifier_sha256: {
+    audit_live_evidence_sha256: "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500",
+    audit_proof_chain_sha256: "ee6e0fe5a3c9e3a9aa2f408d3dda31bcb182c2c825afc9ed51a6472e2594e802",
+  },
+  committed_state_commit: "1b62227f8c38b12a8c287f670d9300241a11686b", committed_state_mode: "0600",
+  committed_state_path: ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/.10-51-live-state.json",
+  committed_state_sha256: "fccf4bf8244b73cea24ac00a47653762164906ec451d1373de1260a43e30a387",
+  diagnostic: "unavailable_from_committed_state", generation: "aa9559e40fb797ce19457fdbbecb5a59913befb124d6258b4ea506e7596ce19f",
+  inner_status: "failed", lifecycle_close: "unavailable_from_committed_state", lifecycle_exit: "unavailable_from_committed_state",
+  manifest_sha256: "8a8556d3eb5bd93f04e27ba5becb369aa2fecf9ffbe596f443f1b42732ce76fd", mcp_tools_call_count: 0,
+  non_planning_tree: "4f9b2179939056aaa632d06f0b7405eddfde2322c7fcd207de5b6817f88dd79a", observed_provider_requests: 0,
+  outcome: "terminal_evidence_incomplete", previous_sha256: "ba48bb767a5dc0648e58c062364e79865235056b4bcfaa1eb0d3ceadfca08a09",
+  request_receipt: "unavailable_from_committed_state", request_receipt_mac: "unavailable_from_committed_state", reservation_count: 1,
+  result: "unavailable_from_committed_state", reviewed_commit: "5751312a28da639ebe0b24834b18d90655efe4b3",
+  schema: "evidencelens.consumed-generation-forensic.v1", sequence: 4, status: "gaps_found",
+  transcript: "unavailable_from_committed_state", wrapper_status: "completed",
+};
 const proofRecord = {
   ...identity, build_sha256: digest(buildRecord), clean_exit: true, execution_sha256: digest(executionRecord), finding_count: 2,
   fixture_count: 4, outcome: "passed", review_sha256: "", schema: "evidencelens.live-proof.v3",
@@ -46,8 +70,49 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["source-review", "reviews", "build", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "build", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
+  });
+
+  it("accepts only the exact consumed-generation forensic non-pass", () => {
+    expect(auditConsumedGenerationForensic(forensicRecord)).toMatchObject({ reviewed_commit: forensicRecord.reviewed_commit });
+    expect(auditModeRecords("forensic-consumed-generation", [forensicRecord])).toMatchObject({ reviewed_commit: forensicRecord.reviewed_commit });
+    expect(() => auditModeRecords("forensic-consumed-generation", [])).toThrow("PROOF_CHAIN_ARGV");
+    expect(() => auditModeRecords("forensic-consumed-generation", [forensicRecord, forensicRecord])).toThrow("PROOF_CHAIN_ARGV");
+  });
+
+  it.each([
+    ["commit", { committed_state_commit: "0".repeat(40) }], ["path", { committed_state_path: "other" }],
+    ["state hash", { committed_state_sha256: h("0") }], ["generation", { generation: h("0") }],
+    ["sequence", { sequence: 3 }], ["previous hash", { previous_sha256: h("0") }],
+    ["status", { status: "passed" }], ["encoding", { canonical_encoding: "utf-8" }],
+    ["mode", { committed_state_mode: "0644" }], ["source", { reviewed_commit: "0".repeat(40) }],
+    ["build", { build_sha256: h("0") }], ["fabricated receipt", { request_receipt: {} }],
+  ])("rejects changed forensic %s", (_label, changed) => {
+    expect(() => auditModeRecords("forensic-consumed-generation", [{ ...forensicRecord, ...changed }])).toThrow();
+  });
+
+  it("rejects changed forensic keys and schema", () => {
+    const { result: _result, ...missing } = forensicRecord;
+    expect(() => auditModeRecords("forensic-consumed-generation", [missing])).toThrow("PROOF_CHAIN_SCHEMA");
+    expect(() => auditModeRecords("forensic-consumed-generation", [{ ...forensicRecord, unknown: true }])).toThrow("PROOF_CHAIN_SCHEMA");
+    expect(() => auditModeRecords("forensic-consumed-generation", [{ ...forensicRecord, schema: "evidencelens.execution.v2" }])).toThrow();
+  });
+
+  it("requires owner-only canonical bytes for the forensic file", async () => {
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-forensic-"));
+    const path = join(root, "FORENSIC.json");
+    try {
+      await writeFile(path, canonicalJson(forensicRecord), { mode: 0o600 });
+      await expect(auditConsumedGenerationForensicFile(path)).resolves.toMatchObject({ status: "gaps_found" });
+      await writeFile(path, `${canonicalJson(forensicRecord)}\n`, { mode: 0o600 });
+      await expect(auditConsumedGenerationForensicFile(path)).rejects.toThrow("PROOF_CHAIN_FILE");
+      await writeFile(path, canonicalJson(forensicRecord), { mode: 0o600 });
+      await chmod(path, 0o644);
+      await expect(auditConsumedGenerationForensicFile(path)).rejects.toThrow("PROOF_CHAIN_FILE");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 
   it("enforces mode-specific schema order and cardinality", () => {
