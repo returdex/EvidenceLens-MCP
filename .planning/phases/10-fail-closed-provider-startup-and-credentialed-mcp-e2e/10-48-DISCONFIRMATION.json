@@ -1,0 +1,41 @@
+{
+  "schema": "evidencelens.combined-disconfirmation.v1",
+  "input_hashes": {
+    "provider_disconfirmation_sha256": "3be35e03439321dbd46efc77761b56c9319addb034e8c50036715f2b3e307507",
+    "provider_command_sha256": "af69812e8ae469ec28f686750dffe2fb633401a600f0785c30c6315f54a3efe0",
+    "host_disconfirmation_sha256": "f67a11a4bae81d90b53bac97eedfff79f585655b977341cc9d7833fde8e1d2cb",
+    "host_command_sha256": "d05809d26e53f5ad79912deb62a97038fb6534f0e85fa05061a2b7f35c91b20f"
+  },
+  "finding_ids": [
+    "BL-01",
+    "BL-02",
+    "BL-03",
+    "BL-04",
+    "BL-05",
+    "BL-06",
+    "WR-01",
+    "WR-02"
+  ],
+  "pass_counts": {
+    "focused_test_files": 12,
+    "focused_tests": 307,
+    "source_audit_rows": 25,
+    "offline_test_files": 43,
+    "offline_tests": 573,
+    "builds": 1
+  },
+  "source_audit_sha256": "fd125bc3946cdfc64b1daedf1c9002f473d8b21f22036142ede0ed50818c1556",
+  "side_effects": {
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "credential_reads": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "gh_dispatches": 0,
+    "git_pushes": 0
+  }
+}
