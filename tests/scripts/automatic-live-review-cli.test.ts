@@ -34,10 +34,16 @@ describe("automatic review package CLI", () => {
   });
 
   it("reaches the real fixed build preflight and reports only a stable code", async () => {
-    const result = await invoke("review:auto-build");
+    const root = await mkdtemp(join(tmpdir(), "automatic-cli-docker-"));
+    const marker = join(root, "docker-called");
+    const docker = join(root, "docker");
+    await writeFile(docker, `#!/bin/sh\nprintf called > '${marker}'\nexit 99\n`);
+    await chmod(docker, 0o700);
+    const result = await invoke("review:auto-build", [], { PATH: `${root}:${process.env.PATH}` });
     expect(result.code).toBe(50);
-    expect(result.stderr).toContain("automatic-live-review: AUTOMATIC_PREFLIGHT");
+    expect(result.stderr).toContain("automatic-live-review: AUTOMATIC_BUILD_FAILED");
     expect(result.stderr).not.toMatch(/DEEPSEEK_API_KEY|\/Users\/|stack|cause/iu);
+    expect(await readFile(marker, "utf8")).toBe("called");
   });
 
   it("reaches the real fixed live preflight before credential access", async () => {
