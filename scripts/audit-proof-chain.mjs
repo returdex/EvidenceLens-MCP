@@ -34,6 +34,87 @@ const mode = (paths, schemas, committed = false) => Object.freeze({
   committed,
 });
 
+const localValidationPath = `${phase}/10-59-LOCAL-VALIDATION.json`;
+const forensicPath = `${phase}/10-53-FORENSIC.json`;
+const transitionPath = `${phase}/10-59-TRANSITION.json`;
+const executionPath = `${phase}/10-59-EXECUTION.json`;
+const proofPath = `${phase}/10-59-PROOF.json`;
+const sourcePath = `${phase}/10-57-SOURCE.json`;
+const reviewPath = `${phase}/10-57-REVIEW.md`;
+const securityPath = `${phase}/10-57-SECURITY.md`;
+const buildPath = `${phase}/10-58-FINAL-BUILD.json`;
+
+/** These ordered registries are production constants, not caller input. */
+export const BRANCH_AUTHORITY_REGISTRIES = Object.freeze({
+  preflight: Object.freeze({
+    branch: "preflight_started",
+    schema: "evidencelens.preflight-sync-authority.v1",
+    paths: Object.freeze([forensicPath, transitionPath, executionPath, proofPath, localValidationPath]),
+  }),
+  live: Object.freeze({
+    branch: "preflight_authenticated",
+    schema: "evidencelens.live-sync-authority.v1",
+    paths: Object.freeze([forensicPath, sourcePath, reviewPath, securityPath, buildPath, transitionPath, executionPath, proofPath, localValidationPath]),
+  }),
+});
+
+export const FINAL_AUDIT_REGISTRIES = Object.freeze({
+  preflight: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.preflight.paths, `${phase}/10-60-SYNC-CLAIM.json`, `${phase}/10-60-SYNC-JOURNAL.json`]),
+  live: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.live.paths, `${phase}/10-60-SYNC-CLAIM.json`, `${phase}/10-60-SYNC-JOURNAL.json`]),
+});
+
+const ownerCapabilities = new WeakSet();
+/** The returned object has identity only; it contains no serializable authority. */
+export function createTerminalOwnerCapability() {
+  const capability = Object.freeze(Object.create(null));
+  ownerCapabilities.add(capability);
+  return capability;
+}
+export function closeTerminalOwnerCapability(capability) { ownerCapabilities.delete(capability); }
+function requireOwner(capability) { if (!ownerCapabilities.has(capability)) fail("PROOF_CHAIN_LOCAL_OWNER"); }
+
+const validationReceiptKeys = ["artifact_sha256", "auditors", "branch", "capability_identity", "generation", "outcome", "schema", "validation"];
+export function validateTerminalOwnerReceipt(value) {
+  if (!exactKeys(value, validationReceiptKeys) || value.schema !== "evidencelens.terminal-owner-validation.v1"
+    || !hash.test(value.generation) || !["preflight_started", "preflight_authenticated"].includes(value.branch)
+    || typeof value.capability_identity !== "string" || !hash.test(value.capability_identity)
+    || !exactKeys(value.artifact_sha256, ["execution", "proof", "transition"])
+    || Object.values(value.artifact_sha256).some((entry) => !hash.test(entry))
+    || !exactKeys(value.auditors, ["execution", "proof"]) || value.auditors.execution !== "execution-auto" || value.auditors.proof !== "proof-auto"
+    || !exactKeys(value.validation, ["execution", "proof"])
+    || !["passed", "failed"].includes(value.validation.execution) || !["passed", "failed"].includes(value.validation.proof)
+    || typeof value.outcome !== "string" || value.outcome.length === 0) fail("PROOF_CHAIN_LOCAL_VALIDATION");
+  return Object.freeze(value);
+}
+
+export function auditExecutionAuto(capability, transition, execution) {
+  requireOwner(capability);
+  const branch = authenticatedBranch(transition);
+  auditExecution(execution);
+  assertBranchExecution(branch, execution);
+  return Object.freeze({ branch, status: execution.status });
+}
+export function auditProofAuto(capability, transition, execution, proof) {
+  requireOwner(capability);
+  const branch = authenticatedBranch(transition);
+  auditExecution(execution); auditLiveProof(proof); assertBranchExecution(branch, execution);
+  if (proof.execution_sha256 !== sha256Hex(Buffer.from(canonicalJson(execution))) || proof.outcome !== execution.outcome || proof.status !== execution.status) fail("PROOF_CHAIN_IDENTITY");
+  return Object.freeze({ branch, status: proof.status });
+}
+
+function authenticatedBranch(transition) {
+  if (!plain(transition) || transition.schema !== "evidencelens.live-transition.v1"
+    || !["preflight_started", "preflight_authenticated"].includes(transition.branch)
+    || !hash.test(transition.generation)) fail("PROOF_CHAIN_TRANSITION");
+  return transition.branch;
+}
+function assertBranchExecution(branch, execution) {
+  if (branch === "preflight_started") {
+    if (execution.status !== "gaps_found" || execution.outcome === "passed" || execution.mcp_tools_call_count !== 0
+      || execution.reservation_count !== 0 || execution.request_receipt?.observed_provider_requests !== 0) fail("PROOF_CHAIN_BRANCH");
+  } else if (execution.reservation_count !== 1) fail("PROOF_CHAIN_BRANCH");
+}
+
 export const PROOF_CHAIN_MODES = Object.freeze({
   "forensic-consumed-generation": mode(["10-53-FORENSIC.json"], ["evidencelens.consumed-generation-forensic.v1"]),
   "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
@@ -187,19 +268,29 @@ export function auditExecution(value) {
   if (!exactKeys(value, executionKeys) || value.schema !== "evidencelens.execution.v2") fail("PROOF_CHAIN_SCHEMA");
   validateCertifiers(value.certifier_sha256);
   if (!hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)
-    || !hash.test(value.build_generation) || !hash.test(value.execution_generation) || !/^sha256:[0-9a-f]{64}$/u.test(value.image_id)
-    || !hash.test(value.request_receipt_sha256) || !hash.test(value.transcript_sha256)
+    || !hash.test(value.execution_generation)
     || JSON.stringify(value.argv) !== JSON.stringify(["docker", "compose", "--profile", "review", "run", "--rm", "-T", "review"])
     || !exactKeys(value.environment, ["profile", "provider_disabled"]) || value.environment.profile !== "review" || value.environment.provider_disabled !== false
-    || !auditLifecycle(value.exit) || !auditLifecycle(value.close) || value.exit.code !== value.close.code || value.exit.signal !== value.close.signal
-    || !Array.isArray(value.repair_set) || value.repair_set.length !== 0 || value.mcp_tools_call_count !== 1 || value.reservation_count !== 1
-    || !exactKeys(value.transcript, transcriptKeys) || value.transcript.mcp_method !== "tools/call" || value.transcript.tool !== "review_evidence"
-    || value.transcript.exit_code !== value.exit.code || value.transcript.close_code !== value.close.code
-    || sha256Hex(Buffer.from(canonicalJson(value.transcript))) !== value.transcript_sha256) fail("PROOF_CHAIN_EXECUTION");
-  auditReceipt(value.request_receipt, value);
-  const observed = value.request_receipt.observed_provider_requests;
+    || !Array.isArray(value.repair_set) || value.repair_set.length !== 0
+    || ![0, 1].includes(value.mcp_tools_call_count) || ![0, 1].includes(value.reservation_count)) fail("PROOF_CHAIN_EXECUTION");
+  const preReservation = value.mcp_tools_call_count === 0 && value.reservation_count === 0;
+  const preTools = value.mcp_tools_call_count === 0 && value.reservation_count === 1;
+  if (preReservation) {
+    if (value.build_generation !== unavailable || value.image_id !== unavailable || value.request_receipt !== null || value.request_receipt_sha256 !== null
+      || value.transcript !== null || value.transcript_sha256 !== null || value.exit !== null || value.close !== null) fail("PROOF_CHAIN_EXECUTION");
+  } else {
+    if (!hash.test(value.build_generation) || !/^sha256:[0-9a-f]{64}$/u.test(value.image_id)) fail("PROOF_CHAIN_EXECUTION");
+    auditReceipt(value.request_receipt, value);
+  }
+  if (!preReservation && !preTools) {
+    if (!auditLifecycle(value.exit) || !auditLifecycle(value.close) || value.exit.code !== value.close.code || value.exit.signal !== value.close.signal
+      || !exactKeys(value.transcript, transcriptKeys) || value.transcript.mcp_method !== "tools/call" || value.transcript.tool !== "review_evidence"
+      || value.transcript.exit_code !== value.exit.code || value.transcript.close_code !== value.close.code
+      || !hash.test(value.transcript_sha256) || sha256Hex(Buffer.from(canonicalJson(value.transcript))) !== value.transcript_sha256) fail("PROOF_CHAIN_EXECUTION");
+  } else if (preTools && (value.transcript !== null || value.transcript_sha256 !== null || value.exit !== null || value.close !== null)) fail("PROOF_CHAIN_EXECUTION");
+  const observed = preReservation ? 0 : value.request_receipt.observed_provider_requests;
   if (value.outcome === "passed") {
-    if (value.status !== "passed" || value.clean_exit !== true || value.exit.code !== 0 || value.exit.signal !== null
+    if (preReservation || preTools || value.status !== "passed" || value.clean_exit !== true || value.exit.code !== 0 || value.exit.signal !== null
       || observed !== 1 || value.fixture_count !== 4 || !Number.isSafeInteger(value.finding_count) || value.finding_count < 1
       || value.provider !== "deepseek" || typeof value.model !== "string" || value.model.length < 1 || value.diagnostic !== null
       || !exactKeys(value.result, resultKeys) || value.result.fixture_count !== 4 || value.result.finding_count !== value.finding_count
@@ -208,7 +299,8 @@ export function auditExecution(value) {
   } else if (!nonPassOutcomes.has(value.outcome) || value.status !== "gaps_found" || value.clean_exit !== false || value.fixture_count !== 0 || value.finding_count !== 0
     || value.result !== null || value.result_sha256 !== null || value.provider !== "deepseek" || typeof value.model !== "string"
     || !exactKeys(value.diagnostic, ["code", "path"]) || !diagnosticCodes.has(value.diagnostic.code) || value.diagnostic.path !== "transport.fetch"
-    || (value.diagnostic.code === "pre_fetch" ? observed !== 0 : observed > 1)) fail("PROOF_CHAIN_EXECUTION");
+    || (preReservation && value.outcome !== "preflight_failed") || (preTools && observed !== 0)
+    || (!preReservation && value.diagnostic.code === "pre_fetch" ? observed !== 0 : observed > 1)) fail("PROOF_CHAIN_EXECUTION");
   return sourceIdentity(value);
 }
 
@@ -347,8 +439,77 @@ async function assertCommittedInputs(paths, repoDir = process.cwd()) {
     if (!working.equals(committed)) fail("PROOF_CHAIN_REPAIR_SET");
   }
 }
+async function readFixedCommittedTuple(paths, repoDir = process.cwd()) {
+  let fullCommit;
+  try { fullCommit = (await execFileAsync("git", ["rev-parse", "HEAD^{commit}"], { cwd: repoDir, encoding: "utf8" })).stdout.trim(); }
+  catch { fail("PROOF_CHAIN_COMMITTED"); }
+  if (!/^[0-9a-f]{40}$/u.test(fullCommit)) fail("PROOF_CHAIN_COMMITTED");
+  const values = [];
+  for (const path of paths) {
+    let canonical;
+    try { canonical = (await execFileAsync("git", ["show", `${fullCommit}:${path}`], { cwd: repoDir, encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
+    catch { fail("PROOF_CHAIN_COMMITTED"); }
+    let handle;
+    try {
+      handle = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+      const before = await handle.stat({ bigint: true }); const working = await handle.readFile(); const after = await handle.stat({ bigint: true });
+      if (!before.isFile() || before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size || !working.equals(canonical)) fail("PROOF_CHAIN_COMMITTED");
+      const text = new TextDecoder("utf-8", { fatal: true }).decode(working);
+      try { const parsed = JSON.parse(text); if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_COMMITTED"); values.push(parsed); }
+      catch (error) { if (error instanceof Error && error.message === "PROOF_CHAIN_COMMITTED") throw error; values.push(evidence(text)); }
+    } catch (error) {
+      if (error instanceof Error && error.message === "PROOF_CHAIN_COMMITTED") throw error;
+      fail("PROOF_CHAIN_COMMITTED");
+    } finally { await handle?.close().catch(() => undefined); }
+  }
+  return { fullCommit, values };
+}
+
+function registryFromRecords(values, expected) {
+  if (values.length !== expected.paths.length) fail("PROOF_CHAIN_ARGV");
+  const offset = expected === BRANCH_AUTHORITY_REGISTRIES.live ? 5 : 1;
+  const [forensic] = values;
+  auditConsumedGenerationForensic(forensic);
+  const transition = values[offset]; const execution = values[offset + 1]; const proof = values[offset + 2]; const receipt = values[offset + 3];
+  const branch = authenticatedBranch(transition);
+  if (branch !== expected.branch) fail("PROOF_CHAIN_BRANCH");
+  auditExecution(execution); auditLiveProof(proof); validateTerminalOwnerReceipt(receipt);
+  assertBranchExecution(branch, execution);
+  if (transition.generation !== receipt.generation || execution.execution_generation !== receipt.generation
+    || receipt.artifact_sha256.execution !== sha256Hex(Buffer.from(canonicalJson(execution)))
+    || receipt.artifact_sha256.proof !== sha256Hex(Buffer.from(canonicalJson(proof)))
+    || receipt.artifact_sha256.transition !== sha256Hex(Buffer.from(canonicalJson(transition)))
+    || proof.execution_sha256 !== receipt.artifact_sha256.execution) fail("PROOF_CHAIN_IDENTITY");
+  if (expected === BRANCH_AUTHORITY_REGISTRIES.live) {
+    auditSourceAndReports(values[1], values[2], values[3]); auditBuildAuto(values[4]);
+    if (proof.status !== (execution.status) || proof.outcome !== execution.outcome) fail("PROOF_CHAIN_IDENTITY");
+  } else if (proof.status !== "gaps_found" || proof.outcome === "passed") fail("PROOF_CHAIN_BRANCH");
+  return Object.freeze({ branch, registry_schema: expected.schema, status: proof.status });
+}
+
+export async function auditCommittedAuthority(modeName, repoDir = process.cwd()) {
+  if (!["execution-committed-auto", "proof-committed-auto", "sync-authority-auto", "final-audit-auto"].includes(modeName)) fail("PROOF_CHAIN_ARGV");
+  const transitionOnly = await readFixedCommittedTuple([transitionPath], repoDir);
+  const branch = authenticatedBranch(transitionOnly.values[0]);
+  const registry = branch === "preflight_started" ? BRANCH_AUTHORITY_REGISTRIES.preflight : BRANCH_AUTHORITY_REGISTRIES.live;
+  const paths = modeName === "final-audit-auto" ? FINAL_AUDIT_REGISTRIES[branch === "preflight_started" ? "preflight" : "live"] : registry.paths;
+  const committed = await readFixedCommittedTuple(paths, repoDir);
+  const result = registryFromRecords(committed.values.slice(0, registry.paths.length), registry);
+  return Object.freeze({ ...result, cardinality: paths.length, full_commit: committed.fullCommit });
+}
 async function main(argv) {
   const [mode, ...paths] = argv;
+  if (["execution-auto", "proof-auto"].includes(mode)) fail("PROOF_CHAIN_LOCAL_OWNER");
+  if (["execution-committed-auto", "proof-committed-auto", "sync-authority-auto", "final-audit-auto"].includes(mode)) {
+    if (paths.length !== 0) fail("PROOF_CHAIN_ARGV");
+    process.stdout.write(`${canonicalJson(await auditCommittedAuthority(mode))}\n`);
+    return;
+  }
+  if (mode === "terminal-owner-receipt-auto") {
+    if (paths.length !== 1 || paths[0] !== localValidationPath) fail("PROOF_CHAIN_ARGV");
+    validateTerminalOwnerReceipt(await load(localValidationPath, true));
+    process.stdout.write(`${canonicalJson({ status: "ready" })}\n`); return;
+  }
   const specification = PROOF_CHAIN_MODES[mode];
   if (!specification || paths.length !== specification.paths.length || new Set(paths).size !== paths.length
     || paths.some((path, index) => path !== specification.paths[index])) fail("PROOF_CHAIN_ARGV");

@@ -4,7 +4,7 @@ import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -72,6 +72,42 @@ describe("proof chain certifier", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
     expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
+  });
+
+  it("publishes distinct immutable 5/9 sync and 7/11 final registries including LOCAL_VALIDATION", () => {
+    expect(BRANCH_AUTHORITY_REGISTRIES.preflight.paths).toHaveLength(5);
+    expect(BRANCH_AUTHORITY_REGISTRIES.live.paths).toHaveLength(9);
+    expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
+    expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
+    for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
+      expect(paths.at(-1)).toMatch(/10-59-LOCAL-VALIDATION\.json$/u);
+      expect(new Set(paths).size).toBe(paths.length);
+      expect(Object.isFrozen(paths)).toBe(true);
+    }
+    expect(BRANCH_AUTHORITY_REGISTRIES.preflight.schema).not.toBe(BRANCH_AUTHORITY_REGISTRIES.live.schema);
+  });
+
+  it("rejects local audit modes without a live owner capability and after capability closure", () => {
+    const transition = { branch: "preflight_authenticated", generation: executionRecord.execution_generation, schema: "evidencelens.live-transition.v1" };
+    expect(() => auditExecutionAuto({}, transition, executionRecord)).toThrow("PROOF_CHAIN_LOCAL_OWNER");
+    const capability = createTerminalOwnerCapability();
+    expect(auditExecutionAuto(capability, transition, executionRecord)).toEqual({ branch: "preflight_authenticated", status: "passed" });
+    expect(auditProofAuto(capability, transition, executionRecord, { ...boundProof, execution_sha256: digest(executionRecord) })).toEqual({ branch: "preflight_authenticated", status: "passed" });
+    closeTerminalOwnerCapability(capability);
+    expect(() => auditExecutionAuto(capability, transition, executionRecord)).toThrow("PROOF_CHAIN_LOCAL_OWNER");
+  });
+
+  it("validates an exact terminal-owner receipt but never treats it as standalone authority", () => {
+    const validation = {
+      artifact_sha256: { execution: h("1"), proof: h("2"), transition: h("3") },
+      auditors: { execution: "execution-auto", proof: "proof-auto" }, branch: "preflight_authenticated",
+      capability_identity: h("4"), generation: h("5"), outcome: "passed", schema: "evidencelens.terminal-owner-validation.v1",
+      validation: { execution: "passed", proof: "passed" },
+    };
+    expect(validateTerminalOwnerReceipt(validation)).toEqual(validation);
+    expect(() => validateTerminalOwnerReceipt({ ...validation, extra: true })).toThrow("PROOF_CHAIN_LOCAL_VALIDATION");
+    expect(() => validateTerminalOwnerReceipt({ ...validation, artifact_sha256: { ...validation.artifact_sha256, proof: h("0") } })).not.toThrow();
+    expect(() => auditModeRecords("proof", [validation])).toThrow();
   });
 
   it("discriminates strict build-auto ready and terminal non-pass without mixed authority", () => {
