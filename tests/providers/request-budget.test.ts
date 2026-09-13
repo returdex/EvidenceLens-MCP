@@ -80,4 +80,17 @@ describe("provider HTTP request budget", () => {
     expect(stderr.endsWith("\n")).toBe(true);
     expect(() => proof!.receiptSink(proof!.requestBudget.receipt())).toThrow("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
   });
+
+  it("erases proof identity from the child environment before exposing the request capability", () => {
+    const environment: Record<string, string | undefined> = {
+      EVIDENCELENS_DIAGNOSTIC_GENERATION: generation,
+      EVIDENCELENS_DIAGNOSTIC_KEY: key.toString("hex")
+    };
+
+    const proof = createProviderRequestProofFromEnvironment(environment, () => undefined);
+
+    expect(proof).toBeDefined();
+    expect(environment).not.toHaveProperty("EVIDENCELENS_DIAGNOSTIC_GENERATION");
+    expect(environment).not.toHaveProperty("EVIDENCELENS_DIAGNOSTIC_KEY");
+  });
 });
