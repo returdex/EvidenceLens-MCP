@@ -30,11 +30,12 @@ function uniqueRequirementState(text) {
   return { requirement: checklist[0][1], trace: trace[0][1] };
 }
 function auditSealed(proof, phase7, phase10, requirements) {
-  const proofKeys = ["certifier_sha256", "clean_exit", "finding_count", "fixture_count", "manifest_sha256", "non_planning_tree", "outcome", "reviewed_commit", "schema", "status"];
+  const proofKeys = ["build_sha256", "certifier_sha256", "clean_exit", "execution_sha256", "finding_count", "fixture_count", "manifest_sha256", "non_planning_tree", "outcome", "review_sha256", "reviewed_commit", "schema", "security_sha256", "source_sha256", "status"];
   const certKeys = ["audit_live_evidence_sha256", "audit_proof_chain_sha256"];
-  if (!exact(proof, proofKeys) || proof.schema !== "evidencelens.live-proof.v2" || !exact(proof.certifier_sha256, certKeys)
+  if (!exact(proof, proofKeys) || proof.schema !== "evidencelens.live-proof.v3" || !exact(proof.certifier_sha256, certKeys)
     || !Object.values(proof.certifier_sha256).every((value) => typeof value === "string" && hash64.test(value))
-    || !hash64.test(proof.manifest_sha256) || !hash64.test(proof.non_planning_tree) || !commitId.test(proof.reviewed_commit)) throw new Error("live evidence audit failed");
+    || !hash64.test(proof.manifest_sha256) || !hash64.test(proof.non_planning_tree) || !commitId.test(proof.reviewed_commit)
+    || ["build_sha256", "execution_sha256", "review_sha256", "security_sha256", "source_sha256"].some((key) => !hash64.test(proof[key]))) throw new Error("live evidence audit failed");
   const passed = proof.outcome === "passed";
   if (!passed && !nonPasses.has(proof.outcome)) throw new Error("live evidence audit failed");
   if (passed ? (proof.status !== "passed" || proof.clean_exit !== true || proof.fixture_count !== 4 || !Number.isSafeInteger(proof.finding_count) || proof.finding_count < 1)

@@ -1,8 +1,11 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { auditChainRecord, auditLiveProof, auditModeRecords, auditRepairSet, auditSourceAndReports, PROOF_CHAIN_MODES } from "../../scripts/audit-proof-chain.mjs";
+import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
+const digest = (value: unknown) => createHash("sha256").update(canonicalJson(value)).digest("hex");
 const certifiers = { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") };
 const identity = { certifier_sha256: certifiers, manifest_sha256: h("c"), non_planning_tree: h("d"), reviewed_commit: "e".repeat(40) };
 
@@ -15,19 +18,22 @@ const receipt = {
   diagnostic_second_call: false, fallback: false, generation: h("f"), mac: h("1"), max_retries: 0,
   observed_provider_requests: 1, reservation_count: 1, schema: "evidencelens.provider-request-receipt.v1",
 };
+const result = { finding_count: 2, fixture_count: 4, model: "deepseek-chat", provider: "deepseek", public_schema: true, provenance: true };
+const transcript = { close_code: 0, exit_code: 0, mcp_method: "tools/call", tool: "review_evidence" };
 const executionRecord = {
   ...identity, argv: ["docker", "compose", "--profile", "review", "run", "--rm", "-T", "review"],
   build_generation: buildRecord.generation, clean_exit: true, close: { code: 0, observed: true, signal: null },
   diagnostic: null, environment: { profile: "review", provider_disabled: false }, execution_generation: receipt.generation,
   exit: { code: 0, observed: true, signal: null }, finding_count: 2, fixture_count: 4, image_id: buildRecord.image_id,
   mcp_tools_call_count: 1, model: "deepseek-chat", outcome: "passed", provider: "deepseek", repair_set: [],
-  request_receipt: receipt, reservation_count: 1, result_sha256: h("2"), schema: "evidencelens.execution.v2",
-  status: "passed", transcript_sha256: h("3"),
+  request_receipt: receipt, request_receipt_sha256: digest(receipt), reservation_count: 1, result,
+  result_sha256: digest(result), schema: "evidencelens.execution.v2", status: "passed", transcript,
+  transcript_sha256: digest(transcript),
 };
 const proofRecord = {
-  ...identity, build_sha256: h("4"), clean_exit: true, execution_sha256: h("5"), finding_count: 2,
-  fixture_count: 4, outcome: "passed", review_sha256: h("6"), schema: "evidencelens.live-proof.v3",
-  security_sha256: h("7"), source_sha256: h("8"), status: "passed",
+  ...identity, build_sha256: digest(buildRecord), clean_exit: true, execution_sha256: digest(executionRecord), finding_count: 2,
+  fixture_count: 4, outcome: "passed", review_sha256: "", schema: "evidencelens.live-proof.v3",
+  security_sha256: "", source_sha256: "", status: "passed",
 };
 
 describe("proof chain certifier", () => {
@@ -36,6 +42,7 @@ describe("proof chain certifier", () => {
   const asvs = { ...identity, schema: "evidencelens.asvs-review.v2", status: "ready" };
   const build = buildRecord;
   const execution = executionRecord;
+  const boundProof = { ...proofRecord, source_sha256: digest(source), review_sha256: digest(deep), security_sha256: digest(asvs) };
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
@@ -74,16 +81,17 @@ describe("proof chain certifier", () => {
 
   const proof = (outcome: string, overrides = {}) => ({
     ...identity,
+    build_sha256: h("1"), execution_sha256: h("2"), review_sha256: h("3"), security_sha256: h("4"), source_sha256: h("5"),
     clean_exit: outcome === "passed",
     finding_count: outcome === "passed" ? 1 : 0,
     fixture_count: outcome === "passed" ? 4 : 0,
     outcome,
-    schema: "evidencelens.live-proof.v2",
+    schema: "evidencelens.live-proof.v3",
     status: outcome === "passed" ? "passed" : "gaps_found",
     ...overrides,
   });
 
-  it("accepts the sole exact ten-key live proof format for success and terminal preflight failure", () => {
+  it("accepts the exact chain-bound live proof format for success and terminal preflight failure", () => {
     expect(auditLiveProof(proof("passed"))).toMatchObject(identity);
     expect(auditLiveProof(proof("preflight_failed"))).toMatchObject(identity);
   });
@@ -118,18 +126,22 @@ describe("proof chain certifier", () => {
   });
 
   it("accepts consumed pre-fetch failure but never reports it as an observed send", () => {
+    const failedReceipt = { ...receipt, observed_provider_requests: 0 };
+    const failedTranscript = { ...transcript, close_code: 1, exit_code: 1 };
     const failed = {
       ...executionRecord, clean_exit: false, close: { code: 1, observed: true, signal: null }, diagnostic: { code: "pre_fetch", path: "transport.fetch" },
       exit: { code: 1, observed: true, signal: null }, finding_count: 0, fixture_count: 0, outcome: "request_failed",
-      request_receipt: { ...receipt, observed_provider_requests: 0 }, result_sha256: null, status: "gaps_found",
+      request_receipt: failedReceipt, request_receipt_sha256: digest(failedReceipt), result: null, result_sha256: null, status: "gaps_found",
+      transcript: failedTranscript, transcript_sha256: digest(failedTranscript),
     };
     expect(auditModeRecords("execution", [failed, buildRecord, source, deep, asvs])).toMatchObject(identity);
-    expect(() => auditModeRecords("execution", [{ ...failed, request_receipt: receipt }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_EXECUTION");
+    expect(() => auditModeRecords("execution", [{ ...failed, request_receipt: receipt, request_receipt_sha256: digest(receipt) }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_EXECUTION");
   });
 
   it("binds terminal proof to exact tuple digests and rejects self-asserted legacy proof", () => {
-    expect(() => auditModeRecords("proof", [proofRecord, executionRecord, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_IDENTITY");
-    expect(() => auditModeRecords("proof", [proof("passed"), executionRecord, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_SCHEMA");
+    expect(auditModeRecords("proof", [boundProof, executionRecord, buildRecord, source, deep, asvs])).toMatchObject(identity);
+    expect(() => auditModeRecords("proof", [{ ...boundProof, execution_sha256: h("0") }, executionRecord, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_IDENTITY");
+    expect(() => auditModeRecords("proof", [{ ...identity, clean_exit: true, finding_count: 2, fixture_count: 4, outcome: "passed", schema: "evidencelens.live-proof.v2", status: "passed" }, executionRecord, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_SCHEMA");
   });
 
   it("binds source and both reviews to identical certifier and source identities", () => {
