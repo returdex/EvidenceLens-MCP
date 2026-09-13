@@ -1,0 +1,132 @@
+---
+phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
+plan: 54
+subsystem: live-proof
+tags: [hmac, atomic-evidence, lifecycle, proof-chain]
+requires:
+  - phase: 10-53
+    provides: immutable consumed-generation forensic record
+provides:
+  - five exact authenticated terminal snapshot variants
+  - durable pre-reservation failure evidence and fail-closed missing callback handling
+  - strict ready-or-terminal-non-pass build-auto validator
+affects: [10-55, 10-56, 10-57, 10-58, 10-59, 10-60]
+tech-stack:
+  added: []
+  patterns: [per-generation HMAC terminal snapshots, owner-only atomic sealing, fixed branch registry]
+key-files:
+  created: []
+  modified:
+    - scripts/automatic-live-review.mjs
+    - scripts/docker-review-real.mjs
+    - scripts/live-proof-state.mjs
+    - scripts/audit-proof-chain.mjs
+    - tests/scripts/automatic-live-review.test.ts
+    - tests/scripts/automatic-live-review-cli.test.ts
+    - tests/scripts/docker-review-real.test.ts
+    - tests/scripts/live-proof-state.test.ts
+    - tests/scripts/audit-proof-chain.test.ts
+key-decisions:
+  - "A terminal snapshot is accepted only when its exact branch counters and per-generation HMAC validate."
+  - "The old 10-49/50/51 tuple is reachable only through a separately named read-only forensic function."
+patterns-established:
+  - "Terminal evidence precedes owner return and missing evidence is itself a terminal failure."
+  - "Build-auto returns an explicit ready or terminal_non_pass discriminator; field presence never implies readiness."
+requirements-completed: [SAFE-04, PROV-01]
+duration: 6min
+completed: 2026-09-13
+---
+
+# Phase 10 Plan 54: Durable Terminal Evidence Summary
+
+**Per-generation authenticated terminal snapshots now preserve every live branch, while build preflight accepts only strict ready or strict terminal non-pass evidence.**
+
+## Performance
+
+- **Duration:** 6 min
+- **Started:** 2026-09-13T16:36:00Z
+- **Completed:** 2026-09-13T16:42:11Z
+- **Tasks:** 2
+- **Files modified:** 9
+
+## Accomplishments
+
+- Defined five mutually exclusive terminal variants with fixed tools/reservation/observed-send counts and HMAC authentication.
+- Moved automatic execution to fixed 10-57/10-58/10-59 locators and durably sealed pre-reservation failures before credential, Docker, or provider activity.
+- Added a strict build-auto discriminator that rejects mixed schemas, reordered fixed paths, caller downgrade, and impossible counts.
+- Removed the fabricated zero-count fallback: an omitted terminal callback now fails closed.
+
+## Task Commits
+
+1. **Task 1: Define exact terminal variants and durable capture contract** - `84d83e8`
+2. **Task 2: Define strict build-auto ready and terminal non-pass schemas** - `9927032`
+3. **Rule 3 fix: Authenticate the fixed automatic review tuple** - `192789b`
+
+## Files Created/Modified
+
+- `scripts/live-proof-state.mjs` - exact variant creation/authentication and durable preflight transitions.
+- `scripts/docker-review-real.mjs` - exactly-once frozen terminal callback before key cleanup.
+- `scripts/automatic-live-review.mjs` - fixed new-chain owner, atomic snapshot persistence, and forensic-only legacy reader.
+- `scripts/audit-proof-chain.mjs` - exact reviews-auto/build-auto registries and discriminator.
+- `tests/scripts/*.test.ts` - provider-disabled producer, CLI, lifecycle, state, and audit contracts.
+
+## Decisions Made
+
+- Kept terminal MAC validation in the producing process while persisting only the MAC, never its key material.
+- Represented unavailable preflight fields as exact nulls within a branch whose counters are structurally fixed at 0/0/0.
+
+## Deviations from Plan
+
+### Auto-fixed Issues
+
+**1. [Rule 3 - Blocking] Added the missing fixed reviews-auto registry**
+- **Found during:** Overall verification
+- **Issue:** The new production build dispatcher used 10-57 paths with the old 10-49-only `reviews` registry and would always fail before certification.
+- **Fix:** Added a fixed zero-caller-choice `reviews-auto` tuple and routed the dispatcher through it.
+- **Files modified:** `scripts/audit-proof-chain.mjs`, `scripts/automatic-live-review.mjs`, `tests/scripts/audit-proof-chain.test.ts`
+- **Verification:** 178 focused provider-disabled tests and TypeScript build passed.
+- **Committed in:** `192789b`
+
+---
+
+**Total deviations:** 1 auto-fixed (1 blocking issue)
+**Impact on plan:** The fix is required for the planned new chain to be executable and does not broaden authority.
+
+## External-Side-Effect Accounting
+
+- Docker builds/runs: 0
+- Credential reads: 0
+- Provider/network sends: 0
+- Retries/fallback/diagnostic second calls: 0
+- GitHub Actions/push/dispatch: 0
+
+## Known Stubs
+
+None. Null terminal fields are intentional exact unavailable representations in non-pass variants, not UI or execution stubs.
+
+## Threat Flags
+
+No unplanned threat surface. The new file-I/O and authentication surfaces are the explicit T-10-54-01 through T-10-54-04 mitigations.
+
+## Issues Encountered
+
+Legacy tests asserted the old registry cardinality and direct harness call spelling; they were updated to assert the new fixed dispatch and missing-snapshot behavior.
+
+## User Setup Required
+
+None.
+
+## Next Phase Readiness
+
+Plan 10-55 can consume the exact five-variant and build-auto contracts without redefining them. The current changes do not authorize a live request or synchronization.
+
+## Self-Check: PASSED
+
+- All nine modified implementation/test files exist.
+- Task commits `84d83e8`, `9927032`, and `192789b` exist.
+- `npm run build` passed.
+- Focused provider-disabled suite passed: 178/178.
+
+---
+*Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
+*Completed: 2026-09-13*
