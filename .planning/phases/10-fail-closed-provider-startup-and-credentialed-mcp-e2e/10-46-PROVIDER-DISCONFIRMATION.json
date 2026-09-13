@@ -1,0 +1,82 @@
+{
+  "schema": "evidencelens.provider-disconfirmation.v1",
+  "phase": "10",
+  "plan": "10-46",
+  "outcome": "passed",
+  "command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test -- --run tests/providers/diagnostics.test.ts tests/providers/request-budget.test.ts tests/providers/deepseek.test.ts tests/providers/retry.test.ts tests/providers/provider-contract.test.ts tests/contract/review-provider.test.ts && npm run build && git diff --check",
+  "command_sha256": "af69812e8ae469ec28f686750dffe2fb633401a600f0785c30c6315f54a3efe0",
+  "test_files_passed": 6,
+  "tests_passed": 78,
+  "findings": [
+    {
+      "id": "BL-02",
+      "status": "disconfirmed",
+      "production_owners": [
+        "src/providers/deepseek.ts",
+        "src/providers/provenance.ts",
+        "src/tools/review.ts",
+        "src/providers/diagnostics.ts"
+      ],
+      "tests": [
+        "tests/providers/deepseek.test.ts :: emits one canonical feature at each real response decode and content failure site",
+        "tests/providers/provider-contract.test.ts :: emits one provenance feature at the owning throw site without disclosing details",
+        "tests/contract/review-provider.test.ts :: emits one canonical orchestration identity feature while preserving sanitized public bytes",
+        "tests/providers/diagnostics.test.ts :: emits and verifies exactly one canonical bounded allowlisted frame",
+        "tests/providers/diagnostics.test.ts :: rejects unknown, duplicate, oversize, malformed, stale, bad-MAC, and detail-bearing frames"
+      ],
+      "observed_child_diagnostics": 1,
+      "accepted_bad_or_multiple_diagnostics": 0,
+      "secret_leaks": 0
+    },
+    {
+      "id": "BL-05",
+      "status": "disconfirmed",
+      "production_owners": [
+        "src/providers/request-budget.ts",
+        "src/providers/deepseek.ts"
+      ],
+      "tests": [
+        "tests/providers/request-budget.test.ts :: allows at most one sequential or concurrent hostile acquire",
+        "tests/providers/deepseek.test.ts :: acquires immediately around transport.fetch and permanently blocks a second send",
+        "tests/providers/deepseek.test.ts :: rejects a concurrent hostile second review before its transport.fetch invocation",
+        "tests/providers/retry.test.ts :: uses an explicit no-retry policy that cannot loop"
+      ],
+      "maximum_observed_provider_requests": 1,
+      "second_transport_fetch_invocations": 0,
+      "max_retries": 0,
+      "fallback": false
+    },
+    {
+      "id": "WR-01",
+      "status": "disconfirmed",
+      "production_owners": [
+        "src/providers/request-budget.ts",
+        "src/providers/deepseek.ts",
+        "src/tools/review.ts"
+      ],
+      "tests": [
+        "tests/providers/deepseek.test.ts :: reports observed zero when request construction fails before fetch",
+        "tests/contract/review-provider.test.ts :: records a tools/call-side pre-fetch failure as reservation one and observed zero",
+        "tests/providers/request-budget.test.ts :: separates the reservation from an observed provider HTTP send",
+        "tests/providers/request-budget.test.ts :: rejects forged, malformed, cross-generation, and extra-key receipts"
+      ],
+      "pre_fetch_reservation_count": 1,
+      "pre_fetch_observed_provider_requests": 0,
+      "entered_fetch_observed_provider_requests": 1,
+      "accepted_forged_receipts": 0
+    }
+  ],
+  "side_effects": {
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "credential_reads": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "gh_dispatches": 0,
+    "git_pushes": 0
+  }
+}
