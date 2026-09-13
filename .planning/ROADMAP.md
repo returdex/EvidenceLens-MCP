@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(37 of 37 plans executed; verification 7/11 with PROV-01 and automatic proof-chain gaps still open.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(37 of 52 plans executed; Plans 10-38 through 10-52 close the 7/11 review, automation, lifecycle, request-boundary, and proof-authority gaps before any new live request.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 37 plans
+**Plans**: 52 plans
 
 Plans:
 **Wave 1**
@@ -323,10 +323,56 @@ Plans:
 **Wave 33** *(gap closure; blocked on Wave 32 completion)*
 - [x] 10-37-PLAN.md — Write-ahead crash-recoverable three-artifact synchronization and final audit
 
+**Wave 34** *(gap closure; blocked on Wave 33 completion)*
+- [ ] 10-38-PLAN.md — Require separately observed, consistent child exit and close events
+
+**Wave 35** *(gap closure; blocked on Wave 34 completion)*
+- [ ] 10-39-PLAN.md — Define and inject authenticated child-side diagnostics at real production owners
+
+**Wave 36** *(gap closure; blocked on Wave 35 completion)*
+- [ ] 10-40-PLAN.md — Authenticate/classify the host Docker diagnostic channel with injected-child E2E tests
+
+**Wave 37** *(gap closure; blocked on Wave 36 completion)*
+- [ ] 10-41-PLAN.md — Enforce one request at actual DeepSeek transport.fetch with zero-retry proof policy
+
+**Wave 38** *(gap closure; blocked on Wave 37 completion)*
+- [ ] 10-42-PLAN.md — Authenticate adapter HTTP receipts and persist distinct host request counters
+
+**Wave 39** *(gap closure; blocked on Wave 38 completion)*
+- [ ] 10-43-PLAN.md — Enforce strict mode-specific proof schemas, tuples, and unique status authority
+
+**Wave 40** *(gap closure; blocked on Wave 39 completion)*
+- [ ] 10-44-PLAN.md — Authenticate the complete Git/build/execution proof chain and synchronization authority
+
+**Wave 41** *(gap closure; blocked on Wave 40 completion)*
+- [ ] 10-45-PLAN.md — Replace automatic CLI stubs with fixed production dispatch and subprocess E2E tests
+
+**Wave 42** *(gap closure; blocked on Wave 41 completion)*
+- [ ] 10-46-PLAN.md — Disconfirm provider, child-channel, and adapter request-boundary defects
+- [ ] 10-47-PLAN.md — Disconfirm CLI, lifecycle, proof, and synchronization defects
+
+**Wave 43** *(gap closure; blocked on both Wave 42 plans)*
+- [ ] 10-48-PLAN.md — Seal the combined eight-finding and source-coverage authority
+
+**Wave 44** *(gap closure; blocked on Wave 43 completion)*
+- [ ] 10-49-PLAN.md — Deep- and ASVS-certify the exact repaired source by atomic hash-bound local validation
+
+**Wave 45** *(gap closure; blocked on Wave 44 completion)*
+- [ ] 10-50-PLAN.md — Produce and same-process authenticate one exact-source immutable build
+
+**Wave 46** *(gap closure; blocked on Wave 45 completion)*
+- [ ] 10-51-PLAN.md — Run and atomically seal the zero-or-one-request automatic credentialed proof
+
+**Wave 47** *(gap closure; blocked on Wave 46 completion)*
+- [ ] 10-52-PLAN.md — Synchronize and independently audit final chain-certified truth
+
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
+- No Plan 10-51 provider request is reachable until the real CLI, lifecycle, diagnostic, transport-cap, proof-authority, disconfirmation, deep-review, ASVS, exact-source, and immutable-build gates in Plans 10-38 through 10-50 pass; any earlier failure fixes the live request budget at zero.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
+- Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
+- Plans 10-38 through 10-52 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
