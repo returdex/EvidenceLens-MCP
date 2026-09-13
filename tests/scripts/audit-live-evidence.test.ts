@@ -8,10 +8,11 @@ const requirements = (complete: boolean) => `- [${complete ? "x" : " "}] **PROV-
 describe("live evidence audit", () => {
   const h = (c: string) => c.repeat(64);
   const proof = (outcome: string, overrides: Record<string, unknown> = {}) => ({
+    build_sha256: h("1"), execution_sha256: h("2"), review_sha256: h("3"), security_sha256: h("4"), source_sha256: h("5"),
     certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") },
     clean_exit: outcome === "passed", fixture_count: outcome === "passed" ? 4 : 0,
     finding_count: outcome === "passed" ? 1 : 0, manifest_sha256: h("c"), non_planning_tree: h("d"),
-    outcome, reviewed_commit: "e".repeat(40), schema: "evidencelens.live-proof.v2",
+    outcome, reviewed_commit: "e".repeat(40), schema: "evidencelens.live-proof.v3",
     status: outcome === "passed" ? "passed" : "gaps_found", ...overrides,
   });
   const phase = (n: 7 | 10, status: "passed" | "gaps_found") => `---\nphase: ${n}\nstatus: ${status}\n---\n`;
