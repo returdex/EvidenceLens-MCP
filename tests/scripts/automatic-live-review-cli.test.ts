@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
+import { runAutomaticBuildPipeline } from "../../scripts/automatic-live-review.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -26,6 +27,30 @@ async function invokeLiveIn(root: string, env: NodeJS.ProcessEnv = {}) {
 }
 
 describe("automatic review package CLI", () => {
+  it("reaches fixed post-build build-auto audit with exactly one PATH-stubbed Docker build", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-post-build-"));
+    const marker = join(root, "docker-calls");
+    const docker = join(root, "docker");
+    await writeFile(docker, `#!/bin/sh\nprintf 'build\\n' >> '${marker}'\nexit 0\n`); await chmod(docker, 0o700);
+    const modes: string[] = [];
+    const h = (c: string) => c.repeat(64);
+    const source = { certifier_sha256: {}, manifest_sha256: h("a"), non_planning_tree: h("b"), reviewed_commit: "c".repeat(40), schema: "evidencelens.source.v2", status: "ready" };
+    const buildResult = { daemon_identity_sha256: h("1"), fixture_sha256: [h("2"), h("3"), h("4"), h("5")], image_config_sha256: h("6"), image_content_sha256: h("7"), image_id: `sha256:${h("8")}`, runtime_sha256: h("9") };
+    const result = await runAutomaticBuildPipeline({
+      audit: async (mode: string) => { if (mode === "build") throw new Error("legacy build mode reached"); modes.push(mode); },
+      readSource: async () => source,
+      prepare: async () => {
+        await execFileAsync("docker", ["build"], { env: { ...process.env, PATH: `${root}:${process.env.PATH}` } });
+        return { generation: h("d"), handoffPath: join(root, "handoff") };
+      },
+      produce: async () => ({ status: "completed" }), verify: async () => buildResult,
+      seal: async (_path: string, value: unknown) => value,
+    });
+    expect(result).toMatchObject({ status: "ready", image_id: buildResult.image_id });
+    expect(modes).toEqual(["reviews-auto", "build-auto"]);
+    expect((await readFile(marker, "utf8")).trim().split("\n")).toEqual(["build"]);
+  });
+
   it.each(["review:auto-build", "review:auto-live-once"] as const)("rejects caller argv before every external side effect: %s", async (script) => {
     const root = await mkdtemp(join(tmpdir(), "automatic-cli-path-"));
     const marker = join(root, "called");

@@ -285,25 +285,26 @@ async function prepareBuild(source) {
  * evidence locator is repository-owned and every child is launched without a
  * shell. The proof producer owns the exclusive generation claim and single
  * archive build; its verifier only inspects that resulting image. */
-export async function runFixedAutomaticBuild() {
-  await runNodeScript("scripts/audit-proof-chain.mjs", ["reviews-auto", ...fixedReviewPaths]);
-  const source = await readCanonicalJson(fixedReviewPaths[0]);
+export async function runAutomaticBuildPipeline(dependencies) {
+  if (!plain(dependencies) || !["audit", "readSource", "prepare", "produce", "verify", "seal"].every((key) => typeof dependencies[key] === "function")) fail("AUTOMATIC_PREFLIGHT");
+  await dependencies.audit("reviews-auto", fixedReviewPaths);
+  const source = await dependencies.readSource(fixedReviewPaths[0]);
   let prepared;
-  try { prepared = await prepareBuild(source); } catch { fail("AUTOMATIC_BUILD_FAILED"); }
-  const productionResult = await produceBuildGeneration(prepared.handoffPath, {
+  try { prepared = await dependencies.prepare(source); } catch { fail("AUTOMATIC_BUILD_FAILED"); }
+  const productionResult = await dependencies.produce(prepared.handoffPath, {
     expectedPath: prepared.handoffPath,
     authenticatePlanning: async () => undefined,
   });
   if (productionResult?.status !== "completed") fail("AUTOMATIC_BUILD_FAILED");
   let buildResult;
   try {
-    buildResult = await verifyExistingBuild(prepared.handoffPath, {
+    buildResult = await dependencies.verify(prepared.handoffPath, {
       expectedPath: prepared.handoffPath,
       authenticatePlanning: async () => undefined,
     });
   } catch { fail("AUTOMATIC_VERIFICATION_FAILED"); }
   if (!plain(buildResult) || !imageId.test(buildResult.image_id)) fail("AUTOMATIC_VERIFICATION_FAILED");
-  const finalBuild = await atomicJson(fixedBuildPath, {
+  const finalBuild = await dependencies.seal(fixedBuildPath, {
     ...source,
     build_count: 1,
     daemon_identity_sha256: buildResult.daemon_identity_sha256,
@@ -317,8 +318,19 @@ export async function runFixedAutomaticBuild() {
     status: "ready",
     verifier_build_count: 0,
   });
-  await runNodeScript("scripts/audit-proof-chain.mjs", ["build", fixedBuildPath, ...fixedReviewPaths]);
+  await dependencies.audit("build-auto", [fixedBuildPath, ...fixedReviewPaths]);
   return Object.freeze({ generation: finalBuild.generation, image_id: finalBuild.image_id, status: "ready" });
+}
+
+export async function runFixedAutomaticBuild() {
+  return runAutomaticBuildPipeline({
+    audit: (mode, paths) => runNodeScript("scripts/audit-proof-chain.mjs", [mode, ...paths]),
+    prepare: prepareBuild,
+    produce: produceBuildGeneration,
+    readSource: readCanonicalJson,
+    seal: atomicJson,
+    verify: verifyExistingBuild,
+  });
 }
 
 /** Production live entrypoint. Authentication precedes both state consumption
