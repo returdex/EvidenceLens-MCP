@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   createProviderRequestBudget,
+  createProviderRequestProofFromEnvironment,
+  PROVIDER_REQUEST_RECEIPT_PREFIX,
   verifyProviderRequestReceipt
 } from "../../src/providers/request-budget.js";
 
@@ -63,5 +65,19 @@ describe("provider HTTP request budget", () => {
     const receipt = budget.receipt();
     expect(Object.isFrozen(receipt)).toBe(true);
     expect(verifyProviderRequestReceipt(receipt, { generation, key })).toBe(true);
+  });
+
+  it("emits one bounded private-channel receipt from proof environment identity", () => {
+    let stderr = "";
+    const proof = createProviderRequestProofFromEnvironment({
+      EVIDENCELENS_DIAGNOSTIC_GENERATION: generation,
+      EVIDENCELENS_DIAGNOSTIC_KEY: key.toString("hex")
+    }, (value) => { stderr += value; });
+    expect(proof).toBeDefined();
+    proof!.requestBudget.acquireHttpSend();
+    proof!.receiptSink(proof!.requestBudget.receipt());
+    expect(stderr.startsWith(PROVIDER_REQUEST_RECEIPT_PREFIX)).toBe(true);
+    expect(stderr.endsWith("\n")).toBe(true);
+    expect(() => proof!.receiptSink(proof!.requestBudget.receipt())).toThrow("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
   });
 });

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { NormalizedEvidence, ReviewFinding } from "../contracts/review.js";
-import { PROVIDER_PROMPT_VERSION, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "./types.js";
+import { PROVIDER_PROMPT_VERSION, type ProviderEvidenceItem, type ProviderRequestBudget, type ProviderRequestReceipt, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "./types.js";
 import { validateProviderFindings, type ProviderFindingDraft } from "./provenance.js";
 import { ProviderError } from "./errors.js";
 import { fetchWithRetry, type RetryClock } from "./retry.js";
@@ -9,6 +9,11 @@ import type { DiagnosticSink } from "./diagnostics.js";
 
 export interface DeepSeekTransport {
   fetch(input: string, init: RequestInit): Promise<Response>;
+}
+
+export interface DeepSeekProofOptions {
+  requestBudget: ProviderRequestBudget;
+  receiptSink: (receipt: ProviderRequestReceipt) => void;
 }
 
 const MAX_VISUAL_BYTES = 8_000_000;
@@ -138,26 +143,36 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
 export function createDeepSeekProvider(
   config: ProviderConfig,
   transport: DeepSeekTransport = { fetch: (input, init) => fetch(input, init) },
-  diagnostics?: DiagnosticSink
+  diagnostics?: DiagnosticSink,
+  proof?: DeepSeekProofOptions
 ): ReviewProvider {
+  if (proof !== undefined && config.maxRetries !== 0) throw new Error("PROVIDER_PROOF_RETRIES_FORBIDDEN");
   const provider: ReviewProvider = {
     name: "deepseek",
     async review(request: ProviderReviewRequest): Promise<ProviderReviewResult> {
-      if (request.promptVersion !== PROVIDER_PROMPT_VERSION) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
-      assertFingerprint(request);
-      const body = buildBody(request);
-      const response = await fetchWithRetry({
-        maxRetries: config.maxRetries, timeoutMs: config.timeoutMs, maxTotalWaitMs: config.maxTotalWaitMs,
-        operation: (signal) => transport.fetch(`${config.baseUrl}/chat/completions`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` }, body: JSON.stringify(body), signal }),
-      });
-      let decoded: unknown;
-      try { decoded = await response.json(); } catch { invalidResponse(diagnostics, ["provider", "http", "json"], "invalid_format"); }
-      const findings: ReviewFinding[] = validateProviderFindings(
-        normalizedFromProviderEvidence(request.evidence),
-        parseDrafts(decoded, diagnostics),
-        diagnostics
-      );
-      return { provider: provider.name, model: request.inference.model, promptVersion: request.promptVersion, inputFingerprint: request.inputFingerprint, modelFindings: findings, deterministicFindings: [] };
+      try {
+        if (request.promptVersion !== PROVIDER_PROMPT_VERSION) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
+        assertFingerprint(request);
+        const body = buildBody(request);
+        const response = await fetchWithRetry({
+          retryPolicy: proof === undefined ? "bounded" : "none",
+          maxRetries: config.maxRetries, timeoutMs: config.timeoutMs, maxTotalWaitMs: config.maxTotalWaitMs,
+          operation: (signal) => {
+            proof?.requestBudget.acquireHttpSend();
+            return transport.fetch(`${config.baseUrl}/chat/completions`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` }, body: JSON.stringify(body), signal });
+          },
+        });
+        let decoded: unknown;
+        try { decoded = await response.json(); } catch { invalidResponse(diagnostics, ["provider", "http", "json"], "invalid_format"); }
+        const findings: ReviewFinding[] = validateProviderFindings(
+          normalizedFromProviderEvidence(request.evidence),
+          parseDrafts(decoded, diagnostics),
+          diagnostics
+        );
+        return { provider: provider.name, model: request.inference.model, promptVersion: request.promptVersion, inputFingerprint: request.inputFingerprint, modelFindings: findings, deterministicFindings: [] };
+      } finally {
+        if (proof !== undefined) proof.receiptSink(proof.requestBudget.receipt());
+      }
     }
   };
   return provider;

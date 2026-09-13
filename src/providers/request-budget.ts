@@ -3,6 +3,10 @@ import { isProxy } from "node:util/types";
 import type { ProviderRequestBudget, ProviderRequestReceipt } from "./types.js";
 
 export const PROVIDER_REQUEST_RECEIPT_SCHEMA = "evidencelens.provider-request-receipt.v1" as const;
+export const PROVIDER_REQUEST_RECEIPT_PREFIX = "[evidencelens-provider-request] " as const;
+export const PROVIDER_REQUEST_RECEIPT_MAX_BYTES = 4096;
+export const PROVIDER_REQUEST_GENERATION_ENV = "EVIDENCELENS_DIAGNOSTIC_GENERATION" as const;
+export const PROVIDER_REQUEST_KEY_ENV = "EVIDENCELENS_DIAGNOSTIC_KEY" as const;
 
 const receiptKeys = [
   "schema", "generation", "reservation_count", "observed_provider_requests",
@@ -10,6 +14,13 @@ const receiptKeys = [
 ] as const;
 
 type UnsignedReceipt = Omit<ProviderRequestReceipt, "mac">;
+
+export class ProviderRequestBudgetError extends Error {
+  constructor(message: "PROVIDER_REQUEST_BUDGET_INVALID" | "PROVIDER_REQUEST_BUDGET_EXHAUSTED") {
+    super(message);
+    this.name = "ProviderRequestBudgetError";
+  }
+}
 
 function validGeneration(value: unknown): value is string {
   return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value);
@@ -45,13 +56,13 @@ export function createProviderRequestBudget(options: {
   key: Uint8Array;
 }): ProviderRequestBudget {
   if (!validGeneration(options.generation) || !validKey(options.key)) {
-    throw new Error("PROVIDER_REQUEST_BUDGET_INVALID");
+    throw new ProviderRequestBudgetError("PROVIDER_REQUEST_BUDGET_INVALID");
   }
   const ownedKey = Buffer.from(options.key);
   let observed: 0 | 1 = 0;
   return Object.freeze({
     acquireHttpSend(): void {
-      if (observed !== 0) throw new Error("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
+      if (observed !== 0) throw new ProviderRequestBudgetError("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
       // This synchronous transition is the capability boundary. It happens in
       // the same turn immediately before transport.fetch can be invoked.
       observed = 1;
@@ -61,6 +72,40 @@ export function createProviderRequestBudget(options: {
       return Object.freeze({ ...unsigned, mac: sign(unsigned, ownedKey) });
     }
   });
+}
+
+export interface ProviderRequestProof {
+  readonly requestBudget: ProviderRequestBudget;
+  readonly receiptSink: (receipt: ProviderRequestReceipt) => void;
+}
+
+export function createProviderRequestProofFromEnvironment(
+  environment: Record<string, string | undefined> = process.env,
+  write: (value: string) => void = (value) => { process.stderr.write(value); }
+): ProviderRequestProof | undefined {
+  const generation = environment[PROVIDER_REQUEST_GENERATION_ENV];
+  const encodedKey = environment[PROVIDER_REQUEST_KEY_ENV];
+  if (!validGeneration(generation) || typeof encodedKey !== "string" || !/^[a-f0-9]{64}$/u.test(encodedKey)) return undefined;
+  const key = Buffer.from(encodedKey, "hex");
+  try {
+    const requestBudget = createProviderRequestBudget({ generation, key });
+    const receiptKey = Buffer.from(key);
+    let emitted = false;
+    const receiptSink = (receipt: ProviderRequestReceipt): void => {
+      if (emitted || !verifyProviderRequestReceipt(receipt, { generation, key: receiptKey })) {
+        throw new ProviderRequestBudgetError("PROVIDER_REQUEST_BUDGET_EXHAUSTED");
+      }
+      const line = `${PROVIDER_REQUEST_RECEIPT_PREFIX}${JSON.stringify(receipt)}\n`;
+      if (Buffer.byteLength(line) > PROVIDER_REQUEST_RECEIPT_MAX_BYTES) {
+        throw new ProviderRequestBudgetError("PROVIDER_REQUEST_BUDGET_INVALID");
+      }
+      emitted = true;
+      try { write(line); } finally { receiptKey.fill(0); }
+    };
+    return Object.freeze({ requestBudget, receiptSink });
+  } finally {
+    key.fill(0);
+  }
 }
 
 export function verifyProviderRequestReceipt(
