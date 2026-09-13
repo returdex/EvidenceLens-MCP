@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
+import { open } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,6 +23,24 @@ const proofKeys = [...keys, "clean_exit", "finding_count", "fixture_count", "out
 const nonPassOutcomes = new Set(["diagnostic_failed", "preflight_failed", "review_failed", "build_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close"]);
 const execFileAsync = promisify(execFile);
 const repairNames = ["10-30-REPAIR.json", "10-31-REPAIR.json", "10-32-REPAIR.json", "10-33-REPAIR.json"];
+const phase = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+const mode = (paths, schemas, committed = false) => Object.freeze({
+  paths: Object.freeze(paths.map((name) => `${phase}/${name}`)),
+  schemas: Object.freeze(schemas),
+  committed,
+});
+
+export const PROOF_CHAIN_MODES = Object.freeze({
+  "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
+  reviews: mode(["10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  build: mode(["10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  diagnostic: mode(["10-29-DIAGNOSTIC.json", "10-28-DIAGNOSTIC-BUILD.json"], ["evidencelens.diagnostic.v2", "evidencelens.build.v2"]),
+  repair: mode(["10-30-REPAIR.json", "10-29-DIAGNOSTIC.json"], ["evidencelens.repair.v2", "evidencelens.diagnostic.v2"]),
+  "repair-set": mode(["10-29-DIAGNOSTIC.json", ...repairNames], ["evidencelens.diagnostic.v2", ...repairNames.map(() => "evidencelens.repair.v2")], true),
+  execution: mode(["10-51-EXECUTION.json", "10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.diagnostic.v2", "evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  proof: mode(["10-51-PROOF.json", "10-51-EXECUTION.json", "10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.live-proof.v2", "evidencelens.diagnostic.v2", "evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  "sync-authority": mode(["10-51-PROOF.json", "10-51-EXECUTION.json", "10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.live-proof.v2", "evidencelens.diagnostic.v2", "evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"], true),
+});
 
 function fail(code) { throw new Error(code); }
 function plain(value) {
@@ -96,6 +115,19 @@ export function auditRepairSet(diagnostic, repairs) {
   return { production_correction: corrections === 1, source_identity: sourceIdentity(diagnostic) };
 }
 
+export function auditModeRecords(modeName, records) {
+  const specification = PROOF_CHAIN_MODES[modeName];
+  if (!specification || !Array.isArray(records) || records.length !== specification.schemas.length) fail("PROOF_CHAIN_ARGV");
+  records.forEach((record, index) => {
+    auditChainRecord(record);
+    if (record.schema !== specification.schemas[index]) fail("PROOF_CHAIN_SCHEMA");
+  });
+  const identity = JSON.stringify(sourceIdentity(records[0]));
+  if (records.slice(1).some((record) => JSON.stringify(sourceIdentity(record)) !== identity)) fail("PROOF_CHAIN_IDENTITY");
+  if (modeName === "repair-set") auditRepairSet(records[0], records.slice(1));
+  return sourceIdentity(records[0]);
+}
+
 export async function auditGitIdentity(record, repoDir = process.cwd()) {
   auditChainRecord(record);
   const manifest = await createNonPlanningManifest({ repoDir, reviewedCommit: record.reviewed_commit });
@@ -113,8 +145,24 @@ function evidence(text) {
   try { return JSON.parse(match[1]); } catch { fail("PROOF_CHAIN_SCHEMA"); }
 }
 async function load(path) {
-  const text = await readFile(path, "utf8");
-  try { return JSON.parse(text); } catch { return evidence(text); }
+  let handle;
+  try {
+    handle = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+    const before = await handle.stat({ bigint: true });
+    if (!before.isFile() || before.size < 3n || before.size > 1024n * 1024n || before.nlink !== 1n) fail("PROOF_CHAIN_FILE");
+    const bytes = await handle.readFile();
+    const after = await handle.stat({ bigint: true });
+    if (before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs) fail("PROOF_CHAIN_FILE");
+    const reopened = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+    let second;
+    try { second = await reopened.readFile(); } finally { await reopened.close(); }
+    if (sha256Hex(bytes) !== sha256Hex(second)) fail("PROOF_CHAIN_FILE");
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    try { return JSON.parse(text); } catch { return evidence(text); }
+  } catch (error) {
+    if (error instanceof Error && /^PROOF_CHAIN_/u.test(error.message)) throw error;
+    fail("PROOF_CHAIN_FILE");
+  } finally { await handle?.close().catch(() => undefined); }
 }
 async function assertCommittedInputs(paths, repoDir = process.cwd()) {
   for (const path of paths) {
@@ -127,33 +175,17 @@ async function assertCommittedInputs(paths, repoDir = process.cwd()) {
 }
 async function main(argv) {
   const [mode, ...paths] = argv;
-  if (mode === "repair-set" && paths.length === 5) {
-    const expectedPrefix = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/";
-    const expected = ["10-29-DIAGNOSTIC.json", ...repairNames].map((name) => `${expectedPrefix}${name}`);
-    if (paths.some((path, index) => path !== expected[index]) || new Set(paths).size !== paths.length) fail("PROOF_CHAIN_REPAIR_SET");
-    await assertCommittedInputs(paths);
-    const [diagnostic, ...repairs] = await Promise.all(paths.map(load));
-    const result = auditRepairSet(diagnostic, repairs);
+  const specification = PROOF_CHAIN_MODES[mode];
+  if (!specification || paths.length !== specification.paths.length || new Set(paths).size !== paths.length
+    || paths.some((path, index) => path !== specification.paths[index])) fail("PROOF_CHAIN_ARGV");
+  if (specification.committed) await assertCommittedInputs(paths);
+  const records = await Promise.all(paths.map(load));
+  auditModeRecords(mode, records);
+  await Promise.all(records.map((record) => auditGitIdentity(record)));
+  if (mode === "repair-set") {
+    const result = auditRepairSet(records[0], records.slice(1));
     process.stdout.write(`${canonicalJson({ production_correction: result.production_correction, status: "ready" })}\n`);
-    return;
   }
-  if (mode === "source-review" && paths.length === 2) {
-    const [source, review] = await Promise.all(paths.map(load));
-    await Promise.all([auditGitIdentity(source), auditGitIdentity(review)]);
-    if (source.schema !== "evidencelens.source.v2" || review.schema !== "evidencelens.deep-review.v2" || JSON.stringify(sourceIdentity(source)) !== JSON.stringify(sourceIdentity(review))) fail("PROOF_CHAIN_IDENTITY");
-    return;
-  }
-  if (mode === "reviews" && paths.length === 3) {
-    const [source, deep, asvs] = await Promise.all(paths.map(load)); auditSourceAndReports(source, deep, asvs); await Promise.all([source, deep, asvs].map((record) => auditGitIdentity(record))); return;
-  }
-  if (["build", "diagnostic", "repair", "proof", "proof-preflight"].includes(mode) && paths.length >= 1) {
-    if (mode === "proof-preflight" && paths.length !== 1) fail("PROOF_CHAIN_ARGV");
-    const records = await Promise.all(paths.map(load)); records.forEach(auditChainRecord);
-    const identity = JSON.stringify(sourceIdentity(records[0]));
-    if (records.slice(1).some((record) => JSON.stringify(sourceIdentity(record)) !== identity)) fail("PROOF_CHAIN_IDENTITY");
-    return;
-  }
-  fail("PROOF_CHAIN_ARGV");
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {

@@ -24,11 +24,21 @@ describe("proof chain certifier", () => {
     for (const records of [[source], [build, source, asvs, deep], [build, source, deep], [build, source, deep, asvs, asvs]]) {
       expect(() => auditModeRecords("build", records)).toThrow(/PROOF_CHAIN_(ARGV|SCHEMA|IDENTITY)/u);
     }
-    expect(() => auditModeRecords("execution", [build, source, deep, asvs])).toThrow("PROOF_CHAIN_SCHEMA");
+    expect(() => auditModeRecords("execution", [build, build, source, deep, asvs])).toThrow("PROOF_CHAIN_SCHEMA");
   });
 
   it("rejects the demonstrated SOURCE-as-build subprocess substitution", () => {
     expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", "build", ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-34-SOURCE.json"], { stdio: "pipe" })).toThrow();
+  });
+
+  it.each([
+    ["missing", ["build"]],
+    ["extra", ["build", ...PROOF_CHAIN_MODES.build.paths, PROOF_CHAIN_MODES.build.paths[3]]],
+    ["reordered", ["build", PROOF_CHAIN_MODES.build.paths[1], PROOF_CHAIN_MODES.build.paths[0], ...PROOF_CHAIN_MODES.build.paths.slice(2)]],
+    ["duplicate", ["build", PROOF_CHAIN_MODES.build.paths[0], PROOF_CHAIN_MODES.build.paths[0], ...PROOF_CHAIN_MODES.build.paths.slice(2)]],
+    ["removed draft mode", ["proof-preflight", ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-36-PROOF.json"]],
+  ])("rejects %s CLI tuples before loading evidence", (_label, argv) => {
+    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", ...argv], { stdio: "pipe" })).toThrow();
   });
   it.each([
     ["evidencelens.source.v2", "ready"], ["evidencelens.deep-review.v2", "ready"],
