@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditChainRecord, auditRepairSet, auditSourceAndReports } from "../../scripts/audit-proof-chain.mjs";
+import { auditChainRecord, auditLiveProof, auditRepairSet, auditSourceAndReports } from "../../scripts/audit-proof-chain.mjs";
 
 const h = (c: string) => c.repeat(64);
 const certifiers = { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") };
@@ -10,9 +10,36 @@ describe("proof chain certifier", () => {
     ["evidencelens.source.v2", "ready"], ["evidencelens.deep-review.v2", "ready"],
     ["evidencelens.asvs-review.v2", "ready"], ["evidencelens.build.v2", "ready"],
     ["evidencelens.diagnostic.v2", "passed"], ["evidencelens.repair.v2", "not_required"],
-    ["evidencelens.live-proof.v2", "passed"],
   ])("accepts the exact %s schema", (schema, status) => {
     expect(auditChainRecord({ ...identity, schema, status })).toMatchObject(identity);
+  });
+
+  const proof = (outcome: string, overrides = {}) => ({
+    ...identity,
+    clean_exit: outcome === "passed",
+    finding_count: outcome === "passed" ? 1 : 0,
+    fixture_count: outcome === "passed" ? 4 : 0,
+    outcome,
+    schema: "evidencelens.live-proof.v2",
+    status: outcome === "passed" ? "passed" : "gaps_found",
+    ...overrides,
+  });
+
+  it("accepts the sole exact ten-key live proof format for success and terminal preflight failure", () => {
+    expect(auditLiveProof(proof("passed"))).toMatchObject(identity);
+    expect(auditLiveProof(proof("preflight_failed"))).toMatchObject(identity);
+  });
+
+  it("rejects the obsolete six-key proof and any unknown proof key", () => {
+    expect(() => auditChainRecord({ ...identity, schema: "evidencelens.live-proof.v2", status: "passed" })).toThrow("PROOF_CHAIN_SCHEMA");
+    expect(() => auditLiveProof(proof("preflight_failed", { max_provider_requests: 0 }))).toThrow("PROOF_CHAIN_SCHEMA");
+  });
+
+  it("rejects forged success counts and false PROV closure from a non-pass", () => {
+    expect(() => auditLiveProof(proof("passed", { fixture_count: 3 }))).toThrow("PROOF_CHAIN_STATE");
+    expect(() => auditLiveProof(proof("passed", { finding_count: 0 }))).toThrow("PROOF_CHAIN_STATE");
+    expect(() => auditLiveProof(proof("preflight_failed", { status: "passed" }))).toThrow("PROOF_CHAIN_STATE");
+    expect(() => auditLiveProof(proof("preflight_failed", { clean_exit: true, fixture_count: 4, finding_count: 1 }))).toThrow("PROOF_CHAIN_STATE");
   });
 
   it("binds source and both reviews to identical certifier and source identities", () => {
