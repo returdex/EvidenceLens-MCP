@@ -88,11 +88,13 @@ const diagnosticSpecs = [
 const featureKey = (path, code) => JSON.stringify({ path, code });
 const fingerprint = (key) => createHash("sha256").update(`evidencelens-diagnostic-v1:${key}`).digest("hex");
 const diagnosticFeatureIndex = new Map();
+const diagnosticInvariantIndex = new Map();
 export const DIAGNOSTIC_INVARIANT_MAP = Object.freeze(Object.fromEntries(diagnosticSpecs.map(([invariant_id, tier, production_file, path, code], index) => {
   const key = featureKey(path, code);
   const entry = Object.freeze({ invariant_id, tier, production_file, test_file: "tests/scripts/docker-review-real.test.ts", regression_id: `P10-24-${String(index + 1).padStart(3, "0")}`, permitted_files: Object.freeze([production_file]) });
   if (diagnosticFeatureIndex.has(key)) throw new Error("diagnostic registry collision");
   diagnosticFeatureIndex.set(key, { entry, feature_fingerprint: fingerprint(key) });
+  diagnosticInvariantIndex.set(invariant_id, Object.freeze({ path: Object.freeze([...path]), code }));
   return [invariant_id, entry];
 })));
 
@@ -112,6 +114,12 @@ export function classifyDiagnostic(features) {
   if (match === undefined) return { invariant_id: "ambiguous", feature_fingerprint: fingerprint("ambiguous"), repair: "no_repair", follow_up_request_budget: 0 };
   const { entry, feature_fingerprint } = match;
   return { invariant_id: entry.invariant_id, feature_fingerprint, tier: entry.tier, regression_id: entry.regression_id, permitted_files: entry.permitted_files, repair: "allowlisted" };
+}
+
+export function diagnosticFeatureForInvariant(invariantId) {
+  const feature = diagnosticInvariantIndex.get(invariantId);
+  if (feature === undefined) return undefined;
+  return { path: [...feature.path], code: feature.code };
 }
 
 export function classifyFailure(phase, ..._privateDetails) {
