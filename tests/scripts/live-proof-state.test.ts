@@ -8,6 +8,7 @@ import {
   createProofState,
   readProofState,
   recordProviderAttempt,
+  recordRequestEvidence,
   recoverProofState,
   transitionProofState,
 } from "../../scripts/live-proof-state.mjs";
@@ -27,7 +28,7 @@ describe("durable live proof state", () => {
     await transitionProofState(path, "started");
     await transitionProofState(path, "verification_failed");
     await completeWrapper(path);
-    expect(await readProofState(path)).toMatchObject({ inner_status: "verification_failed", wrapper_status: "completed", build_count: 1, provider_request_count: 0 });
+    expect(await readProofState(path)).toMatchObject({ inner_status: "verification_failed", wrapper_status: "completed", build_count: 1, mcp_tools_call_count: 0, reservation_count: 0, observed_provider_requests: 0 });
   });
 
   it("records live failure inside a completed wrapper without converting it to pass", async () => {
@@ -57,17 +58,38 @@ describe("durable live proof state", () => {
   it("finishes wrapper-only interruption from durable terminal evidence", async () => {
     const path = await state("live");
     await transitionProofState(path, "consumed");
-    await transitionProofState(path, "passed", { provider_request_count: 1 });
+    await recordProviderAttempt(path);
+    await recordRequestEvidence(path, { mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: 1 });
+    await transitionProofState(path, "passed");
     expect((await readProofState(path)).wrapper_status).toBe("pending");
-    expect(await recoverProofState(path)).toMatchObject({ inner_status: "passed", wrapper_status: "completed", provider_request_count: 1 });
+    expect(await recoverProofState(path)).toMatchObject({ inner_status: "passed", wrapper_status: "completed", mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: 1 });
   });
 
   it("writes request intent before spawn and refuses a second attempt", async () => {
     const path = await state("live");
     await transitionProofState(path, "consumed");
     await recordProviderAttempt(path);
-    expect(await readProofState(path)).toMatchObject({ inner_status: "consumed", provider_request_count: 1 });
+    expect(await readProofState(path)).toMatchObject({ inner_status: "consumed", mcp_tools_call_count: 0, reservation_count: 1, observed_provider_requests: 0 });
     await expect(recordProviderAttempt(path)).rejects.toThrow("PROOF_STATE_TRANSITION");
+  });
+
+  it.each([0, 1] as const)("persists a tools call, reservation, and observed=%i as separate counters", async (observed) => {
+    const path = await state("live");
+    await transitionProofState(path, "consumed");
+    await recordProviderAttempt(path);
+    await recordRequestEvidence(path, { mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: observed });
+    expect(await readProofState(path)).toMatchObject({ mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: observed });
+  });
+
+  it("rejects advisory or impossible counters as request authority", async () => {
+    const path = await state("live");
+    await transitionProofState(path, "consumed");
+    await recordProviderAttempt(path);
+    for (const evidence of [
+      { mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: 2 },
+      { mcp_tools_call_count: 1, reservation_count: 0, observed_provider_requests: 1 },
+      { mcp_tools_call_count: 1, reservation_count: 1, observed_provider_requests: 0, advisory_provider_requests: 1 },
+    ]) await expect(recordRequestEvidence(path, evidence)).rejects.toThrow("PROOF_STATE_TRANSITION");
   });
 
   it("rejects malformed, noncanonical, and rollback state", async () => {

@@ -4,8 +4,9 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, ProviderRequestReceiptCollector, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 import { CHILD_DIAGNOSTIC_GENERATION_ENV, CHILD_DIAGNOSTIC_KEY_ENV, CHILD_DIAGNOSTIC_PREFIX, CHILD_DIAGNOSTIC_SCHEMA } from "../../src/providers/diagnostics.js";
+import { createProviderRequestBudget, PROVIDER_REQUEST_RECEIPT_PREFIX } from "../../src/providers/request-budget.js";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -65,6 +66,12 @@ function diagnosticLine(environment: Record<string, string>, overrides: Record<s
     .update(JSON.stringify(unsigned))
     .digest("hex");
   return `${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...unsigned, mac })}\n`;
+}
+
+function requestReceiptLine(environment: Record<string, string>, observed: 0 | 1, overrides: Record<string, unknown> = {}): string {
+  const budget = createProviderRequestBudget({ generation: environment[CHILD_DIAGNOSTIC_GENERATION_ENV], key: Buffer.from(environment[CHILD_DIAGNOSTIC_KEY_ENV], "hex") });
+  if (observed === 1) budget.acquireHttpSend();
+  return `${PROVIDER_REQUEST_RECEIPT_PREFIX}${JSON.stringify({ ...budget.receipt(), ...overrides })}\n`;
 }
 
 function failingLiveChild(frame: (environment: Record<string, string>, child: FakeStdioChild) => void) {
@@ -303,6 +310,38 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it("accepts exactly one authenticated adapter receipt and keeps tools, reservation, and send distinct", () => {
+    const environment = { [CHILD_DIAGNOSTIC_GENERATION_ENV]: "c".repeat(64), [CHILD_DIAGNOSTIC_KEY_ENV]: "d".repeat(64) };
+    for (const observed of [0, 1] as const) {
+      const collector = new ProviderRequestReceiptCollector();
+      collector.consume(requestReceiptLine(environment, observed));
+      expect(collector.receipt({ generation: environment[CHILD_DIAGNOSTIC_GENERATION_ENV], key: Buffer.from(environment[CHILD_DIAGNOSTIC_KEY_ENV], "hex") })).toMatchObject({ reservation_count: 1, observed_provider_requests: observed });
+    }
+  });
+
+  it.each([
+    ["missing", []],
+    ["duplicate", [0, 0]],
+    ["forged", [0, { mac: "0".repeat(64) }]],
+    ["stale", [0, { generation: "e".repeat(64) }]],
+    ["impossible", [0, { reservation_count: 0, observed_provider_requests: 1 }]],
+  ] as const)("rejects %s adapter receipt evidence", (_name, specification) => {
+    const environment = { [CHILD_DIAGNOSTIC_GENERATION_ENV]: "c".repeat(64), [CHILD_DIAGNOSTIC_KEY_ENV]: "d".repeat(64) };
+    const collector = new ProviderRequestReceiptCollector();
+    if (specification.length === 1 && typeof specification[0] === "number") collector.consume(requestReceiptLine(environment, specification[0] as 0 | 1));
+    if (specification.length === 2 && typeof specification[1] === "number") {
+      collector.consume(requestReceiptLine(environment, specification[0] as 0 | 1) + requestReceiptLine(environment, specification[1] as 0 | 1));
+    } else if (specification.length === 2) collector.consume(requestReceiptLine(environment, specification[0] as 0 | 1, specification[1] as Record<string, unknown>));
+    expect(collector.receipt({ generation: environment[CHILD_DIAGNOSTIC_GENERATION_ENV], key: Buffer.from(environment[CHILD_DIAGNOSTIC_KEY_ENV], "hex") })).toBeUndefined();
+  });
+
+  it("rejects an otherwise valid receipt arriving after child termination", () => {
+    const environment = { [CHILD_DIAGNOSTIC_GENERATION_ENV]: "c".repeat(64), [CHILD_DIAGNOSTIC_KEY_ENV]: "d".repeat(64) };
+    const collector = new ProviderRequestReceiptCollector();
+    collector.markTerminal();
+    collector.consume(requestReceiptLine(environment, 1));
+    expect(collector.receipt({ generation: environment[CHILD_DIAGNOSTIC_GENERATION_ENV], key: Buffer.from(environment[CHILD_DIAGNOSTIC_KEY_ENV], "hex") })).toBeUndefined();
+  });
   it("authenticates one production child frame and classifies it exactly once at the harness failure boundary", async () => {
     const child = failingLiveChild((environment, target) => {
       target.stderr.emit("data", `ordinary private stderr\n${diagnosticLine(environment)}`);
