@@ -1,0 +1,135 @@
+#!/usr/bin/env node
+import { randomBytes } from "node:crypto";
+import { constants as fsConstants } from "node:fs";
+import { lstat, open, rename, unlink } from "node:fs/promises";
+import { dirname } from "node:path";
+import { auditLiveEvidence } from "./audit-live-evidence.mjs";
+import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
+
+const names = ["phase7", "phase10", "requirements"];
+const hash = /^[0-9a-f]{64}$/u;
+function fail(code) { throw new Error(code); }
+function plain(value) { return value !== null && typeof value === "object" && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value)); }
+function exact(value, keys) { return plain(value) && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort()); }
+
+async function syncDir(path) { const handle = await open(path, fsConstants.O_RDONLY); try { await handle.sync(); } finally { await handle.close(); } }
+async function readBytes(path, ownerOnly = false) {
+  let handle;
+  try {
+    handle = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+    const stat = await handle.stat();
+    if (!stat.isFile() || stat.size < 2 || stat.size > 1_000_000 || (ownerOnly && (stat.uid !== process.getuid?.() || (stat.mode & 0o777) !== 0o600))) fail("PROOF_SYNC_TAMPERED");
+    return await handle.readFile();
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("PROOF_SYNC_")) throw error;
+    fail("PROOF_SYNC_TAMPERED");
+  } finally { await handle?.close().catch(() => undefined); }
+}
+async function exclusive(path, bytes) {
+  let handle;
+  try {
+    handle = await open(path, fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY | fsConstants.O_NOFOLLOW, 0o600);
+    await handle.writeFile(bytes); await handle.sync(); await handle.close(); handle = undefined; await syncDir(dirname(path));
+  } catch (error) { await handle?.close().catch(() => undefined); if (error?.code === "EEXIST") fail("PROOF_SYNC_REPLAY"); fail("PROOF_SYNC_IO"); }
+}
+async function atomicReplace(path, bytes) {
+  const temp = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`; let handle;
+  try {
+    handle = await open(temp, fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY | fsConstants.O_NOFOLLOW, 0o600);
+    await handle.writeFile(bytes); await handle.sync(); await handle.close(); handle = undefined;
+    await rename(temp, path); await syncDir(dirname(path));
+  } catch { await handle?.close().catch(() => undefined); await unlink(temp).catch(() => undefined); fail("PROOF_SYNC_IO"); }
+}
+function once(text, pattern, replacement) {
+  const matches = text.match(new RegExp(pattern.source, `${pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`}`));
+  if (matches?.length !== 1) fail("PROOF_SYNC_STALE");
+  return text.replace(pattern, replacement);
+}
+function replacements(proof, originals) {
+  const state = proof.outcome === "passed" ? "passed" : "gaps_found";
+  const phase7 = once(originals.phase7.toString("utf8"), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
+  const phase10 = once(originals.phase10.toString("utf8"), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
+  let requirements = originals.requirements.toString("utf8");
+  requirements = once(requirements, /^- \[[ x]\] \*\*PROV-01\*\*:/mu, `- [${state === "passed" ? "x" : " "}] **PROV-01**:`);
+  requirements = once(requirements, /^\| PROV-01 \| Phase 10 \| (?:Complete|Gap: credentialed Docker MCP proof) \|$/mu, `| PROV-01 | Phase 10 | ${state === "passed" ? "Complete" : "Gap: credentialed Docker MCP proof"} |`);
+  auditLiveEvidence(proof, phase7, phase10, requirements);
+  return { phase7: Buffer.from(phase7), phase10: Buffer.from(phase10), requirements: Buffer.from(requirements) };
+}
+function validateClaim(value) {
+  if (!exact(value, ["intended_state", "original_sha256", "proof_sha256", "replacement_sha256", "schema"]) || value.schema !== "evidencelens.sync-claim.v1"
+    || !["passed", "gaps_found"].includes(value.intended_state) || !hash.test(value.proof_sha256)) fail("PROOF_SYNC_TAMPERED");
+  for (const field of ["original_sha256", "replacement_sha256"]) if (!exact(value[field], names) || names.some((name) => !hash.test(value[field][name]))) fail("PROOF_SYNC_TAMPERED");
+  return value;
+}
+function validateJournal(value, claimSha256) {
+  if (!exact(value, ["claim_sha256", "completed", "schema"]) || value.schema !== "evidencelens.sync-journal.v1" || value.claim_sha256 !== claimSha256
+    || !Array.isArray(value.completed) || value.completed.some((name, index) => !names.includes(name) || names.indexOf(name) !== index)) fail("PROOF_SYNC_TAMPERED");
+  return value;
+}
+async function readCanonical(path, validator) {
+  const bytes = await readBytes(path, true); let value;
+  try { value = validator(JSON.parse(bytes.toString("utf8"))); } catch (error) { if (error instanceof Error && error.message.startsWith("PROOF_SYNC_")) throw error; fail("PROOF_SYNC_TAMPERED"); }
+  if (canonicalJson(value) !== bytes.toString("utf8")) fail("PROOF_SYNC_TAMPERED"); return { bytes, value };
+}
+async function loadProof(path) {
+  const bytes = await readBytes(path, true); let value; try { value = JSON.parse(bytes.toString("utf8")); } catch { fail("PROOF_SYNC_TAMPERED"); }
+  if (canonicalJson(value) !== bytes.toString("utf8")) fail("PROOF_SYNC_TAMPERED"); return { bytes, value };
+}
+function targetPaths(paths) { return { phase7: paths.phase7Path, phase10: paths.phase10Path, requirements: paths.requirementsPath }; }
+async function createJournal(path, claimSha256) { const value = { claim_sha256: claimSha256, completed: [], schema: "evidencelens.sync-journal.v1" }; await exclusive(path, Buffer.from(canonicalJson(value))); return value; }
+
+async function apply(paths, proof, claim, journal, replacementsByName, interruptAt) {
+  const targets = targetPaths(paths);
+  for (const name of names) {
+    if (journal.completed.includes(name)) continue;
+    const current = await readBytes(targets[name]); const currentHash = sha256Hex(current);
+    if (currentHash === claim.replacement_sha256[name]) {
+      // The target rename was durable but the journal update was interrupted.
+    } else {
+      if (currentHash !== claim.original_sha256[name]) fail("PROOF_SYNC_STALE");
+      if (interruptAt === `before-${name}`) fail("PROOF_SYNC_INTERRUPTED");
+      await atomicReplace(targets[name], replacementsByName[name]);
+      if (interruptAt === `after-${name}`) fail("PROOF_SYNC_INTERRUPTED");
+    }
+    journal = { ...journal, completed: [...journal.completed, name] };
+    await atomicReplace(paths.journalPath, Buffer.from(canonicalJson(journal)));
+  }
+  auditLiveEvidence(proof, ...(await Promise.all([paths.phase7Path, paths.phase10Path, paths.requirementsPath].map((path) => readBytes(path)))).map((bytes) => bytes.toString("utf8")));
+  return journal;
+}
+
+export async function synchronizeProofState(paths, options = {}) {
+  const sealed = await loadProof(paths.proofPath);
+  const targets = targetPaths(paths); const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targets[name])])));
+  const next = replacements(sealed.value, originals);
+  const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), proof_sha256: sha256Hex(sealed.bytes), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: "evidencelens.sync-claim.v1" });
+  const claimBytes = Buffer.from(canonicalJson(claim)); await exclusive(paths.claimPath, claimBytes);
+  if (options.interruptAt === "after-claim") fail("PROOF_SYNC_INTERRUPTED");
+  const journal = await createJournal(paths.journalPath, sha256Hex(claimBytes));
+  return apply(paths, sealed.value, claim, journal, next, options.interruptAt);
+}
+
+export async function recoverProofSynchronization(paths, _sideEffects = undefined) {
+  const sealed = await loadProof(paths.proofPath); const claimRecord = await readCanonical(paths.claimPath, validateClaim);
+  if (sha256Hex(sealed.bytes) !== claimRecord.value.proof_sha256) fail("PROOF_SYNC_TAMPERED");
+  const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targetPaths(paths)[name])])));
+  // Derive replacements from any still-original target, or reconstruct them from
+  // the current target and the sealed state when a rename already completed.
+  const base = {};
+  for (const name of names) {
+    const currentHash = sha256Hex(originals[name]);
+    if (currentHash !== claimRecord.value.original_sha256[name] && currentHash !== claimRecord.value.replacement_sha256[name]) fail("PROOF_SYNC_STALE");
+    base[name] = originals[name];
+  }
+  // Status-only transforms are idempotent, so applying them to either original
+  // or replacement bytes produces the exact claimed replacement.
+  const next = replacements(sealed.value, base);
+  if (names.some((name) => sha256Hex(next[name]) !== claimRecord.value.replacement_sha256[name])) fail("PROOF_SYNC_TAMPERED");
+  let journal;
+  try { journal = (await readCanonical(paths.journalPath, (value) => validateJournal(value, sha256Hex(claimRecord.bytes)))).value; }
+  catch (error) {
+    try { await lstat(paths.journalPath); throw error; } catch (statError) { if (statError?.code !== "ENOENT") throw statError; }
+    journal = await createJournal(paths.journalPath, sha256Hex(claimRecord.bytes));
+  }
+  return apply(paths, sealed.value, claimRecord.value, journal, next);
+}
