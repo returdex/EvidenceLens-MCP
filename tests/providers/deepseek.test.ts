@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekTransport } from "../../src/providers/deepseek.js";
 import { serializeProviderError } from "../../src/providers/errors.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
+import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
 
 const hash = "a".repeat(64);
 const requestWithoutFingerprint = {
@@ -19,6 +20,11 @@ function transportFor(body: unknown, status = 200): DeepSeekTransport & { calls:
 }
 
 const config = { apiKey: "secret-key", baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro" as const, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 };
+
+function recordingSink(): DiagnosticSink & { features: DiagnosticFeature[] } {
+  const features: DiagnosticFeature[] = [];
+  return { features, emit(feature) { features.push(feature); return true; } };
+}
 
 describe("DeepSeek provider adapter", () => {
   it("sends an ordered JSON multimodal request and validates returned provenance", async () => {
@@ -67,5 +73,24 @@ describe("DeepSeek provider adapter", () => {
     const provider = createDeepSeekProvider(config, transportFor(draft, 401));
     await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" });
     try { await provider.review(request); } catch (error) { expect(serializeProviderError(error)).toEqual(expect.objectContaining({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" })); expect(JSON.stringify(serializeProviderError(error))).not.toMatch(/secret-key|api\.deepseek|upstream secret body|stack/iu); }
+  });
+
+  it("emits one canonical feature at each real response decode and content failure site", async () => {
+    const cases: Array<{ response: unknown; feature: DiagnosticFeature }> = [
+      { response: { choices: [] }, feature: { path: ["provider", "choices"], code: "too_small" } },
+      { response: { choices: [{ message: { content: 42 } }] }, feature: { path: ["provider", "message", "content"], code: "invalid_type" } },
+      { response: { choices: [{ message: { content: "x".repeat(1_000_001) } }] }, feature: { path: ["provider", "content", "bytes"], code: "too_big" } },
+      { response: { choices: [{ message: { content: "not-json" } }] }, feature: { path: ["provider", "content", "object"], code: "invalid_format" } }
+    ];
+    for (const entry of cases) {
+      const diagnostic = recordingSink();
+      await expect(createDeepSeekProvider(config, transportFor(entry.response), diagnostic).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+      expect(diagnostic.features).toEqual([entry.feature]);
+    }
+
+    const diagnostic = recordingSink();
+    const transport: DeepSeekTransport = { fetch: async () => ({ ok: true, json: async () => { throw new Error("private-body"); } }) as Response };
+    await expect(createDeepSeekProvider(config, transport, diagnostic).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostic.features).toEqual([{ path: ["provider", "http", "json"], code: "invalid_format" }]);
   });
 });

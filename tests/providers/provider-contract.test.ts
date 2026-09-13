@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { type ReviewProvider, type ProviderReviewRequest, type ProviderReviewResult } from "../../src/providers/types.js";
 import { ProviderValidationError, resolveProviderCitation, validateProviderFinding } from "../../src/providers/provenance.js";
+import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
 
 const hash = "a".repeat(64);
 const normalizedEvidence = [{
@@ -51,5 +52,14 @@ describe("provider contract", () => {
     expect(validateProviderFinding(normalizedEvidence, finding)).toMatchObject({ id: "f1", evidenceIds: ["brief"] });
     expect(() => validateProviderFinding(normalizedEvidence, { ...finding, citations: [citation, citation], evidenceIds: ["brief", "brief"] })).toThrowError(ProviderValidationError);
     expect(() => validateProviderFinding(normalizedEvidence, { ...finding, evidenceIds: ["missing"] })).toThrowError(ProviderValidationError);
+  });
+
+  it("emits one provenance feature at the owning throw site without disclosing details", () => {
+    const features: DiagnosticFeature[] = [];
+    const sink: DiagnosticSink = { emit(feature) { features.push(feature); return true; } };
+    const forged = { evidenceId: "missing-private-path", location: { kind: "text" as const, startLine: 1, endLine: 1 }, visual: false };
+    expect(() => resolveProviderCitation(normalizedEvidence, forged, sink)).toThrowError(ProviderValidationError);
+    expect(features).toEqual([{ path: ["citations", "evidenceId"], code: "invalid_value" }]);
+    expect(JSON.stringify(features)).not.toContain("missing-private-path");
   });
 });

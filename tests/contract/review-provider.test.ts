@@ -6,6 +6,7 @@ import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSch
 import type { ProviderConfig } from "../../src/providers/config.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
 import { handleReviewRequest, handleReviewRequestForTest, type ReviewHandlerOptions } from "../../src/tools/review.js";
+import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
 
 const request = {
   reviewId: "provider-contract-001",
@@ -127,6 +128,22 @@ function expectRetainedAnalysisScrubbed(retained: ReturnType<typeof retainAnalys
 }
 
 describe("provider review MCP boundary", () => {
+  it("emits one canonical orchestration identity feature while preserving sanitized public bytes", async () => {
+    const features: DiagnosticFeature[] = [];
+    const diagnosticSink: DiagnosticSink = { emit(feature) { features.push(feature); return true; } };
+    const result = rawText(await handleReviewRequest(request, {
+      diagnosticSink,
+      provider: {
+        ...fakeProvider(),
+        async review(providerRequest) {
+          return { ...(await fakeProvider().review(providerRequest)), model: "wrong-private-model" };
+        }
+      }
+    }));
+    expect(JSON.parse(result)).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
+    expect(features).toEqual([{ path: ["orchestration", "identity"], code: "custom" }]);
+    expect(result).not.toMatch(/wrong-private-model|diagnostic|stack|cause/iu);
+  });
   it("reads normalization dependencies first and snapshots lifecycle dependencies once after both cleanup registrations", async () => {
     const events: string[] = [];
     const provider = fakeProvider();
