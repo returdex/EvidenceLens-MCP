@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 import { randomBytes } from "node:crypto";
+import { execFile } from "node:child_process";
 import { constants as fsConstants } from "node:fs";
 import { lstat, open, rename, unlink } from "node:fs/promises";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 import { auditLiveEvidence } from "./audit-live-evidence.mjs";
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
 
 const names = ["phase7", "phase10", "requirements"];
+const tupleNames = ["proof", "execution", "build", "source", "review", "security"];
+const execFileAsync = promisify(execFile);
 const hash = /^[0-9a-f]{64}$/u;
 function fail(code) { throw new Error(code); }
 function plain(value) { return value !== null && typeof value === "object" && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value)); }
@@ -64,9 +68,10 @@ function replacements(proof, originals) {
   return { phase7: Buffer.from(phase7), phase10: Buffer.from(phase10), requirements: Buffer.from(requirements) };
 }
 function validateClaim(value) {
-  if (!exact(value, ["intended_state", "original_sha256", "proof_sha256", "replacement_sha256", "schema"]) || value.schema !== "evidencelens.sync-claim.v1"
-    || !["passed", "gaps_found"].includes(value.intended_state) || !hash.test(value.proof_sha256)) fail("PROOF_SYNC_TAMPERED");
+  if (!exact(value, ["intended_state", "original_sha256", "replacement_sha256", "schema", "tuple_sha256"]) || value.schema !== "evidencelens.sync-claim.v2"
+    || !["passed", "gaps_found"].includes(value.intended_state)) fail("PROOF_SYNC_TAMPERED");
   for (const field of ["original_sha256", "replacement_sha256"]) if (!exact(value[field], names) || names.some((name) => !hash.test(value[field][name]))) fail("PROOF_SYNC_TAMPERED");
+  if (!exact(value.tuple_sha256, tupleNames) || tupleNames.some((name) => !hash.test(value.tuple_sha256[name]))) fail("PROOF_SYNC_TAMPERED");
   return value;
 }
 function validateJournal(value, claimSha256) {
@@ -85,6 +90,29 @@ async function loadProof(path) {
 }
 function targetPaths(paths) { return { phase7: paths.phase7Path, phase10: paths.phase10Path, requirements: paths.requirementsPath }; }
 async function createJournal(path, claimSha256) { const value = { claim_sha256: claimSha256, completed: [], schema: "evidencelens.sync-journal.v1" }; await exclusive(path, Buffer.from(canonicalJson(value))); return value; }
+
+async function defaultAuthorityValidator(authorityPaths) {
+  try {
+    await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority", ...authorityPaths], {
+      cwd: process.cwd(), env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
+    });
+  } catch { fail("PROOF_SYNC_AUTHORITY"); }
+}
+
+async function authenticateAuthority(paths, validator = defaultAuthorityValidator) {
+  if (!Array.isArray(paths.authorityPaths) || paths.authorityPaths.length !== tupleNames.length
+    || new Set(paths.authorityPaths).size !== tupleNames.length || paths.authorityPaths[0] !== paths.proofPath
+    || typeof validator !== "function") fail("PROOF_SYNC_AUTHORITY");
+  try { await validator(paths.authorityPaths); } catch (error) {
+    if (error instanceof Error && error.message.startsWith("PROOF_SYNC_")) throw error;
+    fail("PROOF_SYNC_AUTHORITY");
+  }
+  const bytes = await Promise.all(paths.authorityPaths.map((path) => readBytes(path)));
+  return {
+    proof: bytes[0],
+    tuple_sha256: Object.fromEntries(tupleNames.map((name, index) => [name, sha256Hex(bytes[index])])),
+  };
+}
 
 async function apply(paths, proof, claim, journal, replacementsByName, interruptAt) {
   const targets = targetPaths(paths);
@@ -107,19 +135,22 @@ async function apply(paths, proof, claim, journal, replacementsByName, interrupt
 }
 
 export async function synchronizeProofState(paths, options = {}) {
+  const authority = await authenticateAuthority(paths, options.authorityValidator);
   const sealed = await loadProof(paths.proofPath);
+  if (!sealed.bytes.equals(authority.proof)) fail("PROOF_SYNC_AUTHORITY");
   const targets = targetPaths(paths); const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targets[name])])));
   const next = replacements(sealed.value, originals);
-  const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), proof_sha256: sha256Hex(sealed.bytes), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: "evidencelens.sync-claim.v1" });
+  const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: "evidencelens.sync-claim.v2", tuple_sha256: authority.tuple_sha256 });
   const claimBytes = Buffer.from(canonicalJson(claim)); await exclusive(paths.claimPath, claimBytes);
   if (options.interruptAt === "after-claim") fail("PROOF_SYNC_INTERRUPTED");
   const journal = await createJournal(paths.journalPath, sha256Hex(claimBytes));
   return apply(paths, sealed.value, claim, journal, next, options.interruptAt);
 }
 
-export async function recoverProofSynchronization(paths, _sideEffects = undefined) {
+export async function recoverProofSynchronization(paths, _sideEffects = undefined, options = {}) {
+  const authority = await authenticateAuthority(paths, options.authorityValidator);
   const sealed = await loadProof(paths.proofPath); const claimRecord = await readCanonical(paths.claimPath, validateClaim);
-  if (sha256Hex(sealed.bytes) !== claimRecord.value.proof_sha256) fail("PROOF_SYNC_TAMPERED");
+  if (!sealed.bytes.equals(authority.proof) || tupleNames.some((name) => authority.tuple_sha256[name] !== claimRecord.value.tuple_sha256[name])) fail("PROOF_SYNC_TAMPERED");
   const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targetPaths(paths)[name])])));
   // Derive replacements from any still-original target, or reconstruct them from
   // the current target and the sealed state when a rename already completed.
@@ -148,6 +179,7 @@ async function main() {
   const phaseDir = dirname(proofPath);
   const paths = {
     proofPath,
+    authorityPaths: [proofPath, `${phaseDir}/10-51-EXECUTION.json`, `${phaseDir}/10-50-FINAL-BUILD.json`, `${phaseDir}/10-49-SOURCE.json`, `${phaseDir}/10-49-REVIEW.md`, `${phaseDir}/10-49-SECURITY.md`],
     claimPath: `${phaseDir}/10-37-SYNC-CLAIM.json`,
     journalPath: `${phaseDir}/10-37-SYNC-JOURNAL.json`,
     phase7Path: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
