@@ -1,8 +1,8 @@
 {
   "schema": "evidencelens.hostile-disconfirmation.v1",
   "certified_source": {
-    "commit": "cffb30656302c58d00edb5a7f5be2380f2df8f3a",
-    "tree": "159c73dd65bb7d166de04d9c6fa3cf02d22d77d6",
+    "commit": "1c62b5d0f4f72eddb4b95244f5a585307277b1cf",
+    "tree": "2051157812507eae1fd46f0fe2fbad1505c7010c",
     "forensic_sha256": "422d60136691675e716ecf3c34f54d35f054f3615acab74789f3962923ca8b95"
   },
   "terminal_variants": {
@@ -21,6 +21,7 @@
     "forensic_crossover_rejection": "passed",
     "generation_key_mac_substitution": "passed",
     "hermetic_post_build_reachability": "passed",
+    "isolated_invalid_build_preflight_fixture": "passed",
     "local_vs_committed_authority": "passed",
     "recovery_byte_idempotence": "passed",
     "registry_cardinality_order": "passed",

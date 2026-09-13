@@ -29,19 +29,19 @@ completed: 2026-09-14
 
 # Phase 10 Plan 56: Hostile Disconfirmation Certification Summary
 
-**Five terminal variants, hermetic post-build reachability, lifecycle interruption, registry substitution, forensic crossover, and false synchronization were disconfirmed by 599 provider-disabled tests with zero external side effects.**
+**Five terminal variants, hermetic post-build reachability, isolated invalid-preflight behavior, lifecycle interruption, registry substitution, forensic crossover, and false synchronization were disconfirmed by 599 provider-disabled tests with zero external side effects.**
 
 ## Performance
 
 - **Duration:** 2 min recertification
-- **Started:** 2026-09-13T16:58:04Z
-- **Completed:** 2026-09-13T17:00:00Z
+- **Started:** 2026-09-13T17:06:20Z
+- **Completed:** 2026-09-13T17:08:00Z
 - **Tasks:** 2
 - **Files modified:** 2
 
 ## Accomplishments
 
-- Exercised 130 focused tests across automatic live review, subprocess CLI, Docker review harness isolation, proof-state lifecycle behavior, and the new hermetic post-build reachability regression.
+- Exercised 130 focused tests across automatic live review, subprocess CLI, Docker review harness isolation, proof-state lifecycle behavior, hermetic post-build reachability, and the isolated invalid-build preflight fixture.
 - Passed the complete provider-disabled suite: 43 files and 599 tests, followed by a successful TypeScript build and `git diff --check`.
 - Sealed all five terminal variants and the mutation matrix with exact zero counts for Docker, credential, MCP tools, network/provider, retry/fallback, GitHub Actions, dispatch, and push activity.
 - Confirmed the committed 10-53 forensic record cannot become complete execution, proof, passed, or synchronization authority.
@@ -60,11 +60,11 @@ completed: 2026-09-14
 
 - Kept execution strictly read-only with respect to source and test files; any missing hostile case would have returned to Plan 10-54 or 10-55 ownership.
 - Treated the PDF.js font-data messages as pre-existing non-failing warnings because all relevant contract tests passed and they do not affect this plan's authority claims.
-- Replaced the stale pre-fix certification identity with corrected source commit `cffb30656302c58d00edb5a7f5be2380f2df8f3a`; the reachability case uses a PATH-stubbed Docker executable and performs no real Docker action.
+- Replaced the stale BL-57-02 pre-fix certification identity with corrected source commit `1c62b5d0f4f72eddb4b95244f5a585307277b1cf`; reachability cases use PATH-stubbed Docker executables and perform no real Docker action.
 
 ## Deviations from Plan
 
-The original seal became stale after BL-57-01 was fixed in `6394335` and documented in `cffb306`. The plan was rerun without source/test edits and the seal was refreshed against the corrected exact source.
+The prior seal became stale after BL-57-02 was fixed in `5f3e1f1` and documented in `1c62b5d`. The plan was rerun without source/test edits and the seal was refreshed against the corrected exact source.
 
 ## Issues Encountered
 
@@ -96,7 +96,7 @@ Plan 10-57 may perform its exact independent source/deep/ASVS review against the
 ## Self-Check: PASSED
 
 - Created artifact exists and reopens as valid JSON.
-- Artifact was reopened and hash-checked after refreshing the corrected source identity: `a262c939c8fc8f52f8d75842a53496c366ff0f7e6e5997f263f1169b47a1b09f`.
+- Artifact was reopened and hash-checked after refreshing the corrected source identity: `eca169ff40fafba26bfc7cad912adca5036f2f9f71ad2c2746b93a41b4c3453a`.
 - Initial task commit `832c09e` exists; the refreshed seal is recorded in the recertification commit.
 - Focused verification: 4 files, 130/130 tests passed.
 - Overall verification: 43 files, 599/599 tests passed; TypeScript build and `git diff --check` passed.
