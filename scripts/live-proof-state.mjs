@@ -22,15 +22,16 @@ async function syncDirectory(path) {
   try { await handle.sync(); } finally { await handle.close(); }
 }
 function validate(value) {
-  const keys = ["build_count", "generation", "inner_status", "kind", "max_provider_requests", "previous_sha256", "provider_request_count", "schema", "sequence", "wrapper_status"];
+  const keys = ["build_count", "generation", "inner_status", "kind", "max_provider_requests", "mcp_tools_call_count", "observed_provider_requests", "previous_sha256", "reservation_count", "schema", "sequence", "wrapper_status"];
   if (!isPlain(value) || JSON.stringify(Object.keys(value).sort()) !== JSON.stringify(keys.sort())) fail("PROOF_STATE_MALFORMED");
   if (value.schema !== "evidencelens.live-proof-state.v1" || !["build", "live"].includes(value.kind) || !lower64.test(value.generation)) fail("PROOF_STATE_MALFORMED");
   const statuses = value.kind === "build" ? buildStatuses : liveStatuses;
   if (!statuses.has(value.inner_status) || !["pending", "completed"].includes(value.wrapper_status)) fail("PROOF_STATE_MALFORMED");
   if (!Number.isSafeInteger(value.sequence) || value.sequence < 0 || (value.previous_sha256 !== null && !lower64.test(value.previous_sha256))) fail("PROOF_STATE_MALFORMED");
-  if (![value.build_count, value.max_provider_requests, value.provider_request_count].every(Number.isSafeInteger)) fail("PROOF_STATE_MALFORMED");
-  if (value.build_count < 0 || value.build_count > 1 || value.max_provider_requests !== (value.kind === "live" ? 1 : 0) || value.provider_request_count < 0 || value.provider_request_count > value.max_provider_requests) fail("PROOF_STATE_MALFORMED");
-  if (value.kind === "build" && value.provider_request_count !== 0) fail("PROOF_STATE_MALFORMED");
+  if (![value.build_count, value.max_provider_requests, value.mcp_tools_call_count, value.reservation_count, value.observed_provider_requests].every(Number.isSafeInteger)) fail("PROOF_STATE_MALFORMED");
+  if (value.build_count < 0 || value.build_count > 1 || value.max_provider_requests !== (value.kind === "live" ? 1 : 0)) fail("PROOF_STATE_MALFORMED");
+  if ([value.mcp_tools_call_count, value.reservation_count, value.observed_provider_requests].some((count) => count < 0 || count > value.max_provider_requests)) fail("PROOF_STATE_MALFORMED");
+  if (value.observed_provider_requests > value.reservation_count || value.kind === "build" && (value.mcp_tools_call_count !== 0 || value.reservation_count !== 0 || value.observed_provider_requests !== 0)) fail("PROOF_STATE_MALFORMED");
   if (value.wrapper_status === "completed" && !(value.kind === "build" ? terminalBuild : terminalLive).has(value.inner_status)) fail("PROOF_STATE_MALFORMED");
   return value;
 }
@@ -87,7 +88,7 @@ export async function createProofState(path, kind, generation) {
   const value = validate({
     build_count: 0, generation, inner_status: "prepared", kind,
     max_provider_requests: kind === "live" ? 1 : 0, previous_sha256: null,
-    provider_request_count: 0, schema: "evidencelens.live-proof-state.v1",
+    mcp_tools_call_count: 0, observed_provider_requests: 0, reservation_count: 0, schema: "evidencelens.live-proof-state.v1",
     sequence: 0, wrapper_status: "pending",
   });
   await writeExclusive(path, value); return value;
@@ -103,15 +104,25 @@ export async function transitionProofState(path, nextStatus, counts = {}) {
     : { prepared: ["consumed"], consumed: ["passed", "failed"] };
   if (!allowed[value.inner_status]?.includes(nextStatus)) fail("PROOF_STATE_TRANSITION");
   const buildCount = nextStatus === "started" ? 1 : value.build_count;
-  const providerCount = counts.provider_request_count ?? value.provider_request_count;
-  if (!Number.isSafeInteger(providerCount) || providerCount < value.provider_request_count || providerCount > value.max_provider_requests) fail("PROOF_STATE_TRANSITION");
-  return replaceDurably(path, current.bytes, { ...value, build_count: buildCount, inner_status: nextStatus, provider_request_count: providerCount });
+  const nextCounts = { mcp_tools_call_count: counts.mcp_tools_call_count ?? value.mcp_tools_call_count, reservation_count: counts.reservation_count ?? value.reservation_count, observed_provider_requests: counts.observed_provider_requests ?? value.observed_provider_requests };
+  for (const key of Object.keys(nextCounts)) if (!Number.isSafeInteger(nextCounts[key]) || nextCounts[key] < value[key] || nextCounts[key] > value.max_provider_requests) fail("PROOF_STATE_TRANSITION");
+  if (nextCounts.observed_provider_requests > nextCounts.reservation_count) fail("PROOF_STATE_TRANSITION");
+  return replaceDurably(path, current.bytes, { ...value, ...nextCounts, build_count: buildCount, inner_status: nextStatus });
 }
 
 export async function recordProviderAttempt(path) {
   const current = await secureRead(path); const value = current.value;
-  if (value.kind !== "live" || value.inner_status !== "consumed" || value.wrapper_status !== "pending" || value.provider_request_count !== 0) fail("PROOF_STATE_TRANSITION");
-  return replaceDurably(path, current.bytes, { ...value, provider_request_count: 1 });
+  if (value.kind !== "live" || value.inner_status !== "consumed" || value.wrapper_status !== "pending" || value.reservation_count !== 0) fail("PROOF_STATE_TRANSITION");
+  return replaceDurably(path, current.bytes, { ...value, reservation_count: 1 });
+}
+
+export async function recordRequestEvidence(path, evidence) {
+  const current = await secureRead(path); const value = current.value;
+  if (value.kind !== "live" || value.inner_status !== "consumed" || value.wrapper_status !== "pending" || !isPlain(evidence)
+    || Object.keys(evidence).sort().join(",") !== "mcp_tools_call_count,observed_provider_requests,reservation_count"
+    || evidence.mcp_tools_call_count !== 1 || evidence.reservation_count !== 1 || (evidence.observed_provider_requests !== 0 && evidence.observed_provider_requests !== 1)
+    || value.reservation_count !== 1 || value.mcp_tools_call_count !== 0 || value.observed_provider_requests !== 0) fail("PROOF_STATE_TRANSITION");
+  return replaceDurably(path, current.bytes, { ...value, ...evidence });
 }
 
 export async function completeWrapper(path) {

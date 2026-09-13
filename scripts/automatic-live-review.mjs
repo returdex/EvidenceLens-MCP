@@ -5,7 +5,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { canonicalJson } from "./audit-live-readiness.mjs";
-import { completeWrapper, createProofState, recordProviderAttempt, transitionProofState } from "./live-proof-state.mjs";
+import { completeWrapper, createProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
+import { runReviewHarness } from "./docker-review-real.mjs";
 
 export const AUTOMATIC_BUILD_CONTROLS = Object.freeze({ build_count: 1, verifier_build_count: 0 });
 export const AUTOMATIC_LIVE_CONTROLS = Object.freeze({
@@ -78,21 +79,6 @@ export async function runAutomaticBuild(options) {
   return Object.freeze({ image_id: verified.image_id });
 }
 
-export async function runAutomaticLiveOnce(options) {
-  if (!plain(options)) fail("AUTOMATIC_PREFLIGHT");
-  const { authenticateReadyBuild, consume, readCredential, spawnOnce } = options;
-  if (![authenticateReadyBuild, consume, readCredential, spawnOnce].every((entry) => typeof entry === "function")) fail("AUTOMATIC_PREFLIGHT");
-  try { await authenticateReadyBuild(); } catch { fail("AUTOMATIC_PREFLIGHT"); }
-  try { await consume(); } catch { fail("AUTOMATIC_REPLAY"); }
-  let credential;
-  try { credential = await readCredential(); } catch { fail("AUTOMATIC_CREDENTIAL"); }
-  if (typeof credential !== "string" || credential.trim() === "") fail("AUTOMATIC_CREDENTIAL");
-  let outcome;
-  try { outcome = await spawnOnce(AUTOMATIC_LIVE_CONTROLS, credential); } catch { outcome = { status: "failed" }; }
-  credential = undefined;
-  return Object.freeze({ status: outcome?.status === "passed" ? "passed" : "failed" });
-}
-
 export async function runStatefulAutomaticLive(options) {
   if (!plain(options) || typeof options.path !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
   const interrupt = typeof options.interrupt === "function" ? options.interrupt : async () => undefined;
@@ -104,15 +90,25 @@ export async function runStatefulAutomaticLive(options) {
   let credential;
   try { credential = await options.readCredential(); } catch { fail("AUTOMATIC_CREDENTIAL"); }
   if (typeof credential !== "string" || credential.trim() === "") fail("AUTOMATIC_CREDENTIAL");
-  let outcome;
+  let status = "failed";
+  let requestEvidence;
   await interrupt("before-spawn");
   await recordProviderAttempt(options.path);
-  try { outcome = await options.spawnOnce(AUTOMATIC_LIVE_CONTROLS, credential); } catch { outcome = { status: "failed" }; }
+  try {
+    await runReviewHarness({
+      ...(plain(options.harnessOptions) ? options.harnessOptions : {}),
+      isOffline: false,
+      environment: { ...(options.harnessOptions?.environment ?? process.env), DEEPSEEK_API_KEY: credential },
+      retainRequestEvidence: (evidence) => { requestEvidence = evidence; },
+    });
+    status = "passed";
+  } catch { status = "failed"; }
   credential = undefined;
+  if (requestEvidence === undefined) requestEvidence = { mcp_tools_call_count: 0, reservation_count: 1, observed_provider_requests: 0 };
+  if (requestEvidence.mcp_tools_call_count === 1) await recordRequestEvidence(options.path, requestEvidence);
   await interrupt("after-spawn");
-  const status = outcome?.status === "passed" ? "passed" : "failed";
   await interrupt("before-result");
-  await transitionProofState(options.path, status, { provider_request_count: 1 });
+  await transitionProofState(options.path, status);
   await interrupt("after-result");
   await interrupt("before-wrapper");
   const result = await completeWrapper(options.path);

@@ -14,6 +14,13 @@ import {
   CHILD_DIAGNOSTIC_PREFIX,
   parseChildDiagnosticFrame
 } from "../dist/providers/diagnostics.js";
+import {
+  PROVIDER_REQUEST_GENERATION_ENV,
+  PROVIDER_REQUEST_KEY_ENV,
+  PROVIDER_REQUEST_RECEIPT_MAX_BYTES,
+  PROVIDER_REQUEST_RECEIPT_PREFIX,
+  verifyProviderRequestReceipt
+} from "../dist/providers/request-budget.js";
 
 const offline = process.argv.includes("--offline");
 const controlTimeoutMs = 30_000;
@@ -223,6 +230,35 @@ class ChildDiagnosticCollector {
     this.frames.fill(undefined);
     this.frames.length = 0;
   }
+}
+
+export class ProviderRequestReceiptCollector {
+  constructor() { this.buffer = Buffer.alloc(0); this.frames = []; this.terminalSeen = false; }
+  consume(chunk) {
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    this.buffer = Buffer.concat([this.buffer, bytes]);
+    while (true) {
+      const newline = this.buffer.indexOf(0x0a);
+      if (newline < 0) {
+        if (this.buffer.length > PROVIDER_REQUEST_RECEIPT_MAX_BYTES && this.buffer.toString("utf8", 0, PROVIDER_REQUEST_RECEIPT_PREFIX.length) === PROVIDER_REQUEST_RECEIPT_PREFIX) {
+          this.frames.push(undefined); this.buffer = Buffer.alloc(0);
+        }
+        return;
+      }
+      const line = this.buffer.subarray(0, newline + 1);
+      this.buffer = this.buffer.subarray(newline + 1);
+      if (line.toString("utf8", 0, PROVIDER_REQUEST_RECEIPT_PREFIX.length) !== PROVIDER_REQUEST_RECEIPT_PREFIX) continue;
+      if (this.terminalSeen || line.length > PROVIDER_REQUEST_RECEIPT_MAX_BYTES) { this.frames.push(undefined); continue; }
+      try { this.frames.push(JSON.parse(line.toString("utf8", PROVIDER_REQUEST_RECEIPT_PREFIX.length).trimEnd())); }
+      catch { this.frames.push(undefined); }
+    }
+  }
+  markTerminal() { this.terminalSeen = true; }
+  receipt(expected) {
+    if (this.frames.length !== 1 || this.frames[0] === undefined) return undefined;
+    return verifyProviderRequestReceipt(this.frames[0], expected) ? this.frames[0] : undefined;
+  }
+  clear() { this.buffer.fill(0); this.buffer = Buffer.alloc(0); this.frames.fill(undefined); this.frames.length = 0; }
 }
 
 export class StdioClient {
@@ -631,7 +667,7 @@ export async function completeProofLifecycle(lifecycle, payload, isOffline = off
   write(`${isOffline ? "offline smoke" : "credentialed review"} passed: ${payload.normalizedEvidence.length} fixtures, ${payload.findings.length} findings\n`);
 }
 
-export async function performMcpReview(client, isOffline = offline, expectedModel) {
+export async function performMcpReview(client, isOffline = offline, expectedModel, options = {}) {
   const initialized = await client.request(1, "initialize", {
     protocolVersion,
     capabilities: {},
@@ -642,6 +678,7 @@ export async function performMcpReview(client, isOffline = offline, expectedMode
   const listed = await client.request(2, "tools/list");
   if (!Array.isArray(listed?.tools) || listed.tools.length !== 1 || listed.tools[0]?.name !== "review_evidence") fail("tools/list", "expected only review_evidence");
   if (listed.tools[0]?.annotations?.readOnlyHint !== true || listed.tools[0]?.annotations?.destructiveHint !== false || listed.tools[0]?.annotations?.idempotentHint !== true) fail("tools/list", "review_evidence annotations were not read-only");
+  options.onToolsCall?.();
   const result = await client.request(3, "tools/call", { name: "review_evidence", arguments: fixtureRequest(isOffline) });
   return assertStructuralReview(result, isOffline, expectedModel);
 }
@@ -654,6 +691,7 @@ export async function runReviewHarness(options = {}) {
   const write = options.write ?? ((message) => process.stdout.write(message));
   const classify = options.classify ?? classifyDiagnostic;
   const retainDiagnostic = options.retainDiagnostic ?? (() => undefined);
+  const retainRequestEvidence = options.retainRequestEvidence ?? (() => undefined);
 
   if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -665,12 +703,24 @@ export async function runReviewHarness(options = {}) {
   const diagnosticKey = isOffline ? undefined : randomBytes(32);
   let diagnosticGeneration = isOffline ? undefined : randomBytes(32).toString("hex");
   const diagnosticCollector = isOffline ? undefined : new ChildDiagnosticCollector();
+  const receiptCollector = isOffline ? undefined : new ProviderRequestReceiptCollector();
+  let mcpToolsCallCount = 0;
+  let requestEvidenceRetained = false;
+  const retainAuthenticatedRequestEvidence = (receipt) => {
+    if (requestEvidenceRetained) fail("protocol");
+    const evidence = Object.freeze({ mcp_tools_call_count: mcpToolsCallCount, reservation_count: 1, observed_provider_requests: receipt?.observed_provider_requests ?? 0 });
+    retainRequestEvidence(evidence);
+    requestEvidenceRetained = true;
+    return evidence;
+  };
   const childEnvironment = isOffline
     ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" }
     : {
         ...liveProof.childEnv,
         [CHILD_DIAGNOSTIC_GENERATION_ENV]: diagnosticGeneration,
-        [CHILD_DIAGNOSTIC_KEY_ENV]: diagnosticKey.toString("hex")
+        [CHILD_DIAGNOSTIC_KEY_ENV]: diagnosticKey.toString("hex"),
+        [PROVIDER_REQUEST_GENERATION_ENV]: diagnosticGeneration,
+        [PROVIDER_REQUEST_KEY_ENV]: diagnosticKey.toString("hex")
       };
   const childArguments = ["compose", "--profile", selectedProfile, "run", "--rm", "-T"];
   if (!isOffline) childArguments.push("-e", CHILD_DIAGNOSTIC_GENERATION_ENV, "-e", CHILD_DIAGNOSTIC_KEY_ENV);
@@ -681,18 +731,27 @@ export async function runReviewHarness(options = {}) {
     env: childEnvironment
   });
   const onDiagnosticData = (chunk) => diagnosticCollector?.consume(chunk);
-  const onDiagnosticTerminal = () => diagnosticCollector?.markTerminal();
+  const onReceiptData = (chunk) => receiptCollector?.consume(chunk);
+  const onDiagnosticTerminal = () => { diagnosticCollector?.markTerminal(); receiptCollector?.markTerminal(); };
   child.stderr?.on("data", onDiagnosticData);
+  child.stderr?.on("data", onReceiptData);
   child.on("exit", onDiagnosticTerminal);
   child.on("close", onDiagnosticTerminal);
   const lifecycleTimeoutMs = (controlTimeoutMs * 3) + (liveProof?.toolsCallTimeoutMs ?? controlTimeoutMs);
   const lifecycle = captureChildLifecycle(child, lifecycleTimeoutMs);
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
   try {
-    const payload = await performMcpReview(client, isOffline, expectedModel);
+    const payload = await performMcpReview(client, isOffline, expectedModel, { onToolsCall: () => { mcpToolsCallCount += 1; } });
     await completeProofLifecycle(lifecycle, payload, isOffline, { write });
+    if (!isOffline) {
+      const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
+      if (receipt === undefined || receipt.observed_provider_requests !== 1) fail("protocol");
+      retainAuthenticatedRequestEvidence(receipt);
+    }
   } catch (error) {
     if (!isOffline) {
+      const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
+      try { if (!requestEvidenceRetained) retainAuthenticatedRequestEvidence(receipt); } catch { /* Evidence retention cannot mask the owning failure. */ }
       const feature = diagnosticCollector.feature({ generation: diagnosticGeneration, key: diagnosticKey });
       const diagnostic = classify(feature === undefined ? [] : [feature]);
       try { retainDiagnostic(diagnostic); } catch { /* Diagnostic retention cannot mask the owning failure. */ }
@@ -701,9 +760,11 @@ export async function runReviewHarness(options = {}) {
     fail("protocol", error);
   } finally {
     child.stderr?.off("data", onDiagnosticData);
+    child.stderr?.off("data", onReceiptData);
     child.off("exit", onDiagnosticTerminal);
     child.off("close", onDiagnosticTerminal);
     diagnosticCollector?.clear();
+    receiptCollector?.clear();
     diagnosticKey?.fill(0);
     delete childEnvironment[CHILD_DIAGNOSTIC_GENERATION_ENV];
     delete childEnvironment[CHILD_DIAGNOSTIC_KEY_ENV];

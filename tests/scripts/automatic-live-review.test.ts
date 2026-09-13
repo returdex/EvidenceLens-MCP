@@ -8,8 +8,6 @@ import {
   AUTOMATIC_LIVE_CONTROLS,
   claimExclusive,
   runAutomaticBuild,
-  runAutomaticLiveOnce,
-  runStatefulAutomaticLive,
   validateFixedInvocation,
 } from "../../scripts/automatic-live-review.mjs";
 
@@ -35,31 +33,12 @@ describe("automatic immutable review runner", () => {
     expect(AUTOMATIC_BUILD_CONTROLS).toEqual({ build_count: 1, verifier_build_count: 0 });
   });
 
-  it("consumes before credential access and one pinned spawn", async () => {
-    const order: string[] = [];
-    const spawnOnce = vi.fn(async (controls) => { order.push("spawn"); return { status: "failed", controls }; });
-    const result = await runAutomaticLiveOnce({
-      authenticateReadyBuild: vi.fn(async () => order.push("authenticate")),
-      consume: vi.fn(async () => order.push("consume")),
-      readCredential: vi.fn(async () => { order.push("credential"); return "private"; }),
-      spawnOnce,
-    });
-    expect(order).toEqual(["authenticate", "consume", "credential", "spawn"]);
-    expect(spawnOnce).toHaveBeenCalledOnce();
-    expect(spawnOnce.mock.calls[0]?.[0]).toEqual(AUTOMATIC_LIVE_CONTROLS);
-    expect(result).toEqual({ status: "failed" });
-    expect(JSON.stringify(result)).not.toContain("private");
-  });
-
-  it("never reads a credential when authentication or consumption fails", async () => {
-    const readCredential = vi.fn();
-    await expect(runAutomaticLiveOnce({
-      authenticateReadyBuild: async () => { throw new Error("not-ready"); }, consume: vi.fn(), readCredential, spawnOnce: vi.fn(),
-    })).rejects.toThrow("AUTOMATIC_PREFLIGHT");
-    await expect(runAutomaticLiveOnce({
-      authenticateReadyBuild: async () => undefined, consume: async () => { throw new Error("exists"); }, readCredential, spawnOnce: vi.fn(),
-    })).rejects.toThrow("AUTOMATIC_REPLAY");
-    expect(readCredential).not.toHaveBeenCalled();
+  it("binds live execution to the authenticated production harness without a spawnOnce authority", async () => {
+    const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
+    expect(source).toContain('import { runReviewHarness } from "./docker-review-real.mjs"');
+    expect(source).toContain("await runReviewHarness({");
+    expect(source).not.toContain("spawnOnce");
+    expect(source).toContain("recordRequestEvidence(options.path, requestEvidence)");
   });
 
   it("uses O_EXCL for claims and refuses replay or concurrency", async () => {
@@ -84,22 +63,4 @@ describe("automatic immutable review runner", () => {
     });
   });
 
-  it.each(["before-consume", "after-consume", "before-spawn", "after-spawn", "before-result", "after-result", "before-wrapper", "after-wrapper"])("recovers interruption %s without respawn", async (point) => {
-    const root = await mkdtemp(join(tmpdir(), "automatic-crash-"));
-    const path = join(root, "live.json");
-    const counters = { credential: 0, spawn: 0 };
-    await expect(runStatefulAutomaticLive({
-      generation: "b".repeat(64),
-      path,
-      authenticateReadyBuild: async () => undefined,
-      readCredential: async () => { counters.credential += 1; return "private"; },
-      spawnOnce: async () => { counters.spawn += 1; return { status: "failed" }; },
-      interrupt: async (at) => { if (at === point) throw new Error("crash"); },
-    })).rejects.toThrow("crash");
-    const before = { ...counters };
-    const { recoverProofState } = await import("../../scripts/live-proof-state.mjs");
-    const recovered = await recoverProofState(path);
-    expect(recovered.wrapper_status).toBe("completed");
-    expect(counters).toEqual(before);
-  });
 });
