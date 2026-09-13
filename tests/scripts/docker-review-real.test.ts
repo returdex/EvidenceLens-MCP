@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, classifyDiagnostic, classifyFailure, completeProofLifecycle, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -296,6 +296,28 @@ describe("credentialed Docker review harness", () => {
     });
     for (const features of [[], [{ path: ["private-secret"], code: "custom" }], [{ path: ["rpc", "envelope"], code: "invalid_type" }, { path: ["unknown"], code: "custom" }]]) {
       expect(classifyDiagnostic(features)).toEqual({ invariant_id: "ambiguous", feature_fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u), repair: "no_repair", follow_up_request_budget: 0 });
+    }
+  });
+
+  it("reproduces every diagnostic invariant offline with one distinct canonical vector", () => {
+    const diagnostics = Object.entries(DIAGNOSTIC_INVARIANT_MAP).map(([id, entry]: any) => {
+      const feature = diagnosticFeatureForInvariant(id);
+      const result = classifyDiagnostic([feature]);
+      expect(result).toMatchObject({ invariant_id: id, tier: entry.tier, regression_id: entry.regression_id, permitted_files: entry.permitted_files, repair: "allowlisted" });
+      expect(result.feature_fingerprint).toMatch(/^[a-f0-9]{64}$/u);
+      expect(JSON.stringify(result)).not.toMatch(/passed:|credentialed review passed|secret|\/Users\/|\/workspace\//u);
+      return result;
+    });
+    expect(new Set(diagnostics.map((value) => value.invariant_id)).size).toBe(diagnostics.length);
+    expect(new Set(diagnostics.map((value) => value.feature_fingerprint)).size).toBe(diagnostics.length);
+  });
+
+  it("routes duplicate, multi-issue, unknown and ambiguous vectors to zero-budget no-repair", () => {
+    const feature = diagnosticFeatureForInvariant(Object.keys(DIAGNOSTIC_INVARIANT_MAP)[0]);
+    for (const features of [[feature, feature], [feature, { path: ["unknown"], code: "custom" }], [{ path: ["unknown"], code: "custom" }], null]) {
+      const diagnostic = classifyDiagnostic(features as any);
+      expect(diagnostic).toMatchObject({ invariant_id: "ambiguous", repair: "no_repair", follow_up_request_budget: 0 });
+      expect(JSON.stringify(diagnostic)).not.toContain("passed");
     }
   });
   it("drives the production orchestration seam through the complete offline-shaped lifecycle", async () => {
