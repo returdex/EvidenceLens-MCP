@@ -61,6 +61,7 @@ completed: 2026-09-13
 1. **Task 1: Define exact terminal variants and durable capture contract** - `84d83e8`
 2. **Task 2: Define strict build-auto ready and terminal non-pass schemas** - `9927032`
 3. **Rule 3 fix: Authenticate the fixed automatic review tuple** - `192789b`
+4. **Deep-review fix: Route post-build audit through the fixed registry** - `6394335`
 
 ## Files Created/Modified
 
@@ -87,9 +88,17 @@ completed: 2026-09-13
 - **Verification:** 178 focused provider-disabled tests and TypeScript build passed.
 - **Committed in:** `192789b`
 
+**2. [Rule 1 - Bug] Replaced the unreachable legacy post-build audit**
+- **Found during:** Plan 10-57 deep source review (`BL-57-01`)
+- **Issue:** `runFixedAutomaticBuild` authenticated 10-57 inputs but dispatched its completed 10-58 artifact through the legacy 10-49/10-50 `build` tuple, so every successful build would fail post-build certification.
+- **Fix:** Routed the completed artifact through fixed `build-auto`, added fixed `source-review-auto`, corrected Plan 10-57 verification command text, and added a PATH-stubbed one-build regression that fails if legacy `build` is reached.
+- **Files modified:** `scripts/automatic-live-review.mjs`, `scripts/audit-proof-chain.mjs`, `tests/scripts/automatic-live-review-cli.test.ts`, `tests/scripts/audit-proof-chain.test.ts`, `10-57-PLAN.md`
+- **Verification:** Focused 64/64 and full provider-disabled 599/599 tests passed; TypeScript build and diff check passed.
+- **Committed in:** `6394335`
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 blocking issue)
+**Total deviations:** 2 auto-fixed (1 blocking issue, 1 correctness bug)
 **Impact on plan:** The fix is required for the planned new chain to be executable and does not broaden authority.
 
 ## External-Side-Effect Accounting
@@ -125,7 +134,9 @@ Plan 10-55 can consume the exact five-variant and build-auto contracts without r
 - All nine modified implementation/test files exist.
 - Task commits `84d83e8`, `9927032`, and `192789b` exist.
 - `npm run build` passed.
-- Focused provider-disabled suite passed: 178/178.
+- Initial focused provider-disabled suite passed: 178/178.
+- Post-review focused suite passed: 64/64; full provider-disabled suite passed: 599/599.
+- Deep-review blocker `BL-57-01` is fixed by `6394335`.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
