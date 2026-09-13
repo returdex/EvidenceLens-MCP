@@ -1,0 +1,55 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "certified_source": {
+    "commit": "4a4f36b3db3d14291ad0e8f3beec53d2ebf013de",
+    "tree": "8c02172f00df97b49969fb55225f4f7f364ff24b",
+    "forensic_sha256": "422d60136691675e716ecf3c34f54d35f054f3615acab74789f3962923ca8b95"
+  },
+  "terminal_variants": {
+    "passed": "passed",
+    "post_fetch_non_pass": "passed",
+    "post_tools_pre_fetch": "passed",
+    "pre_tools_post_reservation": "passed",
+    "pre_reservation_preflight": "passed"
+  },
+  "case_results": {
+    "atomic_rename_reopen_hash": "passed",
+    "bounded_stdout_stderr": "passed",
+    "callback_duplication_omission": "passed",
+    "concurrent_o_excl_claim": "passed",
+    "exit_close_disagreement": "passed",
+    "forensic_crossover_rejection": "passed",
+    "generation_key_mac_substitution": "passed",
+    "local_vs_committed_authority": "passed",
+    "recovery_byte_idempotence": "passed",
+    "registry_cardinality_order": "passed",
+    "source_as_build_path_substitution": "passed",
+    "sync_incomplete_authority_refusal": "passed",
+    "terminal_callback_before_wrapper_completion": "passed"
+  },
+  "verification": {
+    "focused_test_files": 4,
+    "focused_tests": 129,
+    "full_test_files": 43,
+    "full_tests": 598,
+    "typescript_builds": 1,
+    "git_diff_check": "passed"
+  },
+  "side_effects": {
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "credential_reads": 0,
+    "mcp_tools_calls": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "retries": 0,
+    "fallback": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "gh_dispatches": 0,
+    "git_pushes": 0
+  },
+  "status": "passed"
+}
