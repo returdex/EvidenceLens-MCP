@@ -20,6 +20,13 @@ Close the remaining PROV-01 gap by diagnosing the retained sanitized protocol fa
 - Automatic execution remains bounded: each live verification task must declare an exact maximum provider-request count, disable retries and fallback, and stop after its declared attempts.
 - A failed live attempt must be retained truthfully and must never be converted into success, skipped status, or an offline substitute.
 
+### Local ordering and GitHub Actions
+- Ordinary local edits, generated local evidence, and local verification do not consume a limited execution sequence and do not require an intermediate Git commit before local authoritative validation.
+- Local SOURCE, BUILD, EXECUTION, and PROOF artifacts may be validated before commit when authority is established by exact content hashes, atomic write/rename, immutable input identities, and same-process verification.
+- Git commits remain required for durable project history, but commit timing must not create artificial local task dependencies or draft-versus-authoritative modes solely to satisfy GSD task boundaries.
+- Finite execution-count controls apply primarily to GitHub Actions runs. Any plan that triggers GitHub Actions must declare an exact maximum run count, prove the trigger count, and prohibit automatic retrigger loops.
+- Local test, build, Docker, and provider request budgets remain independently bounded where their plans declare a cost or safety limit; they are not counted as GitHub Actions runs.
+
 ### Cost and secret safety
 - Use credential-free and retained non-secret evidence for diagnosis before spending an API request.
 - Never print, commit, hash into public artifacts, or otherwise disclose provider credentials or raw provider diagnostics.

@@ -44,7 +44,7 @@
     "repository": "EvidenceLens-MCP",
     "visibility": "public",
     "license": "MIT",
-    "push_after_each_change": true
+    "push_after_each_change": false
   },
   "release_policy": {
     "scheme": "x.y.z",
