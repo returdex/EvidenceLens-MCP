@@ -7,11 +7,13 @@ import { loadProviderConfig, type ProviderConfig } from "./providers/config.js";
 import { createDeepSeekProvider } from "./providers/deepseek.js";
 import { ProviderError, serializeProviderError } from "./providers/errors.js";
 import type { ReviewProvider } from "./providers/types.js";
+import { createChildDiagnosticSinkFromEnvironment, type DiagnosticSink } from "./providers/diagnostics.js";
 
 export interface ServerOptions {
   allowedRoots?: readonly FilesystemRootConfig[];
   provider?: ReviewProvider;
   providerConfig?: ProviderConfig;
+  diagnosticSink?: DiagnosticSink;
 }
 
 export function createServer(options: ServerOptions = {}): McpServer {
@@ -19,16 +21,18 @@ export function createServer(options: ServerOptions = {}): McpServer {
 
   let provider = options.provider;
   let providerConfig = options.providerConfig;
+  const diagnosticSink = options.diagnosticSink ?? createChildDiagnosticSinkFromEnvironment();
   const providerDisabled = process.env.EVIDENCELENS_DISABLE_PROVIDER === "1";
   if (!provider && !providerConfig && !providerDisabled) {
     providerConfig = loadProviderConfig();
   }
-  if (!provider && providerConfig) provider = createDeepSeekProvider(providerConfig);
+  if (!provider && providerConfig) provider = createDeepSeekProvider(providerConfig, undefined, diagnosticSink);
 
   registerReviewTool(server, {
     filesystemPolicy: createFilesystemPolicy(options.allowedRoots ?? []),
     provider,
-    providerConfig
+    providerConfig,
+    diagnosticSink
   });
 
   return server;

@@ -84,7 +84,8 @@ describe("DeepSeek provider adapter", () => {
     ];
     for (const entry of cases) {
       const diagnostic = recordingSink();
-      await expect(createDeepSeekProvider(config, transportFor(entry.response), diagnostic).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+      const transport: DeepSeekTransport = { fetch: async () => new Response(JSON.stringify(entry.response), { status: 200, headers: { "content-type": "application/json" } }) };
+      await expect(createDeepSeekProvider(config, transport, diagnostic).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
       expect(diagnostic.features).toEqual([entry.feature]);
     }
 

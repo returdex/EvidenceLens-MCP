@@ -19,6 +19,7 @@ import { isProviderReviewResultEnvelope, PROVIDER_PROMPT_VERSION, providerInfere
 import type { ProviderConfig } from "../providers/config.js";
 import { ProviderError } from "../providers/errors.js";
 import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
+import type { DiagnosticSink } from "../providers/diagnostics.js";
 
 const SERVER_NAME = "evidencelens";
 const SERVER_VERSION = "0.1.3";
@@ -35,6 +36,7 @@ export interface ReviewHandlerOptions {
   provider?: ReviewProvider;
   providerConfig?: Pick<ProviderConfig, "model" | "temperature" | "maxTokens">;
   analyzer?: ReviewAnalyzer;
+  diagnosticSink?: DiagnosticSink;
 }
 
 const DEFAULT_PROVIDER_INFERENCE = {
@@ -131,23 +133,37 @@ function freezeProviderRequest(request: ProviderReviewRequest): Readonly<Provide
   return freezeOwnedTree(request);
 }
 
-function namespaceProviderFindings(result: ProviderReviewResult, deterministic: readonly ReviewFinding[]): ReviewFinding[] {
-  if (!result.provider || !/^[a-z][a-z0-9-]{0,31}$/u.test(result.provider)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+function namespaceProviderFindings(result: ProviderReviewResult, deterministic: readonly ReviewFinding[], diagnostics?: DiagnosticSink): ReviewFinding[] {
+  if (!result.provider || !/^[a-z][a-z0-9-]{0,31}$/u.test(result.provider)) {
+    diagnostics?.emit({ path: ["metadata", "provider", "name"], code: "invalid_value" });
+    throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  }
   const deterministicIds = new Set(deterministic.map((finding) => finding.id));
   const namespaced = result.modelFindings.map((finding) => {
     const id = `provider:${result.provider}:${finding.id}`;
     const parsed = reviewFindingSchema.safeParse({ ...finding, id });
-    if (!parsed.success || deterministicIds.has(id)) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    if (!parsed.success) {
+      diagnostics?.emit({ path: ["orchestration", "namespace"], code: "custom" });
+      throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    }
+    if (deterministicIds.has(id)) {
+      diagnostics?.emit({ path: ["orchestration", "collision"], code: "custom" });
+      throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+    }
     return parsed.data;
   });
-  if (new Set(namespaced.map((finding) => finding.id)).size !== namespaced.length) throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  if (new Set(namespaced.map((finding) => finding.id)).size !== namespaced.length) {
+    diagnostics?.emit({ path: ["orchestration", "collision"], code: "custom" });
+    throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  }
   return namespaced;
 }
 
 /** @internal */
 export function assertNoForbiddenProviderAuthoredStrings(
   findings: readonly ReviewFinding[],
-  forbiddenValues: ReadonlySet<string>
+  forbiddenValues: ReadonlySet<string>,
+  diagnostics?: DiagnosticSink
 ): void {
   for (const finding of findings) {
     const idSuffix = finding.id.replace(/^provider:[a-z][a-z0-9-]{0,31}:/u, "");
@@ -161,6 +177,7 @@ export function assertNoForbiddenProviderAuthoredStrings(
       ...finding.followUpChecks
     ];
     if (authoredStrings.some((value) => [...forbiddenValues].some((forbidden) => value.includes(forbidden)))) {
+      diagnostics?.emit({ path: ["disclosure", "key"], code: "custom" });
       throw new ProviderError("PROVIDER_INVALID_RESPONSE");
     }
   }
@@ -169,14 +186,21 @@ export function assertNoForbiddenProviderAuthoredStrings(
 function validateProviderResultIdentity(
   provider: ReviewProvider,
   request: ProviderReviewRequest,
-  result: ProviderReviewResult
+  result: ProviderReviewResult,
+  diagnostics?: DiagnosticSink
 ): void {
   if (
     result.provider !== provider.name
-    || result.model !== request.inference.model
-    || result.promptVersion !== request.promptVersion
-    || result.inputFingerprint !== request.inputFingerprint
   ) {
+    diagnostics?.emit({ path: ["metadata", "provider", "name"], code: "invalid_value" });
+    throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  }
+  if (result.model !== request.inference.model) {
+    diagnostics?.emit({ path: ["metadata", "provider", "model"], code: "invalid_value" });
+    throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+  }
+  if (result.promptVersion !== request.promptVersion || result.inputFingerprint !== request.inputFingerprint) {
+    diagnostics?.emit({ path: ["orchestration", "identity"], code: "custom" });
     throw new ProviderError("PROVIDER_INVALID_RESPONSE");
   }
 }
@@ -223,6 +247,7 @@ async function createReviewResponse(
     const provider = options.provider;
     const providerConfig = options.providerConfig;
     const analyzer = options.analyzer ?? createDeterministicReviewAnalyzer();
+    const diagnostics = options.diagnosticSink;
     const expectedProviderRequest = provider === undefined
       ? undefined
       : freezeProviderRequest(providerRequest(analysis, request, providerConfig));
@@ -271,15 +296,17 @@ async function createReviewResponse(
           throw new ProviderError("PROVIDER_REQUEST_FAILED");
         }
         if (!isProviderReviewResultEnvelope(untrustedProviderResult)) {
+          diagnostics?.emit({ path: typeof untrustedProviderResult === "object" && untrustedProviderResult !== null ? ["orchestration", "keyset"] : ["orchestration", "object"], code: typeof untrustedProviderResult === "object" && untrustedProviderResult !== null ? "unrecognized_keys" : "invalid_type" });
           throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         }
         const parsedProviderResult = providerReviewResultSchema.safeParse(untrustedProviderResult);
         if (!parsedProviderResult.success || !isProviderReviewResultEnvelope(untrustedProviderResult)) {
+          diagnostics?.emit({ path: ["orchestration", "schema"], code: "custom" });
           throw new ProviderError("PROVIDER_INVALID_RESPONSE");
         }
         const providerResult = parsedProviderResult.data;
-        validateProviderResultIdentity(provider, expectedProviderRequest, providerResult);
-        const namespacedProviderFindings = namespaceProviderFindings(providerResult, trustedDeterministicFindings);
+        validateProviderResultIdentity(provider, expectedProviderRequest, providerResult, diagnostics);
+        const namespacedProviderFindings = namespaceProviderFindings(providerResult, trustedDeterministicFindings, diagnostics);
         providerMetadata = namespacedProviderFindings.length > 0
           ? { provider: { name: providerResult.provider, model: providerResult.model } }
           : {};
@@ -293,7 +320,7 @@ async function createReviewResponse(
           expectedProviderRequest.inputFingerprint,
           expectedProviderRequest.promptVersion
         ].filter((value) => value.length > 0));
-        assertNoForbiddenProviderAuthoredStrings(providerFindings, forbiddenProviderValues);
+        assertNoForbiddenProviderAuthoredStrings(providerFindings, forbiddenProviderValues, diagnostics);
         internal = {
           deterministicFindings: trustedDeterministicFindings,
           providerResult,
@@ -301,6 +328,7 @@ async function createReviewResponse(
         };
       } catch (error) {
         if (error instanceof ProviderError) throw error;
+        diagnostics?.emit({ path: ["orchestration", "schema"], code: "custom" });
         throw new ProviderError("PROVIDER_INVALID_RESPONSE");
       }
 
@@ -309,7 +337,12 @@ async function createReviewResponse(
         findings: [...internal.deterministicFindings, ...internal.providerFindings],
         metadata: { ...trustedDeterministicResponse.metadata, ...providerMetadata }
       } satisfies ReviewResponse;
-      response = reviewResponseSchema.parse(mergedResponse);
+      const merged = reviewResponseSchema.safeParse(mergedResponse);
+      if (!merged.success) {
+        diagnostics?.emit({ path: ["orchestration", "merged"], code: "custom" });
+        throw new ProviderError("PROVIDER_INVALID_RESPONSE");
+      }
+      response = merged.data;
     }
   } catch (error) {
     pendingError = error instanceof EvidenceLensError || error instanceof ProviderError

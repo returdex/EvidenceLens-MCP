@@ -5,6 +5,7 @@ import { validateProviderFindings, type ProviderFindingDraft } from "./provenanc
 import { ProviderError } from "./errors.js";
 import { fetchWithRetry, type RetryClock } from "./retry.js";
 import type { ProviderConfig } from "./config.js";
+import type { DiagnosticSink } from "./diagnostics.js";
 
 export interface DeepSeekTransport {
   fetch(input: string, init: RequestInit): Promise<Response>;
@@ -97,11 +98,24 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
   };
 }
 
-function parseDrafts(response: unknown): ProviderFindingDraft[] {
-  if (typeof response !== "object" || response === null || !Array.isArray((response as { choices?: unknown }).choices)) throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
+function invalidResponse(diagnostics: DiagnosticSink | undefined, path: readonly (string | number)[], code: string): never {
+  diagnostics?.emit({ path, code });
+  throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
+}
+
+function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderFindingDraft[] {
+  if (typeof response !== "object" || response === null || !Array.isArray((response as { choices?: unknown }).choices)
+    || (response as { choices: unknown[] }).choices.length === 0) {
+    invalidResponse(diagnostics, ["provider", "choices"], "too_small");
+  }
   const message = (response as { choices: Array<{ message?: { content?: unknown; reasoning_content?: unknown } }> }).choices[0]?.message;
   const content = message?.content;
   const reasoningContent = message?.reasoning_content;
+  if (typeof content !== "string") invalidResponse(diagnostics, ["provider", "message", "content"], "invalid_type");
+  if (content.length > 1_000_000) invalidResponse(diagnostics, ["provider", "content", "bytes"], "too_big");
+  if (content.length === 0 && typeof reasoningContent !== "string") {
+    invalidResponse(diagnostics, ["provider", "message", "reasoning_content"], "invalid_type");
+  }
   const candidates = [content, ...(typeof content === "string" && content.length === 0 ? [reasoningContent] : [])];
   for (const candidate of candidates) {
     if (typeof candidate !== "string" || candidate.length > 1_000_000 || candidate.length === 0) continue;
@@ -118,10 +132,14 @@ function parseDrafts(response: unknown): ProviderFindingDraft[] {
       } catch { /* Try the next bounded JSON candidate, then fail closed. */ }
       }
   }
-  throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
+  invalidResponse(diagnostics, ["provider", "content", "object"], "invalid_format");
 }
 
-export function createDeepSeekProvider(config: ProviderConfig, transport: DeepSeekTransport = { fetch: (input, init) => fetch(input, init) }): ReviewProvider {
+export function createDeepSeekProvider(
+  config: ProviderConfig,
+  transport: DeepSeekTransport = { fetch: (input, init) => fetch(input, init) },
+  diagnostics?: DiagnosticSink
+): ReviewProvider {
   const provider: ReviewProvider = {
     name: "deepseek",
     async review(request: ProviderReviewRequest): Promise<ProviderReviewResult> {
@@ -133,8 +151,12 @@ export function createDeepSeekProvider(config: ProviderConfig, transport: DeepSe
         operation: (signal) => transport.fetch(`${config.baseUrl}/chat/completions`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` }, body: JSON.stringify(body), signal }),
       });
       let decoded: unknown;
-      try { decoded = await response.json(); } catch { throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false }); }
-      const findings: ReviewFinding[] = validateProviderFindings(normalizedFromProviderEvidence(request.evidence), parseDrafts(decoded));
+      try { decoded = await response.json(); } catch { invalidResponse(diagnostics, ["provider", "http", "json"], "invalid_format"); }
+      const findings: ReviewFinding[] = validateProviderFindings(
+        normalizedFromProviderEvidence(request.evidence),
+        parseDrafts(decoded, diagnostics),
+        diagnostics
+      );
       return { provider: provider.name, model: request.inference.model, promptVersion: request.promptVersion, inputFingerprint: request.inputFingerprint, modelFindings: findings, deterministicFindings: [] };
     }
   };

@@ -136,13 +136,13 @@ describe("provider review MCP boundary", () => {
       provider: {
         ...fakeProvider(),
         async review(providerRequest) {
-          return { ...(await fakeProvider().review(providerRequest)), model: "wrong-private-model" };
+          return { ...(await fakeProvider().review(providerRequest)), inputFingerprint: "0".repeat(64) };
         }
       }
     }));
     expect(JSON.parse(result)).toEqual({ ok: false, code: "PROVIDER_FAILURE", message: "Provider failure" });
     expect(features).toEqual([{ path: ["orchestration", "identity"], code: "custom" }]);
-    expect(result).not.toMatch(/wrong-private-model|diagnostic|stack|cause/iu);
+    expect(result).not.toMatch(/inputFingerprint|diagnostic|stack|cause/iu);
   });
   it("reads normalization dependencies first and snapshots lifecycle dependencies once after both cleanup registrations", async () => {
     const events: string[] = [];
