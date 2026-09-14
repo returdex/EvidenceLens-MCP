@@ -2,7 +2,7 @@
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
 plan: 57
 standard: OWASP ASVS 4.0.3 Level 1
-reviewed_commit: 6fe14a3d799e9ac021f40b8dfabc059b21112e8b
+reviewed_commit: 801604db62f75d18c37a3ef89699d8f1c9f5017c
 status: blocked
 open_blocker_critical_high: 1
 open_warning: 0
@@ -12,8 +12,6 @@ open_warning: 0
 
 Status: **BLOCKED**. No READY evidence block is present.
 
-BL-57-04 blocks V10/V11 auditability: the historical failed-local-validation regression uses the mutable current repository instead of the exact historical committed tuple it claims to test. Legitimate recertification changes therefore alter the first fail-closed rejection category and break the mandatory suite.
+BL-57-05 blocks stable V10/V11 auditability because a test's required error category depends on whether current certification artifacts are BLOCKED or READY. Historical tuple isolation is otherwise correct, and no other ASVS warning or higher was found.
 
-The receipt contract repair, local validation enforcement, authentication/MAC, one-shot authority, schemas, cryptographic binding, file atomicity, resource bounds and sanitized errors showed no other warning or higher.
-
-All external action counters are zero.
+Docker, credential, provider/network/paid, GitHub Actions, dispatch and push counters are all zero.

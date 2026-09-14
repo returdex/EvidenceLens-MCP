@@ -6,20 +6,20 @@ Open findings: **1 Blocker, 0 Critical, 0 High, 0 Warning**
 
 Reviewed blobs: **109/109**
 
-No READY evidence block is present. Current exact identity: commit `6fe14a3d799e9ac021f40b8dfabc059b21112e8b`, manifest `2838bcafffc950f05686dbefc1af2f31c66fa03be40a47f26cd185667f260037`, tree `f1fe4547da6afd6c5d5be586591e25fa3a3ad1a70b5dc1a905a543d0a653e59b`, proof certifier `0ae4c2ef14ee4b7516c02fb50f5271a8cbfd385c8a69bb504f56efb72a910826`.
+No READY evidence block is present. Exact identity: commit `801604db62f75d18c37a3ef89699d8f1c9f5017c`, manifest `173ea95862eb36ba229c1f1a24c86720f775674ba152deae82aa505f8325a862`, tree `df8cc079672960ab8b2a430ecd22352662df4b57210dd0275fb14e4738a8488b`, proof certifier `0ae4c2ef14ee4b7516c02fb50f5271a8cbfd385c8a69bb504f56efb72a910826`.
 
-## BL-57-04 — historical failed-attempt regression depends on current workspace tuple
+## BL-57-05 — current-drift regression hardcodes a certification-state-dependent category
 
 Severity: **Blocker**
 
 Owner: Plan 10-55 test owner (`tests/scripts/audit-proof-chain.test.ts`)
 
-The two tests for `proof-committed-auto` and `sync-authority-auto` claim to verify immutable failed LOCAL_VALIDATION attempt `585fd01`, but execute the CLIs against the current repository and merely expect `PROOF_CHAIN_LOCAL_VALIDATION`. During required 10-57 artifact replacement, the correct first refusal is `PROOF_CHAIN_COMMITTED`; after committing the new source identity, the historical 10-58/10-59 tuple is necessarily identity-stale and can fail before local-validation inspection.
+The historical `585fd01` tests now correctly materialize an isolated Git repository. However, the new test `reports current fixed-tuple source/build absence as an upstream committed rejection` still executes `sync-authority-auto` against the mutable current repository and requires exactly `PROOF_CHAIN_COMMITTED`.
 
-Mandatory suite result: **42/43 files, 610/612 tests**. Both failures received `PROOF_CHAIN_COMMITTED` instead of the state-dependent expected category.
+That category currently occurs because the checked-in 10-57 REVIEW is intentionally BLOCKED and has no evidence block. A successful Plan 10-57 recertification necessarily installs a valid evidence block; parsing then proceeds and the stale historical build/live tuple is rejected later as identity or local-validation failure. Thus the test again changes outcome solely because certification succeeds.
 
-Required correction: materialize the exact `585fd01` tuple in an isolated temporary Git repository (including the exact commit and working bytes), or test the committed-authority function with an injected immutable tuple. Assert LOCAL_VALIDATION rejection there. Separately assert that current tuple drift is rejected, without requiring one specific downstream category. Rerun Plan 10-56 and fully recertify.
+Required correction: make current-drift coverage accept the invariant that authority is rejected without requiring a downstream category, or isolate an explicit malformed/missing current tuple fixture when testing `PROOF_CHAIN_COMMITTED`. Keep the exact historical LOCAL_VALIDATION tests isolated as they now are. Then rerun Plan 10-56 and completely recertify 10-57.
 
-The pre-tools null receipt change itself is correct: tools=0/reservation=1 requires null receipt/digest; post-tools and passed variants require an authenticated receipt; committed authority rejects a reached failed local validation.
+The isolated historical test implementation itself, tuple receipt rules, preflight authority, terminal owner, lifecycle, counters, atomicity and synchronization showed no additional warning or higher.
 
-Docker builds/runs **0/0**; credentials **0**; provider/network/paid **0/0/0**; GitHub Actions/dispatch/push **0/0/0**. Current build and failed 10-59 evidence remain stale history and grant no authority.
+External counters are all zero. Historical build/live evidence remains non-authoritative.
