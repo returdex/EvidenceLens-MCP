@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-78-PLAN.md
-last_updated: "2026-09-14T10:50:23.235Z"
+stopped_at: Completed 10-79-PLAN.md
+last_updated: "2026-09-14T10:54:05.176Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 109
-  completed_plans: 97
-  percent: 89
+  completed_plans: 98
+  percent: 90
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 79 of 81
+Plan: 80 of 81
 
 - Phase: 10 of 11
-- Status: exact post-lifecycle-drain source commit 8473505 is READY with zero-warning deep and ASVS L1 review
-- Progress: Plan 10-78 complete; Plan 10-79 is next for the local exact-source image build
-- Last activity: passed 221 hostile tests and certified the 109-blob source identity after the full 623-test provider-disabled suite
+- Status: exact-source generation 2a530ae4 and image sha256:66ea14e9 are READY after independent no-rebuild authentication
+- Progress: Plan 10-79 complete; Plan 10-80 is next for the bounded single-request credentialed proof
+- Last activity: built reviewed commit 8473505 once and passed 68 focused tests plus the independent build-auto audit
 
 ## Decisions and Assumptions
 
@@ -144,6 +144,7 @@ Plan: 79 of 81
 - [Phase 10]: Generation 21c4e3fe remains byte-exact authority:false and replay_allowed:false history superseded by lifecycle-drain fix 0b47dbb.
 - [Phase 10]: Only the 10-77/78/79/80/81 namespace can acquire current certification, build, live-proof, and synchronization authority.
 - [Phase 10]: Authorize Plan 10-79 only from reviewed commit 8473505, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift requires recertification before Docker or provider activity.
+- [Phase 10]: Promote generation 2a530ae49b8be4d5108e3ac23b279dfc776ee80e582d0b1d051e8e56f3db8d04 as the sole READY Plan 10-79 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -206,16 +207,17 @@ Plan: 79 of 81
 | Phase 10 P74 | 1min | 1 tasks | 1 files |
 | Phase 10 P77 | 8min | 2 tasks | 8 files |
 | Phase 10 P78 | 3min | 2 tasks | 4 files |
+| Phase 10 P79 | 1min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-14T10:50:23.229Z
-- **Stopped at:** Completed 10-78-PLAN.md
+- **Last session:** 2026-09-14T10:54:05.171Z
+- **Stopped at:** Completed 10-79-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-79 to build and independently authenticate the exact 10-78 source image.
+Execute Plan 10-80 against only the exact READY generation and image from Plan 10-79.
 
 ---
-*Last updated: 2026-09-14 after completing lifecycle-drain hostile testing and exact-source certification*
+*Last updated: 2026-09-14 after completing the exact-source local image build and independent authentication*
