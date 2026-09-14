@@ -1,48 +1,44 @@
 # Phase 10 Plan 57 Exact-Source Deep Review
 
-Status: **READY**
+Status: **BLOCKED**
 
-Open findings: **0 Blocker, 0 Critical, 0 High, 0 Warning**
+Open findings: **1 Blocker, 0 Critical, 0 High, 0 Warning**
 
 Reviewed blobs: **109/109**
 
-```json evidencelens-evidence
-{"certifier_sha256":{"audit_live_evidence_sha256":"62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500","audit_proof_chain_sha256":"e98e27f2da0ac0e27b1fd347882317162e836f533dc52c85b9bd52e232421080"},"manifest_sha256":"16eb4cbbcec4e2c4186d515438d6f74ca2cfe0b371fd6ab8fa743a8bfd453af3","non_planning_tree":"e8909645154eb45219b2c380794953b65fa635cc6285246130934618d5470dba","reviewed_commit":"07c8cbc44e147bc3fc85d9c910fbe3f30b9f2f48","schema":"evidencelens.deep-review.v2","status":"ready"}
+No READY evidence block is present. The earlier certification is invalid for the changed source and this report grants no build/live authority.
+
+## Exact current identity
+
+- Commit: `ebbcd0bff0da564c41af22b0cd3d283e6b81a8c9`
+- Tree: `647e14d712e1c1f16ba17a47a4eefa79e7cb2fb7f2845d18d653b3da275975bb`
+- Manifest: `fe40c3c72db8f0ea65d77c939be11ebd557767e4d0e9bc51ed2362d75492c981`
+- Proof certifier: `b26a25be659c90baa08cda28497551456639738df1939396a1533bc2f3ffa5c1`
+- Live certifier: `62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500`
+
+## BL-57-03 — real invalid preflight cannot seal its five-member authority
+
+Severity: **Blocker**  
+Owner: Plan 10-54 implementation/tests
+
+`runStatefulAutomaticLive()` correctly creates durable state and an authenticated terminal snapshot when `authenticateReadyBuild()` fails, then invokes `finishEvidence()`. However, `sealAutomaticLiveEvidence()` unconditionally reads SOURCE, BUILD, REVIEW and SECURITY before producing TRANSITION, EXECUTION, PROOF and LOCAL_VALIDATION.
+
+If the authentic preflight failure is a missing or malformed source/build/review/security member, those reads fail too. The terminal owner leaves only state and terminal snapshot, and never produces the branch's specified five-member authority. The new integration test masks the defect by injecting an audit exception while precreating all four otherwise-valid files.
+
+Direct provider-free reproduction with all four inputs absent produced:
+
+```json
+{"error":"AUTOMATIC_PREFLIGHT","state":true,"terminal":true,"transition":false,"execution":false,"proof":false,"local_validation":false}
 ```
 
-## Authority and coverage
+Required correction: the `preflight_started` producer must not require the unavailable 9-member live inputs. It must derive its five-member non-pass authority from the generation, authenticated snapshot/state and committed forensic record only, with explicit unavailable build/source fields already supported by the execution schema. Add tests for missing and malformed real fixed inputs that assert all five authority members exist, local audits pass, credential/harness counters remain zero, and no stale 10-58 tuple is accepted.
 
-The complete 109-blob non-planning manifest at completed Plan 10-56 commit `07c8cbc44e147bc3fc85d9c910fbe3f30b9f2f48` was reviewed. Its canonical manifest digest is `16eb4cbbcec4e2c4186d515438d6f74ca2cfe0b371fd6ab8fa743a8bfd453af3`; aggregate tree identity is `e8909645154eb45219b2c380794953b65fa635cc6285246130934618d5470dba`.
+## Other reviewed boundaries
 
-All changed implementation and test blobs since Plan 10-49, their consumers, and unchanged manifest members were included. Both certifier blobs share this exact identity. The working non-planning tree had no drift.
+The BL-59-01 terminal-owner wiring, success/post-reservation branches, lifecycle metadata, HMAC/key lifecycle, exact counters, one-shot provider guard, replay/concurrency, fixed registries, sync tuple cardinality and sanitized failures showed no additional warning or higher.
 
-## Finding closure
+## Side effects
 
-| Finding | Closure | Result |
-|---|---|---|
-| BL-57-01 | Fixed build pipeline calls `reviews-auto` before production and `build-auto` after its single sealed build; hermetic regression reaches the post-build gate. | CLOSED |
-| BL-57-02 | Invalid-preflight regression now injects an explicit isolated failing audit and proves all downstream build functions and the PATH-stubbed Docker command remain untouched, independent of workspace artifacts. | CLOSED |
+Docker builds/runs **0/0**; credentials **0**; provider/network/paid requests **0/0/0**; GitHub Actions/dispatches/pushes **0/0/0**. The reproduction was an injected provider-free local call.
 
-## Deep review matrix
-
-| Boundary | Result |
-|---|---|
-| Five terminal branches and exact counter discrimination | PASS |
-| HMAC authentication, random generation keys and key clearing | PASS |
-| One-shot reservation/fetch with no retry, fallback or diagnostic call | PASS |
-| Separately observed exit/close and bounded stream/deadline handling | PASS |
-| Atomic/no-follow state, evidence sealing and reopen/hash checks | PASS |
-| Concurrency, replay, recovery idempotence and generation isolation | PASS |
-| Exact Git archive, manifest, certifier and build tuple binding | PASS |
-| Branch-specific 5/9 authority and 7/11 final registries | PASS |
-| Committed authority reread, sync claim/journal and recovery | PASS |
-| Stable sanitized failures without secret/raw-output disclosure | PASS |
-
-## Verification and side effects
-
-- Hostile disconfirmation: 4 focused files / 130 tests and 43 full files / 599 tests.
-- Certification gates: `source-review-auto`, `reviews-auto`, full provider-disabled suite, TypeScript build and `git diff --check`.
-- Docker builds/runs: **0/0**; credential reads: **0**; network/provider/paid requests: **0/0/0**.
-- GitHub Actions, workflow/repository/`gh` dispatches and pushes: **0/0/0/0/0**.
-
-This exact identity is approved for Plan 10-58's single immutable build. Any source, certifier or artifact drift invalidates approval.
+The current source is **not approved** for build or live execution.
