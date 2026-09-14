@@ -36,9 +36,10 @@ const mode = (paths, schemas, committed = false) => Object.freeze({
 });
 
 const legacyConsumedLivePath = `${phase}/10-62-CONSUMED-LIVE.json`;
-const consumedLivePath = `${phase}/10-67-CONSUMED-LIVE.json`;
+const priorConsumedLivePath = `${phase}/10-67-CONSUMED-LIVE.json`;
+const consumedLivePath = `${phase}/10-72-CONSUMED-LIVE.json`;
 const localValidationPath = `${phase}/10-70-LOCAL-VALIDATION.json`;
-const forensicPath = consumedLivePath;
+const forensicPath = priorConsumedLivePath;
 const transitionPath = `${phase}/10-70-TRANSITION.json`;
 const executionPath = `${phase}/10-70-EXECUTION.json`;
 const proofPath = `${phase}/10-70-PROOF.json`;
@@ -68,15 +69,27 @@ const consumedLiveFiles = Object.freeze({
   proof: Object.freeze({ path: `${phase}/10-65-PROOF.json`, sha256: "3a36b63d9a3cd93e1462d8a531061b84be9ccef18f56b2a10de05168a146a163" }),
   local_validation: Object.freeze({ path: `${phase}/10-65-LOCAL-VALIDATION.json`, sha256: "36e9000c5fbcd9535b68730ee65b19d7ab2e1ed0c795c717ff78fe54de9632e1" }),
 });
+const currentConsumedLiveCommit = "95dcbef2e0f525b1380f0f303aee096e68c911e5";
+const currentConsumedLiveGeneration = "3767fe38a51a1e27932064af0859c135138a1e4267a018ba86c81167cd96c6bb";
+const currentConsumedLiveFiles = Object.freeze({
+  state: Object.freeze({ path: `${phase}/.10-70-live-state.json`, sha256: "c4bd00de921ac81a0c2cdc98b68a070aec9835d953f7acbd27b29f63fc5ff970" }),
+  terminal: Object.freeze({ path: `${phase}/.10-70-terminal-snapshot.json`, sha256: "873667367cd808726c49b2f191f7e38c60d4a50c1c89642239440759cdf59103" }),
+  claim: Object.freeze({ path: `${phase}/.10-70-terminal-snapshot.json.claim`, sha256: "7163c77aec4bcb438e57e989932681ef2cf53763d3802b0679940e512d63eaa6" }),
+  transition: Object.freeze({ path: `${phase}/10-70-TRANSITION.json`, sha256: "e9cec2fbc647f1a168989ef7da61573dcfee7788e3e8fd6694a13788313e97dc" }),
+  execution: Object.freeze({ path: `${phase}/10-70-EXECUTION.json`, sha256: "d270df564fa6b360c488aadab7b4f8b98fce553cd19f8ae355d5979fef8e90dc" }),
+  proof: Object.freeze({ path: `${phase}/10-70-PROOF.json`, sha256: "2c701fdeed90d7e8e738b67c01410242c0b9ee949bde592ef88d65c70e7323d4" }),
+  local_validation: Object.freeze({ path: `${phase}/10-70-LOCAL-VALIDATION.json`, sha256: "aa557953d0899ac5c6b1c39a48d4782181c1df8f29ac531e354b9c1b76ab8b31" }),
+});
 const consumedLiveArtifactKeys = ["commit", "mode", "path", "sha256"];
 const consumedLiveArchiveKeys = ["artifacts", "authority", "certifier_sha256", "generation", "manifest_sha256", "mcp_tools_call_count", "non_planning_tree", "observed_provider_requests", "outcome", "replay_allowed", "reservation_count", "reviewed_commit", "schema", "status"];
 const currentConsumedLiveArchiveKeys = [...consumedLiveArchiveKeys, "cause"];
 
 export function auditConsumedLiveArchive(value) {
   const legacy = value?.generation === legacyConsumedLiveGeneration;
-  const expectedGeneration = legacy ? legacyConsumedLiveGeneration : consumedLiveGeneration;
-  const expectedCommit = legacy ? legacyConsumedLiveCommit : consumedLiveCommit;
-  const expectedFiles = legacy ? legacyConsumedLiveFiles : consumedLiveFiles;
+  const prior = value?.generation === consumedLiveGeneration;
+  const expectedGeneration = legacy ? legacyConsumedLiveGeneration : prior ? consumedLiveGeneration : currentConsumedLiveGeneration;
+  const expectedCommit = legacy ? legacyConsumedLiveCommit : prior ? consumedLiveCommit : currentConsumedLiveCommit;
+  const expectedFiles = legacy ? legacyConsumedLiveFiles : prior ? consumedLiveFiles : currentConsumedLiveFiles;
   const expectedKeys = legacy ? consumedLiveArchiveKeys : currentConsumedLiveArchiveKeys;
   const expectedMetadata = legacy ? {
     auditProof: "6e22b85bc9abbeb2ca8a04f28b99306367ddd69e6e85c4d82e065838326d8619",
@@ -84,16 +97,22 @@ export function auditConsumedLiveArchive(value) {
     nonPlanningTree: "309c1f26d5707ed8e1ba9c10e22ca6eb97defb7435c4f2dcec5fdc47cbcba3b4",
     outcome: "automatic_terminal_missing",
     reviewedCommit: "26ba4806d9ef25717b0d1c180bd62aa4216cb634",
-  } : {
+  } : prior ? {
     auditProof: "d671950bd0c248e0538bdcc38cd492cdca00c0da25228e11ccb7d21cb67af6cd",
     manifest: "6d3a5ce527a41a66de67aa98a683b500b67272fd8939ffe0f2a4b02a5e475a5e",
     nonPlanningTree: "b4fc225005464daebfa4fe0b1bbce580e4badde30ad0b404ebffd76d434a3c49",
     outcome: "request_failed",
     reviewedCommit: "4dcd025c47f35b29aeffbf8e8eeb4b7abfc839b2",
+  } : {
+    auditProof: "0f11fd7ec47f0fc14382f28a8e50130a2c05657b244a1aee1d948d1e83705d2d",
+    manifest: "a45fd8656314c041f5b83174820d313bcf5b34426fc71857e13a6d8f022882b2",
+    nonPlanningTree: "2ca2ea34fd8336db77c0aa1f5ada2aa8d8089b08c1846fd50d4eedc1b6cad852",
+    outcome: "request_failed",
+    reviewedCommit: "1ebe63eba01801fae1a4fa13332196d19e032bbc",
   };
   if (!exactKeys(value, expectedKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
     || value.generation !== expectedGeneration || value.authority !== false || value.replay_allowed !== false
-    || (!legacy && value.cause !== "automatic_terminal_missing_before_tools")
+    || (!legacy && value.cause !== (prior ? "automatic_terminal_missing_before_tools" : "compose_inactive_profile_interpolation"))
     || value.reviewed_commit !== expectedMetadata.reviewedCommit
     || value.manifest_sha256 !== expectedMetadata.manifest
     || value.non_planning_tree !== expectedMetadata.nonPlanningTree
@@ -119,9 +138,9 @@ async function syncDirectory(path) {
 export async function createConsumedLiveArchive(path = consumedLivePath) {
   if (path !== consumedLivePath) fail("PROOF_CHAIN_ARGV");
   const artifacts = {};
-  for (const [name, expected] of Object.entries(consumedLiveFiles)) {
+  for (const [name, expected] of Object.entries(currentConsumedLiveFiles)) {
     let committed;
-    try { committed = (await execFileAsync("git", ["show", `${consumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
+    try { committed = (await execFileAsync("git", ["show", `${currentConsumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
     catch { fail("PROOF_CHAIN_CONSUMED_LIVE"); }
     let handle;
     try {
@@ -133,19 +152,19 @@ export async function createConsumedLiveArchive(path = consumedLivePath) {
       try { if (sha256Hex(await reopened.readFile()) !== expected.sha256) fail("PROOF_CHAIN_CONSUMED_LIVE"); } finally { await reopened.close(); }
       const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes); const parsed = JSON.parse(text);
       if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_CONSUMED_LIVE");
-      artifacts[name] = { commit: consumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
+      artifacts[name] = { commit: currentConsumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
     } catch (error) {
       if (error instanceof Error && error.message === "PROOF_CHAIN_CONSUMED_LIVE") throw error;
       fail("PROOF_CHAIN_CONSUMED_LIVE");
     } finally { await handle?.close().catch(() => undefined); }
   }
-  const value = { artifacts, authority: false, cause: "automatic_terminal_missing_before_tools", certifier_sha256: {
+  const value = { artifacts, authority: false, cause: "compose_inactive_profile_interpolation", certifier_sha256: {
     audit_live_evidence_sha256: "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500",
-    audit_proof_chain_sha256: "d671950bd0c248e0538bdcc38cd492cdca00c0da25228e11ccb7d21cb67af6cd",
-  }, generation: consumedLiveGeneration, manifest_sha256: "6d3a5ce527a41a66de67aa98a683b500b67272fd8939ffe0f2a4b02a5e475a5e",
-    mcp_tools_call_count: 0, non_planning_tree: "b4fc225005464daebfa4fe0b1bbce580e4badde30ad0b404ebffd76d434a3c49",
+    audit_proof_chain_sha256: "0f11fd7ec47f0fc14382f28a8e50130a2c05657b244a1aee1d948d1e83705d2d",
+  }, generation: currentConsumedLiveGeneration, manifest_sha256: "a45fd8656314c041f5b83174820d313bcf5b34426fc71857e13a6d8f022882b2",
+    mcp_tools_call_count: 0, non_planning_tree: "2ca2ea34fd8336db77c0aa1f5ada2aa8d8089b08c1846fd50d4eedc1b6cad852",
     observed_provider_requests: 0, outcome: "request_failed", replay_allowed: false, reservation_count: 1,
-    reviewed_commit: "4dcd025c47f35b29aeffbf8e8eeb4b7abfc839b2", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found" };
+    reviewed_commit: "1ebe63eba01801fae1a4fa13332196d19e032bbc", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found" };
   auditConsumedLiveArchive(value);
   const bytes = Buffer.from(canonicalJson(value)); const temporary = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
   let temp; let reservation;
@@ -252,7 +271,8 @@ function assertBranchExecution(branch, execution) {
 }
 
 export const PROOF_CHAIN_MODES = Object.freeze({
-  "consumed-live-archive": mode(["10-67-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
+  "consumed-live-archive": mode(["10-72-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
+  "consumed-live-archive-10-65": mode(["10-67-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "consumed-live-archive-10-59": mode(["10-62-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "forensic-consumed-generation": mode(["10-53-FORENSIC.json"], ["evidencelens.consumed-generation-forensic.v1"]),
   "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
@@ -484,7 +504,7 @@ export function auditModeRecords(modeName, records) {
       if (!["evidencelens.build.v2", "evidencelens.build-terminal.v1"].includes(record.schema)) fail("PROOF_CHAIN_SCHEMA");
     } else if (record.schema !== specification.schemas[index]) fail("PROOF_CHAIN_SCHEMA");
   });
-  if (["consumed-live-archive", "consumed-live-archive-10-59"].includes(modeName)) return auditConsumedLiveArchive(records[0]);
+  if (["consumed-live-archive", "consumed-live-archive-10-65", "consumed-live-archive-10-59"].includes(modeName)) return auditConsumedLiveArchive(records[0]);
   const identity = JSON.stringify(sourceIdentity(records[0]));
   if (records.slice(1).some((record) => JSON.stringify(sourceIdentity(record)) !== identity)) fail("PROOF_CHAIN_IDENTITY");
   if (modeName === "repair-set") auditRepairSet(records[0], records.slice(1));
@@ -667,12 +687,12 @@ async function main(argv) {
   if (mode === "forensic-consumed-generation") await assertConsumedState();
   const records = await Promise.all(paths.map((path) => load(path, mode === "forensic-consumed-generation")));
   auditModeRecords(mode, records);
-  if (!["forensic-consumed-generation", "consumed-live-archive", "consumed-live-archive-10-59"].includes(mode)) await Promise.all(records.map((record) => auditGitIdentity(record)));
+  if (!["forensic-consumed-generation", "consumed-live-archive", "consumed-live-archive-10-65", "consumed-live-archive-10-59"].includes(mode)) await Promise.all(records.map((record) => auditGitIdentity(record)));
   if (mode === "forensic-consumed-generation") {
     process.stdout.write(`${canonicalJson({ status: "gaps_found" })}\n`);
     return;
   }
-  if (["consumed-live-archive", "consumed-live-archive-10-59"].includes(mode)) {
+  if (["consumed-live-archive", "consumed-live-archive-10-65", "consumed-live-archive-10-59"].includes(mode)) {
     process.stdout.write(`${canonicalJson({ authority: false, status: "gaps_found" })}\n`); return;
   }
   if (mode === "build-auto") {
@@ -687,7 +707,7 @@ async function main(argv) {
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
   main(process.argv.slice(2)).then(() => {
-    if (!["forensic-consumed-generation", "consumed-live-archive", "consumed-live-archive-10-59", "create-consumed-live-archive"].includes(process.argv[2])) process.stdout.write("proof chain audit passed\n");
+    if (!["forensic-consumed-generation", "consumed-live-archive", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "create-consumed-live-archive"].includes(process.argv[2])) process.stdout.write("proof chain audit passed\n");
   }).catch((error) => {
     process.stderr.write(`${error instanceof Error && /^PROOF_CHAIN_/u.test(error.message) ? error.message : "PROOF_CHAIN_FAILED"}\n`);
     process.exitCode = 1;
