@@ -1,8 +1,8 @@
 {
   "schema": "evidencelens.hostile-disconfirmation.v1",
   "certified_source": {
-    "commit": "26866a848cacfc61d8c7cdaf77a1a1eaffa15771",
-    "tree": "b26f54507bea93ecb82935488da1ec8a52d40934",
+    "commit": "7c9b8a4ac088e843f5f7f4e4711628951e358cd8",
+    "tree": "b5be9013ab0de1a46abfff48550b60c0f4447854",
     "forensic_sha256": "422d60136691675e716ecf3c34f54d35f054f3615acab74789f3962923ca8b95"
   },
   "terminal_variants": {
@@ -27,6 +27,10 @@
     "five_member_gaps_only_authority": "passed",
     "nine_member_live_authority_unchanged": "passed",
     "local_vs_committed_authority": "passed",
+    "local_validation_failure_proof_sync_refusal": "passed",
+    "immutable_585fd01_refusal": "passed",
+    "pre_tools_null_receipt_exclusivity": "passed",
+    "live_branch_non_null_receipt_requirement": "passed",
     "recovery_byte_idempotence": "passed",
     "registry_cardinality_order": "passed",
     "source_as_build_path_substitution": "passed",
@@ -34,10 +38,10 @@
     "terminal_callback_before_wrapper_completion": "passed"
   },
   "verification": {
-    "focused_test_files": 4,
-    "focused_tests": 139,
+    "focused_test_files": 6,
+    "focused_tests": 210,
     "full_test_files": 43,
-    "full_tests": 608,
+    "full_tests": 612,
     "typescript_builds": 1,
     "git_diff_check": "passed"
   },
