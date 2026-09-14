@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -110,10 +110,30 @@ describe("proof chain certifier", () => {
     expect(() => auditModeRecords("proof", [validation])).toThrow();
   });
 
-  it.each(["proof-committed-auto", "sync-authority-auto"])('%s refuses the immutable failed LOCAL_VALIDATION attempt', (mode) => {
-    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", mode], {
+  it.each(["proof-committed-auto", "sync-authority-auto"])('%s refuses the immutable failed LOCAL_VALIDATION attempt', async (mode) => {
+    const repoRoot = process.cwd();
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-585fd01-"));
+    try {
+      for (const path of BRANCH_AUTHORITY_REGISTRIES.live.paths) {
+        const bytes = execFileSync("git", ["show", `585fd01:${path}`], { cwd: repoRoot });
+        await mkdir(join(root, path, ".."), { recursive: true });
+        await writeFile(join(root, path), bytes, { mode: 0o600 });
+      }
+      execFileSync("git", ["init", "-q"], { cwd: root });
+      execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: root });
+      execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: root });
+      execFileSync("git", ["add", "."], { cwd: root });
+      execFileSync("git", ["commit", "-qm", "materialize immutable 585fd01 tuple"], { cwd: root });
+      expect(() => execFileSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), mode], {
+        cwd: root, env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
+      })).toThrow(/PROOF_CHAIN_LOCAL_VALIDATION/u);
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
+  it("reports current fixed-tuple source/build absence as an upstream committed rejection", () => {
+    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
       env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
-    })).toThrow(/PROOF_CHAIN_LOCAL_VALIDATION/u);
+    })).toThrow(/PROOF_CHAIN_COMMITTED/u);
   });
 
   it("discriminates strict build-auto ready and terminal non-pass without mixed authority", () => {
