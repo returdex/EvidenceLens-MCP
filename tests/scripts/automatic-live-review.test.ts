@@ -10,6 +10,7 @@ import {
   runAutomaticBuild,
   runFixedAutomaticBuild,
   runFixedAutomaticLive,
+  runStatefulAutomaticLive,
   validateFixedInvocation,
 } from "../../scripts/automatic-live-review.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
@@ -110,6 +111,34 @@ describe("automatic immutable review runner", () => {
     expect(readCredential).not.toHaveBeenCalled();
     for (const key of ["transition", "execution", "proof", "localValidation"] as const) expect(JSON.parse(await readFile(paths[key], "utf8"))).toBeTruthy();
     expect(JSON.parse(await readFile(paths.localValidation, "utf8"))).toMatchObject({ branch: "preflight_started", generation, outcome: "preflight_failed", validation: { execution: "passed", proof: "passed" } });
+  });
+
+  it("retains the terminal through the production harness when its post-reservation preflight fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-harness-preflight-"));
+    const generation = "f".repeat(64);
+    const spawnChild = vi.fn(() => { throw new Error("must not spawn"); });
+    const result = await runStatefulAutomaticLive({
+      authenticateReadyBuild: async () => undefined,
+      generation,
+      harnessOptions: {
+        resolveProof: async () => { throw new Error("preflight"); },
+        spawnChild,
+        write: () => undefined,
+      },
+      path: join(root, "state.json"),
+      readCredential: async () => "fake-credential",
+      terminalPath: join(root, "terminal.json"),
+    });
+
+    expect(spawnChild).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      inner_status: "failed", mcp_tools_call_count: 0, observed_provider_requests: 0,
+      reservation_count: 1, terminal_branch: "pre_tools_post_reservation", wrapper_status: "completed",
+    });
+    expect(JSON.parse(await readFile(join(root, "terminal.json"), "utf8"))).toMatchObject({
+      branch: "pre_tools_post_reservation", diagnostic: { code: "preflight" }, generation,
+      mcp_tools_call_count: 0, observed_provider_requests: 0, reservation_count: 1,
+    });
   });
 
   it.each([

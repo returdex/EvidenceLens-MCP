@@ -704,8 +704,6 @@ export async function runReviewHarness(options = {}) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
   }
 
-  const liveProof = isOffline ? undefined : await resolveProof(undefined, environment);
-  const expectedModel = liveProof?.model;
   const selectedProfile = isOffline ? "smoke" : "review";
   const ownsDiagnosticKey = !isOffline && options.terminalKey === undefined;
   const diagnosticKey = isOffline ? undefined : (options.terminalKey ?? randomBytes(32));
@@ -729,6 +727,20 @@ export async function runReviewHarness(options = {}) {
     requestEvidenceRetained = true;
     return evidence;
   };
+  let liveProof;
+  try {
+    liveProof = isOffline ? undefined : await resolveProof(undefined, environment);
+  } catch (error) {
+    if (!isOffline) {
+      retainAuthenticatedRequestEvidence(undefined);
+      retainTerminal({
+        branch: "pre_tools_post_reservation", close: null, diagnostic: { code: "preflight" }, exit: null,
+        request_receipt: null, result: null, stream_truncated: false, transcript: null,
+      });
+    }
+    throw error;
+  }
+  const expectedModel = liveProof?.model;
   const childEnvironment = isOffline
     ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" }
     : {
