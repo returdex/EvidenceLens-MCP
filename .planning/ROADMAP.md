@@ -442,7 +442,7 @@ Plans:
 - [x] 10-77-PLAN.md — Preserve 10-75 as authority:false and rotate registries to the bounded-drain recovery namespace
 
 **Wave 73** *(gap closure; blocked on Wave 72 completion)*
-- [ ] 10-78-PLAN.md — Hostile-test and exactly recertify the post-tools bounded-drain source
+- [x] 10-78-PLAN.md — Hostile-test and exactly recertify the post-tools bounded-drain source
 
 **Wave 74** *(gap closure; blocked on Wave 73 completion)*
 - [ ] 10-79-PLAN.md — Build and authenticate a fresh exact-source local Docker image
@@ -491,7 +491,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 67/81 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 68/81 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
