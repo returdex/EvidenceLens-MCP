@@ -35,3 +35,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Resolve Compose config with fixed non-secret review/proof sentinels while keeping the real review credential only in the review child environment; make the mutable-current audit assert either structured READY success or a finite sanitized rejection family, always with zero watched writes and zero external effects.
 - **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts, tests/scripts/audit-proof-chain.test.ts
 ---
+
+## post-tools-pre-fetch-ambiguous — Failed tools/call evidence sampled before asynchronous drain
+- **Date:** 2026-09-14
+- **Error patterns:** post_tools_pre_fetch, AUTOMATIC_TERMINAL_STATE, tools/call count 1, observed provider sends 0, null receipt, null lifecycle, stream_truncated, ambiguous diagnostic
+- **Root cause:** After terminating a failed tools/call child, runReviewHarness sampled receipt, diagnostic, and lifecycle collectors before asynchronous stderr/end/exit/close delivery completed, sealing an incomplete tuple that strict auditors correctly rejected.
+- **Fix:** Await the existing bounded lifecycle after SIGTERM before sampling collectors; preserve authenticated receipt/send invariants; add a provider-disabled production-path asynchronous-drain regression and fail-closed mutable-current registry coverage.
+- **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts, tests/scripts/audit-proof-chain.test.ts
+---
