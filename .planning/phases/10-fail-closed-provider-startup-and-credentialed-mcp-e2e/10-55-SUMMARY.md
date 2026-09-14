@@ -57,6 +57,8 @@ Follow-up correction: **Exact pre-tools receipt discrimination** - `cdf302d`
 
 Historical-test correction: **Isolated immutable 585fd01 authority fixture** - `1874955`
 
+Drift-test correction: **Stable current-repository rejection invariant** - `79ccb73`
+
 ## Files Created/Modified
 
 - `scripts/audit-proof-chain.mjs` - Capability-bound local audits, receipt validation, fixed committed tuple registries and independent final audit.
@@ -89,8 +91,16 @@ Historical-test correction: **Isolated immutable 585fd01 authority fixture** - `
 - **Verification:** The isolated fixture deterministically reaches `PROOF_CHAIN_LOCAL_VALIDATION`; current state deterministically reports `PROOF_CHAIN_COMMITTED`.
 - **Committed in:** `1874955`
 
-**Total deviations:** 2 auto-fixed bugs.
-**Impact on plan:** Historical authority coverage is now independent of current recertification/build state and no longer relies on brittle error ordering.
+**3. [Rule 1 - Test bug] Removed mutable current-state error-order coupling**
+- **Found during:** Plan 10-57 BLOCKED-to-READY transition
+- **Issue:** The current-repository test hardcoded `PROOF_CHAIN_COMMITTED`, although a valid recertification can correctly advance the earliest rejection to identity or local-validation checks.
+- **Fix:** Asserted the stable rejection invariant: nonzero exit, empty authority output, finite sanitized error family, byte-identical sync/status files, and zero Docker/network/GitHub executable calls. The isolated READY tuple continues to test the exact downstream failure.
+- **Files modified:** `tests/scripts/audit-proof-chain.test.ts`
+- **Verification:** Test passes against current blocked artifacts and the isolated READY 585fd01 tuple; focused/full/build/diff checks pass.
+- **Committed in:** `79ccb73`
+
+**Total deviations:** 3 auto-fixed bugs.
+**Impact on plan:** Historical and current authority coverage now remains correct throughout recertification state transitions without weakening rejection assertions.
 
 ## Issues Encountered
 
