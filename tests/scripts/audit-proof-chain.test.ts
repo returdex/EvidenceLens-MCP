@@ -4,7 +4,7 @@ import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -70,7 +70,7 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
   });
 
@@ -80,7 +80,8 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
-      expect(paths.at(-1)).toMatch(/10-59-LOCAL-VALIDATION\.json$/u);
+      expect(paths[0]).toMatch(/10-62-CONSUMED-LIVE\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-65-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
@@ -110,11 +111,34 @@ describe("proof chain certifier", () => {
     expect(() => auditModeRecords("proof", [validation])).toThrow();
   });
 
-  it.each(["proof-committed-auto", "sync-authority-auto"])('%s refuses the immutable failed LOCAL_VALIDATION attempt', async (mode) => {
+  it("accepts only the exact authority-revoked consumed-live archive", async () => {
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-62-CONSUMED-LIVE.json";
+    const archive = JSON.parse(await readFile(path, "utf8"));
+    expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "gaps_found" });
+    expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "gaps_found" });
+    for (const changed of [
+      { ...archive, authority: true }, { ...archive, replay_allowed: true }, { ...archive, status: "passed" },
+      { ...archive, reservation_count: 0 }, { ...archive, observed_provider_requests: 1 },
+      { ...archive, artifacts: { ...archive.artifacts, proof: { ...archive.artifacts.proof, sha256: h("0") } } },
+    ]) expect(() => auditConsumedLiveArchive(changed)).toThrow("PROOF_CHAIN_CONSUMED_LIVE");
+  });
+
+  it.each(["proof-committed-auto", "sync-authority-auto"])('%s refuses the immutable old 10-59 tuple', async (mode) => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-585fd01-"));
+    const oldPaths = [
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-53-FORENSIC.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-SOURCE.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-REVIEW.md",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-SECURITY.md",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-58-FINAL-BUILD.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-59-TRANSITION.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-59-EXECUTION.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-59-PROOF.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-59-LOCAL-VALIDATION.json",
+    ];
     try {
-      for (const path of BRANCH_AUTHORITY_REGISTRIES.live.paths) {
+      for (const path of oldPaths) {
         const bytes = execFileSync("git", ["show", `585fd01:${path}`], { cwd: repoRoot });
         await mkdir(join(root, path, ".."), { recursive: true });
         await writeFile(join(root, path), bytes, { mode: 0o600 });
@@ -124,11 +148,9 @@ describe("proof chain certifier", () => {
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: root });
       execFileSync("git", ["add", "."], { cwd: root });
       execFileSync("git", ["commit", "-qm", "materialize immutable 585fd01 tuple"], { cwd: root });
-      expect(JSON.parse(await readFile(join(root, BRANCH_AUTHORITY_REGISTRIES.live.paths[1]), "utf8")).status).toBe("ready");
-      expect(JSON.parse(await readFile(join(root, BRANCH_AUTHORITY_REGISTRIES.live.paths[4]), "utf8")).status).toBe("ready");
       expect(() => execFileSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), mode], {
         cwd: root, env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
-      })).toThrow(/PROOF_CHAIN_LOCAL_VALIDATION/u);
+      })).toThrow(/PROOF_CHAIN_COMMITTED/u);
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
@@ -136,8 +158,8 @@ describe("proof chain certifier", () => {
     const root = await mkdtemp(join(tmpdir(), "evidencelens-current-reject-"));
     const marker = join(root, "external-called");
     const watched = [
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-60-SYNC-CLAIM.json",
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-60-SYNC-JOURNAL.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-66-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-66-SYNC-JOURNAL.json",
       ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
       ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
       ".planning/REQUIREMENTS.md",
