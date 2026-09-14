@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -162,7 +162,38 @@ describe("proof chain certifier", () => {
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
-  it("accepts isolated current consumed authority then rejects drift without writes or external effects", async () => {
+  it("accepts a committed synthetic READY namespace without external effects", async () => {
+    const repoRoot = process.cwd();
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-ready-registry-"));
+    const checkout = join(root, "repo");
+    const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+    const marker = join(root, "external-called");
+    const replacements = [
+      ["10-63-SOURCE.json", "10-68-SOURCE.json"], ["10-63-REVIEW.md", "10-68-REVIEW.md"],
+      ["10-63-SECURITY.md", "10-68-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-69-FINAL-BUILD.json"],
+      ["10-65-TRANSITION.json", "10-70-TRANSITION.json"], ["10-65-EXECUTION.json", "10-70-EXECUTION.json"],
+      ["10-65-PROOF.json", "10-70-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-70-LOCAL-VALIDATION.json"],
+    ];
+    try {
+      execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
+      for (const [from, to] of replacements) await copyFile(join(checkout, phasePath, from), join(checkout, phasePath, to));
+      execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
+      execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
+      execFileSync("git", ["add", phasePath], { cwd: checkout });
+      execFileSync("git", ["commit", "-qm", "materialize synthetic READY registry"], { cwd: checkout });
+      for (const command of ["docker", "curl", "wget", "gh"]) {
+        await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
+      }
+      const result = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "sync-authority-auto"], {
+        cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
+      });
+      expect(result).toMatchObject({ status: 0, stderr: "" });
+      expect(result.stdout).toMatch(/"cardinality":9/u);
+      await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
+  it("rejects the current BLOCKED namespace before writes or external effects", async () => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-current-reject-"));
     const checkout = join(root, "repo");
@@ -189,18 +220,12 @@ describe("proof chain certifier", () => {
         await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
       }
       const before = await snapshot();
-      const accepted = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "sync-authority-auto"], {
-        cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
-      });
-      expect(accepted).toMatchObject({ status: 0, stderr: "" });
-      expect(accepted.stdout).toMatch(/^\{"branch":"preflight_authenticated","cardinality":9,"full_commit":"[a-f0-9]{40}","registry_schema":"evidencelens\.live-sync-authority\.v1","status":"gaps_found"\}\n\nproof chain audit passed\n$/u);
-      await writeFile(join(checkout, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-68-REVIEW.md"), "drift\n", { flag: "a" });
-      const result = spawnSync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
+      const result = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "sync-authority-auto"], {
         cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
       });
       expect(result.status).not.toBe(0);
       expect(result.stdout).toBe("");
-      expect(result.stderr).toMatch(/^PROOF_CHAIN_(?:COMMITTED|IDENTITY|LOCAL_VALIDATION)\n$/u);
+      expect(result.stderr).toBe("PROOF_CHAIN_COMMITTED\n");
       expect(await snapshot()).toEqual(before);
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
     } finally { await rm(root, { recursive: true, force: true }); }
