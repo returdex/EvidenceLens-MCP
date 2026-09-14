@@ -57,11 +57,17 @@ const consumedLiveFiles = Object.freeze({
   local_validation: Object.freeze({ path: `${phase}/10-59-LOCAL-VALIDATION.json`, sha256: "4dc6ea01b98ff61d1573cebd54192dfa026b433915f4c0830734a779fc0a3926" }),
 });
 const consumedLiveArtifactKeys = ["commit", "mode", "path", "sha256"];
-const consumedLiveArchiveKeys = ["artifacts", "authority", "generation", "mcp_tools_call_count", "observed_provider_requests", "outcome", "replay_allowed", "reservation_count", "schema", "status"];
+const consumedLiveArchiveKeys = ["artifacts", "authority", "certifier_sha256", "generation", "manifest_sha256", "mcp_tools_call_count", "non_planning_tree", "observed_provider_requests", "outcome", "replay_allowed", "reservation_count", "reviewed_commit", "schema", "status"];
 
 export function auditConsumedLiveArchive(value) {
   if (!exactKeys(value, consumedLiveArchiveKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
     || value.generation !== consumedLiveGeneration || value.authority !== false || value.replay_allowed !== false
+    || value.reviewed_commit !== "26ba4806d9ef25717b0d1c180bd62aa4216cb634"
+    || value.manifest_sha256 !== "10151b767b922cad23f0cd642767fa0796471ba71bff8dd82c38aaf87d560516"
+    || value.non_planning_tree !== "309c1f26d5707ed8e1ba9c10e22ca6eb97defb7435c4f2dcec5fdc47cbcba3b4"
+    || !exactKeys(value.certifier_sha256, ["audit_live_evidence_sha256", "audit_proof_chain_sha256"])
+    || value.certifier_sha256.audit_live_evidence_sha256 !== "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500"
+    || value.certifier_sha256.audit_proof_chain_sha256 !== "6e22b85bc9abbeb2ca8a04f28b99306367ddd69e6e85c4d82e065838326d8619"
     || value.reservation_count !== 1 || value.mcp_tools_call_count !== 0 || value.observed_provider_requests !== 0
     || value.outcome !== "automatic_terminal_missing" || value.status !== "gaps_found"
     || !exactKeys(value.artifacts, Object.keys(consumedLiveFiles))) fail("PROOF_CHAIN_CONSUMED_LIVE");
@@ -101,8 +107,13 @@ export async function createConsumedLiveArchive(path = consumedLivePath) {
       fail("PROOF_CHAIN_CONSUMED_LIVE");
     } finally { await handle?.close().catch(() => undefined); }
   }
-  const value = { artifacts, authority: false, generation: consumedLiveGeneration, mcp_tools_call_count: 0, observed_provider_requests: 0,
-    outcome: "automatic_terminal_missing", replay_allowed: false, reservation_count: 1, schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found" };
+  const value = { artifacts, authority: false, certifier_sha256: {
+    audit_live_evidence_sha256: "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500",
+    audit_proof_chain_sha256: "6e22b85bc9abbeb2ca8a04f28b99306367ddd69e6e85c4d82e065838326d8619",
+  }, generation: consumedLiveGeneration, manifest_sha256: "10151b767b922cad23f0cd642767fa0796471ba71bff8dd82c38aaf87d560516",
+    mcp_tools_call_count: 0, non_planning_tree: "309c1f26d5707ed8e1ba9c10e22ca6eb97defb7435c4f2dcec5fdc47cbcba3b4",
+    observed_provider_requests: 0, outcome: "automatic_terminal_missing", replay_allowed: false, reservation_count: 1,
+    reviewed_commit: "26ba4806d9ef25717b0d1c180bd62aa4216cb634", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found" };
   auditConsumedLiveArchive(value);
   const bytes = Buffer.from(canonicalJson(value)); const temporary = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
   let temp; let reservation;
