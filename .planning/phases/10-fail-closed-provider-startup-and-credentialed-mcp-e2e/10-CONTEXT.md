@@ -25,7 +25,10 @@ Close the remaining PROV-01 gap by diagnosing the retained sanitized protocol fa
 - Local SOURCE, BUILD, EXECUTION, and PROOF artifacts may be validated before commit when authority is established by exact content hashes, atomic write/rename, immutable input identities, and same-process verification.
 - Git commits remain required for durable project history, but commit timing must not create artificial local task dependencies or draft-versus-authoritative modes solely to satisfy GSD task boundaries.
 - Finite execution-count controls apply primarily to GitHub Actions runs. Any plan that triggers GitHub Actions must declare an exact maximum run count, prove the trigger count, and prohibit automatic retrigger loops.
-- Local test, build, Docker, and provider request budgets remain independently bounded where their plans declare a cost or safety limit; they are not counted as GitHub Actions runs.
+- Ordinary local tests, builds, and Docker builds/runs have no execution-count quota and may be repeated whenever required for implementation, diagnosis, recertification, or replacement of stale artifacts; they are never counted as GitHub Actions runs.
+- GitHub Actions is the only build/execution system governed by a finite run quota. Plans that can trigger GitHub Actions must declare and enforce an exact run budget, and must never automatically retrigger a workflow after failure.
+- Provider/API requests remain independently bounded for cost and safety. Removing local build limits does not permit retries, fallback calls, diagnostic second requests, or additional paid requests beyond the active plan's provider-request ceiling.
+- A live-proof plan may still prohibit rebuilding inside the live invocation when required to preserve the exact certified image identity. That isolation rule is an evidence-integrity boundary, not a local build quota; a stale image may be rebuilt locally before live execution without separate authorization.
 
 ### Cost and secret safety
 - Use credential-free and retained non-secret evidence for diagnosis before spending an API request.

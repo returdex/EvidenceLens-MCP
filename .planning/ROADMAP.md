@@ -400,6 +400,8 @@ Cross-cutting constraints:
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
 - Plans 10-38 through 10-60 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
+- Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
 - Plan 10-52 is superseded and remains unexecuted because its required 10-51 EXECUTION/PROOF artifacts do not exist; the active Plans 10-53 through 10-60 depend only on the new 10-53/10-57/10-58/10-59 authority chain, with Plan 10-60 as its sole synchronization owner.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
