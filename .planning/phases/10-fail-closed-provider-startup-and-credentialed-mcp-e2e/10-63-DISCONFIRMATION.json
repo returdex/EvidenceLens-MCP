@@ -1,0 +1,53 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "certified_source": {
+    "commit": "2e0acdf2a90f4a5fd2bd330ddd76d32c00a8e90a",
+    "tree": "5026834a07bee139f6907ebda20db53093394a2d",
+    "consumed_archive_sha256": "cbedc600123e2575e6aeee985d83d703439dd674efbb46b66df951a73cc0d890"
+  },
+  "case_results": {
+    "new_registry_exact_cardinality_order": "passed",
+    "consumed_10_59_replay_refusal": "passed",
+    "consumed_10_59_overwrite_refusal": "passed",
+    "consumed_10_59_sync_refusal": "passed",
+    "stale_10_58_10_61_build_substitution": "passed",
+    "mixed_10_57_source_new_live_paths": "passed",
+    "mixed_generation_refusal": "passed",
+    "altered_consumed_archive_refusal": "passed",
+    "missing_extra_reordered_tuple_members": "passed",
+    "local_validation_failure_refusal": "passed",
+    "post_certification_source_drift": "passed",
+    "extra_argv_refusal": "passed",
+    "duplicate_claim_refusal": "passed",
+    "callback_omission_refusal": "passed",
+    "atomic_no_follow_reopen_hash": "passed",
+    "observed_exit_close_binding": "passed",
+    "pre_tools_null_receipt_exclusivity": "passed",
+    "post_tools_authenticated_receipt": "passed",
+    "sync_recovery_tuple_binding": "passed",
+    "sanitized_failure_categories": "passed"
+  },
+  "verification": {
+    "focused_test_files": 6,
+    "focused_tests": 213,
+    "git_diff_check": "passed"
+  },
+  "side_effects": {
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "credential_reads": 0,
+    "mcp_tools_calls": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "retries": 0,
+    "fallback": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "gh_dispatches": 0,
+    "git_pushes": 0,
+    "target_writes": 0
+  },
+  "status": "passed"
+}
