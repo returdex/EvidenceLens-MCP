@@ -4,7 +4,7 @@ import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -108,6 +108,12 @@ describe("proof chain certifier", () => {
     expect(() => validateTerminalOwnerReceipt({ ...validation, extra: true })).toThrow("PROOF_CHAIN_LOCAL_VALIDATION");
     expect(() => validateTerminalOwnerReceipt({ ...validation, artifact_sha256: { ...validation.artifact_sha256, proof: h("0") } })).not.toThrow();
     expect(() => auditModeRecords("proof", [validation])).toThrow();
+  });
+
+  it.each(["proof-committed-auto", "sync-authority-auto"])('%s refuses the immutable failed LOCAL_VALIDATION attempt', (mode) => {
+    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", mode], {
+      env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
+    })).toThrow(/PROOF_CHAIN_LOCAL_VALIDATION/u);
   });
 
   it("discriminates strict build-auto ready and terminal non-pass without mixed authority", () => {
@@ -230,7 +236,7 @@ describe("proof chain certifier", () => {
   it("authenticates a real tools/call, adapter receipt, immutable build and observed lifecycle", () => {
     expect(auditModeRecords("execution", [executionRecord, buildRecord, source, deep, asvs])).toMatchObject(identity);
     expect(() => auditModeRecords("execution", [{ ...executionRecord, request_receipt: { ...receipt, mac: h("0") } }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_RECEIPT");
-    expect(() => auditModeRecords("execution", [{ ...executionRecord, mcp_tools_call_count: 0 }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_EXECUTION");
+    expect(() => auditModeRecords("execution", [{ ...executionRecord, mcp_tools_call_count: 0 }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_RECEIPT");
     expect(() => auditModeRecords("execution", [{ ...executionRecord, close: { code: 0, observed: false, signal: null } }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_EXECUTION");
     expect(() => auditModeRecords("execution", [executionRecord, { ...buildRecord, image_id: `sha256:${h("0")}` }, source, deep, asvs])).toThrow("PROOF_CHAIN_IDENTITY");
   });
@@ -255,6 +261,42 @@ describe("proof chain certifier", () => {
     };
     expect(auditModeRecords("execution", [failed, buildRecord, source, deep, asvs])).toMatchObject(identity);
     expect(() => auditModeRecords("execution", [{ ...failed, request_receipt: receipt, request_receipt_sha256: digest(receipt) }, buildRecord, source, deep, asvs])).toThrow("PROOF_CHAIN_EXECUTION");
+  });
+
+  it("accepts strict pre-tools failure only with an absent receipt and zero observed requests", () => {
+    const preTools = {
+      ...executionRecord, clean_exit: false, close: null, diagnostic: { code: "pre_fetch", path: "transport.fetch" }, exit: null,
+      finding_count: 0, fixture_count: 0, mcp_tools_call_count: 0, model: "", outcome: "request_failed",
+      request_receipt: null, request_receipt_sha256: null, result: null, result_sha256: null, status: "gaps_found",
+      transcript: null, transcript_sha256: null,
+    };
+    expect(auditExecution(preTools)).toMatchObject(identity);
+    for (const forged of [
+      { ...preTools, request_receipt: { ...receipt, observed_provider_requests: 0 }, request_receipt_sha256: digest({ ...receipt, observed_provider_requests: 0 }) },
+      { ...preTools, reservation_count: 0 },
+      { ...preTools, mcp_tools_call_count: 1 },
+      { ...preTools, outcome: "passed", status: "passed" },
+    ]) expect(() => auditExecution(forged)).toThrow();
+  });
+
+  it("requires an authenticated receipt after tools/call for both pre-fetch and post-fetch outcomes", () => {
+    const preFetchReceipt = { ...receipt, observed_provider_requests: 0 };
+    const failedTranscript = { ...transcript, close_code: 1, exit_code: 1 };
+    const base = {
+      ...executionRecord, clean_exit: false, close: { code: 1, observed: true, signal: null }, diagnostic: { code: "pre_fetch", path: "transport.fetch" },
+      exit: { code: 1, observed: true, signal: null }, finding_count: 0, fixture_count: 0, outcome: "request_failed",
+      request_receipt: preFetchReceipt, request_receipt_sha256: digest(preFetchReceipt), result: null, result_sha256: null, status: "gaps_found",
+      transcript: failedTranscript, transcript_sha256: digest(failedTranscript),
+    };
+    expect(auditExecution(base)).toMatchObject(identity);
+    const postFetch = { ...base, diagnostic: { code: "request", path: "transport.fetch" }, request_receipt: receipt, request_receipt_sha256: digest(receipt) };
+    expect(auditExecution(postFetch)).toMatchObject(identity);
+    for (const forged of [
+      { ...base, request_receipt: null, request_receipt_sha256: null },
+      { ...postFetch, request_receipt: { ...receipt, mac: h("0") } },
+      { ...postFetch, request_receipt_sha256: h("0") },
+      { ...executionRecord, request_receipt: null, request_receipt_sha256: null },
+    ]) expect(() => auditExecution(forged)).toThrow("PROOF_CHAIN_RECEIPT");
   });
 
   it("binds terminal proof to exact tuple digests and rejects self-asserted legacy proof", () => {

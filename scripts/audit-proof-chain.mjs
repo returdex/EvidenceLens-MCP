@@ -294,7 +294,9 @@ export function auditExecution(value) {
       || value.transcript !== null || value.transcript_sha256 !== null || value.exit !== null || value.close !== null) fail("PROOF_CHAIN_EXECUTION");
   } else {
     if (!hash.test(value.build_generation) || !/^sha256:[0-9a-f]{64}$/u.test(value.image_id)) fail("PROOF_CHAIN_EXECUTION");
-    auditReceipt(value.request_receipt, value);
+    if (preTools) {
+      if (value.request_receipt !== null || value.request_receipt_sha256 !== null) fail("PROOF_CHAIN_RECEIPT");
+    } else auditReceipt(value.request_receipt, value);
   }
   if (!preReservation && !preTools) {
     if (!auditLifecycle(value.exit) || !auditLifecycle(value.close) || value.exit.code !== value.close.code || value.exit.signal !== value.close.signal
@@ -302,7 +304,7 @@ export function auditExecution(value) {
       || value.transcript.exit_code !== value.exit.code || value.transcript.close_code !== value.close.code
       || !hash.test(value.transcript_sha256) || sha256Hex(Buffer.from(canonicalJson(value.transcript))) !== value.transcript_sha256) fail("PROOF_CHAIN_EXECUTION");
   } else if (preTools && (value.transcript !== null || value.transcript_sha256 !== null || value.exit !== null || value.close !== null)) fail("PROOF_CHAIN_EXECUTION");
-  const observed = preReservation ? 0 : value.request_receipt.observed_provider_requests;
+  const observed = preReservation || preTools ? 0 : value.request_receipt.observed_provider_requests;
   if (value.outcome === "passed") {
     if (preReservation || preTools || value.status !== "passed" || value.clean_exit !== true || value.exit.code !== 0 || value.exit.signal !== null
       || observed !== 1 || value.fixture_count !== 4 || !Number.isSafeInteger(value.finding_count) || value.finding_count < 1
@@ -490,6 +492,7 @@ function registryFromRecords(values, expected) {
   auditExecution(execution);
   if (branch === "preflight_started") auditPreflightProof(proof); else auditLiveProof(proof);
   validateTerminalOwnerReceipt(receipt);
+  if (receipt.validation.execution !== "passed" || receipt.validation.proof !== "passed") fail("PROOF_CHAIN_LOCAL_VALIDATION");
   assertBranchExecution(branch, execution);
   if (transition.generation !== receipt.generation || execution.execution_generation !== receipt.generation
     || receipt.artifact_sha256.execution !== sha256Hex(Buffer.from(canonicalJson(execution)))
