@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 71 plans
+**Plans**: 76 plans
 
 Plans:
 **Wave 1**
@@ -421,18 +421,33 @@ Plans:
 - [ ] 10-70-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 66** *(gap closure; blocked on Wave 65 completion)*
-- [ ] 10-71-PLAN.md — Synchronize only the corrected-lifecycle chain and run final independent verification
+- [ ] 10-71-PLAN.md — Superseded; cannot synchronize the consumed failed 10-70 chain
+
+**Wave 67** *(gap closure; archive consumed 10-70 and rotate authority)*
+- [ ] 10-72-PLAN.md — Preserve 10-70 as authority:false and rotate registries to a post-Compose-fix namespace
+
+**Wave 68** *(gap closure; blocked on Wave 67 completion)*
+- [ ] 10-73-PLAN.md — Hostile-test and exactly recertify the post-Compose-fix source
+
+**Wave 69** *(gap closure; blocked on Wave 68 completion)*
+- [ ] 10-74-PLAN.md — Build and authenticate a fresh exact-source local Docker image
+
+**Wave 70** *(gap closure; blocked on Wave 69 completion)*
+- [ ] 10-75-PLAN.md — Run one fresh generation with at most one provider HTTP send
+
+**Wave 71** *(gap closure; blocked on Wave 70 completion)*
+- [ ] 10-76-PLAN.md — Synchronize only the post-Compose-fix chain and run final verification
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
-- Plans 10-51, 10-59 and 10-65 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-67 preserves 10-65 and rotates fixed production authority to the 10-68/69/70/71 chain.
+- Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-71 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Plans 10-38 through 10-76 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
-- Plans 10-52, 10-60 and 10-66 are superseded and remain unexecuted. Only Plan 10-71 may synchronize, and only from the committed complete 10-67/10-68/10-69/10-70 authority chain.
+- Plans 10-52, 10-60, 10-66 and 10-71 are superseded and remain unexecuted. Only Plan 10-76 may synchronize, and only from the committed complete 10-72/10-73/10-74/10-75 authority chain.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.

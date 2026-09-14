@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-69-PLAN.md
-last_updated: "2026-09-14T09:06:56.931Z"
+stopped_at: Planned post-Compose-fix recovery through 10-76
+last_updated: "2026-09-14T10:30:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 70 of 71
+Plan: 72 of 76
 
 - Phase: 10 of 11
-- Status: the consumed 10-65 generation is sealed as authority:false history; all production authority is rotated to the 10-68 through 10-71 recovery namespace
-- Progress: 61 of 71 Phase 10 plans executed; 10-60 and 10-66 are superseded, and Plans 10-68 through 10-71 form the only current recovery chain
-- Last activity: Archived the exact zero-send attempt and rotated source/build/live/sync registries; provider-disabled suite passes 618/618
+- Status: generation 3767fe38 is consumed immutable gaps evidence; post-fix authority must rotate to Plans 10-72 through 10-76
+- Progress: 10-71 is superseded; Plans 10-72 through 10-76 form the only current recovery chain
+- Last activity: fixed inactive-profile Compose interpolation and stabilized the authority audit; provider-disabled suite passes 620/620
 
 ## Decisions and Assumptions
 
@@ -197,7 +197,7 @@ Plan: 70 of 71
 
 ## Next Action
 
-Execute Plan 10-68 to hostile-test and fully recertify the exact committed registry source before any Docker or provider action.
+Execute Plan 10-72 to archive the consumed 10-70 generation and rotate every production authority registry before recertification.
 
 ---
 *Last updated: 2026-09-14 after Phase 10 Plan 67 execution*

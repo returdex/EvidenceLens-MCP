@@ -134,3 +134,34 @@ The previous section is historical. Plan 10-65 consumed generation `0f9f862325bd
 - Registry/source/test edits end in Plan 10-67. After Plan 10-68 certifies the source, Plans 10-69 through 10-71 must not edit source or tests; any needed edit returns to 10-67 and forces complete recertification.
 
 **Audit result:** All goal, requirement, locked decision, consumed-failure, corrected-lifecycle, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
+
+## Post-10-70 Compose-Preflight Recovery: Plans 10-72 through 10-76
+
+Plan 10-70 consumed generation `3767fe38a51a1e27932064af0859c135138a1e4267a018ba86c81167cd96c6bb` as immutable `gaps_found` evidence at pre_tools_post_reservation/pre_fetch with reservation 1, tools 0 and provider sends 0. Commits `21ae1ed` and `a0cfd23` fix inactive-profile Compose interpolation and the mutable-current audit; `613d782` records the resolved diagnosis. These changes make 10-68 certification and 10-69 image stale, and 10-71 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 72-76 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 72-76 | COVERED |
+| REQ | PROV-01 | Only a complete fresh post-fix committed chain may close provenance | 72-76 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 75 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second zero | 75 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 72-76 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 72-76 | COVERED |
+| FAILURE | 10-70-CONSUMED | Preserve exact zero-send generation and revoke replay/sync authority | 72, 73, 75, 76 | COVERED |
+| FIX | COMPOSE-PREFLIGHT | Certify non-secret inactive-profile sentinel and review-key separation | 73, 75 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 72 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 73 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-73 source | 74 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 75 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-72/73/74/75 authority may update final truth | 76 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-72, 10-73, 10-74 and 10-76 have provider-request budget 0. Only Plan 10-75 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-75 cannot rebuild because it must consume the exact certified Plan 10-74 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-73 certification returns to Plan 10-72 ownership and forces complete recertification.
+
+**Audit result:** All current goal, requirement, locked decision, consumed-failure, Compose fix, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
