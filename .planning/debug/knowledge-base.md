@@ -43,3 +43,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Await the existing bounded lifecycle after SIGTERM before sampling collectors; preserve authenticated receipt/send invariants; add a provider-disabled production-path asynchronous-drain regression and fail-closed mutable-current registry coverage.
 - **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts, tests/scripts/audit-proof-chain.test.ts
 ---
+
+## post-tools-prefetch-exit-130 — Parent cleanup preempted authenticated failure evidence
+- **Date:** 2026-09-14
+- **Error patterns:** tools/call count 1, provider sends 0, request_failed, pre_fetch, transport.fetch, exit 130, close 130, execution validation failed, proof validation failed, null request receipt
+- **Root cause:** runReviewHarness immediately sent SIGTERM after tools/call failure, before stdin EOF could let the child complete its failure/finally path and emit the authenticated request receipt. The provider AbortController could not explain zero-send evidence because the request budget is acquired synchronously before transport.fetch.
+- **Fix:** Close stdin and allow a bounded graceful lifecycle drain before sending fallback SIGTERM; after forced termination, await the existing authoritative bounded lifecycle before sampling authenticated receipt and terminal collectors.
+- **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts
+---

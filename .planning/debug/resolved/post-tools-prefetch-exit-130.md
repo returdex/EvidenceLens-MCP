@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Plan 10-80 reached tools/call then pre-fetch terminated with consistent exit/close code 130 and failed internal validation"
 ---
 
@@ -18,7 +18,7 @@ trigger: "Plan 10-80 reached tools/call then pre-fetch terminated with consisten
 - hypothesis: confirmed — immediate catch cleanup SIGTERM preempted the child-owned failure/finally evidence path.
 - test: run the full provider-disabled test suite, TypeScript build, proof-chain/registry tests, and inspect the final diff for scope and secret/network safety.
 - expecting: all gates pass; receipt authentication and one-send budget tests remain green; only the bounded graceful-drain behavior and regression change.
-- next_action: obtain human confirmation that the fix is acceptable without replaying consumed generation 15d6e9cc
+- next_action: resolved and archived after independent human verification
 
 reasoning_checkpoint:
   hypothesis: "runReviewHarness causes the observed premature abort because its catch block calls child.kill(SIGTERM) immediately after child.stdin.end(), before the child can complete its in-flight tools/call finally block and emit the authenticated request receipt."
@@ -57,6 +57,11 @@ reasoning_checkpoint:
   found: build passed; all 43 test files and 624 tests passed; focused registry suite passed 178 tests; git diff --check passed. No live/provider/network/credential/GitHub Actions/push/dispatch action was used.
   implication: the fix is stable across the available production-shaped offline, build, proof auditor, diff, and registry gates.
 
+- timestamp: 2026-09-14T21:45:00+10:00
+  checked: independent human verification checkpoint
+  found: reviewer accepted the diff after focused real-path 187/187, provider-disabled 624/624, TypeScript build, diff check, and clean-worktree verification; an accidental explicit live-test inclusion failed configuration before any request and is outside the package test contract.
+  implication: the fix is confirmed end-to-end within the authorized provider-disabled verification boundary and the session may be archived.
+
 
 ## Eliminated
 
@@ -65,5 +70,5 @@ reasoning_checkpoint:
 
 - root_cause: runReviewHarness immediately sent SIGTERM in its catch block after tools/call failure, before stdin EOF could let the child finish its in-flight request and emit the authenticated request receipt. The provider AbortController cannot produce zero-send evidence because the send budget is acquired synchronously before transport.fetch. The immediate parent kill therefore created the exit-130/post-tools/pre-fetch shape and left request_receipt null, which the execution/proof auditors correctly rejected.
 - fix: close stdin, allow a bounded graceful lifecycle drain, and send SIGTERM only if that grace expires; after forced termination, continue awaiting the existing authoritative bounded lifecycle before sampling receipt and terminal collectors.
-- verification: targeted natural-drain and forced-termination regressions pass; npm run build passed; provider-disabled full suite passed 624/624 tests across 43 files; focused proof-chain/docker-harness/source-set registry suite passed 178/178 tests; git diff --check passed.
+- verification: targeted natural-drain and forced-termination regressions pass; npm run build passed; provider-disabled full suite passed 624/624 tests across 43 files; focused proof-chain/docker-harness/source-set registry suite passed locally and independent focused real-path verification passed 187/187; git diff --check passed; human verification accepted.
 - files_changed: [scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts]
