@@ -1,0 +1,41 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "tools_call_failure_delayed_authenticated_receipt": "passed",
+    "tools_call_failure_delayed_stderr_exit_close": "passed",
+    "single_existing_bounded_lifecycle_drain": "passed",
+    "internally_consistent_terminal_tuple": "passed",
+    "drain_timeout": "passed",
+    "malformed_or_late_receipt": "passed",
+    "provider_send_count_mismatch": "passed",
+    "old_10_73_74_75_76_substitution": "passed",
+    "altered_10_77_archive": "passed",
+    "mixed_generation": "passed",
+    "failed_local_validation": "passed",
+    "non_pass_sync": "passed",
+    "extra_argv": "passed",
+    "no_second_timer_request_retry_or_fallback": "passed"
+  },
+  "verification": {
+    "focused_test_files": 6,
+    "focused_tests": 221,
+    "command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/scripts/docker-review-real.test.ts tests/scripts/automatic-live-review.test.ts tests/scripts/automatic-live-review-cli.test.ts tests/scripts/live-proof-state.test.ts tests/scripts/audit-proof-chain.test.ts tests/scripts/sync-proof-state.test.ts"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "docker_children": 0,
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "retries": 0,
+    "fallbacks": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "target_writes": 0
+  },
+  "status": "passed"
+}
