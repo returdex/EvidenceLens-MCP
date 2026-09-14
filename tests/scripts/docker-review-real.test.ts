@@ -77,6 +77,15 @@ function requestReceiptLine(environment: Record<string, string>, observed: 0 | 1
 
 function failingLiveChild(frame: (environment: Record<string, string>, child: FakeStdioChild) => void) {
   const child = new FakeStdioChild();
+  child.stdin.end.mockImplementation(() => {
+    setImmediate(() => {
+      child.stdout.emit("end");
+      child.stderr.emit("end");
+      child.exitCode = 1;
+      child.emit("exit", 1, null);
+      child.emit("close", 1, null);
+    });
+  });
   child.kill.mockImplementation((signal: NodeJS.Signals) => {
     child.killed = true;
     child.signalCode = signal;
@@ -400,6 +409,7 @@ describe("credentialed Docker review harness", () => {
 
   it("drains an authenticated zero-send receipt and lifecycle after terminating a failed tools call", async () => {
     const child = failingLiveChild(() => undefined);
+    child.stdin.end.mockImplementation(() => undefined);
     const terminalSnapshots: any[] = [];
     const spawnChild = vi.fn((_command, _args, options) => {
       const environment = { ...(options.env as Record<string, string>) };
@@ -425,6 +435,7 @@ describe("credentialed Docker review harness", () => {
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
+      failureDrainTimeoutMs: 0,
       retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
     })).rejects.toThrow("[docker-review:tools/call] failed");
 
@@ -437,6 +448,42 @@ describe("credentialed Docker review harness", () => {
       request_receipt: expect.objectContaining({ observed_provider_requests: 0, reservation_count: 1 }),
       stream_truncated: true,
       transcript: { close_code: 1, exit_code: 1, mcp_method: "tools/call", tool: "review_evidence" },
+    })]);
+  });
+
+  it("does not terminate a failed tools call before its authenticated receipt and natural lifecycle drain", async () => {
+    const child = failingLiveChild(() => undefined);
+    const terminalSnapshots: any[] = [];
+    const spawnChild = vi.fn((_command, _args, options) => {
+      const environment = { ...(options.env as Record<string, string>) };
+      (child as any).diagnosticEnvironment = environment;
+      child.stdin.end.mockImplementation(() => {
+        setImmediate(() => {
+          child.stderr.emit("data", requestReceiptLine(environment, 0));
+          child.stdout.emit("end");
+          child.stderr.emit("end");
+          child.exitCode = 130;
+          child.emit("exit", 130, null);
+          child.emit("close", 130, null);
+        });
+      });
+      return child;
+    });
+
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild,
+      retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+
+    expect(child.kill).not.toHaveBeenCalled();
+    expect(terminalSnapshots).toEqual([expect.objectContaining({
+      branch: "post_tools_pre_fetch",
+      close: { code: 130, observed: true, signal: null },
+      exit: { code: 130, observed: true, signal: null },
+      request_receipt: expect.objectContaining({ observed_provider_requests: 0, reservation_count: 1 }),
     })]);
   });
 

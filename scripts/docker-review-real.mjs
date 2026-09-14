@@ -708,6 +708,7 @@ export async function runReviewHarness(options = {}) {
   const retainDiagnostic = options.retainDiagnostic ?? (() => undefined);
   const retainRequestEvidence = options.retainRequestEvidence ?? (() => undefined);
   const retainTerminalSnapshot = options.retainTerminalSnapshot;
+  const failureDrainTimeoutMs = options.failureDrainTimeoutMs ?? controlTimeoutMs;
 
   if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
@@ -797,8 +798,19 @@ export async function runReviewHarness(options = {}) {
   } catch (error) {
     if (!isOffline) {
       try { child.stdin.end(); } catch { /* lifecycle observation below remains authoritative */ }
-      if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
-      try { await lifecycle.wait(); } catch { /* Preserve the owning MCP failure while draining bounded lifecycle evidence. */ }
+      let failureDrainTimer;
+      const naturallySettled = await Promise.race([
+        lifecycle.wait().then(() => true, () => true),
+        new Promise((resolve) => {
+          failureDrainTimer = setTimeout(() => resolve(false), failureDrainTimeoutMs);
+          failureDrainTimer.unref?.();
+        })
+      ]);
+      if (failureDrainTimer !== undefined) clearTimeout(failureDrainTimer);
+      if (!naturallySettled && !child.killed && child.exitCode === null) child.kill("SIGTERM");
+      if (!naturallySettled) {
+        try { await lifecycle.wait(); } catch { /* Preserve the owning MCP failure while draining bounded lifecycle evidence. */ }
+      }
       const observedTerminal = lifecycle.observed();
       const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
       try { if (!requestEvidenceRetained) retainAuthenticatedRequestEvidence(receipt); } catch { /* Evidence retention cannot mask the owning failure. */ }
