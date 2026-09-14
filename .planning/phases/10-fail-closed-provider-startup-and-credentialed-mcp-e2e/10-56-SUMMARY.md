@@ -29,13 +29,13 @@ completed: 2026-09-14
 
 # Phase 10 Plan 56: Hostile Disconfirmation Certification Summary
 
-**Isolated historical LOCAL_VALIDATION refusal, current tuple drift rejection, receipt branch exclusivity, and exact gaps/live authority were disconfirmed by 613 provider-disabled tests with zero external side effects.**
+**Immutable historical refusal, stable current lifecycle rejection, receipt branch exclusivity, and exact gaps/live authority were disconfirmed by 613 provider-disabled tests with zero external side effects.**
 
 ## Performance
 
 - **Duration:** 2 min recertification
-- **Started:** 2026-09-14T03:45:47Z
-- **Completed:** 2026-09-14T03:47:30Z
+- **Started:** 2026-09-14T03:50:28Z
+- **Completed:** 2026-09-14T03:55:30Z
 - **Tasks:** 2
 - **Files modified:** 2
 
@@ -43,7 +43,7 @@ completed: 2026-09-14
 
 - Exercised 211 focused tests across six hostile suite files, including isolated reconstruction of the historical `585fd01` tuple.
 - Passed the complete provider-disabled suite: 43 files and 613 tests, followed by a successful TypeScript build and `git diff --check`.
-- Confirmed historical LOCAL_VALIDATION refusal independently from current tuple drift rejection across proof-committed and sync-authority paths.
+- Confirmed historical LOCAL_VALIDATION refusal independently from stable current lifecycle rejection across proof-committed and sync-authority paths.
 - Confirmed invalid preflight evidence can authenticate only the exact 5-member gaps-only branch while the exact 9-member live branch remains unchanged.
 - Sealed all five terminal variants and the mutation matrix with exact zero counts for Docker, credential, MCP tools, network/provider, retry/fallback, GitHub Actions, dispatch, and push activity.
 - Confirmed the committed 10-53 forensic record cannot become complete execution, proof, passed, or synchronization authority.
@@ -62,15 +62,15 @@ completed: 2026-09-14
 
 - Kept execution strictly read-only with respect to source and test files; any missing hostile case would have returned to Plan 10-54 or 10-55 ownership.
 - Treated the PDF.js font-data messages as pre-existing non-failing warnings because all relevant contract tests passed and they do not affect this plan's authority claims.
-- Replaced the stale historical-audit identity with corrected source commit `8f97a9e085cb1dbf5518ac60a6d80ea4c6a4607f`; all cases remain provider-disabled and perform no real Docker or live action.
+- Replaced the stale lifecycle-category identity with corrected source commit `fa6fa7828c9f688ca227f8b4eb38b0f6a613e27b`; all cases remain provider-disabled and perform no real Docker or live action.
 
 ## Deviations from Plan
 
-The prior seal became stale after BL-57-04 was fixed in `1874955` and documented in `8f97a9e`. The plan was rerun without source/test edits and the seal was refreshed against the corrected exact source.
+The prior seal became stale after BL-57-05 was fixed in `79ccb73` and documented in `fa6fa78`. The plan was rerun without source/test edits and the seal was refreshed against the corrected exact source.
 
 ## Issues Encountered
 
-None. The full suite emitted existing PDF.js fallback warnings, but all 613 tests and the build passed.
+The default 5-second per-test budget timed out twice on the same compute-heavy provider classification test; its isolated rerun passed in 1.84 seconds. The unchanged full provider-disabled suite then passed 613/613 with a bounded 10-second per-test budget. Existing PDF.js fallback warnings remained non-failing.
 
 ## External Side Effects
 
@@ -98,10 +98,10 @@ Plan 10-57 may perform its exact independent source/deep/ASVS review against the
 ## Self-Check: PASSED
 
 - Created artifact exists and reopens as valid JSON.
-- Artifact was reopened and hash-checked after refreshing the corrected source identity: `4cbc234fac3dfeec3b789cb0343441edd1ce907bb6f94b3f063829091a3b778d`.
+- Artifact was reopened and hash-checked after refreshing the corrected source identity: `ee2d6dbcdd1a0fb9e616011c977a2dfe3818322868513ad522f3cc95ab8a0fdc`.
 - Initial task commit `832c09e` exists; the refreshed seal is recorded in the recertification commit.
 - Focused verification: 6 files, 211/211 tests passed.
-- Overall verification: 43 files, 613/613 tests passed; TypeScript build and `git diff --check` passed.
+- Overall verification: 43 files, 613/613 tests passed with `--testTimeout 10000`; TypeScript build and `git diff --check` passed.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
