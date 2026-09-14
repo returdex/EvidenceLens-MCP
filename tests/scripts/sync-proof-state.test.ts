@@ -24,11 +24,11 @@ const authority = vi.fn(async () => undefined);
 const options = (extra = {}) => ({ ...extra, authorityValidator: authority });
 
 describe("sealed proof state synchronization", () => {
-  it("uses fixed 10-76 outputs and includes the 10-75 LOCAL_VALIDATION", () => {
-    expect(FIXED_SYNC_PATHS.claim).toMatch(/10-76-SYNC-CLAIM\.json$/u);
-    expect(FIXED_SYNC_PATHS.journal).toMatch(/10-76-SYNC-JOURNAL\.json$/u);
-    expect(FIXED_SYNC_PATHS.localValidation).toMatch(/10-75-LOCAL-VALIDATION\.json$/u);
-    expect(FIXED_SYNC_PATHS.forensic).toMatch(/10-72-CONSUMED-LIVE\.json$/u);
+  it("uses fixed 10-81 outputs and includes the 10-80 LOCAL_VALIDATION", () => {
+    expect(FIXED_SYNC_PATHS.claim).toMatch(/10-81-SYNC-CLAIM\.json$/u);
+    expect(FIXED_SYNC_PATHS.journal).toMatch(/10-81-SYNC-JOURNAL\.json$/u);
+    expect(FIXED_SYNC_PATHS.localValidation).toMatch(/10-80-LOCAL-VALIDATION\.json$/u);
+    expect(FIXED_SYNC_PATHS.forensic).toMatch(/10-77-CONSUMED-LIVE\.json$/u);
   });
 
   it("permits a five-member authority only for gaps_found and tags its claim distinctly", async () => {
