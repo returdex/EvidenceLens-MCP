@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-64-PLAN.md
-last_updated: "2026-09-14T08:30:57.824Z"
+stopped_at: Planned 10-67 through 10-71 recovery after consumed 10-65 failure
+last_updated: "2026-09-14T09:30:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 94
+  total_plans: 99
   completed_plans: 89
   percent: 95
 ---
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 65 of 66
+Plan: 67 of 71
 
 - Phase: 10 of 11
-- Status: consumed 10-59 generation remains non-authoritative; an exact recovery-certified local image is READY for the fresh live generation
-- Progress: 60 of 66 Phase 10 plans executed; 10-60 is superseded and 10-65 through 10-66 remain in the recovery chain
-- Last activity: Built and independently authenticated one immutable image from the exact Plan 10-63 certified Git archive without a verifier rebuild
+- Status: the single 10-65 generation was consumed as an immutable zero-send gaps_found result; post-failure lifecycle fix a85d2bf invalidates 10-63 certification and 10-64 image
+- Progress: 60 of 71 Phase 10 plans executed; 10-60 and 10-66 are superseded, and Plans 10-67 through 10-71 form the only current recovery chain
+- Last activity: Diagnosed and fixed terminal ownership ordering before resolveLiveProof/preflight; provider-disabled suite passes 616/616
 
 ## Decisions and Assumptions
 

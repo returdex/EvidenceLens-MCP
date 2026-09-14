@@ -103,3 +103,34 @@ The previous section is historical. Plan 10-59 was executed once at `585fd01`; i
 - Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and automatic retrigger.
 
 **Audit result:** All current goal, requirement, locked decision, consumed-failure, exact-source, build, live and synchronization items are covered with no silent deferral.
+
+## Post-10-65 Corrected-Lifecycle Recovery: Plans 10-67 through 10-71
+
+The previous section is historical. Plan 10-65 consumed generation `0f9f862325bd28b0a21da955621e7cd0b064b88ee1d9ba931580c18c4ec7ccf6` as immutable `gaps_found` evidence with `AUTOMATIC_TERMINAL_MISSING`, reservation 1, tools 0 and provider sends 0. Commit `a85d2bf` moved terminal/evidence ownership before `resolveLiveProof` and fallible preflight, and the provider-disabled suite now passes 616/616. That source/test edit makes 10-63 certification and 10-64 image stale; 10-66 cannot consume 10-65.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 67-71 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and disclose no credential/raw provider output | 67-71 | COVERED |
+| REQ | PROV-01 | Only a complete fresh committed corrected-lifecycle chain may close provenance | 67-71 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 70 | COVERED |
+| CONTEXT | API-BOUND | At most one provider HTTP send; retry/fallback/diagnostic second request zero | 70 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation itself never rebuilds | 67-71 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions/push/dispatch budget is exactly zero | 67-71 | COVERED |
+| FAILURE | 10-65-CONSUMED | Preserve exact zero-send generation and revoke replay/sync authority | 67-68, 70-71 | COVERED |
+| FIX | TERMINAL-OWNER | Certify a85d2bf ownership before resolveLiveProof/preflight and all terminal branches | 68, 70 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate registries before certification into non-colliding 10-67/68/69/70/71 paths | 67 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-registry source | 68 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-68 source; independent audit does not rebuild | 69 | COVERED |
+| LIVE | FRESH | One non-replay generation seals every terminal branch with at most one paid send | 70 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-67/68/69/70 authority can update Phase 7/10/PROV-01 | 71 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-67, 10-68, 10-69 and 10-71 have provider-request budget 0. Only Plan 10-70 permits at most one provider HTTP send.
+- Local tests, TypeScript builds and Docker builds/runs are not quota-limited. Plan 10-70 cannot rebuild because its live generation must consume the exact certified Plan 10-69 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and automatic retrigger.
+- Registry/source/test edits end in Plan 10-67. After Plan 10-68 certifies the source, Plans 10-69 through 10-71 must not edit source or tests; any needed edit returns to 10-67 and forces complete recertification.
+
+**Audit result:** All goal, requirement, locked decision, consumed-failure, corrected-lifecycle, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
