@@ -74,3 +74,32 @@ The prior table remains historical coverage for Plans 10-38 through 10-52. The f
 - Every new plan has `github_actions_run_budget: 0`; Git push and all GitHub workflow/repository/API dispatch paths are prohibited.
 
 **Audit result:** Every roadmap goal, SAFE-04/PROV-01 requirement, locked context decision, pattern-map guardrail, current committed failure fact, and prior-plan dependency is covered. No item is missing or silently deferred.
+
+## Post-10-59 Consumed-Generation Recovery: Plans 10-62 through 10-66
+
+The previous section is historical. Plan 10-59 was executed once at `585fd01`; it ended `gaps_found` with `AUTOMATIC_TERMINAL_MISSING`, reservation 1, tools 0, observed sends 0, and failed local validation. Its bytes are immutable and Plan 10-60 cannot consume them.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof | 62-66 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and disclose no credential/raw provider output | 62-66 | COVERED |
+| REQ | PROV-01 | Only a complete fresh committed chain may close provenance | 62-66 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 65 | COVERED |
+| CONTEXT | API-BOUND | At most one paid send; retries/fallback/diagnostic second request zero | 65 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker are not quota-limited | 62-64, 66 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions/push/dispatch budget is exactly zero | 62-66 | COVERED |
+| FAILURE | 10-59-CONSUMED | Preserve exact failed generation; never replay/overwrite/promote | 62-63, 65-66 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate fixed source/build/live/sync registries without collision | 62 | COVERED |
+| AUTHORITY | RECERTIFY | Registry source changes require complete hostile test, deep review and ASVS L1 recertification | 63 | COVERED |
+| BUILD | EXACT | Fresh image derives only from exact newly certified source | 64 | COVERED |
+| LIVE | FRESH | New generation seals every terminal branch and permits at most one paid request | 65 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only the complete 10-62/63/64/65 chain can update Phase 7/10/PROV-01 | 66 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-62, 10-63, 10-64 and 10-66 have provider-request budget 0. Only Plan 10-65 permits at most one paid provider HTTP send.
+- Local tests, TypeScript builds and Docker builds/runs may repeat as needed; this is not a GitHub Actions allowance. Live Plan 10-65 cannot rebuild because it must consume one exact certified image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and automatic retrigger.
+
+**Audit result:** All current goal, requirement, locked decision, consumed-failure, exact-source, build, live and synchronization items are covered with no silent deferral.

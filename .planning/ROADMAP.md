@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(56 of 61 plans executed; Plans 10-53 through 10-61 preserve consumed failures, repair and certify terminal proof authority, replace the stale build once, run at most one new live generation, and synchronize only its complete new chain.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(58 of 66 plans executed; the consumed 10-59 attempt is immutable gaps evidence, and Plans 10-62 through 10-66 rotate to a fresh certified build/live/sync namespace.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 61 plans
+**Plans**: 66 plans
 
 Plans:
 **Wave 1**
@@ -388,21 +388,36 @@ Plans:
 - [x] 10-61-PLAN.md — Archive the stale build and perform exactly one authorized replacement credential-free build
 
 **Wave 55** *(gap closure; blocked on replacement build completion)*
-- [ ] 10-59-PLAN.md — Run one new automatically authorized live generation with at most one provider send
+- [x] 10-59-PLAN.md — Consumed zero-send terminal-callback failure; immutable gaps evidence with no fabricated completion summary
 
 **Wave 56** *(gap closure; blocked on Wave 55 completion)*
-- [ ] 10-60-PLAN.md — Synchronize Phase 7, Phase 10 and PROV-01 from the selected exact new-chain branch
+- [ ] 10-60-PLAN.md — Superseded; cannot synchronize the consumed failed 10-59 chain
+
+**Wave 57** *(gap closure; preserves consumed evidence and rotates authority paths)*
+- [ ] 10-62-PLAN.md — Archive consumed 10-59 evidence and rotate all fixed registries to a fresh namespace
+
+**Wave 58** *(gap closure; blocked on Wave 57 completion)*
+- [ ] 10-63-PLAN.md — Hostile-test and completely recertify the exact registry-rotated source
+
+**Wave 59** *(gap closure; blocked on Wave 58 completion)*
+- [ ] 10-64-PLAN.md — Build and authenticate a fresh exact-source local Docker image
+
+**Wave 60** *(gap closure; blocked on Wave 59 completion)*
+- [ ] 10-65-PLAN.md — Run one fresh generation with at most one paid provider request and durable terminal evidence
+
+**Wave 61** *(gap closure; blocked on Wave 60 completion)*
+- [ ] 10-66-PLAN.md — Synchronize only the complete new chain and run the final independent audit
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
-- Plan 10-51 is closed historical evidence: its committed consumed state is immutable forensic-only input for Plan 10-53, cannot be replayed, and cannot serve as execution, proof, or synchronization authority. Plans 10-53 through 10-60 are the sole active replacement chain: forensic preservation, terminal/schema implementation, authority registries, read-only disconfirmation, certification, build, terminal generation, and synchronization in strict dependency order.
+- Plans 10-51 and 10-59 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-62 preserves 10-59 and rotates fixed production authority to the 10-63/64/65/66 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-60 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Plans 10-38 through 10-66 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
-- Plan 10-52 is superseded and remains unexecuted because its required 10-51 EXECUTION/PROOF artifacts do not exist; the active Plans 10-53 through 10-60 depend only on the new 10-53/10-57/10-58/10-59 authority chain, with Plan 10-60 as its sole synchronization owner.
+- Plans 10-52 and 10-60 are superseded and remain unexecuted. Only Plan 10-66 may synchronize, and only from the committed complete 10-62/10-63/10-64/10-65 authority chain.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.

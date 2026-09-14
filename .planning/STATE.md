@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Phase 10 gap plans 10-38 through 10-52 created and verified
-last_updated: "2026-09-14T03:31:11.919Z"
+stopped_at: Phase 10 recovery gap plans 10-62 through 10-66 created
+last_updated: "2026-09-14T18:15:00+10:00"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 89
+  total_plans: 94
   completed_plans: 86
   percent: 97
 ---
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 2 of 60
+Plan: 58 of 66
 
 - Phase: 10 of 11
-- Status: 15 independently verified gap-closure plans are ready; automatic execution and proof authority remain incomplete until execution
-- Progress: 37 of 52 Phase 10 plans complete; plans 10-38 through 10-52 pending
-- Last activity: Planned lifecycle, production diagnostics, transport-bound request accounting, strict proof authority, and automatic final proof closure
+- Status: consumed 10-59 generation retained as gaps_found; five recovery plans are ready
+- Progress: 58 of 66 Phase 10 plans executed; 10-60 is superseded and 10-62 through 10-66 remain
+- Last activity: Planned immutable consumed-evidence archival, namespace rotation, full recertification, fresh local image, one bounded paid proof, and new-chain-only synchronization
 
 ## Decisions and Assumptions
 
@@ -183,7 +183,7 @@ Plan: 2 of 60
 
 ## Next Action
 
-Re-plan Phase 10 gaps before any further paid proof; Phase 7 and PROV-01 remain open until a successful audited live proof.
+Execute Phase 10 gaps starting with Plan 10-62. Do not replay or overwrite 10-59; do not run a provider request before 10-62 registry rotation, 10-63 exact recertification, and 10-64 ready build all pass.
 
 ---
 *Last updated: 2026-09-07 after Phase 10 Plan 15 execution*
