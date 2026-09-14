@@ -367,25 +367,25 @@ Plans:
 - [ ] 10-52-PLAN.md — Synchronize and independently audit final chain-certified truth
 
 **Wave 48** *(gap closure; Plan 10-52 remains unexecuted/superseded)*
-- [ ] 10-53-PLAN.md — Forensically preserve the consumed old generation from committed bytes only
+- [x] 10-53-PLAN.md — Forensically preserve the consumed old generation from committed bytes only
 
 **Wave 49** *(gap closure; blocked on Wave 48 completion)*
-- [ ] 10-54-PLAN.md — Make every terminal live branch durable and validate exact build terminal schemas
+- [x] 10-54-PLAN.md — Make every terminal live branch durable and validate exact build terminal schemas
 
 **Wave 50** *(gap closure; blocked on Wave 49 completion)*
-- [ ] 10-55-PLAN.md — Enforce exact branch-specific audit and synchronization registries
+- [x] 10-55-PLAN.md — Enforce exact branch-specific audit and synchronization registries
 
 **Wave 51** *(gap closure; blocked on Wave 50 completion)*
-- [ ] 10-56-PLAN.md — Disconfirm interruption, concurrency, tampering and false-sync paths offline
+- [x] 10-56-PLAN.md — Disconfirm interruption, concurrency, tampering and false-sync paths offline
 
 **Wave 52** *(gap closure; blocked on Wave 51 completion)*
-- [ ] 10-57-PLAN.md — Deep- and ASVS-certify the exact corrected source
+- [x] 10-57-PLAN.md — Deep- and ASVS-certify the exact corrected source
 
 **Wave 53** *(gap closure; blocked on Wave 52 completion)*
-- [ ] 10-58-PLAN.md — Produce at most one credential-free immutable corrected-source build
+- [x] 10-58-PLAN.md — Produce at most one credential-free immutable corrected-source build
 
 **Wave 54** *(replacement gap closure; blocked on Wave 52 recertification)*
-- [ ] 10-61-PLAN.md — Archive the stale build and perform exactly one authorized replacement credential-free build
+- [x] 10-61-PLAN.md — Archive the stale build and perform exactly one authorized replacement credential-free build
 
 **Wave 55** *(gap closure; blocked on replacement build completion)*
 - [ ] 10-59-PLAN.md — Run one new automatically authorized live generation with at most one provider send
@@ -429,7 +429,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 37/37 | Gaps found (7/11) | - |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 57/61 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
