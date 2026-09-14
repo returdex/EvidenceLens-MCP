@@ -21,10 +21,10 @@ function tupleNamesFor(length) {
 }
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
 export const FIXED_SYNC_PATHS = Object.freeze({
-  forensic: `${phaseDirectory}/10-72-CONSUMED-LIVE.json`, source: `${phaseDirectory}/10-73-SOURCE.json`, review: `${phaseDirectory}/10-73-REVIEW.md`,
-  security: `${phaseDirectory}/10-73-SECURITY.md`, build: `${phaseDirectory}/10-74-FINAL-BUILD.json`, transition: `${phaseDirectory}/10-75-TRANSITION.json`,
-  execution: `${phaseDirectory}/10-75-EXECUTION.json`, proof: `${phaseDirectory}/10-75-PROOF.json`, localValidation: `${phaseDirectory}/10-75-LOCAL-VALIDATION.json`,
-  claim: `${phaseDirectory}/10-76-SYNC-CLAIM.json`, journal: `${phaseDirectory}/10-76-SYNC-JOURNAL.json`,
+  forensic: `${phaseDirectory}/10-77-CONSUMED-LIVE.json`, source: `${phaseDirectory}/10-78-SOURCE.json`, review: `${phaseDirectory}/10-78-REVIEW.md`,
+  security: `${phaseDirectory}/10-78-SECURITY.md`, build: `${phaseDirectory}/10-79-FINAL-BUILD.json`, transition: `${phaseDirectory}/10-80-TRANSITION.json`,
+  execution: `${phaseDirectory}/10-80-EXECUTION.json`, proof: `${phaseDirectory}/10-80-PROOF.json`, localValidation: `${phaseDirectory}/10-80-LOCAL-VALIDATION.json`,
+  claim: `${phaseDirectory}/10-81-SYNC-CLAIM.json`, journal: `${phaseDirectory}/10-81-SYNC-JOURNAL.json`,
   phase7: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md", phase10: `${phaseDirectory}/10-VERIFICATION.md`, requirements: ".planning/REQUIREMENTS.md",
 });
 const execFileAsync = promisify(execFile);
