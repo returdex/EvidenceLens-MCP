@@ -24,7 +24,7 @@ patterns-established:
   - "Local validation uses an in-memory WeakSet capability that becomes invalid when the owner closes it."
   - "Committed validation derives fixed members internally and compares HEAD git-show bytes to O_NOFOLLOW reopened files."
 requirements-completed: [SAFE-04, PROV-01]
-duration: 12min
+duration: 16min
 completed: 2026-09-14
 ---
 
@@ -55,6 +55,8 @@ completed: 2026-09-14
 
 Follow-up correction: **Exact pre-tools receipt discrimination** - `cdf302d`
 
+Historical-test correction: **Isolated immutable 585fd01 authority fixture** - `1874955`
+
 ## Files Created/Modified
 
 - `scripts/audit-proof-chain.mjs` - Capability-bound local audits, receipt validation, fixed committed tuple registries and independent final audit.
@@ -79,8 +81,16 @@ Follow-up correction: **Exact pre-tools receipt discrimination** - `cdf302d`
 - **Verification:** 141 focused tests and 612 full provider-disabled tests passed.
 - **Committed in:** `cdf302d`
 
-**Total deviations:** 1 auto-fixed bug.
-**Impact on plan:** The correction implements the plan's intended five-variant contract without weakening live success authority.
+**2. [Rule 1 - Test bug] Isolated historical downstream refusal from mutable current state**
+- **Found during:** Plan 10-57 recertification
+- **Issue:** Historical tests invoked fixed modes against the mutable current repository, so an earlier `PROOF_CHAIN_COMMITTED` rejection could mask the intended immutable `LOCAL_VALIDATION` refusal.
+- **Fix:** Materialized all nine exact `585fd01` tuple members in a temporary Git repository and added a separate current-state upstream-drift assertion.
+- **Files modified:** `tests/scripts/audit-proof-chain.test.ts`
+- **Verification:** The isolated fixture deterministically reaches `PROOF_CHAIN_LOCAL_VALIDATION`; current state deterministically reports `PROOF_CHAIN_COMMITTED`.
+- **Committed in:** `1874955`
+
+**Total deviations:** 2 auto-fixed bugs.
+**Impact on plan:** Historical authority coverage is now independent of current recertification/build state and no longer relies on brittle error ordering.
 
 ## Issues Encountered
 
@@ -96,8 +106,8 @@ None - no external service configuration required.
 
 ## Verification
 
-- Focused after follow-up: 141 tests passed.
-- Full provider-disabled suite after follow-up: 612 tests passed.
+- Focused after historical isolation: 142 tests passed.
+- Full provider-disabled suite after historical isolation: 613 tests passed.
 - TypeScript build passed.
 - `git diff --check` passed.
 - External effect counters: Docker 0, credentials 0, provider/network 0, paid requests 0, GitHub Actions/push/dispatch 0.
