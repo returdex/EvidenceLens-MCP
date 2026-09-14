@@ -27,3 +27,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Initialized retention ownership before resolveLiveProof and retained an authenticated pre_tools_post_reservation 0/1/0 terminal and request evidence on preflight failure; added a real production-owner regression and stable isolated current-authority lifecycle coverage.
 - **Files changed:** scripts/docker-review-real.mjs, tests/scripts/automatic-live-review.test.ts, tests/scripts/audit-proof-chain.test.ts
 ---
+
+## pre-fetch-before-tools-call — Inactive proof profile blocked review Compose preflight
+- **Date:** 2026-09-14
+- **Error patterns:** pre_fetch, transport.fetch, preflight, tools/call count 0, missing EVIDENCELENS_PROOF_DEEPSEEK_API_KEY, mutable current namespace
+- **Root cause:** Docker Compose interpolated the inactive proof service before profile filtering; the review-only preflight omitted the proof-only required variable and aborted before child spawn, while the outer evidence layer mislabeled the zero-send preflight as transport.fetch. A separate mutable-current regression also hardcoded one lifecycle error for a namespace that can legitimately become READY.
+- **Fix:** Resolve Compose config with fixed non-secret review/proof sentinels while keeping the real review credential only in the review child environment; make the mutable-current audit assert either structured READY success or a finite sanitized rejection family, always with zero watched writes and zero external effects.
+- **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts, tests/scripts/audit-proof-chain.test.ts
+---
