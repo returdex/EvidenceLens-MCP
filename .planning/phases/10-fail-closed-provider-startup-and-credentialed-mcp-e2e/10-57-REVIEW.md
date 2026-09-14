@@ -18,7 +18,8 @@ No READY evidence block is present. The earlier certification is invalid for the
 
 ## BL-57-03 — real invalid preflight cannot seal its five-member authority
 
-Severity: **Blocker**  
+Severity: **Blocker**
+
 Owner: Plan 10-54 implementation/tests
 
 `runStatefulAutomaticLive()` correctly creates durable state and an authenticated terminal snapshot when `authenticateReadyBuild()` fails, then invokes `finishEvidence()`. However, `sealAutomaticLiveEvidence()` unconditionally reads SOURCE, BUILD, REVIEW and SECURITY before producing TRANSITION, EXECUTION, PROOF and LOCAL_VALIDATION.
