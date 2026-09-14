@@ -64,6 +64,7 @@ completed: 2026-09-13
 4. **Deep-review fix: Route post-build audit through the fixed registry** - `6394335`
 5. **Deep-review test fix: Isolate invalid preflight fixture** - `5f3e1f1`
 6. **Debug fix: Wire terminal owner into the fixed live entrypoint** - `d663c8c`
+7. **Deep-review fix: Seal invalid-input preflight authority** - `d729e43`
 
 ## Files Created/Modified
 
@@ -114,9 +115,17 @@ completed: 2026-09-13
 - **Verification:** Focused producer/auditor suite 169/169 and full provider-disabled suite 600/600 passed; TypeScript build and diff check passed. Canonical live evidence remained untouched.
 - **Committed in:** `d663c8c`
 
+**5. [Rule 1 - Bug] Removed invalid new-chain inputs from preflight terminal sealing**
+- **Found during:** Plan 10-57 deep source review (`BL-57-03`)
+- **Issue:** After SOURCE/BUILD/REVIEW/SECURITY authentication failed, the terminal owner reread those same invalid inputs, preventing TRANSITION/EXECUTION/PROOF/LOCAL_VALIDATION from being sealed.
+- **Fix:** The `preflight_started` branch now derives identity only from committed 10-53 FORENSIC, records exact unavailable new-chain bindings, uses a strict preflight-only proof audit, and remains structurally unable to authorize passed/live sync.
+- **Files modified:** `scripts/automatic-live-review.mjs`, `scripts/audit-proof-chain.mjs`, `tests/scripts/automatic-live-review.test.ts`
+- **Verification:** Missing and malformed cases for each of SOURCE, BUILD, REVIEW and SECURITY seal the complete 5-member gaps authority before return with credential/harness/provider counters zero. Focused 177/177 and full provider-disabled 608/608 passed; build and diff check passed.
+- **Committed in:** `d729e43`
+
 ---
 
-**Total deviations:** 4 auto-fixed (1 blocking issue, 1 missing critical integration, 1 production bug, 1 test-isolation bug)
+**Total deviations:** 5 auto-fixed (1 blocking issue, 1 missing critical integration, 2 production bugs, 1 test-isolation bug)
 **Impact on plan:** The fix is required for the planned new chain to be executable and does not broaden authority.
 
 ## External-Side-Effect Accounting
@@ -157,6 +166,7 @@ Plan 10-55 can consume the exact five-variant and build-auto contracts without r
 - Deep-review blocker `BL-57-01` is fixed by `6394335`.
 - Deep-review blocker `BL-57-02` is fixed by `5f3e1f1`; tests leave canonical build/live evidence untouched.
 - Debugged blocker `BL-59-01` is fixed by `d663c8c`; focused 169/169 and full provider-disabled 600/600 tests passed.
+- Deep-review blocker `BL-57-03` is fixed by `d729e43`; focused 177/177 and full provider-disabled 608/608 tests passed.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
