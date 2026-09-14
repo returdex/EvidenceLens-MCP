@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-74-PLAN.md
-last_updated: "2026-09-14T09:45:37.726Z"
+stopped_at: Planned 10-77 through 10-81 after bounded lifecycle-drain fix
+last_updated: "2026-09-14T10:35:12.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 104
+  total_plans: 109
   completed_plans: 95
-  percent: 91
+  percent: 87
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 75 of 76
+Plan: 77 of 81
 
 - Phase: 10 of 11
-- Status: generation 3767fe38 is consumed immutable gaps evidence; post-fix authority must rotate to Plans 10-72 through 10-76
-- Progress: 10-71 is superseded; Plans 10-72 through 10-76 form the only current recovery chain
-- Last activity: fixed inactive-profile Compose interpolation and stabilized the authority audit; provider-disabled suite passes 620/620
+- Status: generation 21c4e3fe is consumed immutable gaps evidence; post-drain-fix authority must rotate to Plans 10-77 through 10-81
+- Progress: 10-76 is superseded; Plans 10-77 through 10-81 form the only current recovery chain
+- Last activity: fixed post-tools terminal evidence sampling to await the existing bounded lifecycle drain; provider-disabled suite passes 622/622
 
 ## Decisions and Assumptions
 
@@ -137,6 +137,10 @@ Plan: 75 of 76
 - [Phase 10]: Compose configuration resolution receives fixed non-secret sentinels while the real review key remains exclusive to the eventual review child. — Avoids inactive-profile interpolation failure without disclosing or persisting the provider credential.
 - [Phase 10]: Promote generation a52db97a as the sole READY Plan 10-74 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Bind Plan 10-75 exclusively to image sha256:37a38cdc built from reviewed commit 1be82ac and the exact 10-73 certification tuple.
+- [Phase 10]: Preserve generation 21c4e3fe as authority:false, replay_allowed:false historical gaps evidence with tools=1 and zero observed provider sends.
+- [Phase 10]: Production fix 0b47dbb waits for the existing bounded lifecycle drain before terminal collectors after tools/call failure without weakening receipt/send authentication.
+- [Phase 10]: The 10-73 certification and 10-74 image are stale after 0b47dbb; only Plans 10-77 through 10-81 may acquire current authority.
+- [Phase 10]: Plan 10-81 is passed-only synchronization authority; every non-pass causes zero target writes and leaves PROV-01 open.
 
 ### Blockers
 
@@ -201,12 +205,12 @@ Plan: 75 of 76
 ## Session Continuity
 
 - **Last session:** 2026-09-14T09:45:37.721Z
-- **Stopped at:** Completed 10-74-PLAN.md
+- **Stopped at:** Planned 10-77 through 10-81 after bounded lifecycle-drain fix
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-72 to archive the consumed 10-70 generation and rotate every production authority registry before recertification.
+Execute Plan 10-77 to archive the consumed 10-75 generation and rotate every production authority registry before recertification.
 
 ---
-*Last updated: 2026-09-14 after Phase 10 Plan 67 execution*
+*Last updated: 2026-09-14 after planning the post-lifecycle-drain recovery chain*
