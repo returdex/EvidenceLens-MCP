@@ -1,8 +1,8 @@
 {
   "schema": "evidencelens.hostile-disconfirmation.v1",
   "certified_source": {
-    "commit": "1c62b5d0f4f72eddb4b95244f5a585307277b1cf",
-    "tree": "2051157812507eae1fd46f0fe2fbad1505c7010c",
+    "commit": "574f2110bfee4def3e26baa64a91c8f02e2859df",
+    "tree": "0c805fec19a603452ba8e6352eb1c5e2eb56a4f8",
     "forensic_sha256": "422d60136691675e716ecf3c34f54d35f054f3615acab74789f3962923ca8b95"
   },
   "terminal_variants": {
@@ -19,6 +19,7 @@
     "concurrent_o_excl_claim": "passed",
     "exit_close_disagreement": "passed",
     "forensic_crossover_rejection": "passed",
+    "fixed_entrypoint_terminal_owner_integration": "passed",
     "generation_key_mac_substitution": "passed",
     "hermetic_post_build_reachability": "passed",
     "isolated_invalid_build_preflight_fixture": "passed",
@@ -31,9 +32,9 @@
   },
   "verification": {
     "focused_test_files": 4,
-    "focused_tests": 130,
+    "focused_tests": 131,
     "full_test_files": 43,
-    "full_tests": 599,
+    "full_tests": 600,
     "typescript_builds": 1,
     "git_diff_check": "passed"
   },
