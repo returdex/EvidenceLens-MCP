@@ -1,6 +1,6 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -124,16 +124,39 @@ describe("proof chain certifier", () => {
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: root });
       execFileSync("git", ["add", "."], { cwd: root });
       execFileSync("git", ["commit", "-qm", "materialize immutable 585fd01 tuple"], { cwd: root });
+      expect(JSON.parse(await readFile(join(root, BRANCH_AUTHORITY_REGISTRIES.live.paths[1]), "utf8")).status).toBe("ready");
+      expect(JSON.parse(await readFile(join(root, BRANCH_AUTHORITY_REGISTRIES.live.paths[4]), "utf8")).status).toBe("ready");
       expect(() => execFileSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), mode], {
         cwd: root, env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
       })).toThrow(/PROOF_CHAIN_LOCAL_VALIDATION/u);
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
-  it("reports current fixed-tuple source/build absence as an upstream committed rejection", () => {
-    expect(() => execFileSync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
-      env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, stdio: "pipe",
-    })).toThrow(/PROOF_CHAIN_COMMITTED/u);
+  it("rejects mutable current authority without output, writes, or external effects", async () => {
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-current-reject-"));
+    const marker = join(root, "external-called");
+    const watched = [
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-60-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-60-SYNC-JOURNAL.json",
+      ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
+      ".planning/REQUIREMENTS.md",
+    ];
+    const snapshot = () => Promise.all(watched.map(async (path) => readFile(path).catch((error) => error?.code === "ENOENT" ? null : Promise.reject(error))));
+    try {
+      for (const command of ["docker", "curl", "wget", "gh"]) {
+        await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
+      }
+      const before = await snapshot();
+      const result = spawnSync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
+        encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
+      });
+      expect(result.status).not.toBe(0);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toMatch(/^PROOF_CHAIN_(?:COMMITTED|IDENTITY|LOCAL_VALIDATION)\n$/u);
+      expect(await snapshot()).toEqual(before);
+      await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+    } finally { await rm(root, { recursive: true, force: true }); }
   });
 
   it("discriminates strict build-auto ready and terminal non-pass without mixed authority", () => {
