@@ -21,12 +21,12 @@ key-files:
     - .planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-REVIEW.md
     - .planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-SECURITY.md
 key-decisions:
-  - "Only the complete 07c8cbc non-planning identity is authorized for the next immutable build."
-  - "Both earlier blockers required full recertification rather than partial review addenda."
+  - "Only the complete 26ba480 non-planning identity is authorized for a newly generated immutable build."
+  - "All three blockers required full recertification rather than partial review addenda."
 patterns-established:
   - "Review artifacts share exact commit, tree, manifest and certifier hashes."
 requirements-completed: [SAFE-04, PROV-01]
-duration: 15min
+duration: 30min
 completed: 2026-09-14
 ---
 
@@ -36,23 +36,23 @@ completed: 2026-09-14
 
 ## Performance
 
-- **Duration:** 15 min across blocker-driven recertification cycles
-- **Completed:** 2026-09-14T03:10:00+10:00
+- **Duration:** 30 min across blocker-driven recertification cycles
+- **Completed:** 2026-09-14T12:00:00+10:00
 - **Tasks:** 2
 - **Files modified:** 4 planning artifacts
 
 ## Accomplishments
 
-- Bound commit `07c8cbc44e147bc3fc85d9c910fbe3f30b9f2f48`, all 109 non-planning blobs, aggregate tree, canonical manifest and both certifier blobs.
-- Closed BL-57-01's post-build registry mismatch and BL-57-02's workspace-state-dependent preflight regression through complete re-review.
-- Passed `source-review-auto`, `reviews-auto`, 599 provider-disabled tests, TypeScript compilation and source-drift checks.
+- Bound commit `26ba4806d9ef25717b0d1c180bd62aa4216cb634`, all 109 non-planning blobs, aggregate tree, canonical manifest and both certifier blobs.
+- Closed BL-57-01's post-build registry mismatch, BL-57-02's state-dependent test and BL-57-03's invalid-preflight authority gap through complete re-review.
+- Passed `source-review-auto`, `reviews-auto`, 608 provider-disabled tests, TypeScript compilation and source-drift checks.
 
 ## Task Commits
 
-1. **Task 1: Freeze and deeply review exact source** — `8848fbd`
-2. **Task 2: Certify ASVS L1 and immutability** — `8848fbd`
+1. **Task 1: Freeze and deeply review exact source** — `46a13f4`
+2. **Task 2: Certify ASVS L1 and immutability** — `46a13f4`
 
-Earlier superseded audit-state commits retained for traceability: `01a8117`, `79c0442`, `45e8318`.
+Earlier superseded audit-state commits remain in history for traceability.
 
 ## Files Created/Modified
 
@@ -72,6 +72,7 @@ Earlier superseded audit-state commits retained for traceability: `01a8117`, `79
 
 1. **BL-57-01:** Legacy post-build registry would fail after consuming the unique build. Plan 10-54 changed the call to `build-auto` and added hermetic reachability coverage.
 2. **BL-57-02:** Invalid-preflight test depended on 10-57 artifacts being absent. Plan 10-54 isolated the invalid audit fixture from workspace state.
+3. **BL-57-03:** Real missing/malformed preflight inputs prevented five-member proof sealing. Plan 10-54 split preflight authority from live-only source/build/review/security inputs and added eight hostile cases.
 
 Both fixes were followed by refreshed Plan 10-56 disconfirmation and full Plan 10-57 recertification as required.
 
@@ -79,7 +80,7 @@ Both fixes were followed by refreshed Plan 10-56 disconfirmation and full Plan 1
 
 - `source-review-auto`: passed.
 - `reviews-auto`: passed.
-- Provider-disabled test suite: 43 files, 599 tests passed.
+- Provider-disabled test suite: 43 files, 608 tests passed.
 - `npm run build`: passed.
 - `git diff --check`: passed.
 - Working non-planning drift from reviewed commit: none.
@@ -94,11 +95,11 @@ None.
 
 ## Next Phase Readiness
 
-Plan 10-58 may perform its single immutable Docker build only against the exact certified tuple. Any source or artifact drift must fail before building.
+The stale 10-58 artifact predates this certification and grants no authority. A newly generated Plan 10-58 build may consume only this exact tuple; any drift must fail before building.
 
 ## Self-Check: PASSED
 
-All three certified artifacts exist, both fixed registry gates pass, and commit `8848fbd` exists.
+All three certified artifacts exist, both fixed registry gates pass, and commit `46a13f4` exists.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
