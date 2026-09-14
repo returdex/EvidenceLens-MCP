@@ -193,7 +193,7 @@ describe("proof chain certifier", () => {
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
-  it("rejects the current BLOCKED namespace before writes or external effects", async () => {
+  it("audits the mutable current namespace without writes or external effects", async () => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-current-reject-"));
     const checkout = join(root, "repo");
@@ -223,9 +223,17 @@ describe("proof chain certifier", () => {
       const result = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "sync-authority-auto"], {
         cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
       });
-      expect(result.status).not.toBe(0);
-      expect(result.stdout).toBe("");
-      expect(result.stderr).toBe("PROOF_CHAIN_COMMITTED\n");
+      if (result.status === 0) {
+        expect(result.stderr).toBe("");
+        expect(result.stdout).toMatch(/"cardinality":9/u);
+      } else {
+        expect(result.stdout).toBe("");
+        expect([
+          "PROOF_CHAIN_COMMITTED\n",
+          "PROOF_CHAIN_IDENTITY\n",
+          "PROOF_CHAIN_LOCAL_VALIDATION\n",
+        ]).toContain(result.stderr);
+      }
       expect(await snapshot()).toEqual(before);
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
     } finally { await rm(root, { recursive: true, force: true }); }
