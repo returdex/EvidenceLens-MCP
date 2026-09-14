@@ -91,14 +91,17 @@ describe("automatic immutable review runner", () => {
     const h = (c: string) => c.repeat(64);
     const generation = h("f");
     const paths = Object.fromEntries(Object.entries({
-      source: "SOURCE.json", review: "REVIEW.md", security: "SECURITY.md", build: "BUILD.json", state: "state.json",
+      forensic: "FORENSIC.json", source: "SOURCE.json", review: "REVIEW.md", security: "SECURITY.md", build: "BUILD.json", state: "state.json",
       terminal: "terminal.json", transition: "TRANSITION.json", execution: "EXECUTION.json", proof: "PROOF.json", localValidation: "LOCAL_VALIDATION.json",
     }).map(([key, name]) => [key, join(root, name)])) as any;
     await mkdir(root, { recursive: true });
     const identity = { certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") }, manifest_sha256: h("c"), non_planning_tree: h("d"), reviewed_commit: "e".repeat(40) };
     const source = { ...identity, schema: "evidencelens.source.v2", status: "ready" };
     const build = { ...identity, build_count: 1, daemon_identity_sha256: h("1"), fixture_sha256: [h("2"), h("3"), h("4"), h("5")], generation: h("6"), image_config_sha256: h("7"), image_content_sha256: h("8"), image_id: `sha256:${h("9")}`, runtime_sha256: h("0"), schema: "evidencelens.build.v2", status: "ready", verifier_build_count: 0 };
-    await Promise.all([writeFile(paths.source, canonicalJson(source)), writeFile(paths.build, canonicalJson(build)), writeFile(paths.review, "review"), writeFile(paths.security, "security")]);
+    await Promise.all([
+      writeFile(paths.forensic, await readFile(".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-53-FORENSIC.json")),
+      writeFile(paths.source, canonicalJson(source)), writeFile(paths.build, canonicalJson(build)), writeFile(paths.review, "review"), writeFile(paths.security, "security"),
+    ]);
     const readCredential = vi.fn(async () => "must-not-be-read");
     await expect(runFixedAutomaticLive({
       auditBuild: async () => { throw new Error("isolated preflight failure"); }, generation, paths, readCredential,
@@ -106,6 +109,43 @@ describe("automatic immutable review runner", () => {
     expect(readCredential).not.toHaveBeenCalled();
     for (const key of ["transition", "execution", "proof", "localValidation"] as const) expect(JSON.parse(await readFile(paths[key], "utf8"))).toBeTruthy();
     expect(JSON.parse(await readFile(paths.localValidation, "utf8"))).toMatchObject({ branch: "preflight_started", generation, outcome: "preflight_failed", validation: { execution: "passed", proof: "passed" } });
+  });
+
+  it.each([
+    ["source", "missing"], ["source", "malformed"], ["build", "missing"], ["build", "malformed"],
+    ["review", "missing"], ["review", "malformed"], ["security", "missing"], ["security", "malformed"],
+  ] as const)("seals the five-member preflight authority for %s %s before credential or harness", async (invalidKey, kind) => {
+    const root = await mkdtemp(join(tmpdir(), `automatic-fixed-${invalidKey}-${kind}-`));
+    const h = (c: string) => c.repeat(64); const generation = h("f");
+    const paths = Object.fromEntries(Object.entries({
+      forensic: "FORENSIC.json", source: "SOURCE.json", review: "REVIEW.md", security: "SECURITY.md", build: "BUILD.json", state: "state.json",
+      terminal: "terminal.json", transition: "TRANSITION.json", execution: "EXECUTION.json", proof: "PROOF.json", localValidation: "LOCAL_VALIDATION.json",
+    }).map(([key, name]) => [key, join(root, name)])) as any;
+    const identity = { certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") }, manifest_sha256: h("c"), non_planning_tree: h("d"), reviewed_commit: "e".repeat(40) };
+    const values: Record<string, string> = {
+      source: canonicalJson({ ...identity, schema: "evidencelens.source.v2", status: "ready" }),
+      build: canonicalJson({ ...identity, generation: h("6"), image_id: `sha256:${h("9")}`, schema: "evidencelens.build.v2", status: "ready" }),
+      review: "review", security: "security",
+    };
+    await writeFile(paths.forensic, await readFile(".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-53-FORENSIC.json"));
+    for (const key of ["source", "build", "review", "security"]) {
+      if (key === invalidKey && kind === "missing") continue;
+      await writeFile(paths[key], key === invalidKey && kind === "malformed" ? (key === "review" || key === "security" ? "" : "{}") : values[key]);
+    }
+    const readCredential = vi.fn(async () => "must-not-be-read"); const runHarness = vi.fn();
+    const auditBuild = async (_script: string, argv: string[]) => {
+      const [, buildPath, sourcePath, reviewPath, securityPath] = argv;
+      const source = JSON.parse(await readFile(sourcePath, "utf8")); const build = JSON.parse(await readFile(buildPath, "utf8"));
+      if (source.schema !== "evidencelens.source.v2" || build.schema !== "evidencelens.build.v2"
+        || (await readFile(reviewPath, "utf8")).length === 0 || (await readFile(securityPath, "utf8")).length === 0) throw new Error("invalid tuple");
+    };
+    await expect(runFixedAutomaticLive({ auditBuild, generation, paths, readCredential, runHarness })).rejects.toThrow("AUTOMATIC_PREFLIGHT");
+    expect(readCredential).not.toHaveBeenCalled(); expect(runHarness).not.toHaveBeenCalled();
+    const members = await Promise.all(["transition", "execution", "proof", "localValidation"].map((key) => readFile(paths[key], "utf8").then(JSON.parse)));
+    expect(members[0]).toMatchObject({ branch: "preflight_started", generation });
+    expect(members[1]).toMatchObject({ status: "gaps_found", outcome: "preflight_failed", reservation_count: 0, mcp_tools_call_count: 0, request_receipt: null });
+    expect(members[2]).toMatchObject({ status: "gaps_found", outcome: "preflight_failed", build_sha256: "unavailable_from_committed_state", source_sha256: "unavailable_from_committed_state" });
+    expect(members[3]).toMatchObject({ branch: "preflight_started", validation: { execution: "passed", proof: "passed" } });
   });
 
 });

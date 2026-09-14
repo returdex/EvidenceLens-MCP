@@ -30,6 +30,7 @@ const allowedModes = new Set(["auto-build", "auto-live-once"]);
 const execFileAsync = promisify(execFile);
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
 export const FIXED_AUTOMATIC_PATHS = Object.freeze({
+  forensic: `${phaseDirectory}/10-53-FORENSIC.json`,
   source: `${phaseDirectory}/10-57-SOURCE.json`,
   review: `${phaseDirectory}/10-57-REVIEW.md`,
   security: `${phaseDirectory}/10-57-SECURITY.md`,
@@ -217,11 +218,18 @@ function diagnosticOutcome(snapshot) {
 export async function sealAutomaticLiveEvidence(input) {
   const { paths, generation, snapshot, state } = input;
   if (!plain(paths) || !plain(snapshot) || !plain(state) || generation !== snapshot.generation || generation !== state.generation) fail("AUTOMATIC_TERMINAL_STATE");
-  const [source, build, reviewBytes, securityBytes] = await Promise.all([
-    readCanonicalJson(paths.source), readCanonicalJson(paths.build), readFile(paths.review), readFile(paths.security),
-  ]);
+  const preflight = snapshot.branch === "pre_reservation_preflight";
+  let source; let build; let reviewBytes; let securityBytes;
+  if (preflight) {
+    source = await readCanonicalJson(paths.forensic);
+    build = null; reviewBytes = null; securityBytes = null;
+  } else {
+    [source, build, reviewBytes, securityBytes] = await Promise.all([
+      readCanonicalJson(paths.source), readCanonicalJson(paths.build), readFile(paths.review), readFile(paths.security),
+    ]);
+  }
   const identity = sourceIdentity(source);
-  const transition = { branch: snapshot.branch === "pre_reservation_preflight" ? "preflight_started" : "preflight_authenticated", generation, schema: "evidencelens.live-transition.v1" };
+  const transition = { branch: preflight ? "preflight_started" : "preflight_authenticated", generation, schema: "evidencelens.live-transition.v1" };
   const { code, outcome } = diagnosticOutcome(snapshot);
   const passed = outcome === "passed";
   const receipt = snapshot.request_receipt;
@@ -240,10 +248,11 @@ export async function sealAutomaticLiveEvidence(input) {
     transcript_sha256: snapshot.transcript === null ? null : sha256Hex(Buffer.from(canonicalJson(snapshot.transcript))),
   };
   const proof = {
-    ...identity, build_sha256: sha256Hex(Buffer.from(canonicalJson(build))), clean_exit: passed,
+    ...identity, build_sha256: preflight ? "unavailable_from_committed_state" : sha256Hex(Buffer.from(canonicalJson(build))), clean_exit: passed,
     execution_sha256: sha256Hex(Buffer.from(canonicalJson(execution))), finding_count: execution.finding_count,
-    fixture_count: execution.fixture_count, outcome, review_sha256: sha256Hex(reviewBytes), schema: "evidencelens.live-proof.v3",
-    security_sha256: sha256Hex(securityBytes), source_sha256: sha256Hex(Buffer.from(canonicalJson(source))), status: execution.status,
+    fixture_count: execution.fixture_count, outcome, review_sha256: preflight ? "unavailable_from_committed_state" : sha256Hex(reviewBytes), schema: "evidencelens.live-proof.v3",
+    security_sha256: preflight ? "unavailable_from_committed_state" : sha256Hex(securityBytes),
+    source_sha256: preflight ? "unavailable_from_committed_state" : sha256Hex(Buffer.from(canonicalJson(source))), status: execution.status,
   };
   const sealedTransition = await atomicJson(paths.transition, transition);
   const sealedExecution = await atomicJson(paths.execution, execution);

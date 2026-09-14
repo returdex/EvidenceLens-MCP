@@ -97,9 +97,22 @@ export function auditExecutionAuto(capability, transition, execution) {
 export function auditProofAuto(capability, transition, execution, proof) {
   requireOwner(capability);
   const branch = authenticatedBranch(transition);
-  auditExecution(execution); auditLiveProof(proof); assertBranchExecution(branch, execution);
+  auditExecution(execution);
+  if (branch === "preflight_started") auditPreflightProof(proof); else auditLiveProof(proof);
+  assertBranchExecution(branch, execution);
   if (proof.execution_sha256 !== sha256Hex(Buffer.from(canonicalJson(execution))) || proof.outcome !== execution.outcome || proof.status !== execution.status) fail("PROOF_CHAIN_IDENTITY");
   return Object.freeze({ branch, status: proof.status });
+}
+
+function auditPreflightProof(value) {
+  if (!exactKeys(value, proofKeys) || value.schema !== "evidencelens.live-proof.v3") fail("PROOF_CHAIN_SCHEMA");
+  validateCertifiers(value.certifier_sha256);
+  if (!hash.test(value.manifest_sha256) || !hash.test(value.non_planning_tree) || !commit.test(value.reviewed_commit)
+    || value.execution_sha256 === unavailable || !hash.test(value.execution_sha256)
+    || [value.build_sha256, value.review_sha256, value.security_sha256, value.source_sha256].some((entry) => entry !== unavailable)
+    || value.status !== "gaps_found" || value.outcome !== "preflight_failed" || value.clean_exit !== false
+    || value.fixture_count !== 0 || value.finding_count !== 0) fail("PROOF_CHAIN_PREFLIGHT_PROOF");
+  return sourceIdentity(value);
 }
 
 function authenticatedBranch(transition) {
@@ -474,7 +487,9 @@ function registryFromRecords(values, expected) {
   const transition = values[offset]; const execution = values[offset + 1]; const proof = values[offset + 2]; const receipt = values[offset + 3];
   const branch = authenticatedBranch(transition);
   if (branch !== expected.branch) fail("PROOF_CHAIN_BRANCH");
-  auditExecution(execution); auditLiveProof(proof); validateTerminalOwnerReceipt(receipt);
+  auditExecution(execution);
+  if (branch === "preflight_started") auditPreflightProof(proof); else auditLiveProof(proof);
+  validateTerminalOwnerReceipt(receipt);
   assertBranchExecution(branch, execution);
   if (transition.generation !== receipt.generation || execution.execution_generation !== receipt.generation
     || receipt.artifact_sha256.execution !== sha256Hex(Buffer.from(canonicalJson(execution)))
