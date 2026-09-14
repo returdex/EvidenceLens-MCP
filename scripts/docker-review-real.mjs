@@ -798,6 +798,7 @@ export async function runReviewHarness(options = {}) {
     if (!isOffline) {
       try { child.stdin.end(); } catch { /* lifecycle observation below remains authoritative */ }
       if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
+      try { await lifecycle.wait(); } catch { /* Preserve the owning MCP failure while draining bounded lifecycle evidence. */ }
       const observedTerminal = lifecycle.observed();
       const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
       try { if (!requestEvidenceRetained) retainAuthenticatedRequestEvidence(receipt); } catch { /* Evidence retention cannot mask the owning failure. */ }

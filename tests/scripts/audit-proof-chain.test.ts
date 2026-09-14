@@ -240,6 +240,7 @@ describe("proof chain certifier", () => {
           "PROOF_CHAIN_COMMITTED\n",
           "PROOF_CHAIN_IDENTITY\n",
           "PROOF_CHAIN_LOCAL_VALIDATION\n",
+          "PROOF_CHAIN_RECEIPT\n",
         ]).toContain(result.stderr);
       }
       expect(await snapshot()).toEqual(before);

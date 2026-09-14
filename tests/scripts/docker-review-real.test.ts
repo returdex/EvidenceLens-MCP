@@ -77,6 +77,18 @@ function requestReceiptLine(environment: Record<string, string>, observed: 0 | 1
 
 function failingLiveChild(frame: (environment: Record<string, string>, child: FakeStdioChild) => void) {
   const child = new FakeStdioChild();
+  child.kill.mockImplementation((signal: NodeJS.Signals) => {
+    child.killed = true;
+    child.signalCode = signal;
+    setImmediate(() => {
+      child.stdout.emit("end");
+      child.stderr.emit("end");
+      child.exitCode = 1;
+      child.emit("exit", 1, null);
+      child.emit("close", 1, null);
+    });
+    return true;
+  });
   child.stdin.write.mockImplementation((raw: string, callback?: (error?: Error) => void) => {
     const message = JSON.parse(raw);
     if (message.method === "initialize") {
@@ -384,6 +396,48 @@ describe("credentialed Docker review harness", () => {
     expect(childEnvironment).not.toHaveProperty(CHILD_DIAGNOSTIC_KEY_ENV);
     expect(childEnvironment).not.toHaveProperty(CHILD_DIAGNOSTIC_GENERATION_ENV);
     expect(JSON.stringify(diagnostics)).not.toMatch(/injected-test-only|ordinary private stderr|apiKey|mac|generation/u);
+  });
+
+  it("drains an authenticated zero-send receipt and lifecycle after terminating a failed tools call", async () => {
+    const child = failingLiveChild(() => undefined);
+    const terminalSnapshots: any[] = [];
+    const spawnChild = vi.fn((_command, _args, options) => {
+      const environment = { ...(options.env as Record<string, string>) };
+      (child as any).diagnosticEnvironment = environment;
+      child.kill.mockImplementation((signal: NodeJS.Signals) => {
+        child.killed = true;
+        child.signalCode = signal;
+        setImmediate(() => {
+          child.stderr.emit("data", requestReceiptLine(environment, 0));
+          child.stdout.emit("end");
+          child.stderr.emit("end");
+          child.exitCode = 1;
+          child.emit("exit", 1, null);
+          child.emit("close", 1, null);
+        });
+        return true;
+      });
+      return child;
+    });
+
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild,
+      retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+
+    expect(terminalSnapshots).toEqual([expect.objectContaining({
+      branch: "post_tools_pre_fetch",
+      close: { code: 1, observed: true, signal: null },
+      exit: { code: 1, observed: true, signal: null },
+      mcp_tools_call_count: 1,
+      observed_provider_requests: 0,
+      request_receipt: expect.objectContaining({ observed_provider_requests: 0, reservation_count: 1 }),
+      stream_truncated: true,
+      transcript: { close_code: 1, exit_code: 1, mcp_method: "tools/call", tool: "review_evidence" },
+    })]);
   });
 
   it.each([
