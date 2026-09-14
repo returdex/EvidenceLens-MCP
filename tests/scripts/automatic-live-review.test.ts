@@ -1,4 +1,4 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -12,6 +12,7 @@ import {
   runFixedAutomaticLive,
   validateFixedInvocation,
 } from "../../scripts/automatic-live-review.mjs";
+import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 describe("automatic immutable review runner", () => {
   it("accepts only the two literal package entrypoints", () => {
@@ -83,6 +84,28 @@ describe("automatic immutable review runner", () => {
     expect(source).not.toContain('// Concrete source sets and generation locators are supplied only by reviewed');
     expect(source).toContain('mode === "auto-build"');
     expect(source).toContain("runFixedAutomaticLive()");
+  });
+
+  it("drives the real fixed live entrypoint through terminal-owner sealing and both local audits before return", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-fixed-owner-"));
+    const h = (c: string) => c.repeat(64);
+    const generation = h("f");
+    const paths = Object.fromEntries(Object.entries({
+      source: "SOURCE.json", review: "REVIEW.md", security: "SECURITY.md", build: "BUILD.json", state: "state.json",
+      terminal: "terminal.json", transition: "TRANSITION.json", execution: "EXECUTION.json", proof: "PROOF.json", localValidation: "LOCAL_VALIDATION.json",
+    }).map(([key, name]) => [key, join(root, name)])) as any;
+    await mkdir(root, { recursive: true });
+    const identity = { certifier_sha256: { audit_live_evidence_sha256: h("a"), audit_proof_chain_sha256: h("b") }, manifest_sha256: h("c"), non_planning_tree: h("d"), reviewed_commit: "e".repeat(40) };
+    const source = { ...identity, schema: "evidencelens.source.v2", status: "ready" };
+    const build = { ...identity, build_count: 1, daemon_identity_sha256: h("1"), fixture_sha256: [h("2"), h("3"), h("4"), h("5")], generation: h("6"), image_config_sha256: h("7"), image_content_sha256: h("8"), image_id: `sha256:${h("9")}`, runtime_sha256: h("0"), schema: "evidencelens.build.v2", status: "ready", verifier_build_count: 0 };
+    await Promise.all([writeFile(paths.source, canonicalJson(source)), writeFile(paths.build, canonicalJson(build)), writeFile(paths.review, "review"), writeFile(paths.security, "security")]);
+    const readCredential = vi.fn(async () => "must-not-be-read");
+    await expect(runFixedAutomaticLive({
+      auditBuild: async () => { throw new Error("isolated preflight failure"); }, generation, paths, readCredential,
+    })).rejects.toThrow("AUTOMATIC_PREFLIGHT");
+    expect(readCredential).not.toHaveBeenCalled();
+    for (const key of ["transition", "execution", "proof", "localValidation"] as const) expect(JSON.parse(await readFile(paths[key], "utf8"))).toBeTruthy();
+    expect(JSON.parse(await readFile(paths.localValidation, "utf8"))).toMatchObject({ branch: "preflight_started", generation, outcome: "preflight_failed", validation: { execution: "passed", proof: "passed" } });
   });
 
 });

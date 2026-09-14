@@ -111,7 +111,7 @@ function authenticatedBranch(transition) {
 function assertBranchExecution(branch, execution) {
   if (branch === "preflight_started") {
     if (execution.status !== "gaps_found" || execution.outcome === "passed" || execution.mcp_tools_call_count !== 0
-      || execution.reservation_count !== 0 || execution.request_receipt?.observed_provider_requests !== 0) fail("PROOF_CHAIN_BRANCH");
+      || execution.reservation_count !== 0 || execution.request_receipt !== null) fail("PROOF_CHAIN_BRANCH");
   } else if (execution.reservation_count !== 1) fail("PROOF_CHAIN_BRANCH");
 }
 

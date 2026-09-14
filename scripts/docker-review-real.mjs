@@ -648,6 +648,11 @@ export function captureChildLifecycle(child, timeoutMs = controlTimeoutMs) {
 
   return Object.freeze({
     child,
+    observed() {
+      if (!terminalPairSeen() || exitCount !== 1 || closeCount !== 1
+        || exitMetadata.code !== closeMetadata.code || exitMetadata.signal !== closeMetadata.signal) return undefined;
+      return Object.freeze({ ...exitMetadata });
+    },
     wait() {
       if (outcome !== undefined) {
         return outcome.error === undefined ? Promise.resolve(outcome.value) : Promise.reject(outcome.error);
@@ -764,12 +769,15 @@ export async function runReviewHarness(options = {}) {
       retainTerminal({
         branch: "passed", close: { ...terminal, observed: true }, diagnostic: null,
         exit: { ...terminal, observed: true }, request_receipt: receipt,
-        result: { finding_count: payload.findings.length, fixture_count: payload.normalizedEvidence.length },
-        transcript: { mcp_method: "tools/call", tool: "review_evidence" }, stream_truncated: false,
+        result: { finding_count: payload.findings.length, fixture_count: payload.normalizedEvidence.length, model: expectedModel, provider: "deepseek", provenance: true, public_schema: true },
+        transcript: { close_code: terminal.code, exit_code: terminal.code, mcp_method: "tools/call", tool: "review_evidence" }, stream_truncated: false,
       });
     }
   } catch (error) {
     if (!isOffline) {
+      try { child.stdin.end(); } catch { /* lifecycle observation below remains authoritative */ }
+      if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
+      const observedTerminal = lifecycle.observed();
       const receipt = receiptCollector.receipt({ generation: diagnosticGeneration, key: diagnosticKey });
       try { if (!requestEvidenceRetained) retainAuthenticatedRequestEvidence(receipt); } catch { /* Evidence retention cannot mask the owning failure. */ }
       const feature = diagnosticCollector.feature({ generation: diagnosticGeneration, key: diagnosticKey });
@@ -779,8 +787,12 @@ export async function runReviewHarness(options = {}) {
       const branch = mcpToolsCallCount === 0 ? "pre_tools_post_reservation" : observed === 1 ? "post_fetch_non_pass" : "post_tools_pre_fetch";
       try {
         retainTerminal({
-          branch, diagnostic: { code: diagnostic.invariant_id ?? "ambiguous" }, request_receipt: receipt ?? null,
-          result: null, transcript: mcpToolsCallCount === 1 ? { mcp_method: "tools/call", tool: "review_evidence" } : null,
+          branch, close: observedTerminal === undefined ? null : { ...observedTerminal, observed: true },
+          diagnostic: { code: diagnostic.invariant_id ?? "ambiguous" },
+          exit: observedTerminal === undefined ? null : { ...observedTerminal, observed: true }, request_receipt: receipt ?? null,
+          result: null, transcript: mcpToolsCallCount === 1 && observedTerminal !== undefined
+            ? { close_code: observedTerminal.code, exit_code: observedTerminal.code, mcp_method: "tools/call", tool: "review_evidence" }
+            : null,
           stream_truncated: feature === undefined,
         });
       } catch { fail("protocol"); }

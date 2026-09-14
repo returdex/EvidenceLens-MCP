@@ -9,9 +9,10 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { canonicalJson, sha256Hex } from "./audit-live-readiness.mjs";
+import { auditExecutionAuto, auditProofAuto, closeTerminalOwnerCapability, createTerminalOwnerCapability, validateTerminalOwnerReceipt } from "./audit-proof-chain.mjs";
 import { produceBuildGeneration } from "./docker-proof-produce.mjs";
 import { verifyExistingBuild } from "./docker-proof-verify-existing.mjs";
-import { authenticateTerminalSnapshot, completeWrapper, createAuthenticatedTerminalSnapshot, createProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
+import { authenticateTerminalSnapshot, completeWrapper, createAuthenticatedTerminalSnapshot, createProofState, readProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
 import { runReviewHarness } from "./docker-review-real.mjs";
 
 export const AUTOMATIC_BUILD_CONTROLS = Object.freeze({ build_count: 1, verifier_build_count: 0 });
@@ -38,6 +39,7 @@ export const FIXED_AUTOMATIC_PATHS = Object.freeze({
   transition: `${phaseDirectory}/10-59-TRANSITION.json`,
   execution: `${phaseDirectory}/10-59-EXECUTION.json`,
   proof: `${phaseDirectory}/10-59-PROOF.json`,
+  localValidation: `${phaseDirectory}/10-59-LOCAL-VALIDATION.json`,
 });
 const fixedReviewPaths = Object.freeze([
   FIXED_AUTOMATIC_PATHS.source,
@@ -114,6 +116,10 @@ export async function runStatefulAutomaticLive(options) {
   if (!plain(options) || typeof options.path !== "string" || typeof options.terminalPath !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
   const interrupt = typeof options.interrupt === "function" ? options.interrupt : async () => undefined;
   const terminalKey = randomBytes(32);
+  const finishEvidence = async (snapshot) => {
+    const state = await readProofState(options.path);
+    if (typeof options.finishEvidence === "function") await options.finishEvidence({ snapshot, state });
+  };
   await createProofState(options.path, "live", options.generation);
   await transitionProofState(options.path, "preflight_started");
   try { await options.authenticateReadyBuild(); } catch {
@@ -123,13 +129,11 @@ export async function runStatefulAutomaticLive(options) {
     await sealTerminal(options.terminalPath, snapshot, terminalKey);
     await transitionProofState(options.path, "failed");
     await completeWrapper(options.path);
+    await finishEvidence(snapshot);
     terminalKey.fill(0);
     fail("AUTOMATIC_PREFLIGHT");
   }
   await transitionProofState(options.path, "preflight_authenticated");
-  await interrupt("before-consume");
-  await transitionProofState(options.path, "consumed");
-  await interrupt("after-consume");
   let credential;
   try { credential = await options.readCredential(); } catch { credential = undefined; }
   if (typeof credential !== "string" || credential.trim() === "") {
@@ -139,9 +143,13 @@ export async function runStatefulAutomaticLive(options) {
     await sealTerminal(options.terminalPath, snapshot, terminalKey);
     await transitionProofState(options.path, "failed");
     await completeWrapper(options.path);
+    await finishEvidence(snapshot);
     terminalKey.fill(0);
     fail("AUTOMATIC_CREDENTIAL");
   }
+  await interrupt("before-consume");
+  await transitionProofState(options.path, "consumed");
+  await interrupt("after-consume");
   let status = "failed";
   let requestEvidence;
   let terminalSnapshot;
@@ -164,8 +172,15 @@ export async function runStatefulAutomaticLive(options) {
   } catch { status = "failed"; }
   credential = undefined;
   if (terminalSnapshot === undefined) {
+    terminalSnapshot = createAuthenticatedTerminalSnapshot({
+      branch: requestEvidence?.mcp_tools_call_count === 1 ? "post_tools_pre_fetch" : "pre_tools_post_reservation",
+      diagnostic: { code: "terminal_callback_missing" }, generation: options.generation,
+    }, terminalKey);
+    await sealTerminal(options.terminalPath, terminalSnapshot, terminalKey);
+    if (requestEvidence?.mcp_tools_call_count === 1) await recordRequestEvidence(options.path, requestEvidence);
     await transitionProofState(options.path, "failed");
     await completeWrapper(options.path);
+    try { await finishEvidence(terminalSnapshot); } catch { /* failed validation is durably recorded by the owner */ }
     terminalKey.fill(0);
     fail("AUTOMATIC_TERMINAL_MISSING");
   }
@@ -180,8 +195,78 @@ export async function runStatefulAutomaticLive(options) {
   await interrupt("before-wrapper");
   const result = await completeWrapper(options.path);
   await interrupt("after-wrapper");
+  await finishEvidence(terminalSnapshot);
   terminalKey.fill(0);
   return Object.freeze({ ...result, terminal_branch: terminalSnapshot.branch, terminal_sha256: sha256Hex(Buffer.from(canonicalJson(terminalSnapshot))) });
+}
+
+function sourceIdentity(source) {
+  return {
+    certifier_sha256: source.certifier_sha256, manifest_sha256: source.manifest_sha256,
+    non_planning_tree: source.non_planning_tree, reviewed_commit: source.reviewed_commit,
+  };
+}
+
+function diagnosticOutcome(snapshot) {
+  if (snapshot.branch === "passed") return { code: null, outcome: "passed" };
+  if (snapshot.branch === "pre_reservation_preflight") return { code: "pre_fetch", outcome: "preflight_failed" };
+  if (snapshot.observed_provider_requests === 1) return { code: "request", outcome: "request_failed" };
+  return { code: "pre_fetch", outcome: "request_failed" };
+}
+
+export async function sealAutomaticLiveEvidence(input) {
+  const { paths, generation, snapshot, state } = input;
+  if (!plain(paths) || !plain(snapshot) || !plain(state) || generation !== snapshot.generation || generation !== state.generation) fail("AUTOMATIC_TERMINAL_STATE");
+  const [source, build, reviewBytes, securityBytes] = await Promise.all([
+    readCanonicalJson(paths.source), readCanonicalJson(paths.build), readFile(paths.review), readFile(paths.security),
+  ]);
+  const identity = sourceIdentity(source);
+  const transition = { branch: snapshot.branch === "pre_reservation_preflight" ? "preflight_started" : "preflight_authenticated", generation, schema: "evidencelens.live-transition.v1" };
+  const { code, outcome } = diagnosticOutcome(snapshot);
+  const passed = outcome === "passed";
+  const receipt = snapshot.request_receipt;
+  const execution = {
+    ...identity, argv: ["docker", "compose", "--profile", "review", "run", "--rm", "-T", "review"],
+    build_generation: snapshot.reservation_count === 0 ? "unavailable_from_committed_state" : build.generation,
+    clean_exit: passed, close: snapshot.close, diagnostic: passed ? null : { code, path: "transport.fetch" },
+    environment: { profile: "review", provider_disabled: false }, execution_generation: generation,
+    exit: snapshot.exit, finding_count: passed ? snapshot.result.finding_count : 0, fixture_count: passed ? snapshot.result.fixture_count : 0,
+    image_id: snapshot.reservation_count === 0 ? "unavailable_from_committed_state" : build.image_id,
+    mcp_tools_call_count: snapshot.mcp_tools_call_count, model: snapshot.result?.model ?? "", outcome, provider: "deepseek", repair_set: [],
+    request_receipt: receipt, request_receipt_sha256: receipt === null ? null : sha256Hex(Buffer.from(canonicalJson(receipt))),
+    reservation_count: snapshot.reservation_count,
+    result: passed ? snapshot.result : null, result_sha256: passed ? sha256Hex(Buffer.from(canonicalJson(snapshot.result))) : null,
+    schema: "evidencelens.execution.v2", status: passed ? "passed" : "gaps_found", transcript: snapshot.transcript,
+    transcript_sha256: snapshot.transcript === null ? null : sha256Hex(Buffer.from(canonicalJson(snapshot.transcript))),
+  };
+  const proof = {
+    ...identity, build_sha256: sha256Hex(Buffer.from(canonicalJson(build))), clean_exit: passed,
+    execution_sha256: sha256Hex(Buffer.from(canonicalJson(execution))), finding_count: execution.finding_count,
+    fixture_count: execution.fixture_count, outcome, review_sha256: sha256Hex(reviewBytes), schema: "evidencelens.live-proof.v3",
+    security_sha256: sha256Hex(securityBytes), source_sha256: sha256Hex(Buffer.from(canonicalJson(source))), status: execution.status,
+  };
+  const sealedTransition = await atomicJson(paths.transition, transition);
+  const sealedExecution = await atomicJson(paths.execution, execution);
+  const sealedProof = await atomicJson(paths.proof, proof);
+  const capability = createTerminalOwnerCapability();
+  const capabilityIdentity = randomBytes(32).toString("hex");
+  let executionValidation = "failed"; let proofValidation = "failed";
+  try {
+    try { auditExecutionAuto(capability, sealedTransition, sealedExecution); executionValidation = "passed"; } catch { /* receipt records failure */ }
+    try { auditProofAuto(capability, sealedTransition, sealedExecution, sealedProof); proofValidation = "passed"; } catch { /* receipt records failure */ }
+  } finally { closeTerminalOwnerCapability(capability); }
+  const validation = validateTerminalOwnerReceipt({
+    artifact_sha256: {
+      execution: sha256Hex(Buffer.from(canonicalJson(sealedExecution))), proof: sha256Hex(Buffer.from(canonicalJson(sealedProof))),
+      transition: sha256Hex(Buffer.from(canonicalJson(sealedTransition))),
+    },
+    auditors: { execution: "execution-auto", proof: "proof-auto" }, branch: sealedTransition.branch,
+    capability_identity: capabilityIdentity, generation, outcome, schema: "evidencelens.terminal-owner-validation.v1",
+    validation: { execution: executionValidation, proof: proofValidation },
+  });
+  await atomicJson(paths.localValidation, validation);
+  if (executionValidation !== "passed" || proofValidation !== "passed") fail("AUTOMATIC_TERMINAL_STATE");
+  return Object.freeze({ execution: sealedExecution, localValidation: validation, proof: sealedProof, transition: sealedTransition });
 }
 
 async function runNodeScript(script, argv) {
@@ -336,18 +421,21 @@ export async function runFixedAutomaticBuild() {
 /** Production live entrypoint. Authentication precedes both state consumption
  * and credential access; the state machine consumes the generation before the
  * only guarded harness invocation. */
-export async function runFixedAutomaticLive() {
-  const generation = randomBytes(32).toString("hex");
-  return runStatefulAutomaticLive({
+export async function runFixedAutomaticLive(dependencies = {}) {
+  const paths = dependencies.paths ?? FIXED_AUTOMATIC_PATHS;
+  const generation = dependencies.generation ?? randomBytes(32).toString("hex");
+  return (dependencies.runStateful ?? runStatefulAutomaticLive)({
     authenticateReadyBuild: async () => {
-      await runNodeScript("scripts/audit-proof-chain.mjs", ["build-auto", fixedBuildPath, ...fixedReviewPaths]);
-      const build = await readCanonicalJson(fixedBuildPath);
+      await (dependencies.auditBuild ?? runNodeScript)("scripts/audit-proof-chain.mjs", ["build-auto", paths.build, paths.source, paths.review, paths.security]);
+      const build = await readCanonicalJson(paths.build);
       if (build.status !== "ready" || !lower64.test(build.generation) || !imageId.test(build.image_id)) fail("AUTOMATIC_PREFLIGHT");
     },
+    finishEvidence: ({ snapshot, state }) => (dependencies.sealEvidence ?? sealAutomaticLiveEvidence)({ generation, paths, snapshot, state }),
     generation,
-    path: fixedLiveStatePath,
-    terminalPath: fixedTerminalPath,
-    readCredential: async () => process.env.DEEPSEEK_API_KEY,
+    path: paths.state,
+    terminalPath: paths.terminal,
+    readCredential: dependencies.readCredential ?? (async () => process.env.DEEPSEEK_API_KEY),
+    runHarness: dependencies.runHarness,
   });
 }
 
