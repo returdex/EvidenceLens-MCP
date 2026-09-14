@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Planned 10-77 through 10-81 after bounded lifecycle-drain fix
-last_updated: "2026-09-14T10:35:12.000Z"
+stopped_at: Completed 10-77-PLAN.md
+last_updated: "2026-09-14T10:44:45.737Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 109
-  completed_plans: 95
-  percent: 87
+  completed_plans: 96
+  percent: 88
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 77 of 81
+Plan: 78 of 81
 
 - Phase: 10 of 11
-- Status: generation 21c4e3fe is consumed immutable gaps evidence; post-drain-fix authority must rotate to Plans 10-77 through 10-81
-- Progress: 10-76 is superseded; Plans 10-77 through 10-81 form the only current recovery chain
-- Last activity: fixed post-tools terminal evidence sampling to await the existing bounded lifecycle drain; provider-disabled suite passes 622/622
+- Status: generation 21c4e3fe is archived as immutable authority:false gaps evidence; all production registries now use Plans 10-77 through 10-81
+- Progress: Plan 10-77 complete; Plan 10-78 is next for hostile disconfirmation and exact source recertification
+- Last activity: archived exact 10-75 bytes, rotated fixed authority paths, and passed the 623-test provider-disabled suite
 
 ## Decisions and Assumptions
 
@@ -141,6 +141,8 @@ Plan: 77 of 81
 - [Phase 10]: Production fix 0b47dbb waits for the existing bounded lifecycle drain before terminal collectors after tools/call failure without weakening receipt/send authentication.
 - [Phase 10]: The 10-73 certification and 10-74 image are stale after 0b47dbb; only Plans 10-77 through 10-81 may acquire current authority.
 - [Phase 10]: Plan 10-81 is passed-only synchronization authority; every non-pass causes zero target writes and leaves PROV-01 open.
+- [Phase 10]: Generation 21c4e3fe remains byte-exact authority:false and replay_allowed:false history superseded by lifecycle-drain fix 0b47dbb.
+- [Phase 10]: Only the 10-77/78/79/80/81 namespace can acquire current certification, build, live-proof, and synchronization authority.
 
 ### Blockers
 
@@ -201,16 +203,17 @@ Plan: 77 of 81
 | Phase 10 P72 | 7min | 2 tasks | 8 files |
 | Phase 10 P73 | 5min | 2 tasks | 4 files |
 | Phase 10 P74 | 1min | 1 tasks | 1 files |
+| Phase 10 P77 | 8min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-14T09:45:37.721Z
-- **Stopped at:** Planned 10-77 through 10-81 after bounded lifecycle-drain fix
+- **Last session:** 2026-09-14T10:44:45.729Z
+- **Stopped at:** Completed 10-77-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-77 to archive the consumed 10-75 generation and rotate every production authority registry before recertification.
+Execute Plan 10-78 to hostile-test and exactly recertify the post-lifecycle-drain source.
 
 ---
-*Last updated: 2026-09-14 after planning the post-lifecycle-drain recovery chain*
+*Last updated: 2026-09-14 after completing the consumed-evidence archive and authority rotation*
