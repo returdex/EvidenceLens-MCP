@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-73-PLAN.md
-last_updated: "2026-09-14T09:42:36.731Z"
+stopped_at: Completed 10-74-PLAN.md
+last_updated: "2026-09-14T09:45:37.726Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 104
-  completed_plans: 94
-  percent: 90
+  completed_plans: 95
+  percent: 91
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 74 of 76
+Plan: 75 of 76
 
 - Phase: 10 of 11
 - Status: generation 3767fe38 is consumed immutable gaps evidence; post-fix authority must rotate to Plans 10-72 through 10-76
@@ -135,6 +135,8 @@ Plan: 74 of 76
 - [Phase 10]: Only the 10-72/73/74/75/76 namespace is reachable by current production authority. — Stale certification, image, live, and sync tuples must fail closed.
 - [Phase 10]: Authorize Plan 10-74 only from exact reviewed commit 1be82ac and its 109-blob manifest; later non-planning drift restarts Plans 10-72 and 10-73. — Prevents stale or mixed source authority from reaching the local image gate.
 - [Phase 10]: Compose configuration resolution receives fixed non-secret sentinels while the real review key remains exclusive to the eventual review child. — Avoids inactive-profile interpolation failure without disclosing or persisting the provider credential.
+- [Phase 10]: Promote generation a52db97a as the sole READY Plan 10-74 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Bind Plan 10-75 exclusively to image sha256:37a38cdc built from reviewed commit 1be82ac and the exact 10-73 certification tuple.
 
 ### Blockers
 
@@ -194,11 +196,12 @@ Plan: 74 of 76
 | Phase 10 P69 | 1 min | 1 tasks | 1 files |
 | Phase 10 P72 | 7min | 2 tasks | 8 files |
 | Phase 10 P73 | 5min | 2 tasks | 4 files |
+| Phase 10 P74 | 1min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-14T09:42:36.726Z
-- **Stopped at:** Completed 10-73-PLAN.md
+- **Last session:** 2026-09-14T09:45:37.721Z
+- **Stopped at:** Completed 10-74-PLAN.md
 - **Resume file:** None
 
 ## Next Action
