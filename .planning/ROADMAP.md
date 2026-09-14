@@ -409,7 +409,7 @@ Plans:
 - [ ] 10-66-PLAN.md — Superseded; cannot synchronize the consumed failed 10-65 chain
 
 **Wave 62** *(gap closure; preserve the consumed 10-65 attempt and rotate authority first)*
-- [ ] 10-67-PLAN.md — Archive 10-65 as authority:false and rotate fixed registries to a fresh namespace
+- [x] 10-67-PLAN.md — Archive 10-65 as authority:false and rotate fixed registries to a fresh namespace
 
 **Wave 63** *(gap closure; blocked on Wave 62 completion)*
 - [ ] 10-68-PLAN.md — Hostile-test and fully recertify the exact corrected-lifecycle source
@@ -461,7 +461,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 60/66 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 61/71 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

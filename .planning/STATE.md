@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Planned 10-67 through 10-71 recovery after consumed 10-65 failure
-last_updated: "2026-09-14T09:30:00.000Z"
+stopped_at: Completed 10-67-PLAN.md
+last_updated: "2026-09-14T08:57:39.746Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 99
-  completed_plans: 89
-  percent: 95
+  completed_plans: 90
+  percent: 91
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 67 of 71
+Plan: 68 of 71
 
 - Phase: 10 of 11
-- Status: the single 10-65 generation was consumed as an immutable zero-send gaps_found result; post-failure lifecycle fix a85d2bf invalidates 10-63 certification and 10-64 image
-- Progress: 60 of 71 Phase 10 plans executed; 10-60 and 10-66 are superseded, and Plans 10-67 through 10-71 form the only current recovery chain
-- Last activity: Diagnosed and fixed terminal ownership ordering before resolveLiveProof/preflight; provider-disabled suite passes 616/616
+- Status: the consumed 10-65 generation is sealed as authority:false history; all production authority is rotated to the 10-68 through 10-71 recovery namespace
+- Progress: 61 of 71 Phase 10 plans executed; 10-60 and 10-66 are superseded, and Plans 10-68 through 10-71 form the only current recovery chain
+- Last activity: Archived the exact zero-send attempt and rotated source/build/live/sync registries; provider-disabled suite passes 618/618
 
 ## Decisions and Assumptions
 
@@ -126,6 +126,8 @@ Plan: 67 of 71
 - [Phase 10]: Preserve consumed 10-59 evidence as byte-exact authority:false history and rotate production authority exclusively to 10-62 through 10-66. — Prevents replay or synchronization of the failed paid attempt and forces exact recertification before further authority.
 - [Phase 10]: Authorize Plan 10-64 only from exact source commit 4dcd025 and require full recertification after non-planning drift. — Prevents stale or mixed authority from reaching the local build gate.
 - [Phase 10]: Promote only the first READY generation produced by the fixed zero-argument local build path; independent verification must not rebuild it. — Preserves exact image authority while keeping failed local attempts non-authoritative.
+- [Phase 10]: Consumed 10-59 and 10-65 generations remain explicit read-only authority:false archives — Production authority now begins at 10-67 and cannot consume either failed paid attempt.
+- [Phase 10]: Missing 10-68 certification is the expected current BLOCKED state — A hermetic committed fixture proves READY behavior without weakening the live repository gate.
 
 ### Blockers
 
@@ -180,16 +182,17 @@ Plan: 67 of 71
 | Phase 10 P62 | 6min | 2 tasks | 8 files |
 | Phase 10 P63 | 5min | 2 tasks | 4 files |
 | Phase 10 P64 | 2min | 1 tasks | 1 files |
+| Phase 10 P67 | 7min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-14T08:30:57.818Z
-- **Stopped at:** Completed 10-64-PLAN.md
+- **Last session:** 2026-09-14T08:57:39.741Z
+- **Stopped at:** Completed 10-67-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-65 against the exact Plan 10-64 READY image without rebuilding it. Preserve the consumed 10-59 evidence and enforce the new generation's single-request ceiling.
+Execute Plan 10-68 to hostile-test and fully recertify the exact committed registry source before any Docker or provider action.
 
 ---
-*Last updated: 2026-09-14 after Phase 10 Plan 64 execution*
+*Last updated: 2026-09-14 after Phase 10 Plan 67 execution*
