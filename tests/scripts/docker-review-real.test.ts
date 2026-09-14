@@ -4,9 +4,10 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, ProviderRequestReceiptCollector, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, ProviderRequestReceiptCollector, resolveLiveProof, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 import { CHILD_DIAGNOSTIC_GENERATION_ENV, CHILD_DIAGNOSTIC_KEY_ENV, CHILD_DIAGNOSTIC_PREFIX, CHILD_DIAGNOSTIC_SCHEMA } from "../../src/providers/diagnostics.js";
 import { createProviderRequestBudget, PROVIDER_REQUEST_RECEIPT_PREFIX } from "../../src/providers/request-budget.js";
+import { PROOF_SENTINEL, REVIEW_SENTINEL } from "../../scripts/proof-runtime-spec.mjs";
 
 const execFileAsync = promisify(execFile);
 const hash = "a".repeat(64);
@@ -730,6 +731,61 @@ describe("credentialed Docker review harness", () => {
       toolsCallTimeoutMs: 60_000
     });
     expect(result.toolsCallTimeoutMs).toBeGreaterThan(result.providerTimeoutMs);
+  });
+
+  it("resolves the real review Compose preflight without a proof-only credential", async () => {
+    const environment = {
+      PATH: process.env.PATH,
+      DEEPSEEK_API_KEY: "review-compose-regression-not-a-secret",
+      DEEPSEEK_MAX_RETRIES: "0",
+      EVIDENCELENS_DISABLE_PROVIDER: "1",
+    };
+
+    const result = await resolveLiveProof(undefined, environment);
+
+    expect(result).toMatchObject({
+      model: "deepseek-v4-flash-vision-exp",
+      providerTimeoutMs: 30_000,
+      toolsCallTimeoutMs: 60_000,
+      childEnv: {
+        DEEPSEEK_API_KEY: "review-compose-regression-not-a-secret",
+        DEEPSEEK_MAX_RETRIES: "0",
+        EVIDENCELENS_PROOF_DEEPSEEK_API_KEY: PROOF_SENTINEL,
+      },
+    });
+  });
+
+  it("keeps the review credential out of Compose config resolution", async () => {
+    const realLookingReviewCredential = "sk-review-must-not-enter-compose-config";
+    const runCompose = vi.fn(async (_file: string, _argv: string[], options: { env: Record<string, string | undefined> }) => {
+      expect(options.env.DEEPSEEK_API_KEY).toBe(REVIEW_SENTINEL);
+      expect(options.env.EVIDENCELENS_PROOF_DEEPSEEK_API_KEY).toBe(PROOF_SENTINEL);
+      expect(Object.values(options.env)).not.toContain(realLookingReviewCredential);
+      return {
+        stdout: JSON.stringify({
+          services: {
+            review: {
+              environment: {
+                DEEPSEEK_API_KEY: REVIEW_SENTINEL,
+                DEEPSEEK_MAX_RETRIES: "0",
+                DEEPSEEK_MODEL: "deepseek-v4-flash-vision-exp",
+                DEEPSEEK_TIMEOUT_MS: "30000",
+              },
+            },
+          },
+        }),
+      };
+    });
+
+    const result = await resolveLiveProof(runCompose, {
+      DEEPSEEK_API_KEY: realLookingReviewCredential,
+      DEEPSEEK_MAX_RETRIES: "2",
+    });
+
+    expect(runCompose).toHaveBeenCalledOnce();
+    expect(result.childEnv.DEEPSEEK_API_KEY).toBe(realLookingReviewCredential);
+    expect(result.childEnv.EVIDENCELENS_PROOF_DEEPSEEK_API_KEY).toBe(PROOF_SENTINEL);
+    expect(result.childEnv.DEEPSEEK_MAX_RETRIES).toBe("0");
   });
 
   it.each([

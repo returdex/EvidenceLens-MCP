@@ -21,6 +21,7 @@ import {
   PROVIDER_REQUEST_RECEIPT_PREFIX,
   verifyProviderRequestReceipt
 } from "../dist/providers/request-budget.js";
+import { PROOF_SENTINEL, REVIEW_SENTINEL } from "./proof-runtime-spec.mjs";
 import { createAuthenticatedTerminalSnapshot } from "./live-proof-state.mjs";
 
 const offline = process.argv.includes("--offline");
@@ -513,10 +514,18 @@ export async function resolveReviewModel(runCompose = execFileAsync) {
   }
 }
 
-async function resolveLiveProof(runCompose = execFileAsync, baseEnvironment = process.env) {
-  const childEnv = { ...baseEnvironment, DEEPSEEK_MAX_RETRIES: "0" };
+export async function resolveLiveProof(runCompose = execFileAsync, baseEnvironment = process.env) {
+  const childEnv = {
+    ...baseEnvironment,
+    DEEPSEEK_MAX_RETRIES: "0",
+    EVIDENCELENS_PROOF_DEEPSEEK_API_KEY: PROOF_SENTINEL,
+  };
+  const composeEnvironment = {
+    ...childEnv,
+    DEEPSEEK_API_KEY: REVIEW_SENTINEL,
+  };
   try {
-    const resolved = await runCompose("docker", ["compose", "--profile", "review", "config", "--format", "json"], { env: childEnv });
+    const resolved = await runCompose("docker", ["compose", "--profile", "review", "config", "--format", "json"], { env: composeEnvironment });
     const document = JSON.parse(resolved.stdout);
     const environment = document?.services?.review?.environment;
     const model = environment?.DEEPSEEK_MODEL;
