@@ -81,7 +81,7 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
       expect(paths[0]).toMatch(/10-67-CONSUMED-LIVE\.json$/u);
-      expect(paths.at(-1)).toMatch(/10-65-LOCAL-VALIDATION\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-70-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
@@ -169,8 +169,8 @@ describe("proof chain certifier", () => {
     const archive = join(root, "current.tar");
     const marker = join(root, "external-called");
     const watched = [
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-66-SYNC-CLAIM.json",
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-66-SYNC-JOURNAL.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-71-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-71-SYNC-JOURNAL.json",
       ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
       ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
       ".planning/REQUIREMENTS.md",
@@ -194,7 +194,7 @@ describe("proof chain certifier", () => {
       });
       expect(accepted).toMatchObject({ status: 0, stderr: "" });
       expect(accepted.stdout).toMatch(/^\{"branch":"preflight_authenticated","cardinality":9,"full_commit":"[a-f0-9]{40}","registry_schema":"evidencelens\.live-sync-authority\.v1","status":"gaps_found"\}\n\nproof chain audit passed\n$/u);
-      await writeFile(join(checkout, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-63-REVIEW.md"), "drift\n", { flag: "a" });
+      await writeFile(join(checkout, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-68-REVIEW.md"), "drift\n", { flag: "a" });
       const result = spawnSync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
         cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
       });
