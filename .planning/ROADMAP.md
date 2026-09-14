@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(50 of 60 plans executed; Plans 10-53 through 10-60 preserve the consumed failure as forensic-only history, repair durable terminal proof authority, recertify/rebuild, run at most one new live generation, and synchronize only its complete new chain.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(56 of 61 plans executed; Plans 10-53 through 10-61 preserve consumed failures, repair and certify terminal proof authority, replace the stale build once, run at most one new live generation, and synchronize only its complete new chain.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 60 plans
+**Plans**: 61 plans
 
 Plans:
 **Wave 1**
@@ -384,10 +384,13 @@ Plans:
 **Wave 53** *(gap closure; blocked on Wave 52 completion)*
 - [ ] 10-58-PLAN.md — Produce at most one credential-free immutable corrected-source build
 
-**Wave 54** *(gap closure; blocked on Wave 53 completion)*
+**Wave 54** *(replacement gap closure; blocked on Wave 52 recertification)*
+- [ ] 10-61-PLAN.md — Archive the stale build and perform exactly one authorized replacement credential-free build
+
+**Wave 55** *(gap closure; blocked on replacement build completion)*
 - [ ] 10-59-PLAN.md — Run one new automatically authorized live generation with at most one provider send
 
-**Wave 55** *(gap closure; blocked on Wave 54 completion)*
+**Wave 56** *(gap closure; blocked on Wave 55 completion)*
 - [ ] 10-60-PLAN.md — Synchronize Phase 7, Phase 10 and PROV-01 from the selected exact new-chain branch
 
 Cross-cutting constraints:
