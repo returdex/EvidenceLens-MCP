@@ -1,25 +1,43 @@
 # Phase 10 Plan 57 Exact-Source Deep Review
 
-Status: **BLOCKED**
+Status: **READY**
 
-Open findings: **1 Blocker, 0 Critical, 0 High, 0 Warning**
+Open findings: **0 Blocker, 0 Critical, 0 High, 0 Warning**
 
 Reviewed blobs: **109/109**
 
-No READY evidence block is present. Exact identity: commit `801604db62f75d18c37a3ef89699d8f1c9f5017c`, manifest `173ea95862eb36ba229c1f1a24c86720f775674ba152deae82aa505f8325a862`, tree `df8cc079672960ab8b2a430ecd22352662df4b57210dd0275fb14e4738a8488b`, proof certifier `0ae4c2ef14ee4b7516c02fb50f5271a8cbfd385c8a69bb504f56efb72a910826`.
+```json evidencelens-evidence
+{"certifier_sha256":{"audit_live_evidence_sha256":"62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500","audit_proof_chain_sha256":"0ae4c2ef14ee4b7516c02fb50f5271a8cbfd385c8a69bb504f56efb72a910826"},"manifest_sha256":"f339592427a3b3242b93a4dae4acbc05ae529505dc6e3fdac4a5adeaceb37187","non_planning_tree":"4161766dbfe783a56ff1de002f7d915764f839a9ad8af77e6e3511aac3d9dadc","reviewed_commit":"e1a2744e89d5d80a6416bb22a45838dd03cc365d","schema":"evidencelens.deep-review.v2","status":"ready"}
+```
 
-## BL-57-05 — current-drift regression hardcodes a certification-state-dependent category
+## Exact authority
 
-Severity: **Blocker**
+The complete 109-blob non-planning tree at refreshed Plan 10-56 commit `e1a2744e89d5d80a6416bb22a45838dd03cc365d` was independently reviewed. Canonical manifest `f339592427a3b3242b93a4dae4acbc05ae529505dc6e3fdac4a5adeaceb37187`, aggregate tree `4161766dbfe783a56ff1de002f7d915764f839a9ad8af77e6e3511aac3d9dadc`, and both certifier hashes share this commit.
 
-Owner: Plan 10-55 test owner (`tests/scripts/audit-proof-chain.test.ts`)
+## Finding closure
 
-The historical `585fd01` tests now correctly materialize an isolated Git repository. However, the new test `reports current fixed-tuple source/build absence as an upstream committed rejection` still executes `sync-authority-auto` against the mutable current repository and requires exactly `PROOF_CHAIN_COMMITTED`.
+BL-57-01 through BL-57-05 are closed. The historical `585fd01` local-validation refusal is materialized in an isolated Git fixture. Current authority drift now asserts the stable invariant—nonzero exit, no stdout/writes/external calls—and permits only the three legitimate fail-closed categories, independent of current REVIEW status.
 
-That category currently occurs because the checked-in 10-57 REVIEW is intentionally BLOCKED and has no evidence block. A successful Plan 10-57 recertification necessarily installs a valid evidence block; parsing then proceeds and the stale historical build/live tuple is rejected later as identity or local-validation failure. Thus the test again changes outcome solely because certification succeeds.
+## Deep production review
 
-Required correction: make current-drift coverage accept the invariant that authority is rejected without requiring a downstream category, or isolate an explicit malformed/missing current tuple fixture when testing `PROOF_CHAIN_COMMITTED`. Keep the exact historical LOCAL_VALIDATION tests isolated as they now are. Then rerun Plan 10-56 and completely recertify 10-57.
+| Boundary | Result |
+|---|---|
+| Exact source/build registry and immutable Git archive | PASS |
+| Five terminal variants and branch-specific 5/9 authority | PASS |
+| Missing/malformed preflight five-member evidence | PASS |
+| Fixed live terminal owner and local audits | PASS |
+| Pre-tools null receipt versus authenticated post-tools receipt | PASS |
+| HMAC/key lifecycle, one-shot fetch and exact counters | PASS |
+| Separate exit/close, bounded streams and deadlines | PASS |
+| Atomic/no-follow persistence, replay and recovery | PASS |
+| Historical failed-attempt isolation and current drift refusal | PASS |
+| 7/11 final registry and synchronization authority | PASS |
+| Sanitized failures and zero secret/raw-output disclosure | PASS |
 
-The isolated historical test implementation itself, tuple receipt rules, preflight authority, terminal owner, lifecycle, counters, atomicity and synchronization showed no additional warning or higher.
+## Verification and side effects
 
-External counters are all zero. Historical build/live evidence remains non-authoritative.
+- Plan 10-56: 6 focused files / 211 tests; full suite 43 files / 613 tests.
+- Certification reruns both fixed registries, all provider-disabled tests, TypeScript build, diff and source-drift checks.
+- Docker, credentials, network/provider/paid request, GitHub Actions/dispatch/push counts: all **0**.
+
+This identity is approved for a newly generated immutable build only. Historical build/live evidence remains stale and cannot authorize it.
