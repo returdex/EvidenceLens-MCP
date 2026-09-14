@@ -21,8 +21,8 @@ key-files:
     - .planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-REVIEW.md
     - .planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-57-SECURITY.md
 key-decisions:
-  - "Only the complete 26ba480 non-planning identity is authorized for a newly generated immutable build."
-  - "All three blockers required full recertification rather than partial review addenda."
+  - "Only the complete e1a2744 non-planning identity is authorized for a newly generated immutable build."
+  - "All five blockers required full recertification rather than partial review addenda."
 patterns-established:
   - "Review artifacts share exact commit, tree, manifest and certifier hashes."
 requirements-completed: [SAFE-04, PROV-01]
@@ -43,14 +43,14 @@ completed: 2026-09-14
 
 ## Accomplishments
 
-- Bound commit `26ba4806d9ef25717b0d1c180bd62aa4216cb634`, all 109 non-planning blobs, aggregate tree, canonical manifest and both certifier blobs.
-- Closed BL-57-01's post-build registry mismatch, BL-57-02's state-dependent test and BL-57-03's invalid-preflight authority gap through complete re-review.
-- Passed `source-review-auto`, `reviews-auto`, 608 provider-disabled tests, TypeScript compilation and source-drift checks.
+- Bound commit `e1a2744e89d5d80a6416bb22a45838dd03cc365d`, all 109 non-planning blobs, aggregate tree, canonical manifest and both certifier blobs.
+- Closed BL-57-01 through BL-57-05, including invalid-preflight authority and state-independent historical/current tuple rejection.
+- Passed `source-review-auto`, `reviews-auto`, 613 provider-disabled tests, TypeScript compilation and source-drift checks.
 
 ## Task Commits
 
-1. **Task 1: Freeze and deeply review exact source** — `46a13f4`
-2. **Task 2: Certify ASVS L1 and immutability** — `46a13f4`
+1. **Task 1: Freeze and deeply review exact source** — `509a399`
+2. **Task 2: Certify ASVS L1 and immutability** — `509a399`
 
 Earlier superseded audit-state commits remain in history for traceability.
 
@@ -73,6 +73,8 @@ Earlier superseded audit-state commits remain in history for traceability.
 1. **BL-57-01:** Legacy post-build registry would fail after consuming the unique build. Plan 10-54 changed the call to `build-auto` and added hermetic reachability coverage.
 2. **BL-57-02:** Invalid-preflight test depended on 10-57 artifacts being absent. Plan 10-54 isolated the invalid audit fixture from workspace state.
 3. **BL-57-03:** Real missing/malformed preflight inputs prevented five-member proof sealing. Plan 10-54 split preflight authority from live-only source/build/review/security inputs and added eight hostile cases.
+4. **BL-57-04:** Historical failed-local-validation tests used the mutable current repository. Plan 10-55 materialized the exact `585fd01` tuple in an isolated Git fixture.
+5. **BL-57-05:** Current-drift coverage hardcoded a certification-state-dependent category. Plan 10-55 now asserts bounded fail-closed categories plus no output, writes or external effects.
 
 Both fixes were followed by refreshed Plan 10-56 disconfirmation and full Plan 10-57 recertification as required.
 
@@ -80,7 +82,7 @@ Both fixes were followed by refreshed Plan 10-56 disconfirmation and full Plan 1
 
 - `source-review-auto`: passed.
 - `reviews-auto`: passed.
-- Provider-disabled test suite: 43 files, 608 tests passed.
+- Provider-disabled test suite: 43 files, 613 tests passed.
 - `npm run build`: passed.
 - `git diff --check`: passed.
 - Working non-planning drift from reviewed commit: none.
@@ -99,7 +101,7 @@ The stale 10-58 artifact predates this certification and grants no authority. A 
 
 ## Self-Check: PASSED
 
-All three certified artifacts exist, both fixed registry gates pass, and commit `46a13f4` exists.
+All three certified artifacts exist, both fixed registry gates pass, and commit `509a399` exists.
 
 ---
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
