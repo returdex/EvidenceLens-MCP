@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-117-PLAN.md
-last_updated: "2026-09-16T16:59:02.496Z"
+stopped_at: Completed 10-118-PLAN.md
+last_updated: "2026-09-16T17:05:17.679Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 149
-  completed_plans: 120
+  completed_plans: 121
   percent: 81
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 117 of 121
+Plan: 118 of 121
 
 - Phase: 10 of 11
-- Status: Plan 10-117 archived the consumed 10-115 attempt and rotated all production authority
-- Progress: Plan 10-118 is the current exact-source certification gate; Plans 10-119 through 10-121 remain downstream
-- Last activity: preserved generation add65ba8 as authority:false and restricted current authority to 10-117/118/119/120/121 after 679 provider-disabled tests
+- Status: Plan 10-118 certified the bounded unique JSON extraction source with zero warning-or-higher findings
+- Progress: Plan 10-119 is the next exact-source immutable local build gate; Plans 10-120 and 10-121 remain downstream
+- Last activity: bound reviewed commit c2572f8, its 109-blob manifest and current certifier hashes after 143 focused and 679 provider-disabled tests
 
 ## Decisions and Assumptions
 
@@ -184,6 +184,8 @@ Plan: 117 of 121
 - [Phase 10]: Promote generation 43ca9ec8236a1619846e3118398fbd313f70d6ac31b1506d3e48e04112e0725c as the sole READY Plan 10-114 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve generation add65ba8 as byte-exact authority:false, replay_allowed:false history superseded by bounded JSON extraction fix e91d3ac.
 - [Phase 10]: Only the 10-117/118/119/120/121 namespace may acquire current production authority.
+- [Phase 10]: Authorize Plan 10-119 only from reviewed commit c2572f8, its 109-blob manifest, and the exact current certifier hashes.
+- [Phase 10]: Accept wrapped provider output only when a bounded string/escape-aware scan yields exactly one complete object with the sole root key findings.
 
 ### Blockers
 
@@ -269,16 +271,17 @@ Plan: 117 of 121
 | Phase 10 P113 | 5min | 2 tasks | 5 files |
 | Phase 10 P114 | 1min | 1 tasks | 2 files |
 | Phase 10 P117 | 5min | 2 tasks | 8 files |
+| Phase 10 P118 | 5min | 2 tasks | 4 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T16:59:02.491Z
-- **Stopped at:** Completed 10-117-PLAN.md
+- **Last session:** 2026-09-16T17:05:17.674Z
+- **Stopped at:** Completed 10-118-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-118 to hostile-test and exactly recertify the bounded JSON extraction source set.
+Execute Plan 10-119 to build and independently verify the exact certified source without a provider request.
 
 ---
-*Last updated: 2026-09-17 after bounded JSON recovery authority rotation*
+*Last updated: 2026-09-17 after bounded JSON extraction exact-source certification*

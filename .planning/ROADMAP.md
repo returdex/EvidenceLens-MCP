@@ -562,7 +562,7 @@ Plans:
 - [x] 10-117-PLAN.md — Preserve 10-115 as authority:false and rotate registries to the bounded JSON recovery namespace
 
 **Wave 112** *(gap closure; blocked on Wave 111 completion)*
-- [ ] 10-118-PLAN.md — Hostile-test and exactly recertify bounded unique JSON-object extraction
+- [x] 10-118-PLAN.md — Hostile-test and exactly recertify bounded unique JSON-object extraction
 
 **Wave 113** *(gap closure; blocked on Wave 112 completion)*
 - [ ] 10-119-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
@@ -615,7 +615,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 91/121 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 92/121 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
