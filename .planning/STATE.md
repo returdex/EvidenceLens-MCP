@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-89-PLAN.md
+stopped_at: Planned 10-92 through 10-96 request-boundary receipt recovery
 last_updated: "2026-09-16T11:14:25.117Z"
 progress:
   total_phases: 11
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 90 of 91
+Plan: 90 of 96
 
 - Phase: 10 of 11
-- Status: Plan 10-89 produced and independently authenticated the exact-source READY image with zero verifier rebuilds
-- Progress: Plans 10-87 through 10-89 are complete; Plan 10-90 is next for the bounded non-replay live proof
-- Last activity: promoted generation eaf954c0 as the sole READY image from reviewed commit 2f93a00; focused tests 70/70 and build-auto audit passed
+- Status: Plan 10-90 is consumed immutable gaps evidence; fix 94184b2 closes its missing request-boundary receipt producer
+- Progress: Plans 10-92 through 10-96 form the sole current archive, recertification, build, bounded-live and passed-only sync chain
+- Last activity: verified request-level coordinator behavior and planned exact post-fix recovery; provider-disabled suite 630/630
 
 ## Decisions and Assumptions
 
@@ -155,10 +155,12 @@ Plan: 90 of 91
 - [Phase 10]: Authorize Plan 10-89 only from reviewed commit 2f93a00, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
 - [Phase 10]: Treat stderr end/close as the authenticated receipt terminal while process exit/close remains lifecycle metadata. — Buffered authenticated frames remain collectible without accepting post-terminal data.
 - [Phase 10]: Promote generation eaf954c0ece6a29592bb69797870b27fa06ed5e4a267199331e18e0ce1b080bd as the sole READY Plan 10-89 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation 57b76915cb7b94b1005e07b381a170109119a22cd4407e0692f4d6aa126cad74 as byte-exact authority:false, replay_allowed:false history with reservation=1, tools=1, sends=0, null receipt, stream_truncated=true and exit/close 0.
+- [Phase 10]: Fix 94184b2 makes the provider adapter the primary receipt producer and tool settlement an authenticated fallback only when the adapter emitted nothing; 10-88/89 are stale and only Plans 10-92 through 10-96 may acquire current authority.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified after the newest separately authorized sanitized protocol non-pass.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified after consumed 10-90 request-boundary receipt failure.
 
 ## Performance Metrics
 
@@ -233,7 +235,7 @@ Plan: 90 of 91
 
 ## Next Action
 
-Execute Plan 10-87 to archive 10-85 and rotate all fixed authority registries before recertification.
+Execute Plan 10-92 to archive 10-90 and rotate all fixed authority registries before recertification.
 
 ---
 *Last updated: 2026-09-16 after exact graceful-drain image authentication*
