@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-107-PLAN.md
-last_updated: "2026-09-16T15:23:39.230Z"
+stopped_at: Completed 10-108-PLAN.md
+last_updated: "2026-09-16T15:29:48.279Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 139
-  completed_plans: 114
-  percent: 82
+  completed_plans: 115
+  percent: 83
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 107 of 111
+Plan: 108 of 111
 
 - Phase: 10 of 11
-- Status: Plan 10-107 archived the consumed 10-105 attempt and rotated all production authority
-- Progress: Plan 10-108 is the current exact-source certification gate; Plans 10-109 through 10-111 remain downstream
-- Last activity: bound generation c9cd2504 to immutable authority:false history and activated only the 10-107/108/109/110/111 namespace
+- Status: Plan 10-108 certified independent request-receipt and child-diagnostic capabilities
+- Progress: Plan 10-109 is the current exact-source local image gate; Plans 10-110 and 10-111 remain downstream
+- Last activity: bound commit 51af544, its 109-blob manifest, tree and certifiers to zero-warning deep and ASVS L1 reviews
 
 ## Decisions and Assumptions
 
@@ -174,10 +174,12 @@ Plan: 107 of 111
 - [Phase 10]: Promote generation ca24335c677389cf68819e9b58f8da29d55bb047ba570d8a175ba8e235693874 as the sole READY Plan 10-104 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve generation c9cd2504 as byte-exact authority:false, replay_allowed:false history superseded by capability-separation fix 6b018f0.
 - [Phase 10]: Only the 10-107/108/109/110/111 namespace may acquire current certification, build, live-proof, and synchronization authority.
+- [Phase 10]: Authorize Plan 10-109 only from reviewed commit 51af544, its 109-blob manifest, and the exact current certifier hashes.
+- [Phase 10]: Keep request-receipt and child-diagnostic generation/key namespaces independently initialized, forwarded, consumed and deleted.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-100 live generation and Plan 10-101 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending the Plan 10-109 image, a passed Plan 10-110 live generation and Plan 10-111 synchronization.
 
 ## Performance Metrics
 
@@ -253,16 +255,17 @@ Plan: 107 of 111
 | Phase 10 P103 | 4min | 2 tasks | 5 files |
 | Phase 10 P104 | 2min | 1 tasks | 2 files |
 | Phase 10 P107 | 6min | 2 tasks | 8 files |
+| Phase 10 P108 | 4min | 2 tasks | 5 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T15:23:39.223Z
-- **Stopped at:** Completed 10-107-PLAN.md
+- **Last session:** 2026-09-16T15:29:48.274Z
+- **Stopped at:** Completed 10-108-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-108 to certify the independent request-receipt and child-diagnostic capability fix.
+Execute Plan 10-109 to build and authenticate the exact certified source image.
 
 ---
-*Last updated: 2026-09-17 after diagnostic capability recovery rotation*
+*Last updated: 2026-09-17 after independent capability source certification*
