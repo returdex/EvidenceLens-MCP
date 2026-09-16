@@ -469,7 +469,7 @@ Plans:
 - [ ] 10-86-PLAN.md — Superseded; cannot synchronize the consumed failed 10-85 chain
 
 **Wave 82** *(gap closure; archive consumed 10-85 and rotate authority)*
-- [ ] 10-87-PLAN.md — Preserve 10-85 as authority:false and rotate registries to the stderr-terminal recovery namespace
+- [x] 10-87-PLAN.md — Preserve 10-85 as authority:false and rotate registries to the stderr-terminal recovery namespace
 
 **Wave 83** *(gap closure; blocked on Wave 82 completion)*
 - [ ] 10-88-PLAN.md — Hostile-test and exactly recertify authenticated stderr terminal ownership
@@ -521,7 +521,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 72/91 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 73/91 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
