@@ -1,0 +1,46 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "true_mcp_initialize_list_call_pre_provider_fallback": "passed",
+    "authenticated_zero_send_fallback_receipt": "passed",
+    "adapter_success_primary_receipt": "passed",
+    "adapter_pre_send_failure_primary_receipt": "passed",
+    "adapter_post_send_failure_primary_receipt": "passed",
+    "settlement_fallback_only_when_adapter_silent": "passed",
+    "second_one_shot_call_no_duplicate_receipt": "passed",
+    "second_one_shot_call_no_second_send": "passed",
+    "forged_malformed_cross_generation_late_receipt": "passed",
+    "old_10_87_through_10_91_substitution": "passed",
+    "altered_10_92_archive": "passed",
+    "mixed_generation": "passed",
+    "failed_local_validation": "passed",
+    "non_pass_sync": "passed",
+    "extra_argv": "passed"
+  },
+  "receipt_invariants": {
+    "reservation_count": 1,
+    "pre_provider_observed_sends": 0,
+    "maximum_receipts_per_generation": 1,
+    "maximum_provider_sends_per_generation": 1
+  },
+  "verification": {
+    "focused_test_files": 8,
+    "focused_tests": 255,
+    "command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/contract/review-tool.test.ts tests/providers/deepseek.test.ts tests/scripts/docker-review-real.test.ts tests/scripts/automatic-live-review.test.ts tests/scripts/automatic-live-review-cli.test.ts tests/scripts/live-proof-state.test.ts tests/scripts/audit-proof-chain.test.ts tests/scripts/sync-proof-state.test.ts"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "docker_children": 0,
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "network_requests": 0,
+    "provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "target_writes": 0
+  },
+  "status": "passed"
+}
