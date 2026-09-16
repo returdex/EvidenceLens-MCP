@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(58 of 66 plans executed; the consumed 10-59 attempt is immutable gaps evidence, and Plans 10-62 through 10-66 rotate to a fresh certified build/live/sync namespace.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(79 of 101 plans executed; consumed live attempts are immutable authority:false evidence, and Plans 10-98 through 10-101 form the sole current certification/build/live/sync namespace.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -499,7 +499,7 @@ Plans:
 - [ ] 10-96-PLAN.md — Superseded; cannot synchronize the consumed failed 10-95 chain
 
 **Wave 92** *(gap closure; archive consumed 10-95 and rotate authority)*
-- [ ] 10-97-PLAN.md — Preserve 10-95 as authority:false and rotate registries to the protocol-boundary recovery namespace
+- [x] 10-97-PLAN.md — Preserve 10-95 as authority:false and rotate registries to the protocol-boundary recovery namespace
 
 **Wave 93** *(gap closure; blocked on Wave 92 completion)*
 - [ ] 10-98-PLAN.md — Hostile-test and exactly recertify low-level tools/call receipt settlement
@@ -508,7 +508,7 @@ Plans:
 - [ ] 10-99-PLAN.md — Build and authenticate a fresh exact-source local Docker image
 
 **Wave 95** *(gap closure; blocked on Wave 94 completion)*
-- [ ] 10-100-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [x] 10-100-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 96** *(gap closure; only reachable from a passed Wave 95 chain)*
 - [ ] 10-101-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
@@ -551,7 +551,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 78/96 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 79/101 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-94-PLAN.md
-last_updated: "2026-09-16T11:53:47.140Z"
+stopped_at: Completed 10-97-PLAN.md
+last_updated: "2026-09-16T12:23:24.860Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 124
-  completed_plans: 107
-  percent: 86
+  total_plans: 129
+  completed_plans: 108
+  percent: 84
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 94 of 96
+Plan: 97 of 101
 
 - Phase: 10 of 11
-- Status: Plan 10-94 built and independently authenticated the exact request-boundary image
-- Progress: Plans 10-95 and 10-96 remain the sole current bounded-live and passed-only sync chain
-- Last activity: promoted generation 5b3cb9c1 from certified commit bfbbe49 with one producer build and zero verifier rebuilds
+- Status: Plan 10-97 archived the consumed protocol-boundary attempt and rotated all current authority
+- Progress: Plans 10-98 through 10-101 are the sole current certification, build, live, and passed-only sync chain
+- Last activity: preserved generation c482938a as authority:false history and retired the stale 10-93/94 authority
 
 ## Decisions and Assumptions
 
@@ -162,6 +162,8 @@ Plan: 94 of 96
 - [Phase 10]: Authorize Plan 10-94 only from reviewed commit bfbbe49, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
 - [Phase 10]: Keep the provider adapter as primary receipt producer and permit request-settlement fallback only when no adapter receipt was emitted. — The shared one-shot coordinator prevents duplicate receipts and provider sends.
 - [Phase 10]: Promote generation 5b3cb9c1b6f6ece79cd961f442c11aa05e8b8c7814922ce46905b09f777cd562 as the sole READY Plan 10-94 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
+- [Phase 10]: Preserve generation c482938a as authority:false, replay_allowed:false history superseded by fix bfff3dc.
+- [Phase 10]: Only the 10-97/98/99/100/101 namespace may acquire current production authority.
 
 ### Blockers
 
@@ -234,16 +236,17 @@ Plan: 94 of 96
 | Phase 10 P92 | 6min | 2 tasks | 8 files |
 | Phase 10 P93 | 3min | 2 tasks | 4 files |
 | Phase 10 P94 | 4min | 1 tasks | 1 files |
+| Phase 10 P97 | 6min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T11:53:47.135Z
-- **Stopped at:** Completed 10-94-PLAN.md
+- **Last session:** 2026-09-16T12:23:24.856Z
+- **Stopped at:** Completed 10-97-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-95 once against the exact Plan 10-94 image with at most one provider HTTP send.
+Execute Plan 10-98 to certify the exact post-fix source against the rotated authority registry.
 
 ---
-*Last updated: 2026-09-16 after exact request-boundary image authentication*
+*Last updated: 2026-09-16 after protocol-boundary recovery authority rotation*
