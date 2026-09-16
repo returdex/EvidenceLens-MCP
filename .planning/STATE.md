@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-87-PLAN.md
-last_updated: "2026-09-16T11:10:30.009Z"
+stopped_at: Completed 10-89-PLAN.md
+last_updated: "2026-09-16T11:14:25.117Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 119
-  completed_plans: 103
+  completed_plans: 104
   percent: 87
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 89 of 91
+Plan: 90 of 91
 
 - Phase: 10 of 11
-- Status: Plan 10-85 is consumed immutable gaps evidence; fixes 18ca920/0555466 require complete recertification and a fresh image
-- Progress: Plans 10-87 through 10-91 are planned as a strict sequential recovery chain; Plan 10-87 is next
-- Last activity: fixed stderr terminal ownership, archived the debug record, and verified harness 110, harness+proof 173, provider-disabled 627, build and diff
+- Status: Plan 10-89 produced and independently authenticated the exact-source READY image with zero verifier rebuilds
+- Progress: Plans 10-87 through 10-89 are complete; Plan 10-90 is next for the bounded non-replay live proof
+- Last activity: promoted generation eaf954c0 as the sole READY image from reviewed commit 2f93a00; focused tests 70/70 and build-auto audit passed
 
 ## Decisions and Assumptions
 
@@ -154,6 +154,7 @@ Plan: 89 of 91
 - [Phase 10]: Fix 18ca920 makes stderr end/close—not process exit/close—the authenticated diagnostic/receipt terminal while rejecting frames after true terminal; 10-83/84 are stale and only Plans 10-87 through 10-91 may acquire current authority.
 - [Phase 10]: Authorize Plan 10-89 only from reviewed commit 2f93a00, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
 - [Phase 10]: Treat stderr end/close as the authenticated receipt terminal while process exit/close remains lifecycle metadata. — Buffered authenticated frames remain collectible without accepting post-terminal data.
+- [Phase 10]: Promote generation eaf954c0ece6a29592bb69797870b27fa06ed5e4a267199331e18e0ce1b080bd as the sole READY Plan 10-89 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -222,11 +223,12 @@ Plan: 89 of 91
 | Phase 10 P84 | 3min | 1 tasks | 1 files |
 | Phase 10 P87 | 6min | 2 tasks | 8 files |
 | Phase 10 P88 | 4min | 2 tasks | 4 files |
+| Phase 10 P89 | 3min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T11:09:56.069Z
-- **Stopped at:** Completed 10-87-PLAN.md
+- **Last session:** 2026-09-16T11:14:25.112Z
+- **Stopped at:** Completed 10-89-PLAN.md
 - **Resume file:** None
 
 ## Next Action
