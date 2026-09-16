@@ -11,6 +11,15 @@ export interface DiagnosticFeature { readonly path: DiagnosticPath; readonly cod
 export interface DiagnosticSink { emit(feature: DiagnosticFeature): boolean }
 
 const featureSpecs = [
+  [["provider", "transport", "fetch"], "dns"],
+  [["provider", "transport", "fetch"], "tls"],
+  [["provider", "transport", "fetch"], "connection"],
+  [["provider", "transport", "fetch"], "network_timeout"],
+  [["provider", "transport", "fetch"], "timeout"],
+  [["provider", "transport", "fetch"], "http_error"],
+  [["provider", "transport", "fetch"], "rate_limited"],
+  [["provider", "transport", "fetch"], "server_error"],
+  [["provider", "transport", "fetch"], "retry_budget"],
   [["provider", "http", "json"], "invalid_format"],
   [["provider", "choices"], "too_small"],
   [["provider", "message", "content"], "invalid_type"],

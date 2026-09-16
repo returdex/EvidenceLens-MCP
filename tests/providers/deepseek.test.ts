@@ -28,6 +28,11 @@ function recordingSink(): DiagnosticSink & { features: DiagnosticFeature[] } {
   return { features, emit(feature) { features.push(feature); return true; } };
 }
 
+function fetchFailure(code: string, details: Record<string, unknown> = {}): TypeError {
+  const cause = Object.assign(new Error("private cause"), { code, ...details });
+  return new TypeError("fetch failed", { cause });
+}
+
 describe("DeepSeek provider adapter", () => {
   it("acquires immediately around transport.fetch and permanently blocks a second send", async () => {
     let calls = 0;
@@ -156,6 +161,46 @@ describe("DeepSeek provider adapter", () => {
     const provider = createDeepSeekProvider(config, transportFor(draft, 401));
     await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" });
     try { await provider.review(request); } catch (error) { expect(serializeProviderError(error)).toEqual(expect.objectContaining({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" })); expect(JSON.stringify(serializeProviderError(error))).not.toMatch(/secret-key|api\.deepseek|upstream secret body|stack/iu); }
+  });
+
+  it.each([
+    ["dns", () => { throw fetchFailure("ENOTFOUND", { errno: -3008, syscall: "getaddrinfo", hostname: "private.example" }); }, config],
+    ["tls", () => { throw fetchFailure("CERT_HAS_EXPIRED"); }, config],
+    ["connection", () => { throw fetchFailure("ECONNREFUSED", { errno: -61, syscall: "connect", address: "127.0.0.1", port: 443 }); }, config],
+    ["network_timeout", () => { throw fetchFailure("UND_ERR_CONNECT_TIMEOUT"); }, config],
+    ["http_error", () => new Response("private", { status: 401 }), config],
+    ["rate_limited", () => new Response("private", { status: 429 }), config],
+    ["server_error", () => new Response("private", { status: 503 }), config],
+    ["retry_budget", () => { throw fetchFailure("ENOTFOUND", { errno: -3008, syscall: "getaddrinfo", hostname: "private.example" }); }, { ...config, maxRetries: 2, maxTotalWaitMs: 1 }]
+  ] as const)("emits the closed %s transport diagnostic from the production adapter path", async (code, outcome, diagnosticConfig) => {
+    const diagnostics = recordingSink();
+    const provider = createDeepSeekProvider(diagnosticConfig, { fetch: async () => outcome() }, diagnostics);
+    await expect(provider.review(request)).rejects.toBeInstanceOf(Error);
+    expect(diagnostics.features).toEqual([{ path: ["provider", "transport", "fetch"], code }]);
+    expect(JSON.stringify(diagnostics.features)).not.toMatch(/private|example|127\.0\.0\.1|443|ENOTFOUND|CERT_HAS_EXPIRED|ECONNREFUSED|UND_ERR/iu);
+  });
+
+  it("emits the closed timeout diagnostic only after the production adapter aborts", async () => {
+    const diagnostics = recordingSink();
+    const provider = createDeepSeekProvider({ ...config, timeoutMs: 5 }, {
+      fetch: async (_input, init) => new Promise<Response>((_resolve, reject) => {
+        init.signal?.addEventListener("abort", () => reject(new DOMException("private abort", "AbortError")), { once: true });
+      })
+    }, diagnostics);
+    await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_RETRY_EXHAUSTED" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "transport", "fetch"], code: "timeout" }]);
+  });
+
+  it.each([
+    ["unknown code", () => { throw fetchFailure("PRIVATE_UNKNOWN"); }],
+    ["multiple causes", () => { throw new TypeError("fetch failed", { cause: new AggregateError([new Error("one"), new Error("two")]) }); }],
+    ["detail-bearing cause", () => { throw fetchFailure("ENOTFOUND", { privateDetail: "secret" }); }],
+    ["detail-bearing root", () => { const error = fetchFailure("ENOTFOUND"); Object.assign(error, { privateDetail: "secret" }); throw error; }]
+  ] as const)("keeps %s transport failures diagnostically ambiguous", async (_name, outcome) => {
+    const diagnostics = recordingSink();
+    const provider = createDeepSeekProvider(config, { fetch: async () => outcome() }, diagnostics);
+    await expect(provider.review(request)).rejects.toBeInstanceOf(Error);
+    expect(diagnostics.features).toEqual([]);
   });
 
   it("emits one canonical feature at each real response decode and content failure site", async () => {

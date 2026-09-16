@@ -163,6 +163,7 @@ export function createDeepSeekProvider(
         const response = await fetchWithRetry({
           retryPolicy: proof === undefined ? "bounded" : "none",
           maxRetries: config.maxRetries, timeoutMs: config.timeoutMs, maxTotalWaitMs: config.maxTotalWaitMs,
+          diagnostics,
           operation: (signal) => {
             proof?.requestBudget.acquireHttpSend();
             return transport.fetch(`${config.baseUrl}/chat/completions`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` }, body: JSON.stringify(body), signal });

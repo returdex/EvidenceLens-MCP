@@ -407,6 +407,33 @@ describe("credentialed Docker review harness", () => {
     expect(JSON.stringify(diagnostics)).not.toMatch(/injected-test-only|ordinary private stderr|apiKey|mac|generation/u);
   });
 
+  it("drains and authenticates one post-fetch transport category with its observed-send receipt", async () => {
+    const child = failingLiveChild((environment, target) => {
+      target.stderr.emit("data", diagnosticLine(environment, { path: ["provider", "transport", "fetch"], code: "dns" }));
+      target.stderr.emit("data", requestReceiptLine(environment, 1));
+    });
+    const diagnostics: unknown[] = [];
+    const terminalSnapshots: any[] = [];
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild: vi.fn((_command, _args, options) => { (child as any).diagnosticEnvironment = options.env; return child; }),
+      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+      retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+
+    expect(diagnostics).toEqual([expect.objectContaining({
+      invariant_id: "provider-transport-dns", tier: "transport", permitted_files: ["src/providers/retry.ts"], repair: "allowlisted"
+    })]);
+    expect(terminalSnapshots).toEqual([expect.objectContaining({
+      branch: "post_fetch_non_pass", observed_provider_requests: 1,
+      request_receipt: expect.objectContaining({ observed_provider_requests: 1, max_retries: 0 }),
+      diagnostic: { code: "provider-transport-dns" }, stream_truncated: false
+    })]);
+    expect(JSON.stringify({ diagnostics, terminalSnapshots })).not.toMatch(/injected-test-only|private\.example|hostname|stack|errno|syscall/u);
+  });
+
   it("drains an authenticated zero-send receipt and lifecycle after terminating a failed tools call", async () => {
     const child = failingLiveChild(() => undefined);
     child.stdin.end.mockImplementation(() => undefined);

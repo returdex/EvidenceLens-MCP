@@ -98,7 +98,16 @@ const diagnosticSpecs = [
   ["orchestration-identity", "orchestration", "src/tools/review.ts", ["orchestration", "identity"], "custom"],
   ["orchestration-namespace", "orchestration", "src/tools/review.ts", ["orchestration", "namespace"], "custom"],
   ["orchestration-collision", "orchestration", "src/tools/review.ts", ["orchestration", "collision"], "custom"],
-  ["orchestration-merged-schema", "orchestration", "src/tools/review.ts", ["orchestration", "merged"], "custom"]
+  ["orchestration-merged-schema", "orchestration", "src/tools/review.ts", ["orchestration", "merged"], "custom"],
+  ["provider-transport-dns", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "dns"],
+  ["provider-transport-tls", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "tls"],
+  ["provider-transport-connection", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "connection"],
+  ["provider-transport-network-timeout", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "network_timeout"],
+  ["provider-transport-timeout", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "timeout"],
+  ["provider-transport-http-error", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "http_error"],
+  ["provider-transport-rate-limited", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "rate_limited"],
+  ["provider-transport-server-error", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "server_error"],
+  ["provider-transport-retry-budget", "transport", "src/providers/retry.ts", ["provider", "transport", "fetch"], "retry_budget"]
 ];
 
 const featureKey = (path, code) => JSON.stringify({ path, code });
