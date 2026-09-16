@@ -1,4 +1,4 @@
-import type { McpServer } from "@modelcontextprotocol/server";
+import { ProtocolError, ProtocolErrorCode, type McpServer } from "@modelcontextprotocol/server";
 import { ZodError } from "zod/v4";
 import {
   reviewRequestSchema,
@@ -432,6 +432,7 @@ export async function handleReviewRequestForTest(
 }
 
 export function registerReviewTool(server: McpServer, options: ReviewHandlerOptions = {}): void {
+  const execute = async (input: unknown): Promise<ReviewToolResult> => handleReviewRequest(input, options);
   server.registerTool(
     "review_evidence",
     {
@@ -445,12 +446,25 @@ export function registerReviewTool(server: McpServer, options: ReviewHandlerOpti
         openWorldHint: false
       }
     },
-    async (input) => {
+    execute
+  );
+
+  // The high-level SDK validates a registered tool's input schema before its
+  // callback runs. Proof ownership must also cover that pre-callback failure
+  // path, so install the one-tool dispatch at the protocol request boundary.
+  // The review handler remains the schema authority and the provider adapter
+  // remains the primary receipt producer.
+  if (options.onRequestSettled !== undefined) {
+    server.server.removeRequestHandler("tools/call");
+    server.server.setRequestHandler("tools/call", async (request) => {
       try {
-        return await handleReviewRequest(input, options);
+        if (request.params.name !== "review_evidence") {
+          throw new ProtocolError(ProtocolErrorCode.InvalidParams, `Tool ${request.params.name} not found`);
+        }
+        return server.server.projectCallToolResult(await execute(request.params.arguments), undefined);
       } finally {
         options.onRequestSettled?.();
       }
-    }
-  );
+    });
+  }
 }

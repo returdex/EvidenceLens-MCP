@@ -189,6 +189,33 @@ async function withProtocolClient<T>(run: (request: (method: string, params?: Re
 }
 
 describe("provider request receipt ownership", () => {
+  it("settles an authenticated receipt at the protocol boundary when tool input validation fails", async () => {
+    const generation = "f".repeat(64);
+    const key = Buffer.alloc(32, 0x61);
+    const requestBudget = createProviderRequestBudget({ generation, key });
+    const receipts: ProviderRequestReceipt[] = [];
+    const server = createServer({
+      providerRequestProof: { requestBudget, receiptSink: (receipt) => { receipts.push(receipt); } }
+    });
+
+    await withProtocolClient(async (request) => {
+      await request("initialize", {
+        protocolVersion: LATEST_PROTOCOL_VERSION,
+        capabilities: {},
+        clientInfo: { name: "pre-handler-receipt-regression", version: "1" }
+      });
+      const result = await request("tools/call", {
+        name: "review_evidence",
+        arguments: { ...validRequest, unexpected: true }
+      });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+    }, server);
+
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 0 });
+    expect(verifyProviderRequestReceipt(receipts[0], { generation, key })).toBe(true);
+  });
+
   it("emits one authenticated zero-send receipt when tools/call settles before provider invocation", async () => {
     const generation = "a".repeat(64);
     const key = Buffer.alloc(32, 0x62);
@@ -292,6 +319,38 @@ function withoutLocalProviderConfig<T>(run: () => T): T {
 }
 
 describe("production executable provider startup contract", () => {
+  it("emits one authenticated zero-send receipt when a real stdio tools/call fails before tool execution", () => {
+    const generation = "e".repeat(64);
+    const key = Buffer.alloc(32, 0x65);
+    const messages = [
+      { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "receipt-process-regression", version: "1" } } },
+      { jsonrpc: "2.0", method: "notifications/initialized", params: {} },
+      { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "review_evidence", arguments: { ...validRequest, unexpected: true } } }
+    ];
+    const result = spawnSync(process.execPath, [resolve(process.cwd(), "dist/server.js")], {
+      env: {
+        ...process.env,
+        EVIDENCELENS_DISABLE_PROVIDER: "1",
+        EVIDENCELENS_DIAGNOSTIC_GENERATION: generation,
+        EVIDENCELENS_DIAGNOSTIC_KEY: key.toString("hex")
+      },
+      input: `${messages.map((message) => JSON.stringify(message)).join("\n")}\n`,
+      encoding: "utf8",
+      timeout: 5_000
+    });
+
+    expect(result.status).toBe(0);
+    const responses = result.stdout.trim().split("\n").map((line) => JSON.parse(line));
+    expect(responses.map((response) => response.id)).toEqual([1, 2]);
+    expect(parseToolPayload(responses[1].result)).toMatchObject({ ok: false, code: "INVALID_REQUEST" });
+    const receiptPrefix = "[evidencelens-provider-request] ";
+    const receiptLines = result.stderr.split("\n").filter((line) => line.startsWith(receiptPrefix));
+    expect(receiptLines).toHaveLength(1);
+    const receipt = JSON.parse(receiptLines[0].slice(receiptPrefix.length));
+    expect(receipt).toMatchObject({ reservation_count: 1, observed_provider_requests: 0 });
+    expect(verifyProviderRequestReceipt(receipt, { generation, key })).toBe(true);
+  });
+
   it("fails closed before MCP traffic for missing, invalid, and conflicting configuration", () => {
     const projectDirectory = process.cwd();
     const executable = resolve(projectDirectory, "dist/server.js");
