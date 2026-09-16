@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(80 of 106 plans executed; consumed live attempts are immutable authority:false evidence, and Plans 10-102 through 10-106 form the sole current archive/certification/build/live/sync namespace.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(93 of 121 plans executed; consumed live attempts remain immutable authority:false evidence, and Plans 10-117 through 10-121 form the sole current archive/certification/build/live/sync namespace.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -556,7 +556,7 @@ Plans:
 - [x] 10-115-PLAN.md — Run one fresh immutable-image generation with at most one provider HTTP send
 
 **Wave 110** *(gap closure; only reachable from a passed Wave 109 chain)*
-- [ ] 10-116-PLAN.md — Superseded; cannot synchronize the consumed failed 10-115 chain
+- [x] 10-116-PLAN.md — Superseded; cannot synchronize the consumed failed 10-115 chain
 
 **Wave 111** *(gap closure; archive consumed 10-115 and rotate authority)*
 - [x] 10-117-PLAN.md — Preserve 10-115 as authority:false and rotate registries to the bounded JSON recovery namespace
@@ -565,13 +565,13 @@ Plans:
 - [x] 10-118-PLAN.md — Hostile-test and exactly recertify bounded unique JSON-object extraction
 
 **Wave 113** *(gap closure; blocked on Wave 112 completion)*
-- [ ] 10-119-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+- [x] 10-119-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 114** *(gap closure; blocked on Wave 113 completion)*
 - [x] 10-120-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 115** *(gap closure; only reachable from a passed Wave 114 chain)*
-- [ ] 10-121-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [x] 10-121-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -615,7 +615,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 92/121 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 93/121 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

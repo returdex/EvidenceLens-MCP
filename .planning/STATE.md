@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-118-PLAN.md
-last_updated: "2026-09-16T17:05:17.679Z"
+stopped_at: Completed 10-119-PLAN.md
+last_updated: "2026-09-16T17:08:54.818Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 149
-  completed_plans: 121
-  percent: 81
+  completed_plans: 122
+  percent: 82
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 118 of 121
+Plan: 119 of 121
 
 - Phase: 10 of 11
-- Status: Plan 10-118 certified the bounded unique JSON extraction source with zero warning-or-higher findings
-- Progress: Plan 10-119 is the next exact-source immutable local build gate; Plans 10-120 and 10-121 remain downstream
-- Last activity: bound reviewed commit c2572f8, its 109-blob manifest and current certifier hashes after 143 focused and 679 provider-disabled tests
+- Status: Plan 10-119 promoted and independently authenticated the exact-source immutable local image
+- Progress: Plan 10-120 is the next one-request live proof gate; Plan 10-121 remains the passed-only synchronization gate
+- Last activity: bound image sha256:c00b86c8 to reviewed commit c2572f8 with one producer build and zero verifier rebuilds after 75 focused tests
 
 ## Decisions and Assumptions
 
@@ -186,6 +186,7 @@ Plan: 118 of 121
 - [Phase 10]: Only the 10-117/118/119/120/121 namespace may acquire current production authority.
 - [Phase 10]: Authorize Plan 10-119 only from reviewed commit c2572f8, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Accept wrapped provider output only when a bounded string/escape-aware scan yields exactly one complete object with the sole root key findings.
+- [Phase 10]: Promote generation 2e02484e2d300ef55b4a40b4e0c8618da7372e7d47ca8aeed659fa8197ccdbe8 as the sole READY Plan 10-119 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
 
 ### Blockers
 
@@ -272,16 +273,17 @@ Plan: 118 of 121
 | Phase 10 P114 | 1min | 1 tasks | 2 files |
 | Phase 10 P117 | 5min | 2 tasks | 8 files |
 | Phase 10 P118 | 5min | 2 tasks | 4 files |
+| Phase 10 P119 | 2min | 1 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T17:05:17.674Z
-- **Stopped at:** Completed 10-118-PLAN.md
+- **Last session:** 2026-09-16T17:08:54.813Z
+- **Stopped at:** Completed 10-119-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-119 to build and independently verify the exact certified source without a provider request.
+Execute Plan 10-120 against only the authenticated Plan 10-119 image with the declared one-request provider ceiling.
 
 ---
-*Last updated: 2026-09-17 after bounded JSON extraction exact-source certification*
+*Last updated: 2026-09-17 after exact-source immutable local image certification*
