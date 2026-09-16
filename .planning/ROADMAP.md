@@ -553,13 +553,13 @@ Plans:
 - [x] 10-114-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 109** *(gap closure; blocked on Wave 108 completion)*
-- [ ] 10-115-PLAN.md — Run one fresh immutable-image generation with at most one provider HTTP send
+- [x] 10-115-PLAN.md — Run one fresh immutable-image generation with at most one provider HTTP send
 
 **Wave 110** *(gap closure; only reachable from a passed Wave 109 chain)*
 - [ ] 10-116-PLAN.md — Superseded; cannot synchronize the consumed failed 10-115 chain
 
 **Wave 111** *(gap closure; archive consumed 10-115 and rotate authority)*
-- [ ] 10-117-PLAN.md — Preserve 10-115 as authority:false and rotate registries to the bounded JSON recovery namespace
+- [x] 10-117-PLAN.md — Preserve 10-115 as authority:false and rotate registries to the bounded JSON recovery namespace
 
 **Wave 112** *(gap closure; blocked on Wave 111 completion)*
 - [ ] 10-118-PLAN.md — Hostile-test and exactly recertify bounded unique JSON-object extraction
@@ -568,7 +568,7 @@ Plans:
 - [ ] 10-119-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 114** *(gap closure; blocked on Wave 113 completion)*
-- [ ] 10-120-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [x] 10-120-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 115** *(gap closure; only reachable from a passed Wave 114 chain)*
 - [ ] 10-121-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
@@ -615,7 +615,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 90/116 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 91/121 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

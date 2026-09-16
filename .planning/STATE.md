@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Planned post-10-115 recovery through 10-121
-last_updated: "2026-09-17T00:00:00.000Z"
+stopped_at: Completed 10-117-PLAN.md
+last_updated: "2026-09-16T16:59:02.496Z"
 progress:
   total_phases: 11
   completed_phases: 9
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 115 of 121
+Plan: 117 of 121
 
 - Phase: 10 of 11
-- Status: Plan 10-115 is consumed immutable gaps evidence after one authenticated provider send; fix e91d3ac closes the bounded JSON extraction defect
-- Progress: Plans 10-117 through 10-121 form the sole archive, recertification, build, live and passed-only synchronization chain
-- Last activity: planned the post-e91d3ac recovery after 35 focused tests, 678 complete provider-disabled tests and TypeScript build passed
+- Status: Plan 10-117 archived the consumed 10-115 attempt and rotated all production authority
+- Progress: Plan 10-118 is the current exact-source certification gate; Plans 10-119 through 10-121 remain downstream
+- Last activity: preserved generation add65ba8 as authority:false and restricted current authority to 10-117/118/119/120/121 after 679 provider-disabled tests
 
 ## Decisions and Assumptions
 
@@ -182,10 +182,12 @@ Plan: 115 of 121
 - [Phase 10]: Authorize Plan 10-114 only from reviewed commit 73e5b8f, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Accept DNS classification only for a descriptor-constrained direct Node Error subclass with an exact field and code whitelist.
 - [Phase 10]: Promote generation 43ca9ec8236a1619846e3118398fbd313f70d6ac31b1506d3e48e04112e0725c as the sole READY Plan 10-114 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation add65ba8 as byte-exact authority:false, replay_allowed:false history superseded by bounded JSON extraction fix e91d3ac.
+- [Phase 10]: Only the 10-117/118/119/120/121 namespace may acquire current production authority.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-110 live generation and Plan 10-111 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-120 live generation and Plan 10-121 synchronization.
 
 ## Performance Metrics
 
@@ -266,16 +268,17 @@ Plan: 115 of 121
 | Phase 10 P112 | 6min | 2 tasks | 8 files |
 | Phase 10 P113 | 5min | 2 tasks | 5 files |
 | Phase 10 P114 | 1min | 1 tasks | 2 files |
+| Phase 10 P117 | 5min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17
-- **Stopped at:** Planned post-10-115 recovery through 10-121
+- **Last session:** 2026-09-16T16:59:02.491Z
+- **Stopped at:** Completed 10-117-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-117 to archive consumed generation add65ba8, revoke stale 10-113/114 authority and rotate all fixed registries.
+Execute Plan 10-118 to hostile-test and exactly recertify the bounded JSON extraction source set.
 
 ---
-*Last updated: 2026-09-17 after bounded JSON extraction recovery planning*
+*Last updated: 2026-09-17 after bounded JSON recovery authority rotation*
