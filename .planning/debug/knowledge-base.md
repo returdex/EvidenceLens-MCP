@@ -91,3 +91,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Threaded authenticated `build.image_id` into the harness, required an immutable `sha256:` image reference, resolved the Compose review service to that exact image, and accepted only descriptor-constrained direct system-error subclasses while retaining keyset, code, MAC, receipt, and send-count allowlists.
 - **Files changed:** compose.yaml, scripts/automatic-live-review.mjs, scripts/docker-review-real.mjs, src/providers/retry.ts, tests/providers/deepseek.test.ts, tests/scripts/automatic-live-review.test.ts, tests/scripts/docker-review-real.test.ts
 ---
+
+## json-extraction-shape-diagnostic — JSON extraction discarded safe structural failure shape
+- **Date:** 2026-09-17
+- **Error patterns:** provider-json-object-extraction, bounded balanced parser, one provider send, repeated broad extraction diagnostic
+- **Root cause:** The bounded scanner preserved only success versus undefined, discarding closed structural failure state before the authenticated diagnostic sink.
+- **Fix:** Return a closed internal result union and register content-free features for no candidate, multiple candidates, unbalanced, wrong root, structural context, and malformed JSON while preserving existing acceptance and public errors.
+- **Files changed:** src/providers/deepseek.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts
+---
