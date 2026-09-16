@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-103-PLAN.md
-last_updated: "2026-09-16T13:05:28.029Z"
+stopped_at: Completed 10-104-PLAN.md
+last_updated: "2026-09-16T13:09:46.980Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 134
-  completed_plans: 112
+  completed_plans: 113
   percent: 84
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 103 of 106
+Plan: 104 of 106
 
 - Phase: 10 of 11
-- Status: Plan 10-103 certified the authenticated pre-sanitization diagnostic source with zero warning-or-higher findings
-- Progress: Plan 10-104 is the current exact-source local image gate; Plans 10-105 and 10-106 remain downstream
-- Last activity: hostile-tested all nine closed fetch categories and bound the exact 109-blob source identity at d10b8a1
+- Status: Plan 10-104 promoted one exact-source READY image with independent no-rebuild authentication
+- Progress: Plan 10-105 is the current one-request live proof gate; Plan 10-106 remains downstream
+- Last activity: bound generation ca24335c and image sha256:eb047e99 to the certified d10b8a1 source tuple
 
 ## Decisions and Assumptions
 
@@ -171,6 +171,7 @@ Plan: 103 of 106
 - [Phase 10]: Only the 10-102/103/104/105/106 namespace may acquire current certification, build, live-proof, and synchronization authority. — Stale and mixed tuples must fail before side effects.
 - [Phase 10]: Authorize Plan 10-104 only from reviewed commit d10b8a1, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
 - [Phase 10]: Keep unknown, multiple and detail-bearing fetch failures ambiguous with zero follow-up request budget. — Closed structural diagnostics must not guess categories or disclose arbitrary transport detail.
+- [Phase 10]: Promote generation ca24335c677389cf68819e9b58f8da29d55bb047ba570d8a175ba8e235693874 as the sole READY Plan 10-104 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -248,16 +249,17 @@ Plan: 103 of 106
 | Phase 10 P99 | 1min | 1 tasks | 2 files |
 | Phase 10 P102 | 9min | 2 tasks | 8 files |
 | Phase 10 P103 | 4min | 2 tasks | 5 files |
+| Phase 10 P104 | 2min | 1 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T13:05:08.799Z
-- **Stopped at:** Completed 10-103-PLAN.md
+- **Last session:** 2026-09-16T13:09:46.975Z
+- **Stopped at:** Completed 10-104-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-104 to build and authenticate a fresh exact-source local Docker image.
+Execute Plan 10-105 once to capture the bounded credentialed Docker MCP proof.
 
 ---
-*Last updated: 2026-09-16 after authenticated diagnostic source certification*
+*Last updated: 2026-09-16 after exact-source local image authentication*
