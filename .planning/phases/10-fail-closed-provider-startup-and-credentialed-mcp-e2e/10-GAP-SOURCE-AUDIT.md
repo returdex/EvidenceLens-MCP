@@ -196,3 +196,34 @@ Plan 10-80 consumed generation `15d6e9cc11282504d9b9feafeaddeced0522ccd3273ef7df
 - Any source/test edit after Plan 10-83 certification returns to Plan 10-82 ownership and forces complete recertification.
 
 **Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed-failure facts, graceful-drain fix, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
+
+## Post-10-85 Authenticated-Stderr Recovery: Plans 10-87 through 10-91
+
+Plan 10-85 consumed generation `b8bb4ddb586f72216d62f966f2fbd83d0f730aff60426141e9c46fb021c0dd82` as immutable `gaps_found` evidence with tools=1, sends=0, post_tools_pre_fetch/pre_fetch, clean exit/close 0, null receipt, stream_truncated=true and failed local validators. Fix `18ca920` makes stderr end/close the collector terminal instead of process exit/close, while preserving rejection after true terminal; `0555466` archives the diagnosis. Verified counts are harness 110, harness+proof 173 and provider-disabled 627, plus build and diff. These edits make 10-83 certification and 10-84 image stale, and 10-86 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 87-91 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 87-91 | COVERED |
+| REQ | PROV-01 | Only a complete fresh stderr-terminal-corrected chain may close provenance | 87-91 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 90 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second zero | 90 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 87-91 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 87-91 | COVERED |
+| FAILURE | 10-85-CONSUMED | Preserve exact generation, counters, diagnostic, truncation, exit/close and failed validators; revoke replay/sync authority | 87-88, 90-91 | COVERED |
+| FIX | STDERR-TERMINAL | Accept buffered authenticated frames until stderr end/close and reject frames after true terminal | 88, 90 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 87 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 88 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-88 source | 89 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 90 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-87/88/89/90 authority may update final truth | 91 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-87, 10-88, 10-89 and 10-91 have provider-request budget 0. Only Plan 10-90 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-90 cannot rebuild because it must consume the exact certified Plan 10-89 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-88 certification returns to Plan 10-87 ownership and forces complete recertification.
+
+**Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed-failure facts, stderr-terminal fix, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-84-PLAN.md
-last_updated: "2026-09-16T10:43:44.312Z"
+stopped_at: Planned 10-87 through 10-91 after consumed 10-85 stderr-terminal failure
+last_updated: "2026-09-16T12:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 114
+  total_plans: 119
   completed_plans: 101
-  percent: 89
+  percent: 85
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 85 of 86
+Plan: 87 of 91
 
 - Phase: 10 of 11
-- Status: exact graceful-drain image sha256:2cb9832 is READY and independently authenticated with zero verifier rebuilds
-- Progress: Plans 10-82 through 10-84 are complete; Plan 10-85 is the sole current bounded live-proof gate
-- Last activity: promoted generation e4c57be5 after one fixed-path local build, 69/69 focused tests and exact no-rebuild proof-chain audit
+- Status: Plan 10-85 is consumed immutable gaps evidence; fixes 18ca920/0555466 require complete recertification and a fresh image
+- Progress: Plans 10-87 through 10-91 are planned as a strict sequential recovery chain; Plan 10-87 is next
+- Last activity: fixed stderr terminal ownership, archived the debug record, and verified harness 110, harness+proof 173, provider-disabled 627, build and diff
 
 ## Decisions and Assumptions
 
@@ -150,6 +150,8 @@ Plan: 85 of 86
 - [Phase 10]: Authorize Plan 10-84 only from reviewed commit cf04ac2, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
 - [Phase 10]: Reserve SIGTERM for bounded graceful-drain timeout while preserving the existing absolute lifecycle deadline. — Natural cleanup must retain authenticated receipt and lifecycle evidence without permitting an unbounded child.
 - [Phase 10]: Promote generation e4c57be578fdb26209f8ec9a79ad5a781198cf1d29465cdacf8a71c0aea618ba as the sole READY Plan 10-84 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation b8bb4ddb586f72216d62f966f2fbd83d0f730aff60426141e9c46fb021c0dd82 as byte-exact authority:false, replay_allowed:false history with tools=1, sends=0, post_tools_pre_fetch, clean exit/close 0, null receipt and truncated stderr.
+- [Phase 10]: Fix 18ca920 makes stderr end/close—not process exit/close—the authenticated diagnostic/receipt terminal while rejecting frames after true terminal; 10-83/84 are stale and only Plans 10-87 through 10-91 may acquire current authority.
 
 ### Blockers
 
@@ -220,12 +222,12 @@ Plan: 85 of 86
 ## Session Continuity
 
 - **Last session:** 2026-09-16T10:43:44.307Z
-- **Stopped at:** Completed 10-84-PLAN.md
+- **Stopped at:** Planned 10-87 through 10-91 after consumed 10-85 stderr-terminal failure
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-85 once against the exact Plan 10-84 image with at most one provider HTTP send.
+Execute Plan 10-87 to archive 10-85 and rotate all fixed authority registries before recertification.
 
 ---
 *Last updated: 2026-09-16 after exact graceful-drain image authentication*
