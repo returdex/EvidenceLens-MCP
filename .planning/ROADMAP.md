@@ -502,7 +502,7 @@ Plans:
 - [x] 10-97-PLAN.md — Preserve 10-95 as authority:false and rotate registries to the protocol-boundary recovery namespace
 
 **Wave 93** *(gap closure; blocked on Wave 92 completion)*
-- [ ] 10-98-PLAN.md — Hostile-test and exactly recertify low-level tools/call receipt settlement
+- [x] 10-98-PLAN.md — Hostile-test and exactly recertify low-level tools/call receipt settlement
 
 **Wave 94** *(gap closure; blocked on Wave 93 completion)*
 - [ ] 10-99-PLAN.md — Build and authenticate a fresh exact-source local Docker image
@@ -551,7 +551,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 79/101 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 80/101 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
