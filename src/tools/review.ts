@@ -37,6 +37,7 @@ export interface ReviewHandlerOptions {
   providerConfig?: Pick<ProviderConfig, "model" | "temperature" | "maxTokens">;
   analyzer?: ReviewAnalyzer;
   diagnosticSink?: DiagnosticSink;
+  onRequestSettled?: () => void;
 }
 
 const DEFAULT_PROVIDER_INFERENCE = {
@@ -444,6 +445,12 @@ export function registerReviewTool(server: McpServer, options: ReviewHandlerOpti
         openWorldHint: false
       }
     },
-    async (input) => handleReviewRequest(input, options)
+    async (input) => {
+      try {
+        return await handleReviewRequest(input, options);
+      } finally {
+        options.onRequestSettled?.();
+      }
+    }
   );
 }

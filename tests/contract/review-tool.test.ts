@@ -15,6 +15,8 @@ import { createServer } from "../../src/server.js";
 import { handleReviewRequest } from "../../src/tools/review.js";
 import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
 import type { ReviewProvider } from "../../src/providers/types.js";
+import { createProviderRequestBudget, verifyProviderRequestReceipt } from "../../src/providers/request-budget.js";
+import type { ProviderRequestReceipt } from "../../src/providers/types.js";
 
 const validRequest = {
   reviewId: "review-001",
@@ -145,9 +147,8 @@ describe("review_evidence schema and error contract", () => {
   });
 });
 
-async function withProtocolClient<T>(run: (request: (method: string, params?: Record<string, unknown>) => Promise<unknown>) => Promise<T>) {
+async function withProtocolClient<T>(run: (request: (method: string, params?: Record<string, unknown>) => Promise<unknown>) => Promise<T>, server = createServer()) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  const server = createServer();
   const pending = new Map<string | number, (message: JSONRPCMessage) => void>();
   let requestId = 1;
 
@@ -186,6 +187,94 @@ async function withProtocolClient<T>(run: (request: (method: string, params?: Re
     await clientTransport.close();
   }
 }
+
+describe("provider request receipt ownership", () => {
+  it("emits one authenticated zero-send receipt when tools/call settles before provider invocation", async () => {
+    const generation = "a".repeat(64);
+    const key = Buffer.alloc(32, 0x62);
+    const requestBudget = createProviderRequestBudget({ generation, key });
+    const receipts: ProviderRequestReceipt[] = [];
+    let providerCalls = 0;
+    const provider: ReviewProvider = {
+      name: "deepseek",
+      async review() {
+        providerCalls += 1;
+        throw new Error("provider must not be reached");
+      }
+    };
+    const server = createServer({
+      provider,
+      providerRequestProof: { requestBudget, receiptSink: (receipt) => { receipts.push(receipt); } }
+    });
+
+    await withProtocolClient(async (request) => {
+      await request("initialize", {
+        protocolVersion: LATEST_PROTOCOL_VERSION,
+        capabilities: {},
+        clientInfo: { name: "receipt-regression", version: "1" }
+      });
+      const result = await request("tools/call", { name: "review_evidence", arguments: validRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "INVALID_REVIEW_ROLES" });
+    }, server);
+
+    expect(providerCalls).toBe(0);
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 0 });
+    expect(verifyProviderRequestReceipt(receipts[0], { generation, key })).toBe(true);
+  });
+
+  it("does not duplicate the adapter receipt at tool settlement or on a second one-shot call", async () => {
+    const generation = "b".repeat(64);
+    const key = Buffer.alloc(32, 0x63);
+    const requestBudget = createProviderRequestBudget({ generation, key });
+    const receipts: ProviderRequestReceipt[] = [];
+    let transportCalls = 0;
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent",
+        baseUrl: "https://example.invalid",
+        model: "deepseek-v4-pro",
+        timeoutMs: 1_000,
+        maxRetries: 0,
+        maxTotalWaitMs: 1_000,
+        temperature: 0.2,
+        maxTokens: 400
+      },
+      providerTransport: {
+        async fetch() {
+          transportCalls += 1;
+          return new Response("not-json", { status: 200, headers: { "content-type": "application/json" } });
+        }
+      },
+      providerRequestProof: {
+        requestBudget,
+        receiptSink: (receipt) => {
+          if (receipts.length !== 0) throw new Error("duplicate receipt");
+          receipts.push(receipt);
+        }
+      }
+    });
+
+    await withProtocolClient(async (request) => {
+      await request("initialize", {
+        protocolVersion: LATEST_PROTOCOL_VERSION,
+        capabilities: {},
+        clientInfo: { name: "adapter-receipt-regression", version: "1" }
+      });
+      const first = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(first)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+      expect(receipts).toHaveLength(1);
+
+      const second = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(second)).toMatchObject({ ok: false });
+      expect(receipts).toHaveLength(1);
+    }, server);
+
+    expect(transportCalls).toBe(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1 });
+    expect(verifyProviderRequestReceipt(receipts[0], { generation, key })).toBe(true);
+  });
+});
 
 function parseToolPayload(toolResult: unknown) {
   const parsedToolResult = reviewToolResultSchema.parse(toolResult);
