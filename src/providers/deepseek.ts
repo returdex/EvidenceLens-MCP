@@ -117,9 +117,13 @@ function findingsFromRoot(value: unknown): ProviderFindingDraft[] | undefined {
   return Array.isArray(findings) ? findings as ProviderFindingDraft[] : undefined;
 }
 
-function extractSingleJsonObject(value: string): ProviderFindingDraft[] | undefined {
+type JsonObjectExtractionFailure = "no_candidate" | "multiple_candidates" | "unbalanced" | "wrong_root" | "structural_context" | "malformed_json";
+type JsonObjectExtraction = { findings: ProviderFindingDraft[] } | { failure: JsonObjectExtractionFailure };
+
+function extractSingleJsonObject(value: string): JsonObjectExtraction {
   try {
-    return findingsFromRoot(JSON.parse(value));
+    const findings = findingsFromRoot(JSON.parse(value));
+    return findings === undefined ? { failure: "wrong_root" } : { findings };
   } catch { /* A bounded wrapper is handled below. */ }
 
   let start = -1;
@@ -127,6 +131,7 @@ function extractSingleJsonObject(value: string): ProviderFindingDraft[] | undefi
   let inString = false;
   let escaped = false;
   let structuralGarbage = false;
+  let malformedCandidate = false;
   const objects: unknown[] = [];
 
   for (let index = 0; index < value.length; index += 1) {
@@ -155,14 +160,19 @@ function extractSingleJsonObject(value: string): ProviderFindingDraft[] | undefi
       depth -= 1;
       if (depth === 0) {
         try { objects.push(JSON.parse(value.slice(start, index + 1))); }
-        catch { structuralGarbage = true; }
+        catch { malformedCandidate = true; }
         start = -1;
       }
     }
   }
 
-  if (start >= 0 || inString || structuralGarbage || objects.length !== 1) return undefined;
-  return findingsFromRoot(objects[0]);
+  if (start >= 0 || inString) return { failure: "unbalanced" };
+  if (structuralGarbage) return { failure: "structural_context" };
+  if (malformedCandidate) return { failure: "malformed_json" };
+  if (objects.length === 0) return { failure: "no_candidate" };
+  if (objects.length > 1) return { failure: "multiple_candidates" };
+  const findings = findingsFromRoot(objects[0]);
+  return findings === undefined ? { failure: "wrong_root" } : { findings };
 }
 
 function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderFindingDraft[] {
@@ -179,14 +189,16 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
     invalidResponse(diagnostics, ["provider", "message", "reasoning_content"], "invalid_type");
   }
   const candidates = [content, ...(typeof content === "string" && content.length === 0 ? [reasoningContent] : [])];
+  let extractionFailure: JsonObjectExtractionFailure = "no_candidate";
   for (const candidate of candidates) {
     if (typeof candidate !== "string" || candidate.length > 1_000_000 || candidate.length === 0) continue;
-    const findings = extractSingleJsonObject(candidate);
-    if (findings !== undefined) {
-      return findings;
+    const extraction = extractSingleJsonObject(candidate);
+    if ("findings" in extraction) {
+      return extraction.findings;
     }
+    extractionFailure = extraction.failure;
   }
-  invalidResponse(diagnostics, ["provider", "content", "object"], "invalid_format");
+  invalidResponse(diagnostics, ["provider", "content", "object"], extractionFailure);
 }
 
 export function createDeepSeekProvider(

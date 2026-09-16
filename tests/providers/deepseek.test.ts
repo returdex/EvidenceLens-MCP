@@ -171,20 +171,23 @@ describe("DeepSeek provider adapter", () => {
   });
 
   it.each([
-    ["multiple objects", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`],
-    ["truncated object", JSON.stringify(draft).slice(0, -1)],
-    ["unmatched trailing object", `${JSON.stringify(draft)}\n{`],
-    ["unsafe trailing array", `${JSON.stringify(draft)}\n[]`],
-    ["extra root key", JSON.stringify({ ...draft, extra: true })],
-    ["prototype-pollution root key", `{"findings":[],"__proto__":{"polluted":true}}`],
-    ["oversized input", "x".repeat(1_000_001)]
-  ])("rejects ambiguous or unsafe bounded object content: %s", async (_name, content) => {
+    ["no candidate", "private prose with no JSON object", { path: ["provider", "content", "object"], code: "no_candidate" }],
+    ["multiple objects", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "multiple_candidates" }],
+    ["truncated object", JSON.stringify(draft).slice(0, -1), { path: ["provider", "content", "object"], code: "unbalanced" }],
+    ["unmatched trailing object", `${JSON.stringify(draft)}\n{`, { path: ["provider", "content", "object"], code: "unbalanced" }],
+    ["unsafe trailing array", `${JSON.stringify(draft)}\n[]`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["extra root key", JSON.stringify({ ...draft, extra: true }), { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["prototype-pollution root key", `{"findings":[],"__proto__":{"polluted":true}}`, { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["malformed candidate", `private-prefix {"findings":[} private-suffix`, { path: ["provider", "content", "object"], code: "malformed_json" }],
+    ["oversized input", "x".repeat(1_000_001), { path: ["provider", "content", "bytes"], code: "too_big" }]
+  ] as const)("rejects ambiguous or unsafe bounded object content with one safe shape: %s", async (_name, content, feature) => {
     const diagnostics = recordingSink();
     const transport: DeepSeekTransport = {
       fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
     };
-    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
-    expect(diagnostics.features).toHaveLength(1);
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([feature]);
+    expect(JSON.stringify(diagnostics.features)).not.toMatch(/private|prefix|suffix|prose|extra|polluted|findings|1_000_001/iu);
   });
 
   it("maps non-transient HTTP failures without leaking upstream details", async () => {
@@ -250,7 +253,7 @@ describe("DeepSeek provider adapter", () => {
       { response: { choices: [] }, feature: { path: ["provider", "choices"], code: "too_small" } },
       { response: { choices: [{ message: { content: 42 } }] }, feature: { path: ["provider", "message", "content"], code: "invalid_type" } },
       { response: { choices: [{ message: { content: "x".repeat(1_000_001) } }] }, feature: { path: ["provider", "content", "bytes"], code: "too_big" } },
-      { response: { choices: [{ message: { content: "not-json" } }] }, feature: { path: ["provider", "content", "object"], code: "invalid_format" } }
+      { response: { choices: [{ message: { content: "not-json" } }] }, feature: { path: ["provider", "content", "object"], code: "no_candidate" } }
     ];
     for (const entry of cases) {
       const diagnostic = recordingSink();
