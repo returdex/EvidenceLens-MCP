@@ -59,3 +59,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Bind collector terminality to stderr end/close and lifecycle late-output rejection to each stream's own completion; retain rejection of frames emitted after the actual stderr terminal boundary and cover both process-event orders with provider-disabled production-harness regressions.
 - **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts
 ---
+
+## docker-compose-clean-exit-no-receipt — Pre-provider tools/call failure skipped the sole receipt producer
+- **Date:** 2026-09-16
+- **Error patterns:** AUTOMATIC_TERMINAL_STATE, tools/call count 1, provider sends 0, null request receipt, stream_truncated, clean exit 0, post_tools_pre_fetch
+- **Root cause:** Provider receipt emission was owned solely by createDeepSeekProvider.review(). Any tools/call failure before provider invocation bypassed its finally block, leaving a valid reservation and completed tools call with no authenticated receipt.
+- **Fix:** Coordinate receipt ownership at createServer: preserve adapter emission as primary, record successful emission, and invoke the same authenticated budget receipt sink at tool settlement only when the adapter never emitted; retain one-shot duplicate rejection.
+- **Files changed:** src/server.ts, src/tools/review.ts, tests/contract/review-tool.test.ts
+---
