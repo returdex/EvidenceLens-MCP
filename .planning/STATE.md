@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-92-PLAN.md
-last_updated: "2026-09-16T11:44:08.459Z"
+stopped_at: Completed 10-93-PLAN.md
+last_updated: "2026-09-16T11:50:08.605Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 124
-  completed_plans: 105
+  completed_plans: 106
   percent: 85
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 92 of 96
+Plan: 93 of 96
 
 - Phase: 10 of 11
-- Status: Plan 10-90 is archived as immutable authority:false gaps evidence; replay and synchronization are revoked
-- Progress: Plan 10-92 completed registry rotation; Plans 10-93 through 10-96 are the sole current recertification, build, bounded-live and passed-only sync chain
-- Last activity: archived generation 57b76915 and rotated all fixed authority paths; provider-disabled suite 631/631
+- Status: Plan 10-93 certified the request-boundary receipt fix with zero-warning deep and ASVS review
+- Progress: Plans 10-94 through 10-96 remain the sole current build, bounded-live and passed-only sync chain
+- Last activity: certified commit bfbbe49 and its exact 109-blob source identity; focused 255/255 and provider-disabled 631/631
 
 ## Decisions and Assumptions
 
@@ -159,6 +159,8 @@ Plan: 92 of 96
 - [Phase 10]: Fix 94184b2 makes the provider adapter the primary receipt producer and tool settlement an authenticated fallback only when the adapter emitted nothing; 10-88/89 are stale and only Plans 10-92 through 10-96 may acquire current authority.
 - [Phase 10]: Preserve generation 57b76915 as authority:false, replay_allowed:false historical gaps evidence superseded by request-boundary fix 94184b2.
 - [Phase 10]: Only the 10-92/93/94/95/96 namespace may acquire current certification, build, live-proof, and synchronization authority.
+- [Phase 10]: Authorize Plan 10-94 only from reviewed commit bfbbe49, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
+- [Phase 10]: Keep the provider adapter as primary receipt producer and permit request-settlement fallback only when no adapter receipt was emitted. — The shared one-shot coordinator prevents duplicate receipts and provider sends.
 
 ### Blockers
 
@@ -229,16 +231,17 @@ Plan: 92 of 96
 | Phase 10 P88 | 4min | 2 tasks | 4 files |
 | Phase 10 P89 | 3min | 1 tasks | 1 files |
 | Phase 10 P92 | 6min | 2 tasks | 8 files |
+| Phase 10 P93 | 3min | 2 tasks | 4 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T11:44:08.455Z
-- **Stopped at:** Completed 10-92-PLAN.md
+- **Last session:** 2026-09-16T11:50:08.601Z
+- **Stopped at:** Completed 10-93-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-93 to hostile-test and exactly recertify the request-boundary receipt coordination fix.
+Execute Plan 10-94 to build and authenticate one local image from the exact Plan 10-93 source identity.
 
 ---
-*Last updated: 2026-09-16 after request-boundary recovery authority rotation*
+*Last updated: 2026-09-16 after exact request-boundary source certification*
