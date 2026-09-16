@@ -511,10 +511,10 @@ Plans:
 - [x] 10-100-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 96** *(gap closure; only reachable from a passed Wave 95 chain)*
-- [ ] 10-101-PLAN.md — Superseded; cannot synchronize the consumed failed 10-100 chain
+- [x] 10-101-PLAN.md — Superseded; cannot synchronize the consumed failed 10-100 chain
 
 **Wave 97** *(gap closure; archive consumed 10-100 and rotate authority)*
-- [ ] 10-102-PLAN.md — Preserve 10-100 as authority:false and rotate registries to the authenticated-diagnostic recovery namespace
+- [x] 10-102-PLAN.md — Preserve 10-100 as authority:false and rotate registries to the authenticated-diagnostic recovery namespace
 
 **Wave 98** *(gap closure; blocked on Wave 97 completion)*
 - [ ] 10-103-PLAN.md — Hostile-test and exactly recertify authenticated pre-sanitization fetch diagnostics
@@ -566,7 +566,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 81/101 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 82/106 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
