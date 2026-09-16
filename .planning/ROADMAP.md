@@ -484,7 +484,7 @@ Plans:
 - [ ] 10-91-PLAN.md — Superseded; cannot synchronize the consumed failed 10-90 chain
 
 **Wave 87** *(gap closure; archive consumed 10-90 and rotate authority)*
-- [ ] 10-92-PLAN.md — Preserve 10-90 as authority:false and rotate registries to the request-boundary recovery namespace
+- [x] 10-92-PLAN.md — Preserve 10-90 as authority:false and rotate registries to the request-boundary recovery namespace
 
 **Wave 88** *(gap closure; blocked on Wave 87 completion)*
 - [ ] 10-93-PLAN.md — Hostile-test and exactly recertify request-boundary receipt coordination
@@ -536,7 +536,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 75/91 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 76/96 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
