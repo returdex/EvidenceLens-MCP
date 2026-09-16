@@ -83,3 +83,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Assigned child diagnostics an independent `EVIDENCELENS_CHILD_DIAGNOSTIC_*` capability namespace, forwarded both capability pairs into the Docker child, and added coexistence plus exact server-to-retry offline regressions for all nine terminal fetch categories.
 - **Files changed:** src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/diagnostics.test.ts, tests/contract/review-tool.test.ts, tests/scripts/docker-review-real.test.ts
 ---
+
+## container-child-diagnostic-forwarding — Certified image identity was not enforced at Compose runtime
+- **Date:** 2026-09-17
+- **Error patterns:** authenticated send receipt, missing child diagnostic, stream_truncated, stale mutable Compose tag, certified image mismatch, Node system Error subclass
+- **Root cause:** The live chain recorded the authenticated build image ID only as evidence while Docker Compose ran a stale mutable tag; after pinning the exact image, transport classification still rejected Node's genuine direct system `Error` subclass because it required exact prototype equality.
+- **Fix:** Threaded authenticated `build.image_id` into the harness, required an immutable `sha256:` image reference, resolved the Compose review service to that exact image, and accepted only descriptor-constrained direct system-error subclasses while retaining keyset, code, MAC, receipt, and send-count allowlists.
+- **Files changed:** compose.yaml, scripts/automatic-live-review.mjs, scripts/docker-review-real.mjs, src/providers/retry.ts, tests/providers/deepseek.test.ts, tests/scripts/automatic-live-review.test.ts, tests/scripts/docker-review-real.test.ts
+---
