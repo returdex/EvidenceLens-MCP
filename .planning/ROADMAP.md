@@ -574,7 +574,7 @@ Plans:
 - [x] 10-121-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 **Wave 116** *(gap closure; archive consumed 10-120 and rotate authority)*
-- [ ] 10-122-PLAN.md — Preserve 10-120 as authority:false and rotate registries to the extraction-shape recovery namespace
+- [x] 10-122-PLAN.md — Preserve 10-120 as authority:false and rotate registries to the extraction-shape recovery namespace
 
 **Wave 117** *(gap closure; blocked on Wave 116 completion)*
 - [ ] 10-123-PLAN.md — Hostile-test and exactly recertify the closed extraction-shape diagnostic taxonomy
@@ -632,7 +632,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 93/121 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 94/126 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

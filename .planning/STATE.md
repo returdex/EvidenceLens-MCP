@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Planned 10-122 through 10-126 gap-closure chain
-last_updated: "2026-09-17T00:00:00.000Z"
+stopped_at: Completed 10-122-PLAN.md
+last_updated: "2026-09-16T17:29:29.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 149
-  completed_plans: 122
-  percent: 82
+  total_plans: 154
+  completed_plans: 123
+  percent: 80
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 121 of 126
+Plan: 122 of 126
 
 - Phase: 10 of 11
-- Status: Plan 10-120 is consumed immutable gaps_found evidence; extraction-shape diagnostics are fixed and the replacement chain is planned
-- Progress: Plan 10-122 is next; Plans 10-123 through 10-126 recertify, rebuild, run one bounded live generation and synchronize only a pass
-- Last activity: planned closed content-free extraction diagnostic recovery after fixes e213bda/d397109 and 681 provider-disabled tests
+- Status: Plan 10-120 is immutable authority:false history and production authority is rotated to Plans 10-123 through 10-126
+- Progress: Plan 10-123 is next; Plans 10-123 through 10-126 recertify, rebuild, run one bounded live generation and synchronize only a pass
+- Last activity: archived generation 3d1a7751, rotated all fixed registries, and passed 681 provider-disabled tests
 
 ## Decisions and Assumptions
 
@@ -187,6 +187,8 @@ Plan: 121 of 126
 - [Phase 10]: Authorize Plan 10-119 only from reviewed commit c2572f8, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Accept wrapped provider output only when a bounded string/escape-aware scan yields exactly one complete object with the sole root key findings.
 - [Phase 10]: Promote generation 2e02484e2d300ef55b4a40b4e0c8618da7372e7d47ca8aeed659fa8197ccdbe8 as the sole READY Plan 10-119 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
+- [Phase 10]: Preserve generation 3d1a7751 as byte-exact authority:false, replay_allowed:false history superseded by extraction-diagnostic fixes e213bda/d397109. — Consumed paid evidence cannot regain replay or synchronization authority.
+- [Phase 10]: Only the 10-122/123/124/125/126 namespace may acquire current production authority. — Stale and mixed tuples must fail before external side effects.
 
 ### Blockers
 
@@ -274,16 +276,17 @@ Plan: 121 of 126
 | Phase 10 P117 | 5min | 2 tasks | 8 files |
 | Phase 10 P118 | 5min | 2 tasks | 4 files |
 | Phase 10 P119 | 2min | 1 tasks | 2 files |
+| Phase 10 P122 | 10min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T17:08:54.813Z
-- **Stopped at:** Planned 10-122 through 10-126 gap-closure chain
+- **Last session:** 2026-09-16T17:29:08.026Z
+- **Stopped at:** Completed 10-122-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-122 to archive 10-120 and rotate authority before exact recertification.
+Execute Plan 10-123 to hostile-test and exactly recertify the closed extraction-shape diagnostic taxonomy.
 
 ---
-*Last updated: 2026-09-17 after planning extraction-shape diagnostic recovery*
+*Last updated: 2026-09-17 after completing extraction-diagnostic authority rotation*
