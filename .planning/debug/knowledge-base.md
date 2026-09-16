@@ -51,3 +51,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Close stdin and allow a bounded graceful lifecycle drain before sending fallback SIGTERM; after forced termination, await the existing authoritative bounded lifecycle before sampling authenticated receipt and terminal collectors.
 - **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts
 ---
+
+## clean-exit-missing-receipt — Process terminal events preceded buffered stderr delivery
+- **Date:** 2026-09-16
+- **Error patterns:** tools/call count 1, provider sends 0, exit 0, close 0, null request receipt, stream_truncated, post_tools_pre_fetch, execution validation failed, proof validation failed
+- **Root cause:** runReviewHarness marked authenticated diagnostic and receipt collectors terminal on child process exit/close, and captureChildLifecycle rejected data after that process pair, even though Node may deliver already-buffered stderr data before the stderr stream emits end/close.
+- **Fix:** Bind collector terminality to stderr end/close and lifecycle late-output rejection to each stream's own completion; retain rejection of frames emitted after the actual stderr terminal boundary and cover both process-event orders with provider-disabled production-harness regressions.
+- **Files changed:** scripts/docker-review-real.mjs, tests/scripts/docker-review-real.test.ts
+---
