@@ -1,0 +1,81 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "direct_findings_object_accepted": "passed",
+    "json_fenced_findings_object_accepted": "passed",
+    "plain_fenced_findings_object_accepted": "passed",
+    "prose_wrapped_findings_object_accepted": "passed",
+    "nested_objects_and_arrays_accepted": "passed",
+    "braces_quotes_backslashes_and_escapes_inside_strings_accepted": "passed",
+    "multiple_candidate_objects_rejected": "passed",
+    "truncated_nesting_rejected": "passed",
+    "truncated_string_state_rejected": "passed",
+    "truncated_escape_state_rejected": "passed",
+    "unmatched_trailing_object_rejected": "passed",
+    "leading_structural_wrapper_rejected": "passed",
+    "trailing_structural_wrapper_rejected": "passed",
+    "non_whitespace_structural_tail_rejected": "passed",
+    "extra_root_key_rejected": "passed",
+    "missing_findings_root_rejected": "passed",
+    "proto_pollution_root_rejected": "passed",
+    "constructor_pollution_root_rejected": "passed",
+    "prototype_pollution_root_rejected": "passed",
+    "array_root_rejected": "passed",
+    "scalar_root_rejected": "passed",
+    "invalid_json_rejected": "passed",
+    "oversize_input_rejected_before_scan": "passed",
+    "all_invalid_shapes_map_to_provider_invalid_response": "passed",
+    "all_invalid_shapes_emit_one_sanitized_diagnostic": "passed",
+    "all_invalid_shapes_have_zero_follow_up_requests": "passed",
+    "stale_10_115_source_authority_rejected": "passed",
+    "mixed_10_115_and_10_118_authority_rejected": "passed",
+    "stale_authority_cannot_reach_build": "passed",
+    "stale_authority_cannot_reach_live": "passed",
+    "stale_authority_cannot_reach_sync": "passed",
+    "failed_local_validation_cannot_authorize_sync": "passed",
+    "max_retries_zero_in_proof_mode": "passed",
+    "no_fallback_or_alternate_request": "passed",
+    "no_replay_or_diagnostic_second_call": "passed"
+  },
+  "extraction_contract": {
+    "maximum_content_characters": 1000000,
+    "accepted_complete_object_count": 1,
+    "accepted_root_own_keys": [
+      "findings"
+    ],
+    "scan_state": [
+      "brace_depth",
+      "in_string",
+      "escaped"
+    ],
+    "unsafe_result": "PROVIDER_INVALID_RESPONSE",
+    "follow_up_request_budget": 0
+  },
+  "verification": {
+    "focused_extraction_tests": 35,
+    "focused_suite_files": 5,
+    "focused_suite_tests": 143,
+    "full_offline_test_files": 43,
+    "full_offline_tests": 679,
+    "minimum_focused_extraction_tests": 35,
+    "minimum_full_offline_tests": 678,
+    "focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts tests/scripts/automatic-live-review.test.ts tests/scripts/automatic-live-review-cli.test.ts tests/scripts/audit-proof-chain.test.ts tests/scripts/sync-proof-state.test.ts",
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "hermetic_provider_transport": "passed",
+    "hermetic_temporary_git_repositories": "passed"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "local_docker_builds": 0,
+    "local_docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  },
+  "status": "passed"
+}
