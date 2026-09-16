@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-83-PLAN.md
-last_updated: "2026-09-16T10:40:17.212Z"
+stopped_at: Completed 10-84-PLAN.md
+last_updated: "2026-09-16T10:43:44.312Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 114
-  completed_plans: 100
-  percent: 88
+  completed_plans: 101
+  percent: 89
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 84 of 86
+Plan: 85 of 86
 
 - Phase: 10 of 11
-- Status: exact graceful-drain source commit cf04ac2 is READY with zero-warning deep and ASVS L1 review; no current image exists yet
-- Progress: Plans 10-82 and 10-83 are complete; Plan 10-84 is the sole current local-image gate
-- Last activity: certified 109 non-planning blobs after focused 223/223, provider-disabled 625/625, TypeScript build and exact no-drift audits
+- Status: exact graceful-drain image sha256:2cb9832 is READY and independently authenticated with zero verifier rebuilds
+- Progress: Plans 10-82 through 10-84 are complete; Plan 10-85 is the sole current bounded live-proof gate
+- Last activity: promoted generation e4c57be5 after one fixed-path local build, 69/69 focused tests and exact no-rebuild proof-chain audit
 
 ## Decisions and Assumptions
 
@@ -149,6 +149,7 @@ Plan: 84 of 86
 - [Phase 10]: Production fix 2b36e6d closes stdin and permits a bounded graceful drain before timeout-only SIGTERM without weakening authenticated receipt or one-send enforcement; 10-78/79 are stale and only Plans 10-82 through 10-86 may acquire current authority.
 - [Phase 10]: Authorize Plan 10-84 only from reviewed commit cf04ac2, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
 - [Phase 10]: Reserve SIGTERM for bounded graceful-drain timeout while preserving the existing absolute lifecycle deadline. — Natural cleanup must retain authenticated receipt and lifecycle evidence without permitting an unbounded child.
+- [Phase 10]: Promote generation e4c57be578fdb26209f8ec9a79ad5a781198cf1d29465cdacf8a71c0aea618ba as the sole READY Plan 10-84 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -214,16 +215,17 @@ Plan: 84 of 86
 | Phase 10 P79 | 1min | 1 tasks | 1 files |
 | Phase 10 P82 | 5min | 2 tasks | 8 files |
 | Phase 10 P83 | 4min | 2 tasks | 4 files |
+| Phase 10 P84 | 3min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T10:40:17.208Z
-- **Stopped at:** Completed 10-83-PLAN.md
+- **Last session:** 2026-09-16T10:43:44.307Z
+- **Stopped at:** Completed 10-84-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-84 to build and independently authenticate one local image from exact source commit cf04ac2.
+Execute Plan 10-85 once against the exact Plan 10-84 image with at most one provider HTTP send.
 
 ---
-*Last updated: 2026-09-16 after exact graceful-drain source certification*
+*Last updated: 2026-09-16 after exact graceful-drain image authentication*
