@@ -30,17 +30,17 @@ const allowedModes = new Set(["auto-build", "auto-live-once"]);
 const execFileAsync = promisify(execFile);
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
 export const FIXED_AUTOMATIC_PATHS = Object.freeze({
-  forensic: `${phaseDirectory}/10-112-CONSUMED-LIVE.json`,
-  source: `${phaseDirectory}/10-113-SOURCE.json`,
-  review: `${phaseDirectory}/10-113-REVIEW.md`,
-  security: `${phaseDirectory}/10-113-SECURITY.md`,
-  build: `${phaseDirectory}/10-114-FINAL-BUILD.json`,
-  state: `${phaseDirectory}/.10-115-live-state.json`,
-  terminal: `${phaseDirectory}/.10-115-terminal-snapshot.json`,
-  transition: `${phaseDirectory}/10-115-TRANSITION.json`,
-  execution: `${phaseDirectory}/10-115-EXECUTION.json`,
-  proof: `${phaseDirectory}/10-115-PROOF.json`,
-  localValidation: `${phaseDirectory}/10-115-LOCAL-VALIDATION.json`,
+  forensic: `${phaseDirectory}/10-117-CONSUMED-LIVE.json`,
+  source: `${phaseDirectory}/10-118-SOURCE.json`,
+  review: `${phaseDirectory}/10-118-REVIEW.md`,
+  security: `${phaseDirectory}/10-118-SECURITY.md`,
+  build: `${phaseDirectory}/10-119-FINAL-BUILD.json`,
+  state: `${phaseDirectory}/.10-120-live-state.json`,
+  terminal: `${phaseDirectory}/.10-120-terminal-snapshot.json`,
+  transition: `${phaseDirectory}/10-120-TRANSITION.json`,
+  execution: `${phaseDirectory}/10-120-EXECUTION.json`,
+  proof: `${phaseDirectory}/10-120-PROOF.json`,
+  localValidation: `${phaseDirectory}/10-120-LOCAL-VALIDATION.json`,
 });
 const fixedReviewPaths = Object.freeze([
   FIXED_AUTOMATIC_PATHS.source,
