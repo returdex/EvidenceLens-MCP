@@ -46,7 +46,13 @@ function transportErrorFeature(error: unknown): DiagnosticFeature | undefined {
     const causeDescriptor = Object.getOwnPropertyDescriptor(error, "cause");
     if (causeDescriptor === undefined || !("value" in causeDescriptor) || causeDescriptor.enumerable || causeDescriptor.get !== undefined || causeDescriptor.set !== undefined) return undefined;
     const cause = causeDescriptor.value;
-    if (!(cause instanceof Error) || Object.getPrototypeOf(cause) !== Error.prototype) return undefined;
+    if (!(cause instanceof Error)) return undefined;
+    const causePrototype = Object.getPrototypeOf(cause);
+    const directSystemErrorSubclass = causePrototype !== null
+      && Object.getPrototypeOf(causePrototype) === Error.prototype
+      && Reflect.ownKeys(causePrototype).length === 1
+      && Reflect.ownKeys(causePrototype)[0] === "constructor";
+    if (causePrototype !== Error.prototype && !directSystemErrorSubclass) return undefined;
     const descriptors = Object.getOwnPropertyDescriptors(cause);
     const enumerableKeys = Object.entries(descriptors).filter(([, descriptor]) => descriptor.enumerable).map(([key]) => key).sort();
     if (!causeKeysets.has(enumerableKeys.join(","))) return undefined;

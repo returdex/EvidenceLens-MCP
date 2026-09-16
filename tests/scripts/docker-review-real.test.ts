@@ -4,12 +4,13 @@ import { EventEmitter } from "node:events";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
-import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, ProviderRequestReceiptCollector, resolveLiveProof, resolveReviewModel, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
+import { assertStructuralReview, captureChildLifecycle, classifyDiagnostic, classifyFailure, completeProofLifecycle, diagnosticFeatureForInvariant, DIAGNOSTIC_INVARIANT_MAP, fixtureRequest, isJsonRpcResponse, liveProofPreflight, MAX_STDERR_BYTES, MAX_STDOUT_LINE_BYTES, methodTimeoutMs, performMcpReview, ProviderRequestReceiptCollector, resolveLiveProof, resolveReviewModel, REVIEW_IMAGE_ENV, runReviewHarness, StdioClient, validateInitializeResult } from "../../scripts/docker-review-real.mjs";
 import { CHILD_DIAGNOSTIC_GENERATION_ENV, CHILD_DIAGNOSTIC_KEY_ENV, CHILD_DIAGNOSTIC_PREFIX, CHILD_DIAGNOSTIC_SCHEMA } from "../../src/providers/diagnostics.js";
 import { createProviderRequestBudget, PROVIDER_REQUEST_GENERATION_ENV, PROVIDER_REQUEST_KEY_ENV, PROVIDER_REQUEST_RECEIPT_PREFIX } from "../../src/providers/request-budget.js";
 import { PROOF_SENTINEL, REVIEW_SENTINEL } from "../../scripts/proof-runtime-spec.mjs";
 
 const execFileAsync = promisify(execFile);
+const certifiedImageId = `sha256:${"9".repeat(64)}`;
 const hash = "a".repeat(64);
 const refs = ["filesystem://course/tests/fixtures/evidence/text/assignment.txt", "filesystem://course/tests/fixtures/evidence/tables/rubric.csv", "filesystem://course/tests/fixtures/evidence/images/rubric-screenshot.png", "filesystem://course/tests/fixtures/evidence/pdfs/text-page.pdf"];
 const roles = ["assignment_brief", "rubric", "teacher_instructions", "solution"];
@@ -332,6 +333,17 @@ describe("bounded Docker stdio event delivery", () => {
 });
 
 describe("credentialed Docker review harness", () => {
+  it.each([undefined, "evidencelens-mcp:plan06", `sha256:${"0".repeat(63)}`])("rejects a non-immutable review image before Compose spawn", async (imageId) => {
+    const spawnChild = vi.fn();
+    await expect(runReviewHarness({
+      isOffline: false,
+      imageId,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      spawnChild,
+    })).rejects.toThrow("[docker-review:preflight] failed");
+    expect(spawnChild).not.toHaveBeenCalled();
+  });
+
   it("accepts exactly one authenticated adapter receipt and keeps tools, reservation, and send distinct", () => {
     const environment = { [PROVIDER_REQUEST_GENERATION_ENV]: "c".repeat(64), [PROVIDER_REQUEST_KEY_ENV]: "d".repeat(64) };
     for (const observed of [0, 1] as const) {
@@ -374,12 +386,14 @@ describe("credentialed Docker review harness", () => {
     const spawnChild = vi.fn((_command, args, options) => {
       expect(args).toContain(CHILD_DIAGNOSTIC_KEY_ENV);
       expect(args).toContain(CHILD_DIAGNOSTIC_GENERATION_ENV);
+      expect(options.env[REVIEW_IMAGE_ENV]).toBe(certifiedImageId);
       (child as any).diagnosticEnvironment = options.env;
       return child;
     });
 
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
@@ -416,6 +430,7 @@ describe("credentialed Docker review harness", () => {
     const terminalSnapshots: any[] = [];
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild: vi.fn((_command, _args, options) => { (child as any).diagnosticEnvironment = options.env; return child; }),
@@ -459,6 +474,7 @@ describe("credentialed Docker review harness", () => {
 
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
@@ -499,6 +515,7 @@ describe("credentialed Docker review harness", () => {
 
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
@@ -538,6 +555,7 @@ describe("credentialed Docker review harness", () => {
 
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild,
@@ -573,6 +591,7 @@ describe("credentialed Docker review harness", () => {
     const classifier = vi.fn(classifyDiagnostic);
     await expect(runReviewHarness({
       isOffline: false,
+      imageId: certifiedImageId,
       environment: { DEEPSEEK_API_KEY: "injected-test-only" },
       resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
       spawnChild: vi.fn((_command, _args, options) => { (child as any).diagnosticEnvironment = options.env; return child; }),
@@ -924,6 +943,18 @@ describe("credentialed Docker review harness", () => {
         EVIDENCELENS_PROOF_DEEPSEEK_API_KEY: PROOF_SENTINEL,
       },
     });
+  });
+
+  it("resolves the review service to the authenticated immutable image instead of the mutable tag", async () => {
+    const result = await execFileAsync("docker", ["compose", "--profile", "review", "config", "--format", "json"], {
+      env: {
+        ...process.env,
+        DEEPSEEK_API_KEY: "review-compose-regression-not-a-secret",
+        EVIDENCELENS_PROOF_DEEPSEEK_API_KEY: PROOF_SENTINEL,
+        [REVIEW_IMAGE_ENV]: certifiedImageId,
+      },
+    });
+    expect(JSON.parse(result.stdout).services.review.image).toBe(certifiedImageId);
   });
 
   it("keeps the review credential out of Compose config resolution", async () => {

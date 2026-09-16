@@ -35,6 +35,8 @@ const expectedReferences = [
   "filesystem://course/tests/fixtures/evidence/pdfs/text-page.pdf"
 ];
 const rawFixtureMarkers = ["Read the assignment brief.", "Criterion,Excellent"];
+export const REVIEW_IMAGE_ENV = "EVIDENCELENS_REVIEW_IMAGE";
+const immutableImageId = /^sha256:[a-f0-9]{64}$/u;
 
 const failurePhases = new Set(["preflight", "docker", "initialize", "tools/list", "tools/call", "protocol", "timeout"]);
 const execFileAsync = promisify(execFile);
@@ -725,6 +727,7 @@ export async function runReviewHarness(options = {}) {
   if (!isOffline && (!environment.DEEPSEEK_API_KEY || environment.DEEPSEEK_API_KEY.trim() === "")) {
     fail("preflight", "DEEPSEEK_API_KEY is required for the credentialed review; no request was sent");
   }
+  if (!isOffline && !immutableImageId.test(options.imageId ?? "")) fail("preflight");
 
   const selectedProfile = isOffline ? "smoke" : "review";
   const ownsDiagnosticKey = !isOffline && options.terminalKey === undefined;
@@ -767,6 +770,7 @@ export async function runReviewHarness(options = {}) {
     ? { ...environment, EVIDENCELENS_DISABLE_PROVIDER: "1" }
     : {
         ...liveProof.childEnv,
+        [REVIEW_IMAGE_ENV]: options.imageId,
         [CHILD_DIAGNOSTIC_GENERATION_ENV]: diagnosticGeneration,
         [CHILD_DIAGNOSTIC_KEY_ENV]: diagnosticKey.toString("hex"),
         [PROVIDER_REQUEST_GENERATION_ENV]: diagnosticGeneration,
@@ -860,6 +864,7 @@ export async function runReviewHarness(options = {}) {
     if (ownsDiagnosticKey) diagnosticKey?.fill(0);
     delete childEnvironment[CHILD_DIAGNOSTIC_GENERATION_ENV];
     delete childEnvironment[CHILD_DIAGNOSTIC_KEY_ENV];
+    delete childEnvironment[REVIEW_IMAGE_ENV];
     diagnosticGeneration = undefined;
     if (!child.killed && child.exitCode === null) child.kill("SIGTERM");
   }

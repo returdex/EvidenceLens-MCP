@@ -433,18 +433,20 @@ export async function runFixedAutomaticBuild() {
 export async function runFixedAutomaticLive(dependencies = {}) {
   const paths = dependencies.paths ?? FIXED_AUTOMATIC_PATHS;
   const generation = dependencies.generation ?? randomBytes(32).toString("hex");
+  let authenticatedImageId;
   return (dependencies.runStateful ?? runStatefulAutomaticLive)({
     authenticateReadyBuild: async () => {
       await (dependencies.auditBuild ?? runNodeScript)("scripts/audit-proof-chain.mjs", ["build-auto", paths.build, paths.source, paths.review, paths.security]);
       const build = await readCanonicalJson(paths.build);
       if (build.status !== "ready" || !lower64.test(build.generation) || !imageId.test(build.image_id)) fail("AUTOMATIC_PREFLIGHT");
+      authenticatedImageId = build.image_id;
     },
     finishEvidence: ({ snapshot, state }) => (dependencies.sealEvidence ?? sealAutomaticLiveEvidence)({ generation, paths, snapshot, state }),
     generation,
     path: paths.state,
     terminalPath: paths.terminal,
     readCredential: dependencies.readCredential ?? (async () => process.env.DEEPSEEK_API_KEY),
-    runHarness: dependencies.runHarness,
+    runHarness: (options) => (dependencies.runHarness ?? runReviewHarness)({ ...options, imageId: authenticatedImageId }),
   });
 }
 

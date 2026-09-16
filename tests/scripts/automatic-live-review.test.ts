@@ -115,6 +115,26 @@ describe("automatic immutable review runner", () => {
     expect(JSON.parse(await readFile(paths.localValidation, "utf8"))).toMatchObject({ branch: "preflight_started", generation, outcome: "preflight_failed", validation: { execution: "passed", proof: "passed" } });
   });
 
+  it("passes the authenticated immutable build image into the production harness", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-image-pin-"));
+    const imageId = `sha256:${"9".repeat(64)}`;
+    const paths = { build: join(root, "BUILD.json"), source: join(root, "SOURCE.json"), review: join(root, "REVIEW.md"), security: join(root, "SECURITY.md") } as any;
+    await writeFile(paths.build, canonicalJson({ generation: "6".repeat(64), image_id: imageId, schema: "evidencelens.build.v2", status: "ready" }));
+    const runHarness = vi.fn(async () => undefined);
+    await runFixedAutomaticLive({
+      auditBuild: async () => undefined,
+      generation: "f".repeat(64),
+      paths,
+      runHarness,
+      runStateful: async (options: any) => {
+        await options.authenticateReadyBuild();
+        await options.runHarness({ environment: { DEEPSEEK_API_KEY: "synthetic" }, isOffline: false });
+        return { status: "tested" };
+      },
+    });
+    expect(runHarness).toHaveBeenCalledWith(expect.objectContaining({ imageId }));
+  });
+
   it("retains the terminal through the production harness when its post-reservation preflight fails", async () => {
     const root = await mkdtemp(join(tmpdir(), "automatic-harness-preflight-"));
     const generation = "f".repeat(64);
@@ -123,6 +143,7 @@ describe("automatic immutable review runner", () => {
       authenticateReadyBuild: async () => undefined,
       generation,
       harnessOptions: {
+        imageId: `sha256:${"9".repeat(64)}`,
         resolveProof: async () => { throw new Error("preflight"); },
         spawnChild,
         write: () => undefined,

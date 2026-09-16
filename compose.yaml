@@ -27,7 +27,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: evidencelens-mcp:plan06
+    image: "${EVIDENCELENS_REVIEW_IMAGE:-evidencelens-mcp:plan06}"
     profiles:
       - review
     environment:

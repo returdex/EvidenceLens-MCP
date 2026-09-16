@@ -180,6 +180,18 @@ describe("DeepSeek provider adapter", () => {
     expect(JSON.stringify(diagnostics.features)).not.toMatch(/private|example|127\.0\.0\.1|443|ENOTFOUND|CERT_HAS_EXPIRED|ECONNREFUSED|UND_ERR/iu);
   });
 
+  it("accepts Node fetch system-error subclasses without exposing their private fields", async () => {
+    class SystemDnsError extends Error {}
+    const cause = Object.assign(new SystemDnsError("private resolver detail"), {
+      code: "EAI_AGAIN", errno: -3001, hostname: "private.example", syscall: "getaddrinfo"
+    });
+    const diagnostics = recordingSink();
+    const provider = createDeepSeekProvider(config, { fetch: async () => { throw new TypeError("fetch failed", { cause }); } }, diagnostics);
+    await expect(provider.review(request)).rejects.toBeInstanceOf(Error);
+    expect(diagnostics.features).toEqual([{ path: ["provider", "transport", "fetch"], code: "dns" }]);
+    expect(JSON.stringify(diagnostics.features)).not.toMatch(/private|example|EAI_AGAIN|getaddrinfo/iu);
+  });
+
   it("emits the closed timeout diagnostic only after the production adapter aborts", async () => {
     const diagnostics = recordingSink();
     const provider = createDeepSeekProvider({ ...config, timeoutMs: 5 }, {
