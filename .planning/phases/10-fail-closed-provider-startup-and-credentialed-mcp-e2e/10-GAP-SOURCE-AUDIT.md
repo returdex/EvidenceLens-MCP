@@ -228,6 +228,37 @@ Plan 10-90 consumed generation `57b76915cb7b94b1005e07b381a170109119a22cd4407e06
 
 **Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-90 truth, coordinator fix, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
 
+## Post-10-95 Protocol-Boundary Receipt Recovery: Plans 10-97 through 10-101
+
+Plan 10-95 consumed generation `c482938a3ebd8a0edd2486c2863dc30274843d2d43d8eda336ff40aa8aac3a9c` as immutable `gaps_found` evidence with reservation=1, tools=1, sends=0, pre_fetch/transport.fetch, null receipt, stream_truncated=true, exit=close=0 and failed local validators. The resolved diagnosis proves SDK input validation may reject a request before the high-level registered callback. Fix `bfff3dc` moves zero-send settlement to the low-level `server.server` tools/call request boundary while keeping the provider adapter primary and exactly-once; `87426b4` archives the diagnosis. In-memory pre-callback, real stdio, exact-image provider-disabled network-none and full 633/633 offline verification passed. These source/test edits make 10-93 certification and 10-94 image stale, and 10-96 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 97-101 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 97-101 | COVERED |
+| REQ | PROV-01 | Only a complete fresh protocol-boundary-corrected chain may close provenance | 97-101 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 100 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second/replay zero | 100 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 97-101 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 97-101 | COVERED |
+| FAILURE | 10-95-CONSUMED | Preserve exact generation, counters, null receipt, truncation, lifecycle and failed validators; revoke replay/sync authority | 97-98, 100-101 | COVERED |
+| FIX | PROTOCOL-BOUNDARY | Low-level tools/call settlement covers SDK pre-callback rejection while adapter remains primary exactly once | 98, 100 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 97 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 98 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-98 source | 99 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 100 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-97/98/99/100 authority may update final truth | 101 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-97, 10-98, 10-99 and 10-101 have provider-request budget 0. Only Plan 10-100 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-100 cannot rebuild because it must consume the exact certified Plan 10-99 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-98 certification returns to Plan 10-97 ownership and forces complete recertification.
+
+**Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-95 truth, protocol-boundary fix, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
+
 ## Post-10-85 Authenticated-Stderr Recovery: Plans 10-87 through 10-91
 
 Plan 10-85 consumed generation `b8bb4ddb586f72216d62f966f2fbd83d0f730aff60426141e9c46fb021c0dd82` as immutable `gaps_found` evidence with tools=1, sends=0, post_tools_pre_fetch/pre_fetch, clean exit/close 0, null receipt, stream_truncated=true and failed local validators. Fix `18ca920` makes stderr end/close the collector terminal instead of process exit/close, while preserving rejection after true terminal; `0555466` archives the diagnosis. Verified counts are harness 110, harness+proof 173 and provider-disabled 627, plus build and diff. These edits make 10-83 certification and 10-84 image stale, and 10-86 cannot synchronize.
