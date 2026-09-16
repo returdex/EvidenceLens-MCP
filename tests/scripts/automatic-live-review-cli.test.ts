@@ -29,12 +29,12 @@ async function invokeLiveIn(root: string, env: NodeJS.ProcessEnv = {}) {
 describe("automatic review package CLI", () => {
   it("fixes production build and live locators exclusively to the recovery namespace", () => {
     expect(FIXED_AUTOMATIC_PATHS).toMatchObject({
-      forensic: expect.stringMatching(/10-82-CONSUMED-LIVE\.json$/u), source: expect.stringMatching(/10-83-SOURCE\.json$/u),
-      review: expect.stringMatching(/10-83-REVIEW\.md$/u), security: expect.stringMatching(/10-83-SECURITY\.md$/u),
-      build: expect.stringMatching(/10-84-FINAL-BUILD\.json$/u), state: expect.stringMatching(/\.10-85-live-state\.json$/u),
-      terminal: expect.stringMatching(/\.10-85-terminal-snapshot\.json$/u), transition: expect.stringMatching(/10-85-TRANSITION\.json$/u),
-      execution: expect.stringMatching(/10-85-EXECUTION\.json$/u), proof: expect.stringMatching(/10-85-PROOF\.json$/u),
-      localValidation: expect.stringMatching(/10-85-LOCAL-VALIDATION\.json$/u),
+      forensic: expect.stringMatching(/10-87-CONSUMED-LIVE\.json$/u), source: expect.stringMatching(/10-88-SOURCE\.json$/u),
+      review: expect.stringMatching(/10-88-REVIEW\.md$/u), security: expect.stringMatching(/10-88-SECURITY\.md$/u),
+      build: expect.stringMatching(/10-89-FINAL-BUILD\.json$/u), state: expect.stringMatching(/\.10-90-live-state\.json$/u),
+      terminal: expect.stringMatching(/\.10-90-terminal-snapshot\.json$/u), transition: expect.stringMatching(/10-90-TRANSITION\.json$/u),
+      execution: expect.stringMatching(/10-90-EXECUTION\.json$/u), proof: expect.stringMatching(/10-90-PROOF\.json$/u),
+      localValidation: expect.stringMatching(/10-90-LOCAL-VALIDATION\.json$/u),
     });
   });
   it("reaches fixed post-build build-auto audit with exactly one PATH-stubbed Docker build", async () => {
@@ -84,7 +84,7 @@ describe("automatic review package CLI", () => {
     await expect(runAutomaticBuildPipeline({
       audit: async (mode: string, paths: string[]) => {
         expect(mode).toBe("reviews-auto");
-        expect(paths.every((path) => path.includes("10-83-"))).toBe(true);
+        expect(paths.every((path) => path.includes("10-88-"))).toBe(true);
         throw new Error("explicit isolated invalid tuple");
       },
       readSource: async () => { counters.readSource += 1; },
@@ -109,8 +109,8 @@ describe("automatic review package CLI", () => {
     expect(result.code).toBe(50);
     expect(result.stderr).toContain("automatic-live-review: AUTOMATIC_PREFLIGHT");
     expect(result.stderr).not.toContain("must-not-be-observed");
-    const state = JSON.parse(await readFile(join(phase, ".10-85-live-state.json"), "utf8"));
-    const terminal = JSON.parse(await readFile(join(phase, ".10-85-terminal-snapshot.json"), "utf8"));
+    const state = JSON.parse(await readFile(join(phase, ".10-90-live-state.json"), "utf8"));
+    const terminal = JSON.parse(await readFile(join(phase, ".10-90-terminal-snapshot.json"), "utf8"));
     expect(state).toMatchObject({ inner_status: "failed", reservation_count: 0, mcp_tools_call_count: 0, observed_provider_requests: 0, wrapper_status: "completed" });
     expect(terminal).toMatchObject({ branch: "pre_reservation_preflight", reservation_count: 0, mcp_tools_call_count: 0, observed_provider_requests: 0 });
     await expect(readFile(marker, "utf8")).rejects.toThrow();
