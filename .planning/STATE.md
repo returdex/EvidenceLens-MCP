@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-93-PLAN.md
-last_updated: "2026-09-16T11:50:08.605Z"
+stopped_at: Completed 10-94-PLAN.md
+last_updated: "2026-09-16T11:53:47.140Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 124
-  completed_plans: 106
-  percent: 85
+  completed_plans: 107
+  percent: 86
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 93 of 96
+Plan: 94 of 96
 
 - Phase: 10 of 11
-- Status: Plan 10-93 certified the request-boundary receipt fix with zero-warning deep and ASVS review
-- Progress: Plans 10-94 through 10-96 remain the sole current build, bounded-live and passed-only sync chain
-- Last activity: certified commit bfbbe49 and its exact 109-blob source identity; focused 255/255 and provider-disabled 631/631
+- Status: Plan 10-94 built and independently authenticated the exact request-boundary image
+- Progress: Plans 10-95 and 10-96 remain the sole current bounded-live and passed-only sync chain
+- Last activity: promoted generation 5b3cb9c1 from certified commit bfbbe49 with one producer build and zero verifier rebuilds
 
 ## Decisions and Assumptions
 
@@ -161,6 +161,7 @@ Plan: 93 of 96
 - [Phase 10]: Only the 10-92/93/94/95/96 namespace may acquire current certification, build, live-proof, and synchronization authority.
 - [Phase 10]: Authorize Plan 10-94 only from reviewed commit bfbbe49, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift must fail before Docker or provider activity.
 - [Phase 10]: Keep the provider adapter as primary receipt producer and permit request-settlement fallback only when no adapter receipt was emitted. — The shared one-shot coordinator prevents duplicate receipts and provider sends.
+- [Phase 10]: Promote generation 5b3cb9c1b6f6ece79cd961f442c11aa05e8b8c7814922ce46905b09f777cd562 as the sole READY Plan 10-94 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
 
 ### Blockers
 
@@ -232,16 +233,17 @@ Plan: 93 of 96
 | Phase 10 P89 | 3min | 1 tasks | 1 files |
 | Phase 10 P92 | 6min | 2 tasks | 8 files |
 | Phase 10 P93 | 3min | 2 tasks | 4 files |
+| Phase 10 P94 | 4min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T11:50:08.601Z
-- **Stopped at:** Completed 10-93-PLAN.md
+- **Last session:** 2026-09-16T11:53:47.135Z
+- **Stopped at:** Completed 10-94-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-94 to build and authenticate one local image from the exact Plan 10-93 source identity.
+Execute Plan 10-95 once against the exact Plan 10-94 image with at most one provider HTTP send.
 
 ---
-*Last updated: 2026-09-16 after exact request-boundary source certification*
+*Last updated: 2026-09-16 after exact request-boundary image authentication*
