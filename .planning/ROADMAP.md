@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 111 plans
+**Plans**: 116 plans
 
 Plans:
 **Wave 1**
@@ -541,7 +541,22 @@ Plans:
 - [x] 10-110-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 106** *(gap closure; only reachable from a passed Wave 105 chain)*
-- [ ] 10-111-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [ ] 10-111-PLAN.md — Superseded; cannot synchronize the consumed failed 10-110 chain
+
+**Wave 106** *(gap closure; archive consumed 10-110 and rotate authority)*
+- [ ] 10-112-PLAN.md — Preserve 10-110 as authority:false and rotate registries to the immutable-image recovery namespace
+
+**Wave 107** *(gap closure; blocked on replacement Wave 106 completion)*
+- [ ] 10-113-PLAN.md — Hostile-test and exactly recertify immutable Compose image binding and direct DNS classification
+
+**Wave 108** *(gap closure; blocked on Wave 107 completion)*
+- [ ] 10-114-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+
+**Wave 109** *(gap closure; blocked on Wave 108 completion)*
+- [ ] 10-115-PLAN.md — Run one fresh immutable-image generation with at most one provider HTTP send
+
+**Wave 110** *(gap closure; only reachable from a passed Wave 109 chain)*
+- [ ] 10-116-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -549,10 +564,12 @@ Cross-cutting constraints:
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-106 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Plans 10-38 through 10-116 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
-- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101 and 10-106 are superseded and remain unexecuted. Only Plan 10-111 may synchronize, and only from an exact committed passed 10-107/10-108/10-109/10-110 authority chain; non-pass performs zero target writes.
+- Generation 30f0d9b28c13132e1a79ce6a3afe0f1a9fdd457867e47e67ded8c3a547b83e73 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
+- Fix 4f8fccd makes the certified sha256 image the actual Compose review image and admits only strictly shaped direct Node system-error subclasses under a descriptor/field/code whitelist; debug archive 30d57ad records the diagnosis. The 10-108 certification and 10-109 image are therefore stale.
+- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106 and 10-111 are superseded and remain unexecuted. Only Plan 10-116 may synchronize, and only from an exact committed passed 10-112/10-113/10-114/10-115 authority chain; non-pass performs zero target writes.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
