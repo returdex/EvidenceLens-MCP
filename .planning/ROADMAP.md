@@ -523,13 +523,13 @@ Plans:
 - [x] 10-104-PLAN.md — Build and authenticate a fresh exact-source local Docker image
 
 **Wave 100** *(gap closure; blocked on Wave 99 completion)*
-- [ ] 10-105-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [x] 10-105-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 101** *(gap closure; only reachable from a passed Wave 100 chain)*
 - [ ] 10-106-PLAN.md — Superseded; cannot synchronize the consumed failed 10-105 chain
 
 **Wave 102** *(gap closure; archive consumed 10-105 and rotate authority)*
-- [ ] 10-107-PLAN.md — Preserve 10-105 as authority:false and rotate registries to independent diagnostic capabilities
+- [x] 10-107-PLAN.md — Preserve 10-105 as authority:false and rotate registries to independent diagnostic capabilities
 
 **Wave 103** *(gap closure; blocked on Wave 102 completion)*
 - [ ] 10-108-PLAN.md — Hostile-test and exactly recertify independent request-receipt and child-diagnostic capabilities
@@ -538,7 +538,7 @@ Plans:
 - [ ] 10-109-PLAN.md — Build and authenticate a fresh exact-source local Docker image
 
 **Wave 105** *(gap closure; blocked on Wave 104 completion)*
-- [ ] 10-110-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [x] 10-110-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 106** *(gap closure; only reachable from a passed Wave 105 chain)*
 - [ ] 10-111-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
@@ -581,7 +581,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 84/106 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 85/111 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
