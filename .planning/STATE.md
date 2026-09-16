@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-114-PLAN.md
-last_updated: "2026-09-16T16:41:58.533Z"
+stopped_at: Planned post-10-115 recovery through 10-121
+last_updated: "2026-09-17T00:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 144
-  completed_plans: 119
-  percent: 83
+  total_plans: 149
+  completed_plans: 120
+  percent: 81
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 114 of 116
+Plan: 115 of 121
 
 - Phase: 10 of 11
-- Status: Plan 10-114 produced and independently authenticated the exact-source immutable local image
-- Progress: Plan 10-115 is the current one-request live-proof gate; Plan 10-116 remains downstream
-- Last activity: promoted READY generation 43ca9ec8 with immutable image sha256:2b72b340 after 74 focused offline tests and a no-rebuild audit
+- Status: Plan 10-115 is consumed immutable gaps evidence after one authenticated provider send; fix e91d3ac closes the bounded JSON extraction defect
+- Progress: Plans 10-117 through 10-121 form the sole archive, recertification, build, live and passed-only synchronization chain
+- Last activity: planned the post-e91d3ac recovery after 35 focused tests, 678 complete provider-disabled tests and TypeScript build passed
 
 ## Decisions and Assumptions
 
@@ -269,13 +269,13 @@ Plan: 114 of 116
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T16:41:58.528Z
-- **Stopped at:** Completed 10-114-PLAN.md
+- **Last session:** 2026-09-17
+- **Stopped at:** Planned post-10-115 recovery through 10-121
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-115 against the exact Plan 10-114 READY image with at most one provider HTTP send.
+Execute Plan 10-117 to archive consumed generation add65ba8, revoke stale 10-113/114 authority and rotate all fixed registries.
 
 ---
-*Last updated: 2026-09-17 after exact-source immutable local image authentication*
+*Last updated: 2026-09-17 after bounded JSON extraction recovery planning*
