@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-119-PLAN.md
-last_updated: "2026-09-16T17:08:54.818Z"
+stopped_at: Planned 10-122 through 10-126 gap-closure chain
+last_updated: "2026-09-17T00:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 119 of 121
+Plan: 121 of 126
 
 - Phase: 10 of 11
-- Status: Plan 10-119 promoted and independently authenticated the exact-source immutable local image
-- Progress: Plan 10-120 is the next one-request live proof gate; Plan 10-121 remains the passed-only synchronization gate
-- Last activity: bound image sha256:c00b86c8 to reviewed commit c2572f8 with one producer build and zero verifier rebuilds after 75 focused tests
+- Status: Plan 10-120 is consumed immutable gaps_found evidence; extraction-shape diagnostics are fixed and the replacement chain is planned
+- Progress: Plan 10-122 is next; Plans 10-123 through 10-126 recertify, rebuild, run one bounded live generation and synchronize only a pass
+- Last activity: planned closed content-free extraction diagnostic recovery after fixes e213bda/d397109 and 681 provider-disabled tests
 
 ## Decisions and Assumptions
 
@@ -190,7 +190,7 @@ Plan: 119 of 121
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-120 live generation and Plan 10-121 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-125 live generation and Plan 10-126 synchronization.
 
 ## Performance Metrics
 
@@ -278,12 +278,12 @@ Plan: 119 of 121
 ## Session Continuity
 
 - **Last session:** 2026-09-16T17:08:54.813Z
-- **Stopped at:** Completed 10-119-PLAN.md
+- **Stopped at:** Planned 10-122 through 10-126 gap-closure chain
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-120 against only the authenticated Plan 10-119 image with the declared one-request provider ceiling.
+Execute Plan 10-122 to archive 10-120 and rotate authority before exact recertification.
 
 ---
-*Last updated: 2026-09-17 after exact-source immutable local image certification*
+*Last updated: 2026-09-17 after planning extraction-shape diagnostic recovery*
