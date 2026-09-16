@@ -35,6 +35,19 @@ describe("proof child diagnostic channel", () => {
     expect(stderr).not.toMatch(/detail|secret|stack|body|credential|request/iu);
   });
 
+  it.each([
+    "no_candidate", "multiple_candidates", "unbalanced", "wrong_root", "structural_context", "malformed_json"
+  ])("authenticates the closed extraction-shape code %s and still rejects unknown codes", (code) => {
+    let stderr = "";
+    const sink = createChildDiagnosticSink({ generation, key: Buffer.from(key), write: (value) => { stderr += value; } });
+    const extraction = { path: ["provider", "content", "object"] as const, code };
+    expect(sink.emit(extraction)).toBe(true);
+    expect(parseChildDiagnosticFrame(stderr, { generation, key })).toEqual(extraction);
+
+    const unknownSink = createChildDiagnosticSink({ generation, key: Buffer.from(key), write: () => { throw new Error("must not write"); } });
+    expect(unknownSink.emit({ path: ["provider", "content", "object"], code: `${code}_unknown` })).toBe(false);
+  });
+
   it("rejects unknown, duplicate, oversize, malformed, stale, bad-MAC, and detail-bearing frames", () => {
     const unsigned = { schema: CHILD_DIAGNOSTIC_SCHEMA, generation, sequence: 1, path: [...feature.path], code: feature.code };
     const valid = `${CHILD_DIAGNOSTIC_PREFIX}${JSON.stringify({ ...unsigned, mac: sign(unsigned) })}\n`;

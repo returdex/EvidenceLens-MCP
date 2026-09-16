@@ -17,7 +17,13 @@ import { ProviderError, serializeProviderError } from "../../src/providers/error
 import type { ReviewProvider } from "../../src/providers/types.js";
 import { createProviderRequestBudget, verifyProviderRequestReceipt } from "../../src/providers/request-budget.js";
 import type { ProviderRequestReceipt } from "../../src/providers/types.js";
-import type { DiagnosticFeature } from "../../src/providers/diagnostics.js";
+import {
+  CHILD_DIAGNOSTIC_GENERATION_ENV,
+  CHILD_DIAGNOSTIC_KEY_ENV,
+  createChildDiagnosticSinkFromEnvironment,
+  type DiagnosticFeature
+} from "../../src/providers/diagnostics.js";
+import { ChildDiagnosticCollector, classifyDiagnostic } from "../../scripts/docker-review-real.mjs";
 
 const validRequest = {
   reviewId: "review-001",
@@ -309,6 +315,48 @@ function injectedFetchFailure(code: string, details: Record<string, unknown> = {
 }
 
 describe("production server transport diagnostics", () => {
+  it.each([
+    ["no_candidate", "private prose with no JSON object", "provider-json-object-no-candidate"],
+    ["multiple_candidates", '{"findings":[]}\n{"findings":[]}', "provider-json-object-multiple-candidates"],
+    ["unbalanced", '{"findings":[]', "provider-json-object-unbalanced"],
+    ["wrong_root", '{"findings":[],"extra":true}', "provider-json-object-wrong-root"],
+    ["structural_context", '{"findings":[]}\n[]', "provider-json-object-structural-context"],
+    ["malformed_json", 'prefix {"findings":[} suffix', "provider-json-object-malformed"]
+  ] as const)("carries one authenticated %s frame through server -> tool -> provider -> stderr -> host collector", async (_code, content, invariantId) => {
+    const generation = "d".repeat(64);
+    const key = Buffer.alloc(32, 0x64);
+    const environment: Record<string, string | undefined> = {
+      [CHILD_DIAGNOSTIC_GENERATION_ENV]: generation,
+      [CHILD_DIAGNOSTIC_KEY_ENV]: key.toString("hex")
+    };
+    let stderr = "";
+    const diagnosticSink = createChildDiagnosticSinkFromEnvironment(environment, (value) => { stderr += value; });
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: {
+        fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), {
+          status: 200, headers: { "content-type": "application/json" }
+        })
+      },
+      diagnosticSink
+    });
+    await withProtocolClient(async (request) => {
+      await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "shape-diagnostic-regression", version: "1" } });
+      const result = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+    }, server);
+
+    const collector = new ChildDiagnosticCollector();
+    collector.consume(stderr);
+    collector.markTerminal();
+    const feature = collector.feature({ generation, key });
+    expect(feature).toEqual({ path: ["provider", "content", "object"], code: _code });
+    expect(classifyDiagnostic([feature])).toMatchObject({ invariant_id: invariantId, repair: "allowlisted" });
+  });
+
   it.each([
     ["dns", () => { throw injectedFetchFailure("ENOTFOUND", { errno: -3008, syscall: "getaddrinfo", hostname: "private.example" }); }, 0, 1_000],
     ["tls", () => { throw injectedFetchFailure("CERT_HAS_EXPIRED"); }, 0, 1_000],

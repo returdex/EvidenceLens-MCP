@@ -209,7 +209,7 @@ export const MAX_STDOUT_LINE_BYTES = 32_000_000;
 export const MAX_STDERR_BYTES = 1_000_000;
 export const MAX_PENDING_EVENTS = 8;
 
-class ChildDiagnosticCollector {
+export class ChildDiagnosticCollector {
   constructor() {
     this.buffer = Buffer.alloc(0);
     this.frames = [];
