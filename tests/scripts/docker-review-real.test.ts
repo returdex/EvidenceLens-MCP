@@ -487,6 +487,49 @@ describe("credentialed Docker review harness", () => {
     })]);
   });
 
+  it.each(["exit-close", "close-exit"] as const)("authenticates a buffered receipt delivered after process %s but before stderr completion", async (order) => {
+    const child = failingLiveChild(() => undefined);
+    const terminalSnapshots: any[] = [];
+    const diagnostics: any[] = [];
+    const spawnChild = vi.fn((_command, _args, options) => {
+      const environment = { ...(options.env as Record<string, string>) };
+      (child as any).diagnosticEnvironment = environment;
+      child.stdin.end.mockImplementation(() => {
+        setImmediate(() => {
+          child.exitCode = 0;
+          const events = order === "exit-close" ? ["exit", "close"] : ["close", "exit"];
+          child.emit(events[0], 0, null);
+          child.emit(events[1], 0, null);
+          child.stderr.emit("data", diagnosticLine(environment));
+          child.stderr.emit("data", requestReceiptLine(environment, 0));
+          child.stdout.emit("end");
+          child.stderr.emit("end");
+        });
+      });
+      return child;
+    });
+
+    await expect(runReviewHarness({
+      isOffline: false,
+      environment: { DEEPSEEK_API_KEY: "injected-test-only" },
+      resolveProof: vi.fn(async (_run, environment) => ({ model: "deepseek-v4-flash-vision-exp", childEnv: { ...environment, DEEPSEEK_MAX_RETRIES: "0" }, toolsCallTimeoutMs: 100 })),
+      spawnChild,
+      retainDiagnostic: (diagnostic: unknown) => diagnostics.push(diagnostic),
+      retainTerminalSnapshot: (snapshot: unknown) => terminalSnapshots.push(snapshot),
+    })).rejects.toThrow("[docker-review:tools/call] failed");
+
+    expect(child.kill).not.toHaveBeenCalled();
+    expect(diagnostics).toEqual([expect.objectContaining({ invariant_id: "provider-http-json-decode" })]);
+    expect(terminalSnapshots).toEqual([expect.objectContaining({
+      branch: "post_tools_pre_fetch",
+      close: { code: 0, observed: true, signal: null },
+      exit: { code: 0, observed: true, signal: null },
+      observed_provider_requests: 0,
+      request_receipt: expect.objectContaining({ observed_provider_requests: 0, reservation_count: 1 }),
+      stream_truncated: false,
+    })]);
+  });
+
   it.each([
     ["absent", () => undefined],
     ["multiple", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment) + diagnosticLine(environment))],
@@ -495,7 +538,7 @@ describe("credentialed Docker review harness", () => {
     ["stale generation", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { generation: "f".repeat(64) }))],
     ["detail-bearing", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", diagnosticLine(environment, { detail: "private" }))],
     ["stdout confusion", (environment: Record<string, string>, child: FakeStdioChild) => child.stdout.emit("data", diagnosticLine(environment))],
-    ["late", (environment: Record<string, string>, child: FakeStdioChild) => { child.emit("exit", 1, null); child.stderr.emit("data", diagnosticLine(environment)); }],
+    ["late", (environment: Record<string, string>, child: FakeStdioChild) => { child.stderr.emit("end"); child.stderr.emit("data", diagnosticLine(environment)); }],
     ["overflow", (environment: Record<string, string>, child: FakeStdioChild) => child.stderr.emit("data", `${CHILD_DIAGNOSTIC_PREFIX}${"x".repeat(4097)}\n`)]
   ] as const)("routes %s child diagnostics to one ambiguous zero-budget result", async (_name, emitFrame) => {
     const child = failingLiveChild((environment, target) => emitFrame(environment, target));

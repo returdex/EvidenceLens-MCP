@@ -584,11 +584,11 @@ export function captureChildLifecycle(child, timeoutMs = controlTimeoutMs) {
     child.off("exit", onExit);
     child.off("close", onClose);
     child.off("error", onChildError);
-    child.stdout?.off("data", onLateOutput);
+    child.stdout?.off("data", onLateStdout);
     child.stdout?.off("end", onStdoutComplete);
     child.stdout?.off("close", onStdoutComplete);
     child.stdout?.off("error", onStreamError);
-    child.stderr?.off("data", onLateOutput);
+    child.stderr?.off("data", onLateStderr);
     child.stderr?.off("end", onStderrComplete);
     child.stderr?.off("close", onStderrComplete);
     child.stderr?.off("error", onStreamError);
@@ -631,8 +631,11 @@ export function captureChildLifecycle(child, timeoutMs = controlTimeoutMs) {
     closeMetadata = { code, signal };
     evaluate();
   };
-  const onLateOutput = () => {
-    if (terminalPairSeen()) rejectAs("protocol");
+  const onLateStdout = () => {
+    if (stdoutComplete) rejectAs("protocol");
+  };
+  const onLateStderr = () => {
+    if (stderrComplete) rejectAs("protocol");
   };
   const onStdoutComplete = () => { stdoutComplete = true; evaluate(); };
   const onStderrComplete = () => { stderrComplete = true; evaluate(); };
@@ -642,11 +645,11 @@ export function captureChildLifecycle(child, timeoutMs = controlTimeoutMs) {
   child.on("exit", onExit);
   child.on("close", onClose);
   child.on("error", onChildError);
-  child.stdout?.on("data", onLateOutput);
+  child.stdout?.on("data", onLateStdout);
   child.stdout?.on("end", onStdoutComplete);
   child.stdout?.on("close", onStdoutComplete);
   child.stdout?.on("error", onStreamError);
-  child.stderr?.on("data", onLateOutput);
+  child.stderr?.on("data", onLateStderr);
   child.stderr?.on("end", onStderrComplete);
   child.stderr?.on("close", onStderrComplete);
   child.stderr?.on("error", onStreamError);
@@ -773,8 +776,8 @@ export async function runReviewHarness(options = {}) {
   const onDiagnosticTerminal = () => { diagnosticCollector?.markTerminal(); receiptCollector?.markTerminal(); };
   child.stderr?.on("data", onDiagnosticData);
   child.stderr?.on("data", onReceiptData);
-  child.on("exit", onDiagnosticTerminal);
-  child.on("close", onDiagnosticTerminal);
+  child.stderr?.on("end", onDiagnosticTerminal);
+  child.stderr?.on("close", onDiagnosticTerminal);
   const lifecycleTimeoutMs = (controlTimeoutMs * 3) + (liveProof?.toolsCallTimeoutMs ?? controlTimeoutMs);
   const lifecycle = captureChildLifecycle(child, lifecycleTimeoutMs);
   const client = new StdioClient(child, liveProof?.toolsCallTimeoutMs);
@@ -836,8 +839,8 @@ export async function runReviewHarness(options = {}) {
   } finally {
     child.stderr?.off("data", onDiagnosticData);
     child.stderr?.off("data", onReceiptData);
-    child.off("exit", onDiagnosticTerminal);
-    child.off("close", onDiagnosticTerminal);
+    child.stderr?.off("end", onDiagnosticTerminal);
+    child.stderr?.off("close", onDiagnosticTerminal);
     diagnosticCollector?.clear();
     receiptCollector?.clear();
     if (ownsDiagnosticKey) diagnosticKey?.fill(0);
