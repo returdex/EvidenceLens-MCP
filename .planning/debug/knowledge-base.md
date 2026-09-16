@@ -67,3 +67,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Coordinate receipt ownership at createServer: preserve adapter emission as primary, record successful emission, and invoke the same authenticated budget receipt sink at tool settlement only when the adapter never emitted; retain one-shot duplicate rejection.
 - **Files changed:** src/server.ts, src/tools/review.ts, tests/contract/review-tool.test.ts
 ---
+
+## post-fetch-transport-request-failure — Fetch failures lacked authenticated structural diagnostics
+- **Date:** 2026-09-16
+- **Error patterns:** post_fetch_non_pass, request_failed, transport.fetch, stream_truncated, ambiguous diagnostic, observed provider requests 1
+- **Root cause:** fetchWithRetry owned terminal timeout, HTTP-status, and rejected-fetch classification but sanitized those outcomes into ProviderError before any DiagnosticSink emission, so the authenticated harness received zero diagnostic frames.
+- **Fix:** Threaded the existing diagnostic sink through fetchWithRetry; emit one of nine closed structural terminal categories for strictly recognized outcomes; retain ambiguity for unknown, aggregate, accessor/proxy-like, and detail-bearing shapes; registered and tested authenticated stderr drain and proof-chain compatibility.
+- **Files changed:** src/providers/retry.ts, src/providers/deepseek.ts, src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/scripts/docker-review-real.test.ts
+---
