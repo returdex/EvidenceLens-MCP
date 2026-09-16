@@ -526,7 +526,7 @@ Plans:
 - [x] 10-105-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 101** *(gap closure; only reachable from a passed Wave 100 chain)*
-- [ ] 10-106-PLAN.md — Superseded; cannot synchronize the consumed failed 10-105 chain
+- [x] 10-106-PLAN.md — Superseded; cannot synchronize the consumed failed 10-105 chain
 
 **Wave 102** *(gap closure; archive consumed 10-105 and rotate authority)*
 - [x] 10-107-PLAN.md — Preserve 10-105 as authority:false and rotate registries to independent diagnostic capabilities
@@ -541,10 +541,10 @@ Plans:
 - [x] 10-110-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 106** *(gap closure; only reachable from a passed Wave 105 chain)*
-- [ ] 10-111-PLAN.md — Superseded; cannot synchronize the consumed failed 10-110 chain
+- [x] 10-111-PLAN.md — Superseded; cannot synchronize the consumed failed 10-110 chain
 
 **Wave 106** *(gap closure; archive consumed 10-110 and rotate authority)*
-- [ ] 10-112-PLAN.md — Preserve 10-110 as authority:false and rotate registries to the immutable-image recovery namespace
+- [x] 10-112-PLAN.md — Preserve 10-110 as authority:false and rotate registries to the immutable-image recovery namespace
 
 **Wave 107** *(gap closure; blocked on replacement Wave 106 completion)*
 - [ ] 10-113-PLAN.md — Hostile-test and exactly recertify immutable Compose image binding and direct DNS classification
@@ -598,7 +598,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 87/111 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 88/116 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
