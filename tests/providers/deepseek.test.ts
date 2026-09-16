@@ -157,6 +157,36 @@ describe("DeepSeek provider adapter", () => {
     }
   });
 
+  it.each([
+    ["direct JSON", JSON.stringify(draft)],
+    ["JSON code fence", `\`\`\`json\n${JSON.stringify(draft)}\n\`\`\``],
+    ["plain code fence", `\`\`\`\n${JSON.stringify(draft)}\n\`\`\``],
+    ["non-structural prose wrapper", `Review result follows:\n${JSON.stringify(draft)}\nEnd of review.`],
+    ["nested braces and escapes in strings", JSON.stringify({ findings: [{ ...draft.findings[0], summary: "Object { nested: \\\"value\\\" } and slash \\\\ remain text." }] })]
+  ])("extracts one bounded strict findings object from %s", async (_name, content) => {
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek" });
+  });
+
+  it.each([
+    ["multiple objects", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`],
+    ["truncated object", JSON.stringify(draft).slice(0, -1)],
+    ["unmatched trailing object", `${JSON.stringify(draft)}\n{`],
+    ["unsafe trailing array", `${JSON.stringify(draft)}\n[]`],
+    ["extra root key", JSON.stringify({ ...draft, extra: true })],
+    ["prototype-pollution root key", `{"findings":[],"__proto__":{"polluted":true}}`],
+    ["oversized input", "x".repeat(1_000_001)]
+  ])("rejects ambiguous or unsafe bounded object content: %s", async (_name, content) => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+    expect(diagnostics.features).toHaveLength(1);
+  });
+
   it("maps non-transient HTTP failures without leaking upstream details", async () => {
     const provider = createDeepSeekProvider(config, transportFor(draft, 401));
     await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_REQUEST_FAILED", message: "Provider request failed" });

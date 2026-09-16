@@ -109,6 +109,62 @@ function invalidResponse(diagnostics: DiagnosticSink | undefined, path: readonly
   throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
 }
 
+function findingsFromRoot(value: unknown): ProviderFindingDraft[] | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const keys = Object.keys(value);
+  if (keys.length !== 1 || keys[0] !== "findings") return undefined;
+  const findings = (value as { findings?: unknown }).findings;
+  return Array.isArray(findings) ? findings as ProviderFindingDraft[] : undefined;
+}
+
+function extractSingleJsonObject(value: string): ProviderFindingDraft[] | undefined {
+  try {
+    return findingsFromRoot(JSON.parse(value));
+  } catch { /* A bounded wrapper is handled below. */ }
+
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let structuralGarbage = false;
+  const objects: unknown[] = [];
+
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index]!;
+    if (start < 0) {
+      if (character === "{") {
+        start = index;
+        depth = 1;
+        inString = false;
+        escaped = false;
+      } else if (character === "}" || character === "[" || character === "]") {
+        structuralGarbage = true;
+      }
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === "\"") inString = false;
+      continue;
+    }
+    if (character === "\"") inString = true;
+    else if (character === "{") depth += 1;
+    else if (character === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        try { objects.push(JSON.parse(value.slice(start, index + 1))); }
+        catch { structuralGarbage = true; }
+        start = -1;
+      }
+    }
+  }
+
+  if (start >= 0 || inString || structuralGarbage || objects.length !== 1) return undefined;
+  return findingsFromRoot(objects[0]);
+}
+
 function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderFindingDraft[] {
   if (typeof response !== "object" || response === null || !Array.isArray((response as { choices?: unknown }).choices)
     || (response as { choices: unknown[] }).choices.length === 0) {
@@ -125,18 +181,10 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
   const candidates = [content, ...(typeof content === "string" && content.length === 0 ? [reasoningContent] : [])];
   for (const candidate of candidates) {
     if (typeof candidate !== "string" || candidate.length > 1_000_000 || candidate.length === 0) continue;
-    const jsonCandidates = [candidate];
-    const firstObject = candidate.indexOf("{");
-    const lastObject = candidate.lastIndexOf("}");
-    if (firstObject >= 0 && lastObject > firstObject) jsonCandidates.push(candidate.slice(firstObject, lastObject + 1));
-    for (const jsonCandidate of jsonCandidates) {
-      try {
-        const parsed: unknown = JSON.parse(jsonCandidate);
-        if (typeof parsed === "object" && parsed !== null && Array.isArray((parsed as { findings?: unknown }).findings)) {
-          return (parsed as { findings: ProviderFindingDraft[] }).findings;
-        }
-      } catch { /* Try the next bounded JSON candidate, then fail closed. */ }
-      }
+    const findings = extractSingleJsonObject(candidate);
+    if (findings !== undefined) {
+      return findings;
+    }
   }
   invalidResponse(diagnostics, ["provider", "content", "object"], "invalid_format");
 }
