@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-113-PLAN.md
-last_updated: "2026-09-16T16:38:45.819Z"
+stopped_at: Completed 10-114-PLAN.md
+last_updated: "2026-09-16T16:41:58.533Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 144
-  completed_plans: 118
-  percent: 82
+  completed_plans: 119
+  percent: 83
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 113 of 116
+Plan: 114 of 116
 
 - Phase: 10 of 11
-- Status: Plan 10-113 certified immutable image binding and strict direct-system-error DNS classification
-- Progress: Plan 10-114 is the current exact-source image build gate; Plans 10-115 and 10-116 remain downstream
-- Last activity: certified reviewed commit 73e5b8f with a 109-blob manifest after 259 focused and 666 full offline tests
+- Status: Plan 10-114 produced and independently authenticated the exact-source immutable local image
+- Progress: Plan 10-115 is the current one-request live-proof gate; Plan 10-116 remains downstream
+- Last activity: promoted READY generation 43ca9ec8 with immutable image sha256:2b72b340 after 74 focused offline tests and a no-rebuild audit
 
 ## Decisions and Assumptions
 
@@ -181,6 +181,7 @@ Plan: 113 of 116
 - [Phase 10]: Only the 10-112/113/114/115/116 namespace may acquire current production authority. — Stale and mixed tuples must fail before external side effects.
 - [Phase 10]: Authorize Plan 10-114 only from reviewed commit 73e5b8f, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Accept DNS classification only for a descriptor-constrained direct Node Error subclass with an exact field and code whitelist.
+- [Phase 10]: Promote generation 43ca9ec8236a1619846e3118398fbd313f70d6ac31b1506d3e48e04112e0725c as the sole READY Plan 10-114 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -264,16 +265,17 @@ Plan: 113 of 116
 | Phase 10 P109 | 1min | 1 tasks | 2 files |
 | Phase 10 P112 | 6min | 2 tasks | 8 files |
 | Phase 10 P113 | 5min | 2 tasks | 5 files |
+| Phase 10 P114 | 1min | 1 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T16:38:45.814Z
-- **Stopped at:** Completed 10-113-PLAN.md
+- **Last session:** 2026-09-16T16:41:58.528Z
+- **Stopped at:** Completed 10-114-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-114 to build and authenticate the fresh exact-source immutable local Docker image.
+Execute Plan 10-115 against the exact Plan 10-114 READY image with at most one provider HTTP send.
 
 ---
-*Last updated: 2026-09-17 after immutable-image and DNS exact-source certification*
+*Last updated: 2026-09-17 after exact-source immutable local image authentication*
