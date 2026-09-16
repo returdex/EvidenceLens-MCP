@@ -75,3 +75,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Threaded the existing diagnostic sink through fetchWithRetry; emit one of nine closed structural terminal categories for strictly recognized outcomes; retain ambiguity for unknown, aggregate, accessor/proxy-like, and detail-bearing shapes; registered and tested authenticated stderr drain and proof-chain compatibility.
 - **Files changed:** src/providers/retry.ts, src/providers/deepseek.ts, src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/scripts/docker-review-real.test.ts
 ---
+
+## post-fetch-ambiguous-multiple-diagnostics — Receipt initialization consumed the child diagnostic capability
+- **Date:** 2026-09-17
+- **Error patterns:** post_fetch_non_pass, one authenticated provider send, ambiguous diagnostic, stream_truncated, local and committed gaps_found audits pass
+- **Root cause:** Request receipt and child diagnostic channels shared `EVIDENCELENS_DIAGNOSTIC_GENERATION/KEY`; request-proof initialization consumed and deleted the variables before diagnostic initialization, making the production diagnostic sink a no-op. The suspected duplicate diagnostic producers were not present.
+- **Fix:** Assigned child diagnostics an independent `EVIDENCELENS_CHILD_DIAGNOSTIC_*` capability namespace, forwarded both capability pairs into the Docker child, and added coexistence plus exact server-to-retry offline regressions for all nine terminal fetch categories.
+- **Files changed:** src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/diagnostics.test.ts, tests/contract/review-tool.test.ts, tests/scripts/docker-review-real.test.ts
+---
