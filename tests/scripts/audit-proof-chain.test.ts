@@ -70,7 +70,7 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-115", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
   });
 
@@ -112,7 +112,7 @@ describe("proof chain certifier", () => {
   });
 
   it("accepts only the exact authority-revoked current consumed-live archive", async () => {
-    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-117-CONSUMED-LIVE.json";
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-122-CONSUMED-LIVE.json";
     const archive = JSON.parse(await readFile(path, "utf8"));
     expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "gaps_found" });
     expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "gaps_found" });
