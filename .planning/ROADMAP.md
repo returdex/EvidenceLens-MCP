@@ -535,7 +535,7 @@ Plans:
 - [x] 10-108-PLAN.md — Hostile-test and exactly recertify independent request-receipt and child-diagnostic capabilities
 
 **Wave 104** *(gap closure; blocked on Wave 103 completion)*
-- [ ] 10-109-PLAN.md — Build and authenticate a fresh exact-source local Docker image
+- [x] 10-109-PLAN.md — Build and authenticate a fresh exact-source local Docker image
 
 **Wave 105** *(gap closure; blocked on Wave 104 completion)*
 - [x] 10-110-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
@@ -581,7 +581,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 86/111 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 87/111 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
