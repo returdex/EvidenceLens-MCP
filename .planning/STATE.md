@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-79-PLAN.md
-last_updated: "2026-09-14T10:54:05.176Z"
+stopped_at: Planned 10-82 through 10-86 recovery after consumed 10-80 generation
+last_updated: "2026-09-16T10:28:01.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 109
+  total_plans: 114
   completed_plans: 98
-  percent: 90
+  percent: 86
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 80 of 81
+Plan: 82 of 86
 
 - Phase: 10 of 11
-- Status: exact-source generation 2a530ae4 and image sha256:66ea14e9 are READY after independent no-rebuild authentication
-- Progress: Plan 10-79 complete; Plan 10-80 is next for the bounded single-request credentialed proof
-- Last activity: built reviewed commit 8473505 once and passed 68 focused tests plus the independent build-auto audit
+- Status: 10-80 generation 15d6e9cc is consumed immutable gaps evidence; fixes 2b36e6d/ec242b9 are independently verified but prior certification/image are stale
+- Progress: Plans 10-82 through 10-86 are ready as the sole current recovery chain; Plan 10-81 is superseded
+- Last activity: verified timeout-only SIGTERM cleanup with focused 187/187, provider-disabled 624/624, TypeScript build, diff check and clean worktree
 
 ## Decisions and Assumptions
 
@@ -145,6 +145,8 @@ Plan: 80 of 81
 - [Phase 10]: Only the 10-77/78/79/80/81 namespace can acquire current certification, build, live-proof, and synchronization authority.
 - [Phase 10]: Authorize Plan 10-79 only from reviewed commit 8473505, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning source or test drift requires recertification before Docker or provider activity.
 - [Phase 10]: Promote generation 2a530ae49b8be4d5108e3ac23b279dfc776ee80e582d0b1d051e8e56f3db8d04 as the sole READY Plan 10-79 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation 15d6e9cc11282504d9b9feafeaddeced0522ccd3273ef7dfb5eb968cfe7a4011 as byte-exact authority:false, replay_allowed:false history with tools=1, sends=0, pre_fetch and exit/close 130.
+- [Phase 10]: Production fix 2b36e6d closes stdin and permits a bounded graceful drain before timeout-only SIGTERM without weakening authenticated receipt or one-send enforcement; 10-78/79 are stale and only Plans 10-82 through 10-86 may acquire current authority.
 
 ### Blockers
 
@@ -211,13 +213,13 @@ Plan: 80 of 81
 
 ## Session Continuity
 
-- **Last session:** 2026-09-14T10:54:05.171Z
-- **Stopped at:** Completed 10-79-PLAN.md
+- **Last session:** 2026-09-16
+- **Stopped at:** Planned 10-82 through 10-86 recovery after consumed 10-80 generation
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-80 against only the exact READY generation and image from Plan 10-79.
+Execute Plan 10-82 to archive 10-80 byte-exactly and rotate fixed authority before recertification.
 
 ---
-*Last updated: 2026-09-14 after completing the exact-source local image build and independent authentication*
+*Last updated: 2026-09-16 after planning the post-graceful-drain recovery chain*

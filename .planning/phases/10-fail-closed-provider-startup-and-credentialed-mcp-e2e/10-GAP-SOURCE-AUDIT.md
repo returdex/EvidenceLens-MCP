@@ -165,3 +165,34 @@ Plan 10-70 consumed generation `3767fe38a51a1e27932064af0859c135138a1e4267a018ba
 - Any source/test edit after Plan 10-73 certification returns to Plan 10-72 ownership and forces complete recertification.
 
 **Audit result:** All current goal, requirement, locked decision, consumed-failure, Compose fix, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
+
+## Post-10-80 Graceful-Drain Recovery: Plans 10-82 through 10-86
+
+Plan 10-80 consumed generation `15d6e9cc11282504d9b9feafeaddeced0522ccd3273ef7dfb5eb968cfe7a4011` as immutable `gaps_found` evidence with tools=1, sends=0, pre_fetch/transport.fetch and exit=close=130. Fix `2b36e6d` closes stdin and gives the child a bounded natural drain before timeout-only SIGTERM; archive `ec242b9` records independent focused 187/187, provider-disabled 624/624, build and diff verification. These changes make 10-78 certification and 10-79 image stale, and 10-81 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 82-86 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 82-86 | COVERED |
+| REQ | PROV-01 | Only a complete fresh graceful-drain-corrected chain may close provenance | 82-86 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 85 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second zero | 85 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 82-86 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 82-86 | COVERED |
+| FAILURE | 10-80-CONSUMED | Preserve exact generation, counters, diagnostic, exit/close and failed validators; revoke replay/sync authority | 82-83, 85-86 | COVERED |
+| FIX | GRACEFUL-DRAIN | Certify stdin EOF, bounded natural drain and timeout-only SIGTERM without receipt/send weakening | 83, 85 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 82 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 83 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-83 source | 84 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 85 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-82/83/84/85 authority may update final truth | 86 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-82, 10-83, 10-84 and 10-86 have provider-request budget 0. Only Plan 10-85 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-85 cannot rebuild because it must consume the exact certified Plan 10-84 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-83 certification returns to Plan 10-82 ownership and forces complete recertification.
+
+**Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed-failure facts, graceful-drain fix, exact-source, build, bounded-live and synchronization items are covered with no silent deferral.
