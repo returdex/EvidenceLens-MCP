@@ -547,7 +547,7 @@ Plans:
 - [x] 10-112-PLAN.md — Preserve 10-110 as authority:false and rotate registries to the immutable-image recovery namespace
 
 **Wave 107** *(gap closure; blocked on replacement Wave 106 completion)*
-- [ ] 10-113-PLAN.md — Hostile-test and exactly recertify immutable Compose image binding and direct DNS classification
+- [x] 10-113-PLAN.md — Hostile-test and exactly recertify immutable Compose image binding and direct DNS classification
 
 **Wave 108** *(gap closure; blocked on Wave 107 completion)*
 - [ ] 10-114-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
@@ -598,7 +598,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 88/116 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 89/116 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

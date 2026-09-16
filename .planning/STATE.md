@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-112-PLAN.md
-last_updated: "2026-09-16T16:31:42.373Z"
+stopped_at: Completed 10-113-PLAN.md
+last_updated: "2026-09-16T16:38:45.819Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 144
-  completed_plans: 117
-  percent: 81
+  completed_plans: 118
+  percent: 82
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 112 of 116
+Plan: 113 of 116
 
 - Phase: 10 of 11
-- Status: Plan 10-112 archived the consumed 10-110 attempt and rotated all production authority
-- Progress: Plan 10-113 is the current exact-source certification gate; Plans 10-114 through 10-116 remain downstream
-- Last activity: preserved generation 30f0d9b2...b83e as authority:false and restricted current authority to 10-112/113/114/115/116
+- Status: Plan 10-113 certified immutable image binding and strict direct-system-error DNS classification
+- Progress: Plan 10-114 is the current exact-source image build gate; Plans 10-115 and 10-116 remain downstream
+- Last activity: certified reviewed commit 73e5b8f with a 109-blob manifest after 259 focused and 666 full offline tests
 
 ## Decisions and Assumptions
 
@@ -179,6 +179,8 @@ Plan: 112 of 116
 - [Phase 10]: Promote generation 303803202b50978b40e0bccfff60012db60ee37d59bbfffa9d48d23c7249be96 as the sole READY Plan 10-109 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve generation 30f0d9b2 as byte-exact authority:false, replay_allowed:false history superseded by immutable-image and direct-system-error fix 4f8fccd. — Consumed paid evidence cannot authorize replay or synchronization.
 - [Phase 10]: Only the 10-112/113/114/115/116 namespace may acquire current production authority. — Stale and mixed tuples must fail before external side effects.
+- [Phase 10]: Authorize Plan 10-114 only from reviewed commit 73e5b8f, its 109-blob manifest, and the exact current certifier hashes.
+- [Phase 10]: Accept DNS classification only for a descriptor-constrained direct Node Error subclass with an exact field and code whitelist.
 
 ### Blockers
 
@@ -261,16 +263,17 @@ Plan: 112 of 116
 | Phase 10 P108 | 4min | 2 tasks | 5 files |
 | Phase 10 P109 | 1min | 1 tasks | 2 files |
 | Phase 10 P112 | 6min | 2 tasks | 8 files |
+| Phase 10 P113 | 5min | 2 tasks | 5 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T16:31:22.668Z
-- **Stopped at:** Completed 10-112-PLAN.md
+- **Last session:** 2026-09-16T16:38:45.814Z
+- **Stopped at:** Completed 10-113-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-113 to hostile-test and exactly recertify the immutable Compose image binding and direct DNS classification.
+Execute Plan 10-114 to build and authenticate the fresh exact-source immutable local Docker image.
 
 ---
-*Last updated: 2026-09-17 after immutable-image recovery authority rotation*
+*Last updated: 2026-09-17 after immutable-image and DNS exact-source certification*
