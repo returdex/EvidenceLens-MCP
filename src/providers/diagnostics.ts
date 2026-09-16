@@ -3,8 +3,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const CHILD_DIAGNOSTIC_SCHEMA = "evidencelens.child-diagnostic.v1" as const;
 export const CHILD_DIAGNOSTIC_PREFIX = "[evidencelens-child-diagnostic] " as const;
 export const CHILD_DIAGNOSTIC_MAX_BYTES = 4096;
-export const CHILD_DIAGNOSTIC_GENERATION_ENV = "EVIDENCELENS_DIAGNOSTIC_GENERATION" as const;
-export const CHILD_DIAGNOSTIC_KEY_ENV = "EVIDENCELENS_DIAGNOSTIC_KEY" as const;
+export const CHILD_DIAGNOSTIC_GENERATION_ENV = "EVIDENCELENS_CHILD_DIAGNOSTIC_GENERATION" as const;
+export const CHILD_DIAGNOSTIC_KEY_ENV = "EVIDENCELENS_CHILD_DIAGNOSTIC_KEY" as const;
 
 export type DiagnosticPath = readonly (string | number)[];
 export interface DiagnosticFeature { readonly path: DiagnosticPath; readonly code: string }

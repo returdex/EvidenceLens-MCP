@@ -773,7 +773,12 @@ export async function runReviewHarness(options = {}) {
         [PROVIDER_REQUEST_KEY_ENV]: diagnosticKey.toString("hex")
       };
   const childArguments = ["compose", "--profile", selectedProfile, "run", "--rm", "-T"];
-  if (!isOffline) childArguments.push("-e", CHILD_DIAGNOSTIC_GENERATION_ENV, "-e", CHILD_DIAGNOSTIC_KEY_ENV);
+  if (!isOffline) childArguments.push(
+    "-e", CHILD_DIAGNOSTIC_GENERATION_ENV,
+    "-e", CHILD_DIAGNOSTIC_KEY_ENV,
+    "-e", PROVIDER_REQUEST_GENERATION_ENV,
+    "-e", PROVIDER_REQUEST_KEY_ENV
+  );
   childArguments.push(selectedProfile);
 
   const child = spawnChild("docker", childArguments, {

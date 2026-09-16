@@ -17,6 +17,7 @@ import { ProviderError, serializeProviderError } from "../../src/providers/error
 import type { ReviewProvider } from "../../src/providers/types.js";
 import { createProviderRequestBudget, verifyProviderRequestReceipt } from "../../src/providers/request-budget.js";
 import type { ProviderRequestReceipt } from "../../src/providers/types.js";
+import type { DiagnosticFeature } from "../../src/providers/diagnostics.js";
 
 const validRequest = {
   reviewId: "review-001",
@@ -300,6 +301,57 @@ describe("provider request receipt ownership", () => {
     expect(transportCalls).toBe(1);
     expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1 });
     expect(verifyProviderRequestReceipt(receipts[0], { generation, key })).toBe(true);
+  });
+});
+
+function injectedFetchFailure(code: string, details: Record<string, unknown> = {}): TypeError {
+  return new TypeError("fetch failed", { cause: Object.assign(new Error("private cause"), { code, ...details }) });
+}
+
+describe("production server transport diagnostics", () => {
+  it.each([
+    ["dns", () => { throw injectedFetchFailure("ENOTFOUND", { errno: -3008, syscall: "getaddrinfo", hostname: "private.example" }); }, 0, 1_000],
+    ["tls", () => { throw injectedFetchFailure("CERT_HAS_EXPIRED"); }, 0, 1_000],
+    ["connection", () => { throw injectedFetchFailure("ECONNREFUSED", { errno: -61, syscall: "connect", address: "127.0.0.1", port: 443 }); }, 0, 1_000],
+    ["network_timeout", () => { throw injectedFetchFailure("UND_ERR_CONNECT_TIMEOUT"); }, 0, 1_000],
+    ["http_error", () => new Response("private", { status: 401 }), 0, 1_000],
+    ["rate_limited", () => new Response("private", { status: 429 }), 0, 1_000],
+    ["server_error", () => new Response("private", { status: 503 }), 0, 1_000],
+    ["retry_budget", () => { throw injectedFetchFailure("ENOTFOUND", { errno: -3008, syscall: "getaddrinfo", hostname: "private.example" }); }, 2, 1]
+  ] as const)("emits exactly one %s frame through server -> tool -> provider -> retry", async (code, outcome, maxRetries, maxTotalWaitMs) => {
+    const features: DiagnosticFeature[] = [];
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 1_000, maxRetries, maxTotalWaitMs, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: { fetch: async () => outcome() },
+      diagnosticSink: { emit(feature) { features.push(feature); return true; } }
+    });
+    await withProtocolClient(async (request) => {
+      await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "transport-diagnostic-regression", version: "1" } });
+      const result = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+    }, server);
+    expect(features).toEqual([{ path: ["provider", "transport", "fetch"], code }]);
+  });
+
+  it("emits exactly one timeout frame through server -> tool -> provider -> retry", async () => {
+    const features: DiagnosticFeature[] = [];
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 5, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: { fetch: async (_input, init) => new Promise<Response>((_resolve, reject) => init.signal?.addEventListener("abort", () => reject(new DOMException("private abort", "AbortError")), { once: true })) },
+      diagnosticSink: { emit(feature) { features.push(feature); return true; } }
+    });
+    await withProtocolClient(async (request) => {
+      await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "timeout-diagnostic-regression", version: "1" } });
+      const result = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+    }, server);
+    expect(features).toEqual([{ path: ["provider", "transport", "fetch"], code: "timeout" }]);
   });
 });
 

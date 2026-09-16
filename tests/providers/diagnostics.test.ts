@@ -1,12 +1,19 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
+  CHILD_DIAGNOSTIC_GENERATION_ENV,
+  CHILD_DIAGNOSTIC_KEY_ENV,
   CHILD_DIAGNOSTIC_PREFIX,
   CHILD_DIAGNOSTIC_SCHEMA,
   createChildDiagnosticSink,
   createChildDiagnosticSinkFromEnvironment,
   parseChildDiagnosticFrame
 } from "../../src/providers/diagnostics.js";
+import {
+  createProviderRequestProofFromEnvironment,
+  PROVIDER_REQUEST_GENERATION_ENV,
+  PROVIDER_REQUEST_KEY_ENV
+} from "../../src/providers/request-budget.js";
 
 const generation = "a".repeat(64);
 const key = Buffer.from("b".repeat(64), "hex");
@@ -55,13 +62,37 @@ describe("proof child diagnostic channel", () => {
   it("erases proof environment values and remains a no-op outside proof mode", () => {
     const env: Record<string, string | undefined> = {};
     expect(createChildDiagnosticSinkFromEnvironment(env).emit(feature)).toBe(false);
-    env.EVIDENCELENS_DIAGNOSTIC_GENERATION = generation;
-    env.EVIDENCELENS_DIAGNOSTIC_KEY = key.toString("hex");
+    env[CHILD_DIAGNOSTIC_GENERATION_ENV] = generation;
+    env[CHILD_DIAGNOSTIC_KEY_ENV] = key.toString("hex");
     let stderr = "";
     const sink = createChildDiagnosticSinkFromEnvironment(env, (value) => { stderr += value; });
-    expect(env).not.toHaveProperty("EVIDENCELENS_DIAGNOSTIC_GENERATION");
-    expect(env).not.toHaveProperty("EVIDENCELENS_DIAGNOSTIC_KEY");
+    expect(env).not.toHaveProperty(CHILD_DIAGNOSTIC_GENERATION_ENV);
+    expect(env).not.toHaveProperty(CHILD_DIAGNOSTIC_KEY_ENV);
     expect(sink.emit(feature)).toBe(true);
     expect(parseChildDiagnosticFrame(stderr, { generation, key })).toEqual(feature);
+  });
+
+  it("keeps request-receipt and child-diagnostic capabilities independently consumable", () => {
+    const environment: Record<string, string | undefined> = {
+      [CHILD_DIAGNOSTIC_GENERATION_ENV]: generation,
+      [CHILD_DIAGNOSTIC_KEY_ENV]: key.toString("hex"),
+      [PROVIDER_REQUEST_GENERATION_ENV]: generation,
+      [PROVIDER_REQUEST_KEY_ENV]: key.toString("hex")
+    };
+    let diagnostic = "";
+    let receipt = "";
+
+    const proof = createProviderRequestProofFromEnvironment(environment, (value) => { receipt += value; });
+    const sink = createChildDiagnosticSinkFromEnvironment(environment, (value) => { diagnostic += value; });
+    proof?.requestBudget.acquireHttpSend();
+    proof?.receiptSink(proof.requestBudget.receipt());
+
+    expect(sink.emit(feature)).toBe(true);
+    expect(parseChildDiagnosticFrame(diagnostic, { generation, key })).toEqual(feature);
+    expect(receipt).toContain("[evidencelens-provider-request]");
+    expect(environment).not.toHaveProperty(CHILD_DIAGNOSTIC_GENERATION_ENV);
+    expect(environment).not.toHaveProperty(CHILD_DIAGNOSTIC_KEY_ENV);
+    expect(environment).not.toHaveProperty(PROVIDER_REQUEST_GENERATION_ENV);
+    expect(environment).not.toHaveProperty(PROVIDER_REQUEST_KEY_ENV);
   });
 });
