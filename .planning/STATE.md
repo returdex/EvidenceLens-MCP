@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-148-PLAN.md
-last_updated: "2026-09-17T07:08:46.447Z"
+stopped_at: Completed 10-149-PLAN.md
+last_updated: "2026-09-17T07:11:36.614Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 179
-  completed_plans: 139
+  completed_plans: 140
   percent: 78
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 149 of 151
+Plan: 150 of 151
 
 - Phase: 10 of 11
-- Status: Plan 10-147 archived the consumed one-send attempt and rotated authority to the bounded Prompt v2 recovery chain
-- Progress: Only Plans 10-148 through 10-151 can now certify, build, run, and synchronize a pass
-- Last activity: 113 focused and 736 complete provider-disabled tests, TypeScript build, archive audit, and diff checks passed
+- Status: Plan 10-149 promoted one exact-source READY immutable local image for the bounded Prompt v2 recovery chain
+- Progress: Plan 10-150 may consume only the authenticated 10-149 generation; Plan 10-151 remains the synchronization gate
+- Last activity: 80 focused provider-disabled tests, one exact local build, independent no-rebuild audit, and diff checks passed
 
 ## Decisions and Assumptions
 
@@ -217,6 +217,7 @@ Plan: 149 of 151
 - [Phase 10]: Only the 10-148/149/150/151 namespace may acquire current production authority. — Stale and mixed tuples fail before external side effects.
 - [Phase 10]: Authorize Plan 10-149 only from reviewed commit 023392e, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
 - [Phase 10]: Keep Prompt v2 request and decoder bounds in one shared exported contract; overflow fails closed as authenticated findings/too_big before projection. — Prevents request-validator limit drift, partial projection, and diagnostic follow-up sends.
+- [Phase 10]: Promote generation baac825df31b54b95e735840948d190adc63925ebc8be4240854d71229595433 as the sole READY Plan 10-149 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -321,16 +322,17 @@ Plan: 149 of 151
 | Phase 10 P144 | 2min | 1 tasks | 2 files |
 | Phase 10 P147 | 7min | 2 tasks | 8 files |
 | Phase 10 P148 | 7min | 2 tasks | 4 files |
+| Phase 10 P149 | 1min | 1 tasks | 2 files | 2026-09-17 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T07:08:46.441Z
-- **Stopped at:** Completed 10-148-PLAN.md
+- **Last session:** 2026-09-17T07:11:36.608Z
+- **Stopped at:** Completed 10-149-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-148 to recertify the exact post-77b82a4 source and tests.
+Execute Plan 10-150 against the exact READY generation `baac825d...595433` with at most one provider HTTP send.
 
 ---
-*Last updated: 2026-09-17 after bounded Prompt v2 authority rotation*
+*Last updated: 2026-09-17 after exact bounded Prompt v2 image authentication*

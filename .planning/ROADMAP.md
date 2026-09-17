@@ -655,7 +655,7 @@ Plans:
 - [x] 10-148-PLAN.md — Hostile-test and exactly recertify the shared Prompt v2 output-budget contract
 
 **Wave 143** *(gap closure; blocked on Wave 142 completion)*
-- [ ] 10-149-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+- [x] 10-149-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 144** *(gap closure; blocked on Wave 143 completion)*
 - [x] 10-150-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
@@ -717,7 +717,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 110/151 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 111/151 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
