@@ -604,7 +604,7 @@ Plans:
 - [x] 10-131-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 **Wave 126** *(gap closure; archive consumed 10-130 and rotate authority)*
-- [ ] 10-132-PLAN.md — Preserve 10-130 as authority:false and rotate registries to the singleton-array JSON recovery namespace
+- [x] 10-132-PLAN.md — Preserve 10-130 as authority:false and rotate registries to the singleton-array JSON recovery namespace
 
 **Wave 127** *(gap closure; blocked on Wave 126 completion)*
 - [ ] 10-133-PLAN.md — Hostile-test and exactly recertify whole-document singleton findings-array parsing
@@ -666,7 +666,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 99/136 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 100/136 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
