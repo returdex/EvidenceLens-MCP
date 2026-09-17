@@ -457,3 +457,22 @@ Plan 10-140 consumed generation `0ffde51b1141461d820e3737ab940c30bbb0f335e79ed4c
 | RESEARCH/FIX | Only stop succeeds; four named terminal reasons are finite diagnostics; missing/type/unknown reject | Hostile-tested in 10-143 and enforced in 10-145 |
 
 Deferred ideas are excluded. All current goal, requirement, context and fix-contract items are covered; no phase split is required.
+
+## Bounded Prompt v2 recovery chain (Plans 10-147 through 10-151)
+
+Plan 10-145 consumed generation `7c0ee397e08639d2adfcab215aa3add9a8622be835ef9e900b3427d87e7ca34e` with exactly one authenticated provider send and retained the content-free `provider-finish-reason-length` result as immutable `gaps_found`. Fix `77b82a4` retains `maxTokens=4000`, requests at most four highest-priority findings, bounds every provider-authored field/follow-up/citation count and length, and applies the same constants after decoding with authenticated `findings/too_big` rejection. Debug archive `19fae6d` records the diagnosis. The prior 10-143 certification and 10-144 image are stale, and 10-146 cannot synchronize.
+
+| Source | Item | Coverage |
+|---|---|---|
+| GOAL | Credentialed Docker MCP proof is truthful, bounded and fail-closed | 10-147 archives the failed generation; 10-150 runs one fresh bounded proof; 10-151 synchronizes only a pass |
+| REQ SAFE-04 | No unsafe downgrade, replay, stale image, oversized provider output or mixed authority | 10-147 rotates fixed registries; 10-148 hostile-tests shared limits and recertifies exact source; 10-149 binds an immutable image |
+| REQ PROV-01 | Complete credentialed structural proof | 10-150 requires stop, at most four bounded findings, four fixtures, positive findings and bound provenance; 10-151 closes only from that pass |
+| CONTEXT API-AUTO/API-BOUND | Provider test is automatic but capped at one send with retries/fallback/alternate/diagnostic-second/replay zero | 10-150 alone has provider budget one; all other plans have zero |
+| CONTEXT LOCAL-UNLIMITED/GHA-BUDGET | Local tests/builds/Docker unrestricted; GitHub Actions zero | Enforced in all five plan budgets and task actions; the live invocation cannot rebuild its certified image |
+| FAILURE 10-145-CONSUMED | Preserve exact one-send generation, receipt, finish-reason diagnostic and lifecycle; revoke replay/sync authority | 10-147, 10-150 and 10-151 |
+| FIX PROMPT-V2-BOUNDS | Max four prioritized findings, nested count/length limits and same-constant post-decode `findings/too_big` rejection | Hostile-tested and certified in 10-148; enforced in 10-150 and 10-151 |
+| AUTHORITY NAMESPACE | Rotate all fixed registries before certification | 10-147 |
+| BUILD EXACT | Fresh local image derives only from exact 10-148 source | 10-149 |
+| SYNC NEW-CHAIN-ONLY | Only complete 10-147/148/149/150 authority may update final truth | 10-151 |
+
+Deferred ideas and Phase 11 SAFE-01 are excluded. All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-145 truth, bounded Prompt v2 fix, exact-source build, one-send live execution and passed-only synchronization are covered; no phase split is required.
