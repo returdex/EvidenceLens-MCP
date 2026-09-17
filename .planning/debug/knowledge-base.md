@@ -100,6 +100,14 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** src/providers/deepseek.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts
 ---
 
+## prose-bracket-structural-context — Inert prose brackets were classified as JSON structure
+- **Date:** 2026-09-17
+- **Error patterns:** provider-json-object-structural-context, unique findings object, prose wrapper, unmatched square bracket
+- **Root cause:** The bounded object extractor treated every square bracket outside the candidate object as structural JSON, including unmatched prose punctuation that could not form a JSON value.
+- **Fix:** Added bounded string-aware square-bracket classification that ignores only clearly inert unmatched prose punctuation while retaining rejection of balanced ambiguity, parseable external values, JSON-like truncation, multiple objects, wrong roots, and unsafe keys.
+- **Files changed:** src/providers/deepseek.ts, tests/providers/deepseek.test.ts
+---
+
 ## extraction-diagnostic-frame-cardinality — New extraction diagnostics were suppressed before stderr
 - **Date:** 2026-09-17
 - **Error patterns:** extraction failure, ambiguous, stream_truncated, provider content object, zero authenticated diagnostic frames
