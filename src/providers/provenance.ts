@@ -11,6 +11,14 @@ import {
 } from "../contracts/review.js";
 import { ProviderError } from "./errors.js";
 import type { DiagnosticFeature, DiagnosticSink } from "./diagnostics.js";
+import {
+  MAX_PROVIDER_CITATIONS,
+  MAX_PROVIDER_FINDINGS,
+  MAX_PROVIDER_FOLLOW_UP_CHARS,
+  MAX_PROVIDER_FOLLOW_UP_CHECKS,
+  MAX_PROVIDER_PROSE_CHARS,
+  MAX_PROVIDER_TITLE_CHARS
+} from "./types.js";
 
 export class ProviderValidationError extends ProviderError {
   constructor(_message?: string) { super("PROVIDER_INVALID_RESPONSE", { retryable: false }); }
@@ -37,14 +45,14 @@ const providerFindingDraftSchema = z.object({
   type: z.enum(["omission", "contradiction", "requirement_conflict", "evidence_quality"]),
   severity: z.enum(["info", "low", "medium", "high"]),
   confidence: z.enum(["high", "medium", "low", "unknown"]),
-  title: z.string().min(1).max(4000),
-  summary: z.string().min(1).max(4000),
-  observation: z.string().min(1).max(4000),
-  interpretation: z.string().min(1).max(4000),
-  uncertainty: z.string().min(1).max(4000).optional(),
-  followUpChecks: z.array(z.string().min(1).max(4000)).min(1).max(10),
+  title: z.string().min(1).max(MAX_PROVIDER_TITLE_CHARS),
+  summary: z.string().min(1).max(MAX_PROVIDER_PROSE_CHARS),
+  observation: z.string().min(1).max(MAX_PROVIDER_PROSE_CHARS),
+  interpretation: z.string().min(1).max(MAX_PROVIDER_PROSE_CHARS),
+  uncertainty: z.string().min(1).max(MAX_PROVIDER_PROSE_CHARS).optional(),
+  followUpChecks: z.array(z.string().min(1).max(MAX_PROVIDER_FOLLOW_UP_CHARS)).min(1).max(MAX_PROVIDER_FOLLOW_UP_CHECKS),
   evidenceIds: z.array(z.string().min(1).max(128)).min(1),
-  citations: z.array(z.union([providerCitationDraftSchema, providerCitationReferenceSchema])).min(1).max(20)
+  citations: z.array(z.union([providerCitationDraftSchema, providerCitationReferenceSchema])).min(1).max(MAX_PROVIDER_CITATIONS)
 }).strict();
 
 export type ProviderCitationDraft = z.infer<typeof providerCitationDraftSchema> | z.infer<typeof providerCitationReferenceSchema>;
@@ -143,6 +151,7 @@ export function validateProviderFindings(
   diagnostics?: DiagnosticSink
 ): ReviewFinding[] {
   try {
+    if (drafts.length > MAX_PROVIDER_FINDINGS) fail("Provider returned too many findings", diagnostics, { path: ["findings"], code: "too_big" });
     const findings = drafts.map((draft) => validateProviderFinding(normalizedEvidence, draft, diagnostics));
     if (new Set(findings.map((finding) => finding.id)).size !== findings.length) fail("Provider finding ids must be unique", diagnostics, { path: ["provenance", "unique"], code: "custom" });
     return findings;

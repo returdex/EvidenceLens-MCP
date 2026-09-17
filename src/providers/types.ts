@@ -9,8 +9,13 @@ import {
 } from "../contracts/review.js";
 import { DEEPSEEK_MODELS } from "./config.js";
 
-export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v1" as const;
-export const MAX_PROVIDER_FINDINGS = 100;
+export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v2" as const;
+export const MAX_PROVIDER_FINDINGS = 4;
+export const MAX_PROVIDER_TITLE_CHARS = 120;
+export const MAX_PROVIDER_PROSE_CHARS = 360;
+export const MAX_PROVIDER_FOLLOW_UP_CHECKS = 2;
+export const MAX_PROVIDER_FOLLOW_UP_CHARS = 240;
+export const MAX_PROVIDER_CITATIONS = 4;
 export const PROVIDER_REVIEW_RESULT_KEYS = Object.freeze([
   "provider",
   "model",

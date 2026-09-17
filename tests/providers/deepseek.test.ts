@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekTransport } from "../../src/providers/deepseek.js";
 import { serializeProviderError } from "../../src/providers/errors.js";
-import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
+import {
+  MAX_PROVIDER_FINDINGS,
+  MAX_PROVIDER_PROSE_CHARS,
+  PROVIDER_PROMPT_VERSION,
+  type ProviderReviewRequest
+} from "../../src/providers/types.js";
 import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
 import { createProviderRequestBudget } from "../../src/providers/request-budget.js";
 import type { ProviderRequestReceipt } from "../../src/providers/types.js";
@@ -123,7 +128,12 @@ describe("DeepSeek provider adapter", () => {
     const result = await provider.review(visualRequest);
     const init = transport.calls[0]!;
     const sent = JSON.parse(String(init.body)) as Record<string, unknown>;
-    expect(sent).toMatchObject({ model: request.inference.model, response_format: { type: "json_object" } });
+    expect(sent).toMatchObject({ model: request.inference.model, max_tokens: 400, response_format: { type: "json_object" } });
+    const messages = sent.messages as Array<{ content: Array<{ type: string; text?: string }> }>;
+    const prompt = JSON.parse(messages[0]!.content[0]!.text!) as { instruction: string; promptVersion: string };
+    expect(prompt.promptVersion).toBe(PROVIDER_PROMPT_VERSION);
+    expect(prompt.instruction).toContain(`at most ${MAX_PROVIDER_FINDINGS} highest-priority distinct findings`);
+    expect(prompt.instruction).toContain(`at most ${MAX_PROVIDER_PROSE_CHARS} characters`);
     expect(JSON.stringify(sent)).toContain("data:image/png;base64,iVBORw0KGgo=");
     expect(sent).toMatchObject({ thinking: { type: "enabled" }, reasoning_effort: "high" });
     expect(init.method).toBe("POST");
@@ -155,6 +165,22 @@ describe("DeepSeek provider adapter", () => {
       const provider = createDeepSeekProvider(config, transportFor(response));
       await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
     }
+  });
+
+  it("rejects provider output that exceeds the prompt's deterministic finding count", async () => {
+    const diagnostics = recordingSink();
+    const findings = Array.from({ length: MAX_PROVIDER_FINDINGS + 1 }, (_, index) => ({ ...draft.findings[0], id: `provider-${index}` }));
+    await expect(createDeepSeekProvider(config, transportFor({ findings }), diagnostics).review(request))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([{ path: ["findings"], code: "too_big" }]);
+  });
+
+  it("rejects verbose provider prose beyond the advertised field budget", async () => {
+    const diagnostics = recordingSink();
+    const findings = [{ ...draft.findings[0], summary: "x".repeat(MAX_PROVIDER_PROSE_CHARS + 1) }];
+    await expect(createDeepSeekProvider(config, transportFor({ findings }), diagnostics).review(request))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([{ path: ["findings", "text"], code: "too_big" }]);
   });
 
   it.each([

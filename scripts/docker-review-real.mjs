@@ -95,6 +95,7 @@ const diagnosticSpecs = [
   ["provider-json-object-structural-context", "provider", "src/providers/deepseek.ts", ["provider", "content", "object"], "structural_context"],
   ["provider-json-object-malformed", "provider", "src/providers/deepseek.ts", ["provider", "content", "object"], "malformed_json"],
   ["finding-presence", "provider", "src/providers/provenance.ts", ["findings"], "too_small"],
+  ["finding-count-bound", "provider", "src/providers/provenance.ts", ["findings"], "too_big"],
   ["finding-draft-keyset", "provider", "src/providers/provenance.ts", ["findings", "keyset"], "unrecognized_keys"],
   ["finding-draft-id", "provider", "src/providers/provenance.ts", ["findings", "id"], "invalid_type"],
   ["finding-draft-type", "provider", "src/providers/provenance.ts", ["findings", "type"], "invalid_value"],

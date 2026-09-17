@@ -1,6 +1,20 @@
 import { createHash } from "node:crypto";
 import type { NormalizedEvidence, ReviewFinding } from "../contracts/review.js";
-import { PROVIDER_PROMPT_VERSION, type ProviderEvidenceItem, type ProviderRequestBudget, type ProviderRequestReceipt, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "./types.js";
+import {
+  MAX_PROVIDER_CITATIONS,
+  MAX_PROVIDER_FINDINGS,
+  MAX_PROVIDER_FOLLOW_UP_CHARS,
+  MAX_PROVIDER_FOLLOW_UP_CHECKS,
+  MAX_PROVIDER_PROSE_CHARS,
+  MAX_PROVIDER_TITLE_CHARS,
+  PROVIDER_PROMPT_VERSION,
+  type ProviderEvidenceItem,
+  type ProviderRequestBudget,
+  type ProviderRequestReceipt,
+  type ProviderReviewRequest,
+  type ProviderReviewResult,
+  type ReviewProvider
+} from "./types.js";
 import { validateProviderFindings, type ProviderFindingDraft } from "./provenance.js";
 import { ProviderError } from "./errors.js";
 import { fetchWithRetry, type RetryClock } from "./retry.js";
@@ -75,7 +89,7 @@ function normalizedFromProviderEvidence(evidence: readonly ProviderEvidenceItem[
 
 function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
   const content: Record<string, unknown>[] = [{ type: "text", text: JSON.stringify({
-    instruction: "Return valid JSON with a findings array. Each citation must contain only evidenceId, an exact location copied from that evidence item's references, and visual. Do not include or invent role, contentHash, sourceReference, or visualPayloadSha256. Citations must be unique and sorted by evidenceId; evidenceIds must exactly match citation evidenceIds.",
+    instruction: `Return only valid JSON with a findings array containing at most ${MAX_PROVIDER_FINDINGS} highest-priority distinct findings. Keep title at most ${MAX_PROVIDER_TITLE_CHARS} characters; keep summary, observation, interpretation, and uncertainty each at most ${MAX_PROVIDER_PROSE_CHARS} characters; include at most ${MAX_PROVIDER_FOLLOW_UP_CHECKS} followUpChecks of at most ${MAX_PROVIDER_FOLLOW_UP_CHARS} characters each; and include at most ${MAX_PROVIDER_CITATIONS} citations per finding. Each citation must contain only evidenceId, an exact location copied from that evidence item's references, and visual. Do not include or invent role, contentHash, sourceReference, or visualPayloadSha256. Citations must be unique and sorted by evidenceId; evidenceIds must exactly match citation evidenceIds. Prefer concise findings that cover different evidence or failure modes.`,
     objective: safeText(request.objective),
     promptVersion: request.promptVersion,
     evidence: request.evidence.map(evidenceForPrompt),
