@@ -16,7 +16,7 @@ import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../revie
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
 import { isProviderReviewResultEnvelope, PROVIDER_PROMPT_VERSION, providerInferenceSettingsSchema, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
-import type { ProviderConfig } from "../providers/config.js";
+import { DEFAULT_PROVIDER_MAX_TOKENS, type ProviderConfig } from "../providers/config.js";
 import { ProviderError } from "../providers/errors.js";
 import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
 import type { DiagnosticSink } from "../providers/diagnostics.js";
@@ -43,7 +43,7 @@ export interface ReviewHandlerOptions {
 const DEFAULT_PROVIDER_INFERENCE = {
   model: "deepseek-v4-pro",
   temperature: 0.2,
-  maxTokens: 4_000
+  maxTokens: DEFAULT_PROVIDER_MAX_TOKENS
 } as const;
 
 function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>): ProviderEvidenceItem[] {

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import { reviewProviderAttributionSchema, reviewResponseSchema, reviewToolResultSchema, type ReviewFinding, type ReviewRequest } from "../../src/contracts/review.js";
 import { ProviderError } from "../../src/providers/errors.js";
+import { computeProviderInputFingerprint } from "../../src/providers/deepseek.js";
 import { MAX_PROVIDER_FINDINGS, PROVIDER_PROMPT_VERSION, providerReviewResultSchema, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../../src/providers/types.js";
 import type { ProviderConfig } from "../../src/providers/config.js";
 import type { ReviewAnalyzer } from "../../src/review/engine.js";
@@ -386,6 +387,25 @@ describe("provider review MCP boundary", () => {
     failureHolder.marker = "failure-remains-writable";
     expect(failureConfig.maxTokens).toBe(4_002);
     expect(failureHolder.marker).toBe("failure-remains-writable");
+  });
+
+  it("binds the fixed default output cap into the exact provider request fingerprint", async () => {
+    let capturedRequest: ProviderReviewRequest | undefined;
+    const provider: ReviewProvider = {
+      name: "local-reviewer",
+      async review(providerRequest) {
+        capturedRequest = providerRequest;
+        return { ...(await fakeProvider().review(providerRequest)), modelFindings: [] };
+      }
+    };
+    expect(payload(await handleReviewRequest(request, { provider }))).toMatchObject({ ok: true });
+    expect(capturedRequest?.inference).toEqual({ model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 8000 });
+    const { inputFingerprint, ...withoutFingerprint } = capturedRequest!;
+    expect(inputFingerprint).toBe(computeProviderInputFingerprint(withoutFingerprint));
+    expect(inputFingerprint).not.toBe(computeProviderInputFingerprint({
+      ...withoutFingerprint,
+      inference: { ...withoutFingerprint.inference, maxTokens: 4000 }
+    }));
   });
 
   it("rejects invalid runtime inference before invoking the provider", async () => {
