@@ -180,11 +180,14 @@ describe("DeepSeek provider adapter", () => {
     ["array plus leading prose", `prefix ${JSON.stringify([draft])}`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["array plus trailing prose", `${JSON.stringify([draft])} suffix`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["brackets in prose", `Review [one]: ${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["empty array", JSON.stringify([]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["multiple array members", JSON.stringify([draft, draft]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["nested singleton array", JSON.stringify([[draft]]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["singleton array primitive", JSON.stringify([1]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["singleton array extra root key", JSON.stringify([{ ...draft, extra: true }]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["singleton array prototype-pollution key", `[{"findings":[],"__proto__":{"polluted":true}}]`, { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["singleton array constructor key", `[{"findings":[],"constructor":{"polluted":true}}]`, { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["singleton array prototype key", `[{"findings":[],"prototype":{"polluted":true}}]`, { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["fenced singleton array", `\`\`\`json\n${JSON.stringify([draft])}\n\`\`\``, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["truncated singleton array", JSON.stringify([draft]).slice(0, -1), { path: ["provider", "content", "object"], code: "structural_context" }],
     ["extra root key", JSON.stringify({ ...draft, extra: true }), { path: ["provider", "content", "object"], code: "wrong_root" }],
@@ -193,10 +196,15 @@ describe("DeepSeek provider adapter", () => {
     ["oversized input", "x".repeat(1_000_001), { path: ["provider", "content", "bytes"], code: "too_big" }]
   ] as const)("rejects ambiguous or unsafe bounded object content with one safe shape: %s", async (_name, content, feature) => {
     const diagnostics = recordingSink();
+    let transportCalls = 0;
     const transport: DeepSeekTransport = {
-      fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+      fetch: async () => {
+        transportCalls += 1;
+        return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } });
+      }
     };
     await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(transportCalls).toBe(1);
     expect(diagnostics.features).toEqual([feature]);
     expect(JSON.stringify(diagnostics.features)).not.toMatch(/private|prefix|suffix|prose|extra|polluted|findings|1_000_001/iu);
   });

@@ -1,0 +1,72 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "whole_document_singleton_array_accepted": "passed",
+    "direct_findings_object_acceptance_unchanged": "passed",
+    "json_fenced_findings_object_acceptance_unchanged": "passed",
+    "plain_fenced_findings_object_acceptance_unchanged": "passed",
+    "prose_wrapped_findings_object_acceptance_unchanged": "passed",
+    "empty_array_rejected": "passed",
+    "multiple_array_members_rejected": "passed",
+    "nested_singleton_array_rejected": "passed",
+    "singleton_primitive_rejected": "passed",
+    "singleton_extra_key_rejected": "passed",
+    "singleton___proto___key_rejected": "passed",
+    "singleton_constructor_key_rejected": "passed",
+    "singleton_prototype_key_rejected": "passed",
+    "fenced_singleton_array_rejected": "passed",
+    "leading_wrapper_text_rejected": "passed",
+    "trailing_wrapper_text_rejected": "passed",
+    "trailing_array_bytes_rejected": "passed",
+    "truncated_singleton_array_rejected": "passed",
+    "malformed_json_rejected": "passed",
+    "mixed_candidates_rejected": "passed",
+    "every_rejection_emits_one_content_free_diagnostic": "passed",
+    "public_error_code_and_message_unchanged": "passed",
+    "every_rejection_uses_one_transport_call": "passed",
+    "no_fallback_second_request_or_diagnostic_call": "passed"
+  },
+  "acceptance_contract": {
+    "whole_document_json_parse": true,
+    "root_type": "array",
+    "root_length": 1,
+    "element_type": "json_plain_object",
+    "element_own_enumerable_string_keys": ["findings"],
+    "findings_type": "array"
+  },
+  "diagnostic_contract": {
+    "rejection_path": ["provider", "content", "object"],
+    "finite_codes": ["malformed_json", "multiple_candidates", "no_candidate", "structural_context", "unbalanced", "wrong_root"],
+    "diagnostics_per_rejected_response": 1,
+    "response_derived_fields": 0,
+    "transport_calls_per_case": 1,
+    "follow_up_request_budget": 0,
+    "public_error_code": "PROVIDER_INVALID_RESPONSE",
+    "public_error_message": "Provider response is invalid"
+  },
+  "verification": {
+    "focused_suite_files": 1,
+    "focused_suite_tests": 51,
+    "minimum_focused_suite_tests": 48,
+    "focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts",
+    "full_offline_test_files": 43,
+    "full_offline_tests": 709,
+    "minimum_full_offline_tests": 705,
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "hermetic_provider_transport": "passed"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "local_docker_builds": 0,
+    "local_docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  },
+  "status": "passed"
+}
