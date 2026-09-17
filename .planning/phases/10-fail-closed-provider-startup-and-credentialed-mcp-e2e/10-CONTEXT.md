@@ -88,3 +88,11 @@ None.
 - Wrapper prose/fences, zero or multiple elements, nested arrays, non-object elements, extra or prototype-pollution keys, trailing bytes, malformed or truncated JSON remain rejected closed with content-free diagnostics.
 - Plans 10-128/129 are stale and Plan 10-131 cannot synchronize. Only Plans 10-132 through 10-136 may acquire current production authority.
 - Local tests, builds and Docker remain unrestricted. Plan 10-135 has a fresh provider-send ceiling of one with retry, fallback, alternate, diagnostic-second-call and replay all zero. GitHub Actions remain zero.
+
+## Post-10-135 inert-prose-bracket recovery decisions
+
+- Generation `7f200433f714be66d4ef181b8d263204d091cb868ae2609a98baeebe4e9f4fb4` is immutable `gaps_found` history after one authenticated provider send; replay, overwrite, upgrade and synchronization are prohibited.
+- Fix `e7d21f5` uses bounded string/escape-aware classification to ignore only provably inert unmatched prose square brackets; complete external arrays, balanced ambiguity, JSON truncation, multiple candidates, wrong roots and dangerous keys remain rejected closed.
+- Resolved debug record `48b2ae9` documents the inert-prose-bracket root cause and the 59 focused / 717 complete provider-disabled verification baseline.
+- Plans 10-133/134 are stale and Plan 10-136 cannot synchronize. Only Plans 10-137 through 10-141 may acquire current production authority.
+- Local tests, builds and Docker remain unrestricted. Plan 10-140 has a fresh provider-send ceiling of one with retry, fallback, alternate, diagnostic-second-call and replay all zero. GitHub Actions remain zero.
