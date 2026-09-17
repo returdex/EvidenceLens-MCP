@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(105 of 141 plans completed; generation f09fa556 is the sole READY exact-source image, and Plans 10-140 through 10-141 remain the current live/sync namespace.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(105 of 146 plans completed; generation 0ffde51b is consumed gaps evidence, and Plans 10-142 through 10-146 are the current finish-reason recovery namespace.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -633,13 +633,28 @@ Plans:
 **Wave 135** *(gap closure; only reachable from a passed Wave 134 chain)*
 - [ ] 10-141-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
+**Wave 136** *(gap closure; archive consumed 10-140 and rotate authority)*
+- [ ] 10-142-PLAN.md — Preserve 10-140 as authority:false and rotate registries to the finish-reason recovery namespace
+
+**Wave 137** *(gap closure; blocked on Wave 136 completion)*
+- [ ] 10-143-PLAN.md — Hostile-test and exactly recertify the strict provider finish-reason contract
+
+**Wave 138** *(gap closure; blocked on Wave 137 completion)*
+- [ ] 10-144-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+
+**Wave 139** *(gap closure; blocked on Wave 138 completion)*
+- [ ] 10-145-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+
+**Wave 140** *(gap closure; only reachable from a passed Wave 139 chain)*
+- [ ] 10-146-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-141 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Plans 10-38 through 10-146 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
 - Generation 30f0d9b28c13132e1a79ce6a3afe0f1a9fdd457867e47e67ded8c3a547b83e73 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
@@ -654,7 +669,9 @@ Cross-cutting constraints:
 - Fix bab40b9 accepts only a whole-document JSON.parse root array of length exactly one whose sole object has the exact findings key; wrappers, multiple/nested arrays, extra/prototype keys, trailing bytes and truncation remain rejected. The 10-128 certification and 10-129 image are therefore stale.
 - Generation 7f200433f714be66d4ef181b8d263204d091cb868ae2609a98baeebe4e9f4fb4 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
 - Fix e7d21f5 uses bounded string/escape-aware classification to ignore only provably inert unmatched prose brackets while complete external arrays, balanced ambiguity, JSON truncation, multiple candidates, wrong roots and dangerous keys remain rejected; resolved debug 48b2ae9 records the diagnosis. The 10-133 certification and 10-134 image are therefore stale.
-- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121, 10-126, 10-131 and 10-136 are superseded and cannot synchronize. Only Plan 10-141 may synchronize, and only from an exact committed passed 10-137/10-138/10-139/10-140 authority chain; non-pass performs zero target writes.
+- Generation 0ffde51b1141461d820e3737ab940c30bbb0f335e79ed4c07f3a1e4caa10c87d is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
+- Fix 92790db requires an own string finish_reason exactly equal to stop for success; length, content_filter, tool_calls and insufficient_system_resource map to exact content-free diagnostics, while missing, non-string and unknown values reject closed. The 10-138 certification and 10-139 image are therefore stale.
+- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121, 10-126, 10-131, 10-136 and 10-141 are superseded and cannot synchronize. Only Plan 10-146 may synchronize, and only from an exact committed passed 10-142/10-143/10-144/10-145 authority chain; non-pass performs zero target writes.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
@@ -683,7 +700,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 105/141 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 105/146 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
@@ -694,4 +711,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-17 after planning the inert-prose-bracket recovery chain through Phase 10 Plan 141*
+*Last updated: 2026-09-17 after planning the finish-reason recovery chain through Phase 10 Plan 146*

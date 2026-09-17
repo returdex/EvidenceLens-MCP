@@ -96,3 +96,11 @@ None.
 - Resolved debug record `48b2ae9` documents the inert-prose-bracket root cause and the 59 focused / 717 complete provider-disabled verification baseline.
 - Plans 10-133/134 are stale and Plan 10-136 cannot synchronize. Only Plans 10-137 through 10-141 may acquire current production authority.
 - Local tests, builds and Docker remain unrestricted. Plan 10-140 has a fresh provider-send ceiling of one with retry, fallback, alternate, diagnostic-second-call and replay all zero. GitHub Actions remain zero.
+
+## Post-10-140 finish-reason recovery decisions
+
+- Generation `0ffde51b1141461d820e3737ab940c30bbb0f335e79ed4c07f3a1e4caa10c87d` is immutable `gaps_found` history after one authenticated provider send; replay, overwrite, upgrade and synchronization are prohibited.
+- Fix `92790db` makes only an own string `finish_reason: "stop"` eligible for provider success. `length`, `content_filter`, `tool_calls` and `insufficient_system_resource` map to exact authenticated content-free diagnostics; missing, non-string and unknown values reject closed.
+- The verified offline baseline is 242 focused and 732 complete provider-disabled tests.
+- Plans 10-138/139 are stale and Plan 10-141 cannot synchronize. Only Plans 10-142 through 10-146 may acquire current production authority.
+- Local tests, builds and Docker remain unrestricted. Plan 10-145 has a fresh provider-send ceiling of one with retry, fallback, alternate, diagnostic-second-call and replay all zero. GitHub Actions remain zero.

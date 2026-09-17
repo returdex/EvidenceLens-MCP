@@ -444,3 +444,16 @@ Plan 10-130 consumed generation `ad6979613da6f3fb038d1ab6b9d7066c571d75ade1ca28d
 - Any source/test edit after Plan 10-133 certification returns to Plan 10-132 ownership and forces complete recertification.
 
 **Audit result:** All current goal, requirements, locked decisions, consumed 10-130 truth, singleton-array fix, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
+## Finish-reason recovery chain (Plans 10-142 through 10-146)
+
+Plan 10-140 consumed generation `0ffde51b1141461d820e3737ab940c30bbb0f335e79ed4c07f3a1e4caa10c87d` with exactly one authenticated provider send and retained `provider-json-object-unbalanced` as immutable `gaps_found`. Fix `92790db` establishes the strict finish-reason contract, making the prior certification and image stale.
+
+| Source | Item | Coverage |
+|---|---|---|
+| GOAL | Credentialed Docker MCP proof is truthful and fail-closed | 10-142 archives the failed generation; 10-145 runs one fresh bounded proof; 10-146 synchronizes only a pass |
+| REQ SAFE-04 | No unsafe downgrade, replay, stale image or mixed authority | 10-142 rotates fixed registries; 10-143 recertifies exact source; 10-144 binds an immutable image |
+| REQ PROV-01 | Complete credentialed structural proof | 10-145 requires exact stop, four fixtures, positive findings and bound provenance; 10-146 closes only from that pass |
+| CONTEXT | Local tests/builds/Docker unrestricted; GHA zero; provider max one | Enforced in all five plan budgets and task actions |
+| RESEARCH/FIX | Only stop succeeds; four named terminal reasons are finite diagnostics; missing/type/unknown reject | Hostile-tested in 10-143 and enforced in 10-145 |
+
+Deferred ideas are excluded. All current goal, requirement, context and fix-contract items are covered; no phase split is required.
