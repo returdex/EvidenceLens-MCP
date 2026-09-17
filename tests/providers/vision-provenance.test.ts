@@ -42,7 +42,7 @@ const request: ProviderReviewRequest = { ...withoutFingerprint, inputFingerprint
 
 function transportFor(content: string) {
   return {
-    fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200 })
+    fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }] }), { status: 200 })
   };
 }
 

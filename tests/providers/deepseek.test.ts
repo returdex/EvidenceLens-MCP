@@ -18,7 +18,7 @@ const draft = { findings: [{ id: "provider-1", type: "omission", severity: "medi
 
 function transportFor(body: unknown, status = 200): DeepSeekTransport & { calls: RequestInit[] } {
   const calls: RequestInit[] = [];
-  return { calls, fetch: async (_input, init) => { calls.push(init); return new Response(status === 200 ? JSON.stringify({ choices: [{ message: { content: JSON.stringify(body) } }] }) : "upstream secret body", { status, headers: { "content-type": "application/json" } }); } };
+  return { calls, fetch: async (_input, init) => { calls.push(init); return new Response(status === 200 ? JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(body) } }] }) : "upstream secret body", { status, headers: { "content-type": "application/json" } }); } };
 }
 
 const config = { apiKey: "secret-key", baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro" as const, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 };
@@ -63,7 +63,7 @@ describe("DeepSeek provider adapter", () => {
       async fetch() {
         calls += 1;
         await firstFetchEntered;
-        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }), {
+        return new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(draft) } }] }), {
           status: 200,
           headers: { "content-type": "application/json" }
         });
@@ -151,7 +151,7 @@ describe("DeepSeek provider adapter", () => {
   });
 
   it("rejects malformed, invalid, and forged provider output without fallback", async () => {
-    for (const response of [{ choices: [{ message: { content: "not json" } }] }, { findings: [{ ...draft.findings[0], severity: "critical" }] }, { findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], evidenceId: "forged" }] }] }]) {
+    for (const response of [{ choices: [{ finish_reason: "stop", message: { content: "not json" } }] }, { findings: [{ ...draft.findings[0], severity: "critical" }] }, { findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], evidenceId: "forged" }] }] }]) {
       const provider = createDeepSeekProvider(config, transportFor(response));
       await expect(provider.review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
     }
@@ -169,9 +169,31 @@ describe("DeepSeek provider adapter", () => {
     ["nested braces and escapes in strings", JSON.stringify({ findings: [{ ...draft.findings[0], summary: "Object { nested: \\\"value\\\" } and slash \\\\ remain text." }] })]
   ])("extracts one bounded strict findings object from %s", async (_name, content) => {
     const transport: DeepSeekTransport = {
-      fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
     };
     await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek" });
+  });
+
+  it.each([
+    ["missing", undefined, "invalid_type"],
+    ["wrong type", 42, "invalid_type"],
+    ["unknown", "private_unrecognized_reason", "invalid_value"],
+    ["token limit", "length", "length"],
+    ["content filter", "content_filter", "content_filter"],
+    ["tool call", "tool_calls", "tool_calls"],
+    ["provider resource limit", "insufficient_system_resource", "insufficient_system_resource"]
+  ] as const)("rejects %s finish_reason before parsing content with one bounded diagnostic", async (_name, finishReason, code) => {
+    const diagnostics = recordingSink();
+    const choice = {
+      ...(finishReason !== undefined ? { finish_reason: finishReason } : {}),
+      message: { content: `private-response-${String(finishReason)} {"findings":[}` }
+    };
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [choice] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "finish_reason"], code }]);
+    expect(JSON.stringify(diagnostics.features)).not.toMatch(/private-response|private_unrecognized_reason|findings/iu);
   });
 
   it.each([
@@ -208,7 +230,7 @@ describe("DeepSeek provider adapter", () => {
     const transport: DeepSeekTransport = {
       fetch: async () => {
         transportCalls += 1;
-        return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } });
+        return new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } });
       }
     };
     await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
@@ -278,9 +300,9 @@ describe("DeepSeek provider adapter", () => {
   it("emits one canonical feature at each real response decode and content failure site", async () => {
     const cases: Array<{ response: unknown; feature: DiagnosticFeature }> = [
       { response: { choices: [] }, feature: { path: ["provider", "choices"], code: "too_small" } },
-      { response: { choices: [{ message: { content: 42 } }] }, feature: { path: ["provider", "message", "content"], code: "invalid_type" } },
-      { response: { choices: [{ message: { content: "x".repeat(1_000_001) } }] }, feature: { path: ["provider", "content", "bytes"], code: "too_big" } },
-      { response: { choices: [{ message: { content: "not-json" } }] }, feature: { path: ["provider", "content", "object"], code: "no_candidate" } }
+      { response: { choices: [{ finish_reason: "stop", message: { content: 42 } }] }, feature: { path: ["provider", "message", "content"], code: "invalid_type" } },
+      { response: { choices: [{ finish_reason: "stop", message: { content: "x".repeat(1_000_001) } }] }, feature: { path: ["provider", "content", "bytes"], code: "too_big" } },
+      { response: { choices: [{ finish_reason: "stop", message: { content: "not-json" } }] }, feature: { path: ["provider", "content", "object"], code: "no_candidate" } }
     ];
     for (const entry of cases) {
       const diagnostic = recordingSink();

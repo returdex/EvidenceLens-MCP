@@ -229,7 +229,16 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
     || (response as { choices: unknown[] }).choices.length === 0) {
     invalidResponse(diagnostics, ["provider", "choices"], "too_small");
   }
-  const message = (response as { choices: Array<{ message?: { content?: unknown; reasoning_content?: unknown } }> }).choices[0]?.message;
+  const choice = (response as { choices: Array<{ finish_reason?: unknown; message?: { content?: unknown; reasoning_content?: unknown } }> }).choices[0];
+  const finishReason = choice?.finish_reason;
+  if (typeof finishReason !== "string") invalidResponse(diagnostics, ["provider", "finish_reason"], "invalid_type");
+  if (finishReason !== "stop") {
+    if (finishReason === "length" || finishReason === "content_filter" || finishReason === "tool_calls" || finishReason === "insufficient_system_resource") {
+      invalidResponse(diagnostics, ["provider", "finish_reason"], finishReason);
+    }
+    invalidResponse(diagnostics, ["provider", "finish_reason"], "invalid_value");
+  }
+  const message = choice?.message;
   const content = message?.content;
   const reasoningContent = message?.reasoning_content;
   if (typeof content !== "string") invalidResponse(diagnostics, ["provider", "message", "content"], "invalid_type");

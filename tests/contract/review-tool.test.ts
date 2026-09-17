@@ -337,7 +337,7 @@ describe("production server transport diagnostics", () => {
         timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
       },
       providerTransport: {
-        fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content } }] }), {
+        fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }] }), {
           status: 200, headers: { "content-type": "application/json" }
         })
       },
@@ -355,6 +355,54 @@ describe("production server transport diagnostics", () => {
     const feature = collector.feature({ generation, key });
     expect(feature).toEqual({ path: ["provider", "content", "object"], code: _code });
     expect(classifyDiagnostic([feature])).toMatchObject({ invariant_id: invariantId, repair: "allowlisted" });
+  });
+
+  it.each([
+    [undefined, "invalid_type", "provider-finish-reason-type"],
+    [42, "invalid_type", "provider-finish-reason-type"],
+    ["private_unknown_reason", "invalid_value", "provider-finish-reason-unknown"],
+    ["length", "length", "provider-finish-reason-length"],
+    ["content_filter", "content_filter", "provider-finish-reason-content-filter"],
+    ["tool_calls", "tool_calls", "provider-finish-reason-tool-calls"],
+    ["insufficient_system_resource", "insufficient_system_resource", "provider-finish-reason-resource"]
+  ] as const)("authenticates the bounded finish_reason diagnostic %s through the full production path", async (finishReason, code, invariantId) => {
+    const generation = "e".repeat(64);
+    const key = Buffer.alloc(32, 0x65);
+    const environment: Record<string, string | undefined> = {
+      [CHILD_DIAGNOSTIC_GENERATION_ENV]: generation,
+      [CHILD_DIAGNOSTIC_KEY_ENV]: key.toString("hex")
+    };
+    let stderr = "";
+    const diagnosticSink = createChildDiagnosticSinkFromEnvironment(environment, (value) => { stderr += value; });
+    const choice = {
+      ...(finishReason !== undefined ? { finish_reason: finishReason } : {}),
+      message: { content: "private body that must not be parsed" }
+    };
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: {
+        fetch: async () => new Response(JSON.stringify({ choices: [choice] }), {
+          status: 200, headers: { "content-type": "application/json" }
+        })
+      },
+      diagnosticSink
+    });
+    await withProtocolClient(async (protocolRequest) => {
+      await protocolRequest("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "finish-reason-regression", version: "1" } });
+      const result = await protocolRequest("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+    }, server);
+
+    const collector = new ChildDiagnosticCollector();
+    collector.consume(stderr);
+    collector.markTerminal();
+    const feature = collector.feature({ generation, key });
+    expect(feature).toEqual({ path: ["provider", "finish_reason"], code });
+    expect(classifyDiagnostic([feature])).toMatchObject({ invariant_id: invariantId, repair: "allowlisted" });
+    expect(JSON.stringify({ feature, classified: classifyDiagnostic([feature]) })).not.toMatch(/private body|private_unknown_reason/iu);
   });
 
   it.each([

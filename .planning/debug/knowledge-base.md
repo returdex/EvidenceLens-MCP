@@ -115,3 +115,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Added exactly the six extraction tuples to the child allowlist, exported the existing host collector for direct regression coverage, and tested the complete offline production chain while preserving fail-closed duplicate and unknown handling.
 - **Files changed:** src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/diagnostics.test.ts, tests/contract/review-tool.test.ts
 ---
+
+## provider-finish-reason-contract — Provider completion state was ignored before content parsing
+- **Date:** 2026-09-17
+- **Error patterns:** provider-json-object-unbalanced, clean HTTP lifecycle, one authenticated provider send, potentially truncated content
+- **Root cause:** The DeepSeek adapter parsed `choices[0].message.content` without first validating `choices[0].finish_reason`, so token-limited and other non-normal completions were misclassified as derivative JSON-shape failures.
+- **Fix:** Accept only exact `stop` for success; reject missing, wrong-type, and unknown reasons and authenticate closed diagnostics for `length`, `content_filter`, `tool_calls`, and `insufficient_system_resource` before content parsing.
+- **Files changed:** src/providers/deepseek.ts, src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/providers/vision-provenance.test.ts, tests/contract/review-tool.test.ts
+---
