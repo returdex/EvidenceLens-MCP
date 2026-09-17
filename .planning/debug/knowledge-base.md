@@ -99,3 +99,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Return a closed internal result union and register content-free features for no candidate, multiple candidates, unbalanced, wrong root, structural context, and malformed JSON while preserving existing acceptance and public errors.
 - **Files changed:** src/providers/deepseek.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts
 ---
+
+## extraction-diagnostic-frame-cardinality — New extraction diagnostics were suppressed before stderr
+- **Date:** 2026-09-17
+- **Error patterns:** extraction failure, ambiguous, stream_truncated, provider content object, zero authenticated diagnostic frames
+- **Root cause:** e213bda expanded the producer and host invariant map with six extraction-shape codes but did not expand the child diagnostic channel's independent closed allowlist, so every new frame was suppressed before stderr.
+- **Fix:** Added exactly the six extraction tuples to the child allowlist, exported the existing host collector for direct regression coverage, and tested the complete offline production chain while preserving fail-closed duplicate and unknown handling.
+- **Files changed:** src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/diagnostics.test.ts, tests/contract/review-tool.test.ts
+---
