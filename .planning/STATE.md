@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-147-PLAN.md
-last_updated: "2026-09-17T07:00:03.935Z"
+stopped_at: Completed 10-148-PLAN.md
+last_updated: "2026-09-17T07:08:46.447Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 179
-  completed_plans: 138
-  percent: 77
+  completed_plans: 139
+  percent: 78
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 148 of 151
+Plan: 149 of 151
 
 - Phase: 10 of 11
 - Status: Plan 10-147 archived the consumed one-send attempt and rotated authority to the bounded Prompt v2 recovery chain
@@ -215,6 +215,8 @@ Plan: 148 of 151
 - [Phase 10]: Promote generation f66bdc3c4a5352c074eaecbc3d2e7df038185c59429f7423cc0a1ea79403910e as the sole READY Plan 10-144 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve generation 7c0ee397 as byte-exact authority:false and replay_allowed:false history superseded by Prompt v2 fix 77b82a4. — Consumed paid evidence cannot regain request, proof, replay, or synchronization authority.
 - [Phase 10]: Only the 10-148/149/150/151 namespace may acquire current production authority. — Stale and mixed tuples fail before external side effects.
+- [Phase 10]: Authorize Plan 10-149 only from reviewed commit 023392e, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
+- [Phase 10]: Keep Prompt v2 request and decoder bounds in one shared exported contract; overflow fails closed as authenticated findings/too_big before projection. — Prevents request-validator limit drift, partial projection, and diagnostic follow-up sends.
 
 ### Blockers
 
@@ -318,11 +320,12 @@ Plan: 148 of 151
 | Phase 10 P143 | 3min | 2 tasks | 4 files |
 | Phase 10 P144 | 2min | 1 tasks | 2 files |
 | Phase 10 P147 | 7min | 2 tasks | 8 files |
+| Phase 10 P148 | 7min | 2 tasks | 4 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T07:00:03.929Z
-- **Stopped at:** Completed 10-147-PLAN.md
+- **Last session:** 2026-09-17T07:08:46.441Z
+- **Stopped at:** Completed 10-148-PLAN.md
 - **Resume file:** None
 
 ## Next Action
