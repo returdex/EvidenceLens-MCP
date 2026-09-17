@@ -163,6 +163,9 @@ describe("DeepSeek provider adapter", () => {
     ["JSON code fence", `\`\`\`json\n${JSON.stringify(draft)}\n\`\`\``],
     ["plain code fence", `\`\`\`\n${JSON.stringify(draft)}\n\`\`\``],
     ["non-structural prose wrapper", `Review result follows:\n${JSON.stringify(draft)}\nEnd of review.`],
+    ["unmatched prose bracket before object", `Review [requested output follows:\n${JSON.stringify(draft)}\nEnd of review.`],
+    ["unmatched prose bracket after object", `${JSON.stringify(draft)}\nReview note [not JSON.`],
+    ["unmatched prose closing bracket", `Review result follows:\n${JSON.stringify(draft)}\nEnd note].`],
     ["nested braces and escapes in strings", JSON.stringify({ findings: [{ ...draft.findings[0], summary: "Object { nested: \\\"value\\\" } and slash \\\\ remain text." }] })]
   ])("extracts one bounded strict findings object from %s", async (_name, content) => {
     const transport: DeepSeekTransport = {
@@ -180,6 +183,11 @@ describe("DeepSeek provider adapter", () => {
     ["array plus leading prose", `prefix ${JSON.stringify([draft])}`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["array plus trailing prose", `${JSON.stringify([draft])} suffix`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["brackets in prose", `Review [one]: ${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["valid JSON array before object", `[1]\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["balanced malformed array before object", `[one]\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["truncated array containing object", `[${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["unmatched JSON-like array before object", `[1,\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["extra valid object inside prose brackets", `[note ${JSON.stringify(draft)}]\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["empty array", JSON.stringify([]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["multiple array members", JSON.stringify([draft, draft]), { path: ["provider", "content", "object"], code: "wrong_root" }],
     ["nested singleton array", JSON.stringify([[draft]]), { path: ["provider", "content", "object"], code: "wrong_root" }],

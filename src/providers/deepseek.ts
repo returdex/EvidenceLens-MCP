@@ -128,6 +128,42 @@ function findingsFromWholeDocument(value: unknown): ProviderFindingDraft[] | und
 type JsonObjectExtractionFailure = "no_candidate" | "multiple_candidates" | "unbalanced" | "wrong_root" | "structural_context" | "malformed_json";
 type JsonObjectExtraction = { findings: ProviderFindingDraft[] } | { failure: JsonObjectExtractionFailure };
 
+function matchingSquareBracket(value: string, start: number): number | undefined {
+  const stack: string[] = ["["];
+  let inString = false;
+  let escaped = false;
+  for (let index = start + 1; index < value.length; index += 1) {
+    const character = value[index]!;
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === "\"") inString = false;
+      continue;
+    }
+    if (character === "\"") inString = true;
+    else if (character === "[" || character === "{") stack.push(character);
+    else if (character === "]" || character === "}") {
+      const expected = character === "]" ? "[" : "{";
+      if (stack.at(-1) !== expected) return index;
+      stack.pop();
+      if (stack.length === 0) return index;
+    }
+  }
+  return undefined;
+}
+
+function unmatchedSquareBracketCouldStartJson(value: string, start: number): boolean {
+  const remainder = value.slice(start + 1).trimStart();
+  if (remainder.length === 0) return false;
+  if (/^[{["\-0-9]/u.test(remainder)) return true;
+  return /^(?:true|false|null)(?:\s|,|\]|$)/u.test(remainder);
+}
+
+function unmatchedClosingSquareBracketCouldEndJson(value: string, end: number): boolean {
+  const prefix = value.slice(0, end).trimEnd();
+  return prefix.length > 0 && /[}\]"0-9]/u.test(prefix.at(-1)!);
+}
+
 function extractSingleJsonObject(value: string): JsonObjectExtraction {
   try {
     const findings = findingsFromWholeDocument(JSON.parse(value));
@@ -150,7 +186,12 @@ function extractSingleJsonObject(value: string): JsonObjectExtraction {
         depth = 1;
         inString = false;
         escaped = false;
-      } else if (character === "}" || character === "[" || character === "]") {
+      } else if (character === "[") {
+        const matching = matchingSquareBracket(value, index);
+        if (matching !== undefined || unmatchedSquareBracketCouldStartJson(value, index)) structuralGarbage = true;
+      } else if (character === "]") {
+        if (unmatchedClosingSquareBracketCouldEndJson(value, index)) structuralGarbage = true;
+      } else if (character === "}") {
         structuralGarbage = true;
       }
       continue;
