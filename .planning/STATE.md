@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-143-PLAN.md
-last_updated: "2026-09-17T05:52:35.798Z"
+stopped_at: Completed 10-144-PLAN.md
+last_updated: "2026-09-17T05:57:07.287Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 174
-  completed_plans: 136
-  percent: 78
+  completed_plans: 137
+  percent: 79
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 144 of 146
+Plan: 145 of 146
 
 - Phase: 10 of 11
-- Status: Plan 10-143 certified the exact post-92790db finish-reason source and diagnostic chain
-- Progress: Only Plans 10-144 through 10-146 can now build, run one bounded generation, and synchronize a pass
-- Last activity: 252 focused and 733 full provider-disabled tests, build, exact-source audits, ASVS review, and diff checks passed
+- Status: Plan 10-144 built and independently authenticated the exact post-92790db immutable image
+- Progress: Only Plans 10-145 and 10-146 can now run one bounded generation and synchronize a pass
+- Last activity: 79 focused provider-disabled tests, exact-source build audit, immutable image verification, and diff checks passed
 
 ## Decisions and Assumptions
 
@@ -212,6 +212,7 @@ Plan: 144 of 146
 - [Phase 10]: Only the 10-143/144/145/146 namespace may acquire current production authority.
 - [Phase 10]: Authorize Plan 10-144 only from reviewed commit 705117f, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Treat exact string stop as the sole provider success terminal; every other type or value rejects before content parsing.
+- [Phase 10]: Promote generation f66bdc3c4a5352c074eaecbc3d2e7df038185c59429f7423cc0a1ea79403910e as the sole READY Plan 10-144 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -313,16 +314,17 @@ Plan: 144 of 146
 | Phase 10 P139 | 1min | 1 tasks | 2 files |
 | Phase 10 P142 | 9min | 2 tasks | 8 files |
 | Phase 10 P143 | 3min | 2 tasks | 4 files |
+| Phase 10 P144 | 2min | 1 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T05:52:35.793Z
-- **Stopped at:** Completed 10-143-PLAN.md
+- **Last session:** 2026-09-17T05:57:07.281Z
+- **Stopped at:** Completed 10-144-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-144 to build and authenticate the certified exact-source local Docker image.
+Execute Plan 10-145 to run one fresh bounded generation against the certified immutable image.
 
 ---
-*Last updated: 2026-09-17 after exact finish-reason source certification*
+*Last updated: 2026-09-17 after exact-source immutable image authentication*
