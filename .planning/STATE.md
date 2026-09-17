@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-142-PLAN.md
-last_updated: "2026-09-17T05:46:21.424Z"
+stopped_at: Completed 10-143-PLAN.md
+last_updated: "2026-09-17T05:52:35.798Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 174
-  completed_plans: 135
+  completed_plans: 136
   percent: 78
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 143 of 146
+Plan: 144 of 146
 
 - Phase: 10 of 11
-- Status: Plan 10-142 archived the consumed 10-140 generation and rotated authority after finish-reason fix 92790db
-- Progress: Only Plans 10-143 through 10-146 can now certify, build, run one bounded generation, and synchronize a pass
-- Last activity: 112 focused and 733 full provider-disabled tests, build, archive audit, and diff checks passed
+- Status: Plan 10-143 certified the exact post-92790db finish-reason source and diagnostic chain
+- Progress: Only Plans 10-144 through 10-146 can now build, run one bounded generation, and synchronize a pass
+- Last activity: 252 focused and 733 full provider-disabled tests, build, exact-source audits, ASVS review, and diff checks passed
 
 ## Decisions and Assumptions
 
@@ -210,10 +210,12 @@ Plan: 143 of 146
 
 - [Phase 10]: Preserve generation 0ffde51b as byte-exact authority:false and replay_allowed:false history superseded by finish-reason fix 92790db.
 - [Phase 10]: Only the 10-143/144/145/146 namespace may acquire current production authority.
+- [Phase 10]: Authorize Plan 10-144 only from reviewed commit 705117f, its 109-blob manifest, and the exact current certifier hashes.
+- [Phase 10]: Treat exact string stop as the sole provider success terminal; every other type or value rejects before content parsing.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-140 live generation and Plan 10-141 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-145 live generation and Plan 10-146 synchronization.
 
 ## Performance Metrics
 
@@ -310,16 +312,17 @@ Plan: 143 of 146
 | Phase 10 P138 | 3min | 2 tasks | 4 files |
 | Phase 10 P139 | 1min | 1 tasks | 2 files |
 | Phase 10 P142 | 9min | 2 tasks | 8 files |
+| Phase 10 P143 | 3min | 2 tasks | 4 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T05:46:21.419Z
-- **Stopped at:** Completed 10-142-PLAN.md
+- **Last session:** 2026-09-17T05:52:35.793Z
+- **Stopped at:** Completed 10-143-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-143 to certify the exact post-92790db source and tests before any build or live activity.
+Execute Plan 10-144 to build and authenticate the certified exact-source local Docker image.
 
 ---
-*Last updated: 2026-09-17 after revoking the consumed finish-reason generation and rotating authority*
+*Last updated: 2026-09-17 after exact finish-reason source certification*

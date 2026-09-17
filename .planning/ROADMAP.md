@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(105 of 146 plans completed; generation 0ffde51b is consumed gaps evidence, and Plans 10-142 through 10-146 are the current finish-reason recovery namespace.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(107 of 146 plans completed; generation 0ffde51b is consumed gaps evidence, and Plans 10-142 through 10-146 are the current finish-reason recovery namespace.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -637,7 +637,7 @@ Plans:
 - [x] 10-142-PLAN.md — Preserve 10-140 as authority:false and rotate registries to the finish-reason recovery namespace
 
 **Wave 137** *(gap closure; blocked on Wave 136 completion)*
-- [ ] 10-143-PLAN.md — Hostile-test and exactly recertify the strict provider finish-reason contract
+- [x] 10-143-PLAN.md — Hostile-test and exactly recertify the strict provider finish-reason contract
 
 **Wave 138** *(gap closure; blocked on Wave 137 completion)*
 - [ ] 10-144-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
@@ -700,7 +700,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 106/146 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 107/146 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
