@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-139-PLAN.md
-last_updated: "2026-09-17T04:50:00.873Z"
+stopped_at: Completed 10-142-PLAN.md
+last_updated: "2026-09-17T05:46:21.424Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 169
-  completed_plans: 134
-  percent: 79
+  total_plans: 174
+  completed_plans: 135
+  percent: 78
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 140 of 141
+Plan: 143 of 146
 
 - Phase: 10 of 11
-- Status: Plan 10-139 built and independently authenticated exact-source image sha256:4d9f2fde78d81d9f7b9d405030e4f0e2231c6df41a86948dbfddf641ae480cd8
-- Progress: Plans 10-140 and 10-141 can now run one fresh bounded generation and synchronize only a pass
-- Last activity: 78 focused provider-disabled tests and the fixed no-rebuild build audit passed
+- Status: Plan 10-142 archived the consumed 10-140 generation and rotated authority after finish-reason fix 92790db
+- Progress: Only Plans 10-143 through 10-146 can now certify, build, run one bounded generation, and synchronize a pass
+- Last activity: 112 focused and 733 full provider-disabled tests, build, archive audit, and diff checks passed
 
 ## Decisions and Assumptions
 
@@ -208,6 +208,9 @@ Plan: 140 of 141
 - [Phase 10]: Ignore unmatched prose brackets only when adjacent token constraints prove they cannot open or close JSON array structure. — Complete or balanced structural ambiguity remains fail closed.
 - [Phase 10]: Promote generation f09fa5569ba59362317bae55ece886ce994b45c7aaabc10682887474eb121542 as the sole READY Plan 10-139 image after one producer build and zero verifier rebuilds.
 
+- [Phase 10]: Preserve generation 0ffde51b as byte-exact authority:false and replay_allowed:false history superseded by finish-reason fix 92790db.
+- [Phase 10]: Only the 10-143/144/145/146 namespace may acquire current production authority.
+
 ### Blockers
 
 - PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-140 live generation and Plan 10-141 synchronization.
@@ -306,16 +309,17 @@ Plan: 140 of 141
 | Phase 10 P137 | 7min | 2 tasks | 8 files |
 | Phase 10 P138 | 3min | 2 tasks | 4 files |
 | Phase 10 P139 | 1min | 1 tasks | 2 files |
+| Phase 10 P142 | 9min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T04:50:00.868Z
-- **Stopped at:** Completed 10-139-PLAN.md
+- **Last session:** 2026-09-17T05:46:21.419Z
+- **Stopped at:** Completed 10-142-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-140 for one fresh bounded credentialed live generation against the exact authenticated image.
+Execute Plan 10-143 to certify the exact post-92790db source and tests before any build or live activity.
 
 ---
-*Last updated: 2026-09-17 after completing exact inert-prose-bracket source certification*
+*Last updated: 2026-09-17 after revoking the consumed finish-reason generation and rotating authority*
