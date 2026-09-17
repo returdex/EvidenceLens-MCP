@@ -69,7 +69,17 @@ completed: 2026-09-17
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+### Auto-fixed Issues
+
+**1. [Rule 1 - State bug] Corrected roadmap updater false completions**
+- **Found during:** Final state update
+- **Issue:** The fixed roadmap updater marked incomplete Plans 10-136, 10-140, and 10-141 complete while counting summaries by total cardinality.
+- **Fix:** Restored all three plans to unchecked and retained only the completed Plan 10-138 transition.
+- **Files modified:** `.planning/ROADMAP.md`, `.planning/STATE.md`
+- **Verification:** Roadmap checkboxes now match the on-disk summary set and the next action is Plan 10-139.
+
+**Total deviations:** 1 auto-fixed (Rule 1 state bug)
+**Impact on plan:** Certification artifacts are unchanged; project state now truthfully reflects remaining work.
 
 ## Issues Encountered
 

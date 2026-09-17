@@ -616,7 +616,7 @@ Plans:
 - [x] 10-135-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 130** *(gap closure; only reachable from a passed Wave 129 chain)*
-- [x] 10-136-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [ ] 10-136-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 **Wave 131** *(gap closure; archive consumed 10-135 and rotate authority)*
 - [x] 10-137-PLAN.md — Preserve 10-135 as authority:false and rotate registries to the inert-prose-bracket recovery namespace
@@ -628,10 +628,10 @@ Plans:
 - [ ] 10-139-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 134** *(gap closure; blocked on Wave 133 completion)*
-- [x] 10-140-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [ ] 10-140-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 135** *(gap closure; only reachable from a passed Wave 134 chain)*
-- [x] 10-141-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [ ] 10-141-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
