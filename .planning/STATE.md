@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-124-PLAN.md
-last_updated: "2026-09-16T17:36:43.383Z"
+stopped_at: Completed 10-127-PLAN.md
+last_updated: "2026-09-17T03:31:36.009Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 154
-  completed_plans: 125
-  percent: 81
+  total_plans: 159
+  completed_plans: 126
+  percent: 79
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 124 of 126
+Plan: 127 of 131
 
 - Phase: 10 of 11
 - Status: Plan 10-120 is immutable authority:false history and production authority is rotated to Plans 10-123 through 10-126
@@ -192,6 +192,8 @@ Plan: 124 of 126
 - [Phase 10]: Authorize Plan 10-124 only from reviewed commit f261c37, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
 - [Phase 10]: Keep extraction failures within seven content-free diagnostic categories while preserving accepted provider JSON shapes and the public error contract. — Rejected output must disclose no response-derived content and cannot increase the request budget.
 - [Phase 10]: Promote generation 331854ebd009142c103607071d5122e12eaacf933eb6dc6997312fdd1e324261 as the sole READY Plan 10-124 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation 67a9af17 as byte-exact authority:false, replay_allowed:false history superseded by authenticated diagnostic allowlist fix c313ccd and resolved debug 7a36f5a.
+- [Phase 10]: Only the 10-127/128/129/130/131 namespace may acquire current production authority.
 
 ### Blockers
 
@@ -282,11 +284,12 @@ Plan: 124 of 126
 | Phase 10 P122 | 10min | 2 tasks | 8 files |
 | Phase 10 P123 | 6min | 2 tasks | 4 files |
 | Phase 10 P124 | 2min | 1 tasks | 2 files |
+| Phase 10 P127 | 7min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-16T17:36:43.378Z
-- **Stopped at:** Completed 10-124-PLAN.md
+- **Last session:** 2026-09-17T03:31:36.003Z
+- **Stopped at:** Completed 10-127-PLAN.md
 - **Resume file:** None
 
 ## Next Action
