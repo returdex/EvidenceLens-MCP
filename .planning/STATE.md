@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Planned 10-137 through 10-141 after consumed 10-135 generation
-last_updated: "2026-09-17T05:00:00.000Z"
+stopped_at: Completed 10-137-PLAN.md
+last_updated: "2026-09-17T04:40:47.749Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 169
-  completed_plans: 131
+  completed_plans: 132
   percent: 78
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 135 of 141
+Plan: 138 of 141
 
 - Phase: 10 of 11
-- Status: Plan 10-135 consumed generation 7f200433 as immutable gaps_found evidence after one provider send
-- Progress: Plans 10-137 through 10-141 must archive/revoke 10-135, recertify e7d21f5, rebuild, run one fresh bounded generation, and synchronize only a pass
-- Last activity: Fix e7d21f5 passed 59 focused and 717 complete provider-disabled tests; debug resolution 48b2ae9 documented the inert-prose-bracket root cause
+- Status: Plan 10-137 archived generation 7f200433 with authority:false and replay_allowed:false
+- Progress: Only Plans 10-138 through 10-141 can now recertify e7d21f5, rebuild, run one fresh bounded generation, and synchronize a pass
+- Last activity: Authority registries rotated after 111 focused and 718 complete provider-disabled tests plus TypeScript build
 
 ## Decisions and Assumptions
 
@@ -202,6 +202,8 @@ Plan: 135 of 141
 - [Phase 10]: Authorize Plan 10-134 only from reviewed commit 9286205, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Accept an array root only through whole-document JSON.parse when its length is one and its sole object has exactly the findings key.
 - [Phase 10]: Promote generation a556a010fdbc3f2ebcae627b49ae18f6c5b2a584ed1d89740741455bb9c558d7 as the sole READY Plan 10-134 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
+- [Phase 10]: Preserve generation 7f200433 as byte-exact authority:false and replay_allowed:false history superseded by e7d21f5. — Consumed paid evidence cannot regain request, proof, replay, or synchronization authority.
+- [Phase 10]: Only the 10-138/139/140/141 namespace may acquire current production authority. — Stale and mixed certification, build, live, and synchronization tuples must fail before external side effects.
 
 ### Blockers
 
@@ -298,16 +300,17 @@ Plan: 135 of 141
 | Phase 10 P132 | 6min | 2 tasks | 8 files |
 | Phase 10 P133 | 4min | 2 tasks | 5 files |
 | Phase 10 P134 | 2min | 1 tasks | 2 files |
+| Phase 10 P137 | 7min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T05:00:00.000Z
-- **Stopped at:** Planned 10-137 through 10-141 after consumed 10-135 generation
+- **Last session:** 2026-09-17T04:40:47.745Z
+- **Stopped at:** Completed 10-137-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-137 to preserve the consumed 10-135 generation and rotate production authority to the 10-138/139/140/141 recovery chain.
+Execute Plan 10-138 to certify the exact post-e7d21f5 source and tests.
 
 ---
-*Last updated: 2026-09-17 after planning the inert-prose-bracket recovery chain*
+*Last updated: 2026-09-17 after completing the inert-prose-bracket authority rotation*
