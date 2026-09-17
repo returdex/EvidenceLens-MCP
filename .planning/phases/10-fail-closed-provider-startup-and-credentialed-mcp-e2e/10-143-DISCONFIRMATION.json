@@ -1,0 +1,73 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "own_string_stop_required_before_content_parse": "passed",
+    "missing_finish_reason_rejected_invalid_type": "passed",
+    "non_string_finish_reason_rejected_invalid_type": "passed",
+    "unknown_string_finish_reason_rejected_invalid_value": "passed",
+    "length_emits_exact_authenticated_diagnostic": "passed",
+    "content_filter_emits_exact_authenticated_diagnostic": "passed",
+    "tool_calls_emits_exact_authenticated_diagnostic": "passed",
+    "insufficient_system_resource_emits_exact_authenticated_diagnostic": "passed",
+    "non_stop_reason_precedes_malformed_content": "passed",
+    "unknown_reason_is_not_echoed": "passed",
+    "unknown_diagnostic_frame_rejected": "passed",
+    "duplicate_diagnostic_frame_rejected": "passed",
+    "conflicting_diagnostic_frame_rejected": "passed",
+    "detail_bearing_diagnostic_frame_rejected": "passed",
+    "public_error_code_and_message_unchanged": "passed",
+    "every_case_uses_one_transport_call": "passed",
+    "no_fallback_second_request_or_diagnostic_call": "passed"
+  },
+  "acceptance_contract": {
+    "finish_reason_ownership": "own response choice property",
+    "finish_reason_type": "string",
+    "sole_success_value": "stop",
+    "content_parsed_only_after_success_gate": true
+  },
+  "diagnostic_contract": {
+    "path": ["provider", "finish_reason"],
+    "finite_codes": [
+      "invalid_type",
+      "invalid_value",
+      "length",
+      "content_filter",
+      "tool_calls",
+      "insufficient_system_resource"
+    ],
+    "diagnostics_per_rejected_response": 1,
+    "response_derived_fields": 0,
+    "transport_calls_per_case": 1,
+    "follow_up_request_budget": 0,
+    "public_error_code": "PROVIDER_INVALID_RESPONSE",
+    "public_error_message": "Provider response is invalid"
+  },
+  "verification": {
+    "plan_verification_suite_files": 3,
+    "plan_verification_tests": 224,
+    "plan_verification_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts tests/contract/review-tool.test.ts tests/scripts/docker-review-real.test.ts",
+    "expanded_focused_suite_files": 5,
+    "expanded_focused_tests": 252,
+    "minimum_focused_suite_tests": 242,
+    "expanded_focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts tests/providers/diagnostics.test.ts tests/contract/review-tool.test.ts tests/scripts/docker-review-real.test.ts tests/scripts/automatic-live-review.test.ts",
+    "full_offline_test_files": 43,
+    "full_offline_tests": 733,
+    "minimum_full_offline_tests": 732,
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "hermetic_provider_transport": "passed"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "local_docker_builds": 0,
+    "local_docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  },
+  "status": "passed"
+}
