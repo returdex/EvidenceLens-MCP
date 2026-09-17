@@ -70,7 +70,7 @@ describe("proof chain certifier", () => {
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-130", "consumed-live-archive-10-125", "consumed-live-archive-10-120", "consumed-live-archive-10-115", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-135", "consumed-live-archive-10-130", "consumed-live-archive-10-125", "consumed-live-archive-10-120", "consumed-live-archive-10-115", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "reviews", "reviews-auto", "build", "build-auto", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
   });
 
@@ -80,8 +80,8 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
-      expect(paths[0]).toMatch(/10-137-CONSUMED-LIVE\.json$/u);
-      expect(paths.at(-1)).toMatch(/10-140-LOCAL-VALIDATION\.json$/u);
+      expect(paths[0]).toMatch(/10-142-CONSUMED-LIVE\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-145-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
@@ -112,7 +112,7 @@ describe("proof chain certifier", () => {
   });
 
   it("accepts only the exact authority-revoked current consumed-live archive", async () => {
-    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-137-CONSUMED-LIVE.json";
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-142-CONSUMED-LIVE.json";
     const archive = JSON.parse(await readFile(path, "utf8"));
     expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "gaps_found" });
     expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "gaps_found" });
@@ -121,6 +121,14 @@ describe("proof chain certifier", () => {
       { ...archive, reservation_count: 0 }, { ...archive, observed_provider_requests: 0 },
       { ...archive, artifacts: { ...archive.artifacts, proof: { ...archive.artifacts.proof, sha256: h("0") } } },
     ]) expect(() => auditConsumedLiveArchive(changed)).toThrow("PROOF_CHAIN_CONSUMED_LIVE");
+  });
+
+  it("retains 10-135 only through its explicit read-only historical audit", async () => {
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-137-CONSUMED-LIVE.json";
+    const archive = JSON.parse(await readFile(path, "utf8"));
+    expect(auditModeRecords("consumed-live-archive-10-135", [archive])).toEqual({ authority: false, status: "gaps_found" });
+    expect(PROOF_CHAIN_MODES["consumed-live-archive-10-135"].paths).toEqual([path]);
+    expect(PROOF_CHAIN_MODES["consumed-live-archive"].paths).not.toContain(path);
   });
 
   it("retains 10-130 only through its explicit read-only historical audit", async () => {
@@ -265,14 +273,14 @@ describe("proof chain certifier", () => {
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
     const marker = join(root, "external-called");
     const replacements = [
-      ["10-63-SOURCE.json", "10-138-SOURCE.json"], ["10-63-REVIEW.md", "10-138-REVIEW.md"],
-      ["10-63-SECURITY.md", "10-138-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-139-FINAL-BUILD.json"],
-      ["10-65-TRANSITION.json", "10-140-TRANSITION.json"], ["10-65-EXECUTION.json", "10-140-EXECUTION.json"],
-      ["10-65-PROOF.json", "10-140-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-140-LOCAL-VALIDATION.json"],
+      ["10-63-SOURCE.json", "10-143-SOURCE.json"], ["10-63-REVIEW.md", "10-143-REVIEW.md"],
+      ["10-63-SECURITY.md", "10-143-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-144-FINAL-BUILD.json"],
+      ["10-65-TRANSITION.json", "10-145-TRANSITION.json"], ["10-65-EXECUTION.json", "10-145-EXECUTION.json"],
+      ["10-65-PROOF.json", "10-145-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-145-LOCAL-VALIDATION.json"],
     ];
     try {
       execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
-      await copyFile(join(repoRoot, phasePath, "10-137-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-137-CONSUMED-LIVE.json"));
+      await copyFile(join(repoRoot, phasePath, "10-142-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-142-CONSUMED-LIVE.json"));
       for (const [from, to] of replacements) await copyFile(join(checkout, phasePath, from), join(checkout, phasePath, to));
       execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
@@ -297,8 +305,8 @@ describe("proof chain certifier", () => {
     const archive = join(root, "current.tar");
     const marker = join(root, "external-called");
     const watched = [
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-141-SYNC-CLAIM.json",
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-141-SYNC-JOURNAL.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-146-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-146-SYNC-JOURNAL.json",
       ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
       ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
       ".planning/REQUIREMENTS.md",
