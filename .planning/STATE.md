@@ -218,6 +218,9 @@ Plan: 150 of 151
 - [Phase 10]: Authorize Plan 10-149 only from reviewed commit 023392e, its 109-blob manifest, and the exact current certifier hashes. — Any later non-planning drift must fail before Docker or provider activity.
 - [Phase 10]: Keep Prompt v2 request and decoder bounds in one shared exported contract; overflow fails closed as authenticated findings/too_big before projection. — Prevents request-validator limit drift, partial projection, and diagnostic follow-up sends.
 - [Phase 10]: Promote generation baac825df31b54b95e735840948d190adc63925ebc8be4240854d71229595433 as the sole READY Plan 10-149 image after one producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve generation 86a962db as byte-exact authority:false and replay_allowed:false history superseded by certified live-output fix ad16455. — Consumed paid evidence cannot regain request, proof, replay, or synchronization authority.
+- [Phase 10]: Only the 10-152/153/154/155/156 namespace may acquire current production authority. — Stale and mixed tuples fail before external side effects.
+- [Phase 10]: Certify the unified product default and Compose review/proof runtime at maxTokens 8000, non-overridable by host input and included in the request fingerprint; configuration remains bounded at 20000, output at four findings, retry at zero and request count at one.
 
 ### Blockers
 
@@ -327,12 +330,12 @@ Plan: 150 of 151
 ## Session Continuity
 
 - **Last session:** 2026-09-17T07:11:36.608Z
-- **Stopped at:** Completed 10-149-PLAN.md
+- **Stopped at:** Planned certified-8000 recovery through 10-156 after consumed 10-150 evidence
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-150 against the exact READY generation `baac825d...595433` with at most one provider HTTP send.
+Execute Plan 10-152 to archive generation `86a962db...9ef4c0e`, revoke stale authority and rotate the fixed recovery namespace. No provider request is permitted before Plan 10-155.
 
 ---
-*Last updated: 2026-09-17 after exact bounded Prompt v2 image authentication*
+*Last updated: 2026-09-17 after planning the certified-8000 recovery chain*

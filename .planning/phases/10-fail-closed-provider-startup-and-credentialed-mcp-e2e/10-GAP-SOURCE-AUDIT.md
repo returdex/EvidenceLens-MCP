@@ -476,3 +476,22 @@ Plan 10-145 consumed generation `7c0ee397e08639d2adfcab215aa3add9a8622be835ef9e9
 | SYNC NEW-CHAIN-ONLY | Only complete 10-147/148/149/150 authority may update final truth | 10-151 |
 
 Deferred ideas and Phase 11 SAFE-01 are excluded. All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-145 truth, bounded Prompt v2 fix, exact-source build, one-send live execution and passed-only synchronization are covered; no phase split is required.
+
+## Certified 8000-token recovery chain (Plans 10-152 through 10-156)
+
+Plan 10-150 consumed generation `86a962dbfa4abe5f13e15796df4ebf333d7080f8f9886fa7b5bf2853f9ef4c0e` as immutable `gaps_found` evidence after exactly one authenticated provider send. Fix `ad16455` unifies the product default and certified Compose review/proof runtime at `maxTokens=8000`, prevents host override, binds the value into the request fingerprint, retains the safe configuration maximum 20000, and preserves max-four bounded findings, `maxRetries=0` and request budget one. Focused 187/187, full provider-disabled 742/742 and Compose expansion pass. The 10-148 certification and 10-149 image are stale, and 10-151 cannot synchronize.
+
+| Source | Item | Coverage |
+|---|---|---|
+| GOAL | Credentialed Docker MCP proof is truthful, bounded and fail-closed | 10-152 archives the consumed generation; 10-155 runs one fresh bounded proof; 10-156 synchronizes only a pass |
+| REQ SAFE-04 | No host override, replay, stale image, wrong runtime or mixed authority | 10-152 rotates fixed registries; 10-153 hostile-tests runtime/config/fingerprint invariants; 10-154 binds an immutable image |
+| REQ PROV-01 | Complete credentialed structural proof | 10-155 requires certified 8000, stop, at most four bounded findings, four fixtures, positive findings and bound provenance; 10-156 closes only from that pass |
+| CONTEXT API-AUTO/API-BOUND | Provider test is automatic but capped at one send with retries/fallback/alternate/diagnostic-second/replay zero | 10-155 alone has provider budget one; all other plans have zero |
+| CONTEXT LOCAL-UNLIMITED/GHA-BUDGET | Local tests/builds/Docker unrestricted; GitHub Actions zero | Enforced in all five plan budgets and actions; live invocation cannot rebuild its certified image |
+| FAILURE 10-150-CONSUMED | Preserve exact one-send generation, receipt, diagnostic and lifecycle; revoke replay/sync authority | 10-152, 10-155 and 10-156 |
+| FIX CERTIFIED-LIVE-8000 | Product default, Compose review/proof, runtime and fingerprint agree on 8000; host cannot override; config max is 20000 | Hostile-tested and certified in 10-153; image-attested in 10-154; enforced in 10-155 and 10-156 |
+| AUTHORITY NAMESPACE | Rotate all fixed registries before certification | 10-152 |
+| BUILD EXACT | Fresh local image derives only from exact 10-153 source | 10-154 |
+| SYNC NEW-CHAIN-ONLY | Only complete 10-152/153/154/155 authority may update final truth | 10-156 |
+
+Deferred ideas and Phase 11 SAFE-01 are excluded. All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-150 truth, certified 8000-token contract, exact-source build, one-send live execution and passed-only synchronization are covered; no phase split is required.
