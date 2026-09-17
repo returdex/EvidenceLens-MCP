@@ -1,0 +1,71 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "unique_findings_object_with_inert_unmatched_open_bracket_before_accepted": "passed",
+    "unique_findings_object_with_inert_unmatched_open_bracket_after_accepted": "passed",
+    "unique_findings_object_with_inert_unmatched_close_bracket_accepted": "passed",
+    "whole_document_exact_findings_object_accepted": "passed",
+    "whole_document_singleton_findings_array_accepted": "passed",
+    "complete_external_array_rejected": "passed",
+    "balanced_prose_brackets_rejected": "passed",
+    "balanced_malformed_array_rejected": "passed",
+    "truncated_json_object_rejected": "passed",
+    "truncated_array_rejected": "passed",
+    "multiple_object_candidates_rejected": "passed",
+    "mixed_array_and_object_candidates_rejected": "passed",
+    "wrong_root_rejected": "passed",
+    "extra_root_key_rejected": "passed",
+    "prototype_pollution_keys_rejected": "passed",
+    "malformed_input_rejected": "passed",
+    "oversized_input_rejected": "passed",
+    "every_rejection_emits_one_content_free_diagnostic": "passed",
+    "public_error_code_and_message_unchanged": "passed",
+    "every_case_uses_one_transport_call": "passed",
+    "no_fallback_second_request_or_diagnostic_call": "passed"
+  },
+  "acceptance_contract": {
+    "bounded_string_and_escape_aware_scan": true,
+    "unique_findings_object_required": true,
+    "ignored_brackets": "provably inert unmatched prose brackets outside the unique findings object only",
+    "complete_or_balanced_external_structure_accepted": false,
+    "whole_document_exact_findings_object_preserved": true,
+    "whole_document_singleton_findings_array_preserved": true
+  },
+  "diagnostic_contract": {
+    "rejection_path": ["provider", "content", "object"],
+    "finite_codes": ["malformed_json", "multiple_candidates", "no_candidate", "structural_context", "unbalanced", "wrong_root"],
+    "oversized_path": ["provider", "content", "bytes"],
+    "oversized_code": "too_big",
+    "diagnostics_per_rejected_response": 1,
+    "response_derived_fields": 0,
+    "transport_calls_per_case": 1,
+    "follow_up_request_budget": 0,
+    "public_error_code": "PROVIDER_INVALID_RESPONSE",
+    "public_error_message": "Provider response is invalid"
+  },
+  "verification": {
+    "focused_suite_files": 1,
+    "focused_suite_tests": 59,
+    "minimum_focused_suite_tests": 59,
+    "focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts",
+    "full_offline_test_files": 43,
+    "full_offline_tests": 718,
+    "minimum_full_offline_tests": 717,
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "hermetic_provider_transport": "passed"
+  },
+  "side_effects": {
+    "credential_reads": 0,
+    "local_docker_builds": 0,
+    "local_docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  },
+  "status": "passed"
+}
