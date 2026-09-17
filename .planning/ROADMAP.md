@@ -616,13 +616,13 @@ Plans:
 - [x] 10-135-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 130** *(gap closure; only reachable from a passed Wave 129 chain)*
-- [ ] 10-136-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [x] 10-136-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 **Wave 131** *(gap closure; archive consumed 10-135 and rotate authority)*
 - [x] 10-137-PLAN.md — Preserve 10-135 as authority:false and rotate registries to the inert-prose-bracket recovery namespace
 
 **Wave 132** *(gap closure; blocked on Wave 131 completion)*
-- [ ] 10-138-PLAN.md — Hostile-test and exactly recertify bounded inert-prose-bracket classification
+- [x] 10-138-PLAN.md — Hostile-test and exactly recertify bounded inert-prose-bracket classification
 
 **Wave 133** *(gap closure; blocked on Wave 132 completion)*
 - [ ] 10-139-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
@@ -631,7 +631,7 @@ Plans:
 - [x] 10-140-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 135** *(gap closure; only reachable from a passed Wave 134 chain)*
-- [ ] 10-141-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+- [x] 10-141-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -683,7 +683,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 103/141 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 104/141 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
