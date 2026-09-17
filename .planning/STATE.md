@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-128-PLAN.md
-last_updated: "2026-09-17T03:38:37.021Z"
+stopped_at: Completed 10-129-PLAN.md
+last_updated: "2026-09-17T03:42:09.450Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 159
-  completed_plans: 127
-  percent: 80
+  completed_plans: 128
+  percent: 81
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 128 of 131
+Plan: 129 of 131
 
 - Phase: 10 of 11
 - Status: Plan 10-120 is immutable authority:false history and production authority is rotated to Plans 10-123 through 10-126
@@ -196,6 +196,7 @@ Plan: 128 of 131
 - [Phase 10]: Only the 10-127/128/129/130/131 namespace may acquire current production authority.
 - [Phase 10]: Authorize Plan 10-129 only from reviewed commit 28507f7, its 109-blob manifest, and the exact current certifier hashes.
 - [Phase 10]: Keep the six extraction-shape diagnostics as exact content-free tuples on an independently authenticated child capability.
+- [Phase 10]: Promote generation be65d4ecf232a5ccc46179fc97c40f2367d70b789fb26a0e019db268c51c0dbb as the sole READY Plan 10-129 image after one producer build and zero verifier rebuilds.
 
 ### Blockers
 
@@ -288,11 +289,12 @@ Plan: 128 of 131
 | Phase 10 P124 | 2min | 1 tasks | 2 files |
 | Phase 10 P127 | 7min | 2 tasks | 8 files |
 | Phase 10 P128 | 5min | 2 tasks | 4 files |
+| Phase 10 P129 | 1min | 1 tasks | 2 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T03:38:37.016Z
-- **Stopped at:** Completed 10-128-PLAN.md
+- **Last session:** 2026-09-17T03:42:09.445Z
+- **Stopped at:** Completed 10-129-PLAN.md
 - **Resume file:** None
 
 ## Next Action
