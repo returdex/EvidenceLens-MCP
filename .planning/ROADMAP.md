@@ -649,7 +649,7 @@ Plans:
 - [ ] 10-146-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 **Wave 141** *(gap closure; archive consumed 10-145 and rotate authority)*
-- [ ] 10-147-PLAN.md — Preserve 10-145 as authority:false and rotate registries to the bounded Prompt v2 recovery namespace
+- [x] 10-147-PLAN.md — Preserve 10-145 as authority:false and rotate registries to the bounded Prompt v2 recovery namespace
 
 **Wave 142** *(gap closure; blocked on Wave 141 completion)*
 - [ ] 10-148-PLAN.md — Hostile-test and exactly recertify the shared Prompt v2 output-budget contract
@@ -717,7 +717,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 108/146 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 109/151 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
