@@ -123,3 +123,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Accept only exact `stop` for success; reject missing, wrong-type, and unknown reasons and authenticate closed diagnostics for `length`, `content_filter`, `tool_calls`, and `insufficient_system_resource` before content parsing.
 - **Files changed:** src/providers/deepseek.ts, src/providers/diagnostics.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/providers/vision-provenance.test.ts, tests/contract/review-tool.test.ts
 ---
+
+## provider-output-token-budget — Accepted output language exceeded the production token ceiling
+- **Date:** 2026-09-17
+- **Error patterns:** provider-finish-reason-length, maxTokens 4000, unbounded findings count, oversized authored fields, one authenticated provider send
+- **Root cause:** The v1 provider prompt imposed no finding-count or prose-size budget, while post-response validation accepted up to 100 findings with authored fields as long as 4000 characters, so a schema-valid answer could exceed the production `maxTokens=4000` ceiling.
+- **Fix:** Versioned the prompt to v2 with a shared four-finding maximum and concise field, follow-up, and citation limits; enforced the same bounds after decoding; and registered a sanitized authenticated `findings/too_big` diagnostic while preserving public schema, provenance, and the one-request cap.
+- **Files changed:** src/providers/types.ts, src/providers/deepseek.ts, src/providers/provenance.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/providers/config.test.ts, docs/mcp-contract.md
+---

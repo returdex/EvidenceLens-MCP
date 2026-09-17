@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Plan 10-145 authenticated provider-finish-reason-length at maxTokens 4000"
 ---
 
@@ -24,7 +24,7 @@ reasoning_checkpoint:
   falsification_test: "This hypothesis would be false if the request body already carried an enforced small count/prose budget or if an output above that budget passed post-response validation."
   fix_rationale: "A shared four-finding/concise-field contract in the prompt and validator makes overflow fail closed and gives the provider a bounded response target without changing the public schema, provenance checks, or one-request budget."
   blind_spots: "No provider call is allowed in this session, so live model compliance must be confirmed only by a fresh future generation; offline tests can prove request shape and rejection behavior."
-next_action: "Await human confirmation of the offline verification, then archive the resolved debug session."
+next_action: "Archived after human confirmation."
 
 ## Evidence
 
