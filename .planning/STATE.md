@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-129-PLAN.md
+stopped_at: Planned 10-132 through 10-136 after singleton-array root fix bab40b9
 last_updated: "2026-09-17T03:42:09.450Z"
 progress:
   total_phases: 11
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 129 of 131
+Plan: 130 of 136
 
 - Phase: 10 of 11
-- Status: Plan 10-120 is immutable authority:false history and production authority is rotated to Plans 10-123 through 10-126
-- Progress: Plan 10-123 is next; Plans 10-123 through 10-126 recertify, rebuild, run one bounded live generation and synchronize only a pass
-- Last activity: archived generation 3d1a7751, rotated all fixed registries, and passed 681 provider-disabled tests
+- Status: Plan 10-130 is immutable one-send gaps history; Plan 10-131 is superseded
+- Progress: Plans 10-132 through 10-136 archive, recertify, rebuild, run one bounded live generation and synchronize only a pass
+- Last activity: fix bab40b9 passed 48 focused and 705 provider-disabled tests plus build
 
 ## Decisions and Assumptions
 
@@ -200,7 +200,7 @@ Plan: 129 of 131
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-125 live generation and Plan 10-126 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-135 live generation and Plan 10-136 synchronization.
 
 ## Performance Metrics
 
@@ -299,7 +299,7 @@ Plan: 129 of 131
 
 ## Next Action
 
-Execute Plan 10-123 to hostile-test and exactly recertify the closed extraction-shape diagnostic taxonomy.
+Execute Plan 10-132 to archive the consumed 10-130 generation and rotate fixed authority registries.
 
 ---
 *Last updated: 2026-09-17 after completing extraction-diagnostic authority rotation*

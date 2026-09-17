@@ -81,3 +81,10 @@ None.
 
 *Phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e*
 *Context gathered: 2026-09-13*
+## Post-10-130 singleton-array recovery decisions
+
+- Generation `ad6979613da6f3fb038d1ab6b9d7066c571d75ade1ca28d891b865147158398d` is immutable `gaps_found` history after one authenticated provider send; replay, overwrite, upgrade and synchronization are prohibited.
+- Fix `bab40b9` admits only a whole-document `JSON.parse` root array of length exactly one whose sole plain/null-prototype object has exactly the own enumerable string key `findings`.
+- Wrapper prose/fences, zero or multiple elements, nested arrays, non-object elements, extra or prototype-pollution keys, trailing bytes, malformed or truncated JSON remain rejected closed with content-free diagnostics.
+- Plans 10-128/129 are stale and Plan 10-131 cannot synchronize. Only Plans 10-132 through 10-136 may acquire current production authority.
+- Local tests, builds and Docker remain unrestricted. Plan 10-135 has a fresh provider-send ceiling of one with retry, fallback, alternate, diagnostic-second-call and replay all zero. GitHub Actions remain zero.

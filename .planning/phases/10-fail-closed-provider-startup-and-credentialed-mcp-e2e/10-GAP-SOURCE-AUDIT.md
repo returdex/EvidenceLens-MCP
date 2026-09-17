@@ -413,3 +413,34 @@ Plan 10-125 consumed generation `67a9af179734906c98d1800dbaf86eb1af676bade55813a
 - Any source/test edit after Plan 10-128 certification returns to Plan 10-127 ownership and forces complete recertification.
 
 **Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-125 truth, child allowlist correction, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
+
+## Post-10-130 Singleton-Array JSON Recovery: Plans 10-132 through 10-136
+
+Plan 10-130 consumed generation `ad6979613da6f3fb038d1ab6b9d7066c571d75ade1ca28d891b865147158398d` as immutable `gaps_found` evidence after exactly one authenticated provider send. The exact diagnostic was `provider-json-object-structural-context`; all lifecycle and proof audits were clean. Fix `bab40b9` accepts a provider response only when whole-document `JSON.parse` yields an array of length exactly one whose sole object has the exact `findings` key. Every wrapper, multiple/nested element, extra/prototype key, trailing or truncated shape remains rejected. Focused 48/48, full provider-disabled 705/705 and build pass. These source/test edits make 10-128 certification and 10-129 image stale, and 10-131 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 132-136 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 132-136 | COVERED |
+| REQ | PROV-01 | Only a complete fresh post-bab40b9 chain may close provenance | 132-136 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 135 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second/replay zero | 135 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 132-136 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 132-136 | COVERED |
+| FAILURE | 10-130-CONSUMED | Preserve exact one-send generation, receipt, diagnostic and clean lifecycle; revoke replay/sync authority | 132-133, 135-136 | COVERED |
+| FIX | SINGLETON-ARRAY | Whole-document exact singleton findings-array acceptance with all other structural shapes rejected | 133, 135 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 132 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 133 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-133 source | 134 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 135 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-132/133/134/135 authority may update final truth | 136 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-132, 10-133, 10-134 and 10-136 have provider-request budget 0. Only Plan 10-135 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-135 cannot rebuild because it must consume the exact certified Plan 10-134 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-133 certification returns to Plan 10-132 ownership and forces complete recertification.
+
+**Audit result:** All current goal, requirements, locked decisions, consumed 10-130 truth, singleton-array fix, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
