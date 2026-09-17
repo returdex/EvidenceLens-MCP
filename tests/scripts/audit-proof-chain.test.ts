@@ -80,8 +80,8 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
-      expect(paths[0]).toMatch(/10-147-CONSUMED-LIVE\.json$/u);
-      expect(paths.at(-1)).toMatch(/10-150-LOCAL-VALIDATION\.json$/u);
+      expect(paths[0]).toMatch(/10-152-CONSUMED-LIVE\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-155-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
@@ -289,14 +289,14 @@ describe("proof chain certifier", () => {
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
     const marker = join(root, "external-called");
     const replacements = [
-      ["10-63-SOURCE.json", "10-148-SOURCE.json"], ["10-63-REVIEW.md", "10-148-REVIEW.md"],
-      ["10-63-SECURITY.md", "10-148-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-149-FINAL-BUILD.json"],
-      ["10-65-TRANSITION.json", "10-150-TRANSITION.json"], ["10-65-EXECUTION.json", "10-150-EXECUTION.json"],
-      ["10-65-PROOF.json", "10-150-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-150-LOCAL-VALIDATION.json"],
+      ["10-63-SOURCE.json", "10-153-SOURCE.json"], ["10-63-REVIEW.md", "10-153-REVIEW.md"],
+      ["10-63-SECURITY.md", "10-153-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-154-FINAL-BUILD.json"],
+      ["10-65-TRANSITION.json", "10-155-TRANSITION.json"], ["10-65-EXECUTION.json", "10-155-EXECUTION.json"],
+      ["10-65-PROOF.json", "10-155-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-155-LOCAL-VALIDATION.json"],
     ];
     try {
       execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
-      await copyFile(join(repoRoot, phasePath, "10-147-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-147-CONSUMED-LIVE.json"));
+      await copyFile(join(repoRoot, phasePath, "10-152-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-152-CONSUMED-LIVE.json"));
       for (const [from, to] of replacements) await copyFile(join(checkout, phasePath, from), join(checkout, phasePath, to));
       execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
@@ -321,8 +321,8 @@ describe("proof chain certifier", () => {
     const archive = join(root, "current.tar");
     const marker = join(root, "external-called");
     const watched = [
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-151-SYNC-CLAIM.json",
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-151-SYNC-JOURNAL.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-156-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-156-SYNC-JOURNAL.json",
       ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
       ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
       ".planning/REQUIREMENTS.md",
