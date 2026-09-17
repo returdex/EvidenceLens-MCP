@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 121 plans
+**Plans**: 131 plans
 
 Plans:
 **Wave 1**
@@ -588,13 +588,28 @@ Plans:
 **Wave 120** *(gap closure; only reachable from a passed Wave 119 chain)*
 - [ ] 10-126-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
+**Wave 121** *(gap closure; archive consumed 10-125 and rotate authority)*
+- [ ] 10-127-PLAN.md — Preserve 10-125 as authority:false and rotate registries to the authenticated extraction-diagnostic recovery namespace
+
+**Wave 122** *(gap closure; blocked on Wave 121 completion)*
+- [ ] 10-128-PLAN.md — Hostile-test and exactly recertify the child authenticated-stderr extraction diagnostic allowlist
+
+**Wave 123** *(gap closure; blocked on Wave 122 completion)*
+- [ ] 10-129-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+
+**Wave 124** *(gap closure; blocked on Wave 123 completion)*
+- [ ] 10-130-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+
+**Wave 125** *(gap closure; only reachable from a passed Wave 124 chain)*
+- [ ] 10-131-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-126 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
+- Plans 10-38 through 10-131 have GitHub Actions run budget 0: no push, workflow/repository dispatch, or retrigger loop is permitted.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
 - Generation 30f0d9b28c13132e1a79ce6a3afe0f1a9fdd457867e47e67ded8c3a547b83e73 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
@@ -603,7 +618,9 @@ Cross-cutting constraints:
 - Fix e91d3ac replaces first-open-to-last-close fallback slicing with a bounded string/escape-aware balanced scan that accepts only one complete object with exact root key findings and rejects ambiguous, truncated, structural-tail, extra-key, pollution-key and oversize input. The 10-113 certification and 10-114 image are therefore stale.
 - Generation 3d1a7751bbab378437bca30943ef360913c79d1f68b63423e4201d8d4c312a8d is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
 - Fixes e213bda/d397109 preserve parser acceptance and public errors while exposing only a closed content-free extraction-shape taxonomy: no_candidate, multiple_candidates, unbalanced, wrong_root, structural_context, malformed_json and the separate too_big bound. The 10-118 certification and 10-119 image are therefore stale.
-- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116 and 10-121 are superseded and cannot synchronize. Only Plan 10-126 may synchronize, and only from an exact committed passed 10-122/10-123/10-124/10-125 authority chain; non-pass performs zero target writes.
+- Generation 67a9af179734906c98d1800dbaf86eb1af676bade55813adb58121e025d0cf79 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
+- Fix c313ccd adds the six exact extraction-shape tuples to the child authenticated-stderr closed allowlist while unknown, duplicate, conflicting and detail-bearing frames remain fail-closed; resolved debug 7a36f5a records the diagnosis. The 10-123 certification and 10-124 image are therefore stale.
+- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121 and 10-126 are superseded and cannot synchronize. Only Plan 10-131 may synchronize, and only from an exact committed passed 10-127/10-128/10-129/10-130 authority chain; non-pass performs zero target writes.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.
@@ -632,7 +649,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 96/126 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 96/131 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

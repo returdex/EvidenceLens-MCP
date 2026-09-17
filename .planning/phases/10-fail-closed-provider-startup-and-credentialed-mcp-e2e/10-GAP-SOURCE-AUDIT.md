@@ -382,3 +382,34 @@ Plan 10-120 consumed generation `3d1a7751bbab378437bca30943ef360913c79d1f68b6342
 - Any source/test edit after Plan 10-123 certification returns to Plan 10-122 ownership and forces complete recertification.
 
 **Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-120 truth, closed extraction-shape taxonomy, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
+
+## Post-10-125 Authenticated Extraction Diagnostic Recovery: Plans 10-127 through 10-131
+
+Plan 10-125 consumed generation `67a9af179734906c98d1800dbaf86eb1af676bade55813adb58121e025d0cf79` as immutable `gaps_found` evidence after exactly one authenticated provider send. It retained an ambiguous/truncated diagnostic despite clean process exit/close because six legitimate extraction-shape codes were missing from the child authenticated-stderr closed allowlist. Fix `c313ccd` adds exactly those tuples; unknown, duplicate, conflicting and detail-bearing frames remain fail-closed. Resolved debug `7a36f5a` records the diagnosis. Focused 198/198, full provider-disabled 693/693 and build pass. These source/test edits make 10-123 certification and 10-124 image stale, and 10-126 cannot synchronize.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 127-131 | COVERED |
+| REQ | SAFE-04 | Preserve sanitized failures and keep credentials/raw provider output undisclosed | 127-131 | COVERED |
+| REQ | PROV-01 | Only a complete fresh post-allowlist-fix chain may close provenance | 127-131 | COVERED |
+| CONTEXT | API-AUTO | Provider test needs no per-run authorization checkpoint | 130 | COVERED |
+| CONTEXT | API-BOUND | At most one provider send; retry/fallback/alternate/diagnostic-second/replay zero | 130 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may repeat; live invocation never rebuilds | 127-131 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push and dispatch budget is exactly zero | 127-131 | COVERED |
+| FAILURE | 10-125-CONSUMED | Preserve exact one-send generation, receipt, ambiguous/truncated diagnostic and lifecycle; revoke replay/sync authority | 127-128, 130-131 | COVERED |
+| FIX | CHILD-ALLOWLIST | Admit exactly six authenticated extraction-shape tuples while unknown/duplicate/conflicting/detail-bearing frames fail closed | 128, 130 | COVERED |
+| AUTHORITY | NAMESPACE | Rotate all fixed registries before certification | 127 | COVERED |
+| AUTHORITY | RECERTIFY | Hostile disconfirmation, deep review and ASVS L1 certify exact post-fix source | 128 | COVERED |
+| BUILD | EXACT | Fresh local image derives only from exact 10-128 source | 129 | COVERED |
+| LIVE | FRESH | One non-replay generation with at most one paid provider send | 130 | COVERED |
+| SYNC | NEW-CHAIN-ONLY | Only complete 10-127/128/129/130 authority may update final truth | 131 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 remains out of scope; CONTEXT contains no deferred idea.
+- Plans 10-127, 10-128, 10-129 and 10-131 have provider-request budget 0. Only Plan 10-130 permits at most one provider HTTP send.
+- Local tests, builds and Docker operations are not quota-limited. Plan 10-130 cannot rebuild because it must consume the exact certified Plan 10-129 image.
+- Every plan has GitHub Actions run budget 0 and prohibits push, workflow dispatch, repository dispatch and retrigger.
+- Any source/test edit after Plan 10-128 certification returns to Plan 10-127 ownership and forces complete recertification.
+
+**Audit result:** All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-125 truth, child allowlist correction, exact-source build, bounded live execution and passed-only synchronization are covered with no silent deferral.
