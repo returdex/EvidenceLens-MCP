@@ -117,12 +117,20 @@ function findingsFromRoot(value: unknown): ProviderFindingDraft[] | undefined {
   return Array.isArray(findings) ? findings as ProviderFindingDraft[] : undefined;
 }
 
+function findingsFromWholeDocument(value: unknown): ProviderFindingDraft[] | undefined {
+  if (Array.isArray(value)) {
+    if (value.length !== 1) return undefined;
+    return findingsFromRoot(value[0]);
+  }
+  return findingsFromRoot(value);
+}
+
 type JsonObjectExtractionFailure = "no_candidate" | "multiple_candidates" | "unbalanced" | "wrong_root" | "structural_context" | "malformed_json";
 type JsonObjectExtraction = { findings: ProviderFindingDraft[] } | { failure: JsonObjectExtractionFailure };
 
 function extractSingleJsonObject(value: string): JsonObjectExtraction {
   try {
-    const findings = findingsFromRoot(JSON.parse(value));
+    const findings = findingsFromWholeDocument(JSON.parse(value));
     return findings === undefined ? { failure: "wrong_root" } : { findings };
   } catch { /* A bounded wrapper is handled below. */ }
 
