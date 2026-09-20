@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: blocked
-stopped_at: Completed 10-159-PLAN.md; next executable gap plan 10-160
-last_updated: "2026-09-20T16:18:11.026Z"
+stopped_at: Completed 10-160-PLAN.md with immutable gaps_found; Plan 10-161 blocked
+last_updated: "2026-09-20T16:23:05.464Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 188
-  completed_plans: 147
-  percent: 78
+  completed_plans: 148
+  percent: 79
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (Fail-Closed Provider Startup and Credentialed MCP E2E) — EXECUTING
-Plan: 159 completed of 160 executable plans; next executable gap plan 160
+Plan: 160 completed; conditional Plan 10-161 blocked by the 10-160 non-pass
 
 - Phase: 10 of 11
-- Status: Plan 10-159 built and independently authenticated the exact-source immutable image for Plan 10-160
-- Progress: READY generation 778344e9 binds image sha256:5ddf3a56 to the exact 109-blob SOURCE/REVIEW/SECURITY tuple
-- Last activity: one local producer build plus zero-rebuild independent audit passed with zero credential reads, provider requests, network proof, Docker runs, GitHub Actions or synchronization writes
+- Status: Plan 10-160 sealed a fresh credentialed generation as immutable authority:false gaps evidence; Plan 10-161 is blocked
+- Progress: generation bc9bd1dd consumed reservation/tools-call/provider-send counts 1/1/1 and returned the authenticated content-free diagnostic provider-json-object-unbalanced
+- Last activity: one exact-image live Docker MCP run, one provider send, zero retries/replay/GitHub Actions/synchronization writes, followed by passing local proof audits
 
 ## Decisions and Assumptions
 
@@ -233,10 +233,11 @@ Plan: 159 completed of 160 executable plans; next executable gap plan 160
 - [Phase 10]: Authorize Plan 10-159 only from reviewed commit 7c99534, canonical manifest 89296db2, aggregate tree ca6a62b2 and the current certifier pair.
 - [Phase 10]: Promote generation 778344e9bcbea6190bf4b7ed6371d8345acf2187a183738509a06d749f38b692 as the sole READY Plan 10-159 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-158 source identity and complete stop/length acceptance contract; no production or test source changed during Plan 10-159.
+- [Phase 10]: Generation bc9bd1dd remains immutable authority:false after exactly one provider send returned provider-json-object-unbalanced; Plan 10-161 is blocked and the generation cannot be replayed or synchronized.
 
 ### Blockers
 
-- PROV-01 remains open: Plan 10-159 produced the exact authenticated immutable image; Plan 10-160 must run one fresh bounded live generation.
+- PROV-01 remains open: Plan 10-160 consumed one provider send and sealed provider-json-object-unbalanced as authority:false; Plan 10-161 is blocked.
 
 ## Performance Metrics
 
@@ -345,16 +346,17 @@ Plan: 159 completed of 160 executable plans; next executable gap plan 160
 | Phase 10 P157 | 7min | 2 tasks | 8 files | 2026-09-21 |
 | Phase 10 P158 | 7min | 2 tasks | 9 files | 2026-09-21 |
 | Phase 10 P159 | 1 min | 1 tasks | 1 files |
+| Phase 10 P160 | 2min | 1 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T16:18:11.021Z
-- **Stopped at:** Completed 10-159-PLAN.md; next executable gap plan 10-160
+- **Last session:** 2026-09-20T16:23:05.458Z
+- **Stopped at:** Completed 10-160-PLAN.md with immutable gaps_found; Plan 10-161 blocked
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-160 once against READY generation `778344e9` and immutable image `sha256:5ddf3a56`, with at most one provider send and no replay. Do not replay immutable generation e2547175; 10-156-SUPERSEDED.md remains historical only.
+Do not execute Plan 10-161. Diagnose `provider-json-object-unbalanced` offline and create a newly certified/build/live gap chain if another provider request is needed; never replay generation `bc9bd1dd`.
 
 ---
-*Last updated: 2026-09-21 after completing Plan 10-159 exact immutable local build*
+*Last updated: 2026-09-21 after sealing Plan 10-160 immutable live non-pass evidence*
