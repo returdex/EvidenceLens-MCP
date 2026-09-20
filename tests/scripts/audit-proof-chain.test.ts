@@ -80,8 +80,8 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
-      expect(paths[0]).toMatch(/10-152-CONSUMED-LIVE\.json$/u);
-      expect(paths.at(-1)).toMatch(/10-155-LOCAL-VALIDATION\.json$/u);
+      expect(paths[0]).toMatch(/10-157-CONSUMED-LIVE\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-160-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
