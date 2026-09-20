@@ -144,7 +144,7 @@ describe("DeepSeek provider adapter", () => {
     expect(result.modelFindings).toHaveLength(1);
   });
 
-  it("uses the official vision model request shape without thinking parameters", async () => {
+  it("explicitly disables default thinking for the bounded vision JSON request", async () => {
     const visualRequestWithoutFingerprint = {
       ...requestWithoutFingerprint,
       evidence: [{ evidenceId: "screenshot", role: "other" as const, type: "screenshot" as const, contentHash: "b".repeat(64), sourceReference: "inline://screenshot", references: [{ kind: "image" as const, width: 1, height: 1 }], visualPayloads: [{ mimeType: "image/png" as const, base64: "iVBORw0KGgo=", byteLength: 8, sha256: "b".repeat(64), width: 1, height: 1, evidenceId: "screenshot", location: { kind: "image" as const, width: 1, height: 1 } }] }],
@@ -155,8 +155,7 @@ describe("DeepSeek provider adapter", () => {
     await createDeepSeekProvider(config, transport).review(visualRequest);
     const sent = JSON.parse(String(transport.calls[0]!.body)) as Record<string, unknown>;
     expect(sent.model).toBe("deepseek-v4-flash-vision-exp");
-    expect(sent).not.toHaveProperty("thinking");
-    expect(sent).not.toHaveProperty("reasoning_effort");
+    expect(sent).toMatchObject({ thinking: { type: "disabled" }, reasoning_effort: "none" });
     expect(JSON.stringify(sent)).toContain("data:image/png;base64,iVBORw0KGgo=");
   });
 

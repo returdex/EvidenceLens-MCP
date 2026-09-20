@@ -98,7 +98,7 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
   }) }];
   const thinking = request.inference.model !== "deepseek-v4-flash-vision-exp"
     ? { thinking: { type: "enabled" }, reasoning_effort: "high" }
-    : {};
+    : { thinking: { type: "disabled" }, reasoning_effort: "none" };
   let bytes = 0;
   for (const item of request.evidence) for (const payload of item.visualPayloads ?? []) {
     const decoded = Buffer.from(payload.base64, "base64");
