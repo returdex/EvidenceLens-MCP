@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: blocked
-stopped_at: Completed 10-157-PLAN.md; next executable gap plan 10-158
-last_updated: "2026-09-20T16:04:29.189Z"
+stopped_at: Completed 10-158-PLAN.md; next executable gap plan 10-159
+last_updated: "2026-09-20T16:13:57.995Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 188
-  completed_plans: 145
-  percent: 77
+  completed_plans: 146
+  percent: 78
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (Fail-Closed Provider Startup and Credentialed MCP E2E) — EXECUTING
-Plan: 157 completed of 160 executable plans; next executable gap plan 158
+Plan: 158 completed of 160 executable plans; next executable gap plan 159
 
 - Phase: 10 of 11
-- Status: Plan 10-157 sealed immutable generation e2547175 as authority:false/replay_allowed:false history and rotated current authority to Plans 10-158 through 10-161
-- Progress: archive and registry rotation passed 115 focused tests and 747 full provider-disabled tests; retired 10-156 remains outside executable discovery
-- Last activity: TypeScript build, diff hygiene, and SDK discovery passed with zero credentials, Docker, provider, network, GitHub Actions, or synchronization writes
+- Status: Plan 10-158 recertified provider-default complete-length acceptance and bound exact source authority for Plan 10-159
+- Progress: hostile production-path coverage passed 360 focused tests and 769 full provider-disabled tests; exact 109-blob SOURCE/REVIEW/SECURITY tuple is READY
+- Last activity: fixed proof-chain audits, TypeScript build, static Compose expansion and no-drift validation passed with zero credentials, Docker daemon/build/run, provider, network, GitHub Actions or synchronization writes
 
 ## Decisions and Assumptions
 
@@ -229,10 +229,12 @@ Plan: 157 completed of 160 executable plans; next executable gap plan 158
 - [Phase 10]: Preserve retired Plan 10-156 byte-exact as non-executable 10-156-SUPERSEDED.md; the consumed non-pass cannot be retried, replayed, overwritten, promoted or rediscovered as an executable plan.
 - [Phase 10]: Generation e2547175 remains immutable authority:false and replay_allowed:false history; correction 403d2a2 cannot promote the consumed request.
 - [Phase 10]: Only the ordered 10-157 through 10-161 namespace may acquire current recovery authority; 10-156-SUPERSEDED.md remains outside executable discovery.
+- [Phase 10]: Treat stop and length identically after the two-value finish gate; only independently complete, bounded and locally proven content may succeed.
+- [Phase 10]: Authorize Plan 10-159 only from reviewed commit 7c99534, canonical manifest 89296db2, aggregate tree ca6a62b2 and the current certifier pair.
 
 ### Blockers
 
-- PROV-01 remains open: Plan 10-157 revoked the consumed 10-155 generation and rotated authority successfully; retired 10-156 is non-executable history and the next executable gap plan is 10-158.
+- PROV-01 remains open: Plan 10-158 passed exact offline recertification; Plan 10-159 must build the certified immutable image before one fresh Plan 10-160 live generation.
 
 ## Performance Metrics
 
@@ -339,16 +341,17 @@ Plan: 157 completed of 160 executable plans; next executable gap plan 158
 | Phase 10 P154 | 1 min | 1 tasks | 1 files |
 | Phase 10 P155 | 2 min | 1 tasks | 7 files | 2026-09-21 |
 | Phase 10 P157 | 7min | 2 tasks | 8 files | 2026-09-21 |
+| Phase 10 P158 | 7min | 2 tasks | 9 files | 2026-09-21 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T16:04:29.183Z
-- **Stopped at:** Completed 10-157-PLAN.md; next executable gap plan 10-158
+- **Last session:** 2026-09-20T16:13:57.990Z
+- **Stopped at:** Completed 10-158-PLAN.md; next executable gap plan 10-159
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-158 to recertify the corrected complete-length response contract. Do not replay immutable generation e2547175; 10-156-SUPERSEDED.md is historical only and cannot be discovered or executed as a plan.
+Execute Plan 10-159 to build and authenticate an immutable local image from exact reviewed commit `7c99534`. Do not replay immutable generation e2547175; 10-156-SUPERSEDED.md remains historical only.
 
 ---
-*Last updated: 2026-09-21 after completing Plan 10-157 authority rotation*
+*Last updated: 2026-09-21 after completing Plan 10-158 exact offline recertification*
