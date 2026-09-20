@@ -44,7 +44,7 @@ All authoritative GOAL, REQ, CONTEXT, verification, review, history, and Phase 7
 
 ## Post-10-155 Complete-Length Recovery: Plans 10-157 through 10-161
 
-This additive audit supersedes production authority from Plans 10-152 through 10-156 without deleting their historical records. Generation `e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291` is consumed immutable `authority:false` evidence after exactly one send. User-approved correction `403d2a2` preserves provider-default Vision behavior and permits `stop` or `length` into the same strict validation pipeline; it does not make `length` itself authoritative.
+This additive audit supersedes production authority from Plans 10-152 through 10-156 without deleting their historical records. The exact old 10-156 bytes are preserved by Git history and by the non-executable artifact `10-156-SUPERSEDED.md`; because SDK discovery selects only `*-PLAN.md`/`PLAN.md`, it is absent from the executable plan set before execution begins. Generation `e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291` is consumed immutable `authority:false` evidence after exactly one send. User-approved correction `403d2a2` preserves provider-default Vision behavior and permits `stop` or `length` into the same strict validation pipeline; it does not make `length` itself authoritative.
 
 | Source | ID | Required outcome | Plan(s) | Status |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ This additive audit supersedes production authority from Plans 10-152 through 10
 | CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker are unrestricted; live invocation still cannot rebuild its certified image | 157-161 | COVERED |
 | CONTEXT | GHA-BUDGET | GitHub Actions/push/workflow/repository dispatch/retrigger budget is exactly zero | 157-161 | COVERED |
 | HISTORY | 10-155 | Preserve e2547175 byte-exact; never replay, overwrite, upgrade or synchronize | 157, 160-161 | COVERED |
-| AUTHORITY | SUPERSEDE-156 | Old Plan 10-156 remains unexecuted and cannot write current truth | 157, 161 | COVERED |
+| AUTHORITY | SUPERSEDE-156 | `10-156-SUPERSEDED.md` preserves the old bytes as history but is absent from executable discovery; the first incomplete gap plan is 10-157 | planning preflight, 157, 161 | COVERED |
 | FIX | 403d2a2 | Preserve Vision defaults; stop/length share exact bounded extraction/schema/provenance pipeline | 158, 160-161 | COVERED |
 | FIX | LENGTH-FAIL-CLOSED | Truncated, malformed, ambiguous, wrong-root, oversized, schema/citation/provenance-invalid length fails closed | 158, 160 | COVERED |
 | FIX | OTHER-REASONS | content_filter/tool_calls/resource/unknown/missing/wrong-type reject before content parsing | 158 | COVERED |
@@ -76,6 +76,7 @@ This additive audit supersedes production authority from Plans 10-152 through 10
 - All five plans have GitHub Actions run budget 0 and prohibit push, workflow_dispatch, repository_dispatch, rerun and retrigger.
 - Local tests, TypeScript builds and local Docker work are unrestricted. Plan 10-160 cannot rebuild because exact-image continuity is an evidence-integrity gate.
 - Any production/test drift after 10-158 certification invalidates 10-159/160/161 authority and returns work to a new additive certification chain.
+- Planning preflight requires `10-156-PLAN.md` absent, `10-156-SUPERSEDED.md` present, and `phase-plan-index 10` to report 10-157 as the first incomplete plan in the current post-10-155 recovery waves (`wave >= 150`); this is established before `$gsd-execute-phase 10 --gaps-only`, not by a registry-rotation action in 10-157.
 
 **Audit result:** Every current goal, requirement, locked context decision, consumed-generation fact, response-acceptance rule, registry boundary, certification/build/live/sync requirement and final audit is covered. No item is missing or silently deferred.
 
