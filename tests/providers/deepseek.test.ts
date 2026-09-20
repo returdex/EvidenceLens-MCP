@@ -144,7 +144,7 @@ describe("DeepSeek provider adapter", () => {
     expect(result.modelFindings).toHaveLength(1);
   });
 
-  it("explicitly disables default thinking for the bounded vision JSON request", async () => {
+  it("preserves provider-default thinking behavior for the bounded vision JSON request", async () => {
     const visualRequestWithoutFingerprint = {
       ...requestWithoutFingerprint,
       evidence: [{ evidenceId: "screenshot", role: "other" as const, type: "screenshot" as const, contentHash: "b".repeat(64), sourceReference: "inline://screenshot", references: [{ kind: "image" as const, width: 1, height: 1 }], visualPayloads: [{ mimeType: "image/png" as const, base64: "iVBORw0KGgo=", byteLength: 8, sha256: "b".repeat(64), width: 1, height: 1, evidenceId: "screenshot", location: { kind: "image" as const, width: 1, height: 1 } }] }],
@@ -155,7 +155,8 @@ describe("DeepSeek provider adapter", () => {
     await createDeepSeekProvider(config, transport).review(visualRequest);
     const sent = JSON.parse(String(transport.calls[0]!.body)) as Record<string, unknown>;
     expect(sent.model).toBe("deepseek-v4-flash-vision-exp");
-    expect(sent).toMatchObject({ thinking: { type: "disabled" }, reasoning_effort: "none" });
+    expect(sent).not.toHaveProperty("thinking");
+    expect(sent).not.toHaveProperty("reasoning_effort");
     expect(JSON.stringify(sent)).toContain("data:image/png;base64,iVBORw0KGgo=");
   });
 
@@ -199,11 +200,31 @@ describe("DeepSeek provider adapter", () => {
     await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek" });
   });
 
+  it("accepts finish_reason length only when the returned content independently passes the complete validation pipeline", async () => {
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { content: JSON.stringify(draft) } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek", modelFindings: [{ id: "provider-1" }] });
+  });
+
+  it.each([
+    ["truncated JSON", JSON.stringify(draft).slice(0, -1), { path: ["provider", "content", "object"], code: "unbalanced" }],
+    ["multiple JSON roots", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "multiple_candidates" }],
+    ["schema-invalid JSON", JSON.stringify({ findings: [{ ...draft.findings[0], severity: "critical" }] }), { path: ["findings", "enum"], code: "invalid_value" }],
+    ["forged provenance", JSON.stringify({ findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], evidenceId: "forged" }] }] }), { path: ["citations", "evidenceId"], code: "invalid_value" }]
+  ] as const)("rejects finish_reason length with %s", async (_name, content, feature) => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([feature]);
+  });
+
   it.each([
     ["missing", undefined, "invalid_type"],
     ["wrong type", 42, "invalid_type"],
     ["unknown", "private_unrecognized_reason", "invalid_value"],
-    ["token limit", "length", "length"],
     ["content filter", "content_filter", "content_filter"],
     ["tool call", "tool_calls", "tool_calls"],
     ["provider resource limit", "insufficient_system_resource", "insufficient_system_resource"]

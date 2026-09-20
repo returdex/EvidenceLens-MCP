@@ -361,7 +361,6 @@ describe("production server transport diagnostics", () => {
     [undefined, "invalid_type", "provider-finish-reason-type"],
     [42, "invalid_type", "provider-finish-reason-type"],
     ["private_unknown_reason", "invalid_value", "provider-finish-reason-unknown"],
-    ["length", "length", "provider-finish-reason-length"],
     ["content_filter", "content_filter", "provider-finish-reason-content-filter"],
     ["tool_calls", "tool_calls", "provider-finish-reason-tool-calls"],
     ["insufficient_system_resource", "insufficient_system_resource", "provider-finish-reason-resource"]

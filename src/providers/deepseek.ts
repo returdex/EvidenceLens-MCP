@@ -98,7 +98,7 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
   }) }];
   const thinking = request.inference.model !== "deepseek-v4-flash-vision-exp"
     ? { thinking: { type: "enabled" }, reasoning_effort: "high" }
-    : { thinking: { type: "disabled" }, reasoning_effort: "none" };
+    : {};
   let bytes = 0;
   for (const item of request.evidence) for (const payload of item.visualPayloads ?? []) {
     const decoded = Buffer.from(payload.base64, "base64");
@@ -246,8 +246,8 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
   const choice = (response as { choices: Array<{ finish_reason?: unknown; message?: { content?: unknown; reasoning_content?: unknown } }> }).choices[0];
   const finishReason = choice?.finish_reason;
   if (typeof finishReason !== "string") invalidResponse(diagnostics, ["provider", "finish_reason"], "invalid_type");
-  if (finishReason !== "stop") {
-    if (finishReason === "length" || finishReason === "content_filter" || finishReason === "tool_calls" || finishReason === "insufficient_system_resource") {
+  if (finishReason !== "stop" && finishReason !== "length") {
+    if (finishReason === "content_filter" || finishReason === "tool_calls" || finishReason === "insufficient_system_resource") {
       invalidResponse(diagnostics, ["provider", "finish_reason"], finishReason);
     }
     invalidResponse(diagnostics, ["provider", "finish_reason"], "invalid_value");
