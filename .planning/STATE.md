@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-149-PLAN.md
-last_updated: "2026-09-17T07:11:36.614Z"
+stopped_at: Completed 10-152-PLAN.md
+last_updated: "2026-09-20T14:01:50.363Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 179
-  completed_plans: 140
-  percent: 78
+  total_plans: 184
+  completed_plans: 141
+  percent: 77
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 150 of 151
+Plan: 153 of 156
 
 - Phase: 10 of 11
-- Status: Plan 10-149 promoted one exact-source READY immutable local image for the bounded Prompt v2 recovery chain
-- Progress: Plan 10-150 may consume only the authenticated 10-149 generation; Plan 10-151 remains the synchronization gate
-- Last activity: 80 focused provider-disabled tests, one exact local build, independent no-rebuild audit, and diff checks passed
+- Status: Plan 10-152 archived consumed generation 86a962db and rotated authority to the certified-8000 recovery chain
+- Progress: Only Plans 10-153 through 10-156 can acquire current certification, build, live-proof, and synchronization authority
+- Last activity: 114 focused and 743 full provider-disabled tests, TypeScript build, archive audit, and diff checks passed
 
 ## Decisions and Assumptions
 
@@ -224,7 +224,7 @@ Plan: 150 of 151
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-145 live generation and Plan 10-146 synchronization.
+- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-155 live generation and Plan 10-156 synchronization.
 
 ## Performance Metrics
 
@@ -326,16 +326,17 @@ Plan: 150 of 151
 | Phase 10 P147 | 7min | 2 tasks | 8 files |
 | Phase 10 P148 | 7min | 2 tasks | 4 files |
 | Phase 10 P149 | 1min | 1 tasks | 2 files | 2026-09-17 |
+| Phase 10 P152 | 42min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-17T07:11:36.608Z
-- **Stopped at:** Planned certified-8000 recovery through 10-156 after consumed 10-150 evidence
+- **Last session:** 2026-09-20T14:01:50.357Z
+- **Stopped at:** Completed 10-152-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-152 to archive generation `86a962db...9ef4c0e`, revoke stale authority and rotate the fixed recovery namespace. No provider request is permitted before Plan 10-155.
+Execute Plan 10-153 to hostile-test and exactly recertify the unified 8000-token product/runtime contract. No provider request is permitted before Plan 10-155.
 
 ---
-*Last updated: 2026-09-17 after planning the certified-8000 recovery chain*
+*Last updated: 2026-09-21 after completing Plan 10-152 authority rotation*
