@@ -131,3 +131,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Versioned the prompt to v2 with a shared four-finding maximum and concise field, follow-up, and citation limits; enforced the same bounds after decoding; and registered a sanitized authenticated `findings/too_big` diagnostic while preserving public schema, provenance, and the one-request cap.
 - **Files changed:** src/providers/types.ts, src/providers/deepseek.ts, src/providers/provenance.ts, scripts/docker-review-real.mjs, tests/providers/deepseek.test.ts, tests/providers/config.test.ts, docs/mcp-contract.md
 ---
+
+## provider-finish-length-8000 — Default hidden reasoning exhausted the bounded vision completion budget
+- **Date:** 2026-09-21
+- **Error patterns:** provider-finish-reason-length, maxTokens 8000, hidden reasoning, thinking default, vision request, one authenticated provider send
+- **Root cause:** The certified vision request omitted thinking controls under an obsolete assumption that the vision model must receive none. DeepSeek now enables thinking by default and routes the retired deepseek-v4-flash-vision-exp alias to current Flash, so hidden reasoning shared and exhausted max_tokens=8000 before the already bounded JSON answer completed.
+- **Fix:** Explicitly send thinking.type=disabled and reasoning_effort=none for deepseek-v4-flash-vision-exp requests; retain enabled/high thinking for text models; update the exact request regression and contract documentation.
+- **Files changed:** src/providers/deepseek.ts, tests/providers/deepseek.test.ts, README.md, docs/mcp-contract.md
+---
