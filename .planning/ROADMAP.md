@@ -679,7 +679,7 @@ Plans:
 - 10-156-SUPERSEDED.md — Retired synchronization plan; prohibited from synchronizing the consumed 10-155 non-pass
 
 **Wave 151** *(gap closure; archive consumed 10-155 and rotate authority)*
-- [ ] 10-157-PLAN.md — Preserve 10-155 as authority:false, retain 10-156-SUPERSEDED.md as non-executable history, and rotate all fixed registries
+- [x] 10-157-PLAN.md — Preserve 10-155 as authority:false, retain 10-156-SUPERSEDED.md as non-executable history, and rotate all fixed registries
 
 **Wave 152** *(gap closure; blocked on Wave 151 completion)*
 - [ ] 10-158-PLAN.md — Hostile-test and exactly recertify provider-default complete-length acceptance
@@ -751,7 +751,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 115/156 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 116/160 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

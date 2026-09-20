@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: blocked
-stopped_at: Completed 10-155-PLAN.md with immutable gaps_found; 10-156-SUPERSEDED.md excluded from executable discovery; next executable gap plan 10-157
-last_updated: "2026-09-20T15:24:35.188Z"
+stopped_at: Completed 10-157-PLAN.md; next executable gap plan 10-158
+last_updated: "2026-09-20T16:04:29.189Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 188
-  completed_plans: 144
+  completed_plans: 145
   percent: 77
 ---
 
@@ -20,20 +20,20 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 10 — fail-closed-provider-startup-and-credentialed-mcp-e2e
+**Current focus:** Phase 10 — Fail-Closed Provider Startup and Credentialed MCP E2E
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 155 completed of 160 executable plans; next executable gap plan 157
+Phase: 10 (Fail-Closed Provider Startup and Credentialed MCP E2E) — EXECUTING
+Plan: 157 completed of 160 executable plans; next executable gap plan 158
 
 - Phase: 10 of 11
-- Status: Plan 10-155 sealed immutable generation e2547175 as gaps_found after the sole authorized provider send; retired 10-156 is preserved as non-executable 10-156-SUPERSEDED.md
-- Progress: reservation=1, tools/call=1, provider send=1, retries/fallback/diagnostic-second-call/replay=0; terminal diagnostic provider-finish-reason-length at maxTokens 8000
-- Last activity: terminal-owner execution/proof audits passed with exit/close 0, no stream truncation, zero GitHub Actions and zero synchronization writes
+- Status: Plan 10-157 sealed immutable generation e2547175 as authority:false/replay_allowed:false history and rotated current authority to Plans 10-158 through 10-161
+- Progress: archive and registry rotation passed 115 focused tests and 747 full provider-disabled tests; retired 10-156 remains outside executable discovery
+- Last activity: TypeScript build, diff hygiene, and SDK discovery passed with zero credentials, Docker, provider, network, GitHub Actions, or synchronization writes
 
 ## Decisions and Assumptions
 
@@ -227,10 +227,12 @@ Plan: 155 completed of 160 executable plans; next executable gap plan 157
 - [Phase 10]: Preserve the exact Plan 10-153 source identity and certified 8000-token contract; no production or test source changed during Plan 10-154.
 - [Phase 10]: Preserve generation e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291 as immutable authority:false gaps evidence after exactly one provider send; finish_reason remained length at the certified 8000-token boundary.
 - [Phase 10]: Preserve retired Plan 10-156 byte-exact as non-executable 10-156-SUPERSEDED.md; the consumed non-pass cannot be retried, replayed, overwritten, promoted or rediscovered as an executable plan.
+- [Phase 10]: Generation e2547175 remains immutable authority:false and replay_allowed:false history; correction 403d2a2 cannot promote the consumed request.
+- [Phase 10]: Only the ordered 10-157 through 10-161 namespace may acquire current recovery authority; 10-156-SUPERSEDED.md remains outside executable discovery.
 
 ### Blockers
 
-- PROV-01 remains open: Plan 10-155 consumed exactly one provider send and returned authenticated provider-finish-reason-length at maxTokens 8000; retired 10-156 is non-executable history and the next executable gap plan is 10-157.
+- PROV-01 remains open: Plan 10-157 revoked the consumed 10-155 generation and rotated authority successfully; retired 10-156 is non-executable history and the next executable gap plan is 10-158.
 
 ## Performance Metrics
 
@@ -336,16 +338,17 @@ Plan: 155 completed of 160 executable plans; next executable gap plan 157
 | Phase 10 P153 | 4min | 2 tasks | 4 files |
 | Phase 10 P154 | 1 min | 1 tasks | 1 files |
 | Phase 10 P155 | 2 min | 1 tasks | 7 files | 2026-09-21 |
+| Phase 10 P157 | 7min | 2 tasks | 8 files | 2026-09-21 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T14:17:49.002Z
-- **Stopped at:** Completed 10-155-PLAN.md with immutable gaps_found; 10-156-SUPERSEDED.md excluded from executable discovery; next executable gap plan 10-157
+- **Last session:** 2026-09-20T16:04:29.183Z
+- **Stopped at:** Completed 10-157-PLAN.md; next executable gap plan 10-158
 - **Resume file:** None
 
 ## Next Action
 
-Execute the newly certified recovery chain beginning at 10-157. Do not replay immutable generation e2547175; 10-156-SUPERSEDED.md is historical only and cannot be discovered or executed as a plan.
+Execute Plan 10-158 to recertify the corrected complete-length response contract. Do not replay immutable generation e2547175; 10-156-SUPERSEDED.md is historical only and cannot be discovered or executed as a plan.
 
 ---
-*Last updated: 2026-09-21 after excluding retired Plan 10-156 from executable discovery*
+*Last updated: 2026-09-21 after completing Plan 10-157 authority rotation*
