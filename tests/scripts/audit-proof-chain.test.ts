@@ -297,14 +297,14 @@ describe("proof chain certifier", () => {
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
     const marker = join(root, "external-called");
     const replacements = [
-      ["10-63-SOURCE.json", "10-153-SOURCE.json"], ["10-63-REVIEW.md", "10-153-REVIEW.md"],
-      ["10-63-SECURITY.md", "10-153-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-154-FINAL-BUILD.json"],
-      ["10-65-TRANSITION.json", "10-155-TRANSITION.json"], ["10-65-EXECUTION.json", "10-155-EXECUTION.json"],
-      ["10-65-PROOF.json", "10-155-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-155-LOCAL-VALIDATION.json"],
+      ["10-63-SOURCE.json", "10-158-SOURCE.json"], ["10-63-REVIEW.md", "10-158-REVIEW.md"],
+      ["10-63-SECURITY.md", "10-158-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-159-FINAL-BUILD.json"],
+      ["10-65-TRANSITION.json", "10-160-TRANSITION.json"], ["10-65-EXECUTION.json", "10-160-EXECUTION.json"],
+      ["10-65-PROOF.json", "10-160-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-160-LOCAL-VALIDATION.json"],
     ];
     try {
       execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
-      await copyFile(join(repoRoot, phasePath, "10-152-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-152-CONSUMED-LIVE.json"));
+      await copyFile(join(repoRoot, phasePath, "10-157-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-157-CONSUMED-LIVE.json"));
       for (const [from, to] of replacements) await copyFile(join(checkout, phasePath, from), join(checkout, phasePath, to));
       execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
@@ -329,8 +329,8 @@ describe("proof chain certifier", () => {
     const archive = join(root, "current.tar");
     const marker = join(root, "external-called");
     const watched = [
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-156-SYNC-CLAIM.json",
-      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-156-SYNC-JOURNAL.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-161-SYNC-CLAIM.json",
+      ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-161-SYNC-JOURNAL.json",
       ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md",
       ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-VERIFICATION.md",
       ".planning/REQUIREMENTS.md",

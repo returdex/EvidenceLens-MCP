@@ -55,15 +55,15 @@ const promptV2ConsumedLivePath = `${phase}/10-147-CONSUMED-LIVE.json`;
 const certifiedOutputConsumedLivePath = `${phase}/10-152-CONSUMED-LIVE.json`;
 const completeLengthConsumedLivePath = `${phase}/10-157-CONSUMED-LIVE.json`;
 const consumedLivePath = `${phase}/10-112-CONSUMED-LIVE.json`;
-const localValidationPath = `${phase}/10-155-LOCAL-VALIDATION.json`;
-const forensicPath = certifiedOutputConsumedLivePath;
-const transitionPath = `${phase}/10-155-TRANSITION.json`;
-const executionPath = `${phase}/10-155-EXECUTION.json`;
-const proofPath = `${phase}/10-155-PROOF.json`;
-const sourcePath = `${phase}/10-153-SOURCE.json`;
-const reviewPath = `${phase}/10-153-REVIEW.md`;
-const securityPath = `${phase}/10-153-SECURITY.md`;
-const buildPath = `${phase}/10-154-FINAL-BUILD.json`;
+const localValidationPath = `${phase}/10-160-LOCAL-VALIDATION.json`;
+const forensicPath = completeLengthConsumedLivePath;
+const transitionPath = `${phase}/10-160-TRANSITION.json`;
+const executionPath = `${phase}/10-160-EXECUTION.json`;
+const proofPath = `${phase}/10-160-PROOF.json`;
+const sourcePath = `${phase}/10-158-SOURCE.json`;
+const reviewPath = `${phase}/10-158-REVIEW.md`;
+const securityPath = `${phase}/10-158-SECURITY.md`;
+const buildPath = `${phase}/10-159-FINAL-BUILD.json`;
 const legacyConsumedLiveCommit = "585fd01622ec7964cd72d0180847383f61757901";
 const legacyConsumedLiveGeneration = "4de25b800d261e98344860f45de900ba852679671cac0aaefeef9d27dc488f65";
 const legacyConsumedLiveFiles = Object.freeze({
@@ -754,8 +754,8 @@ export const BRANCH_AUTHORITY_REGISTRIES = Object.freeze({
 });
 
 export const FINAL_AUDIT_REGISTRIES = Object.freeze({
-  preflight: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.preflight.paths, `${phase}/10-156-SYNC-CLAIM.json`, `${phase}/10-156-SYNC-JOURNAL.json`]),
-  live: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.live.paths, `${phase}/10-156-SYNC-CLAIM.json`, `${phase}/10-156-SYNC-JOURNAL.json`]),
+  preflight: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.preflight.paths, `${phase}/10-161-SYNC-CLAIM.json`, `${phase}/10-161-SYNC-JOURNAL.json`]),
+  live: Object.freeze([...BRANCH_AUTHORITY_REGISTRIES.live.paths, `${phase}/10-161-SYNC-CLAIM.json`, `${phase}/10-161-SYNC-JOURNAL.json`]),
 });
 
 const ownerCapabilities = new WeakSet();
@@ -846,11 +846,11 @@ export const PROOF_CHAIN_MODES = Object.freeze({
   "consumed-live-archive-10-59": mode(["10-62-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "forensic-consumed-generation": mode(["10-53-FORENSIC.json"], ["evidencelens.consumed-generation-forensic.v1"]),
   "source-review": mode(["10-49-SOURCE.json", "10-49-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
-  "source-review-auto": mode(["10-153-SOURCE.json", "10-153-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
+  "source-review-auto": mode(["10-158-SOURCE.json", "10-158-REVIEW.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2"]),
   reviews: mode(["10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
-  "reviews-auto": mode(["10-153-SOURCE.json", "10-153-REVIEW.md", "10-153-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  "reviews-auto": mode(["10-158-SOURCE.json", "10-158-REVIEW.md", "10-158-SECURITY.md"], ["evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
   build: mode(["10-50-FINAL-BUILD.json", "10-49-SOURCE.json", "10-49-REVIEW.md", "10-49-SECURITY.md"], ["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
-  "build-auto": mode(["10-154-FINAL-BUILD.json", "10-153-SOURCE.json", "10-153-REVIEW.md", "10-153-SECURITY.md"], ["evidencelens.build-auto.branch", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
+  "build-auto": mode(["10-159-FINAL-BUILD.json", "10-158-SOURCE.json", "10-158-REVIEW.md", "10-158-SECURITY.md"], ["evidencelens.build-auto.branch", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]),
   diagnostic: mode(["10-29-DIAGNOSTIC.json", "10-28-DIAGNOSTIC-BUILD.json"], ["evidencelens.diagnostic.v2", "evidencelens.build.v2"]),
   repair: mode(["10-30-REPAIR.json", "10-29-DIAGNOSTIC.json"], ["evidencelens.repair.v2", "evidencelens.diagnostic.v2"]),
   "repair-set": mode(["10-29-DIAGNOSTIC.json", ...repairNames], ["evidencelens.diagnostic.v2", ...repairNames.map(() => "evidencelens.repair.v2")], true),
