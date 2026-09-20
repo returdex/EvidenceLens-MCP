@@ -42,6 +42,43 @@
 
 All authoritative GOAL, REQ, CONTEXT, verification, review, history, and Phase 7 state items are covered. No source item is missing or silently deferred.
 
+## Post-10-155 Complete-Length Recovery: Plans 10-157 through 10-161
+
+This additive audit supersedes production authority from Plans 10-152 through 10-156 without deleting their historical records. Generation `e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291` is consumed immutable `authority:false` evidence after exactly one send. User-approved correction `403d2a2` preserves provider-default Vision behavior and permits `stop` or `length` into the same strict validation pipeline; it does not make `length` itself authoritative.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete credentialed Docker MCP/filesystem/provider/public-schema proof without weakening fail-closed startup | 157-161 | COVERED |
+| REQ | SAFE-04 | No credential/raw provider disclosure; all failures remain bounded and sanitized | 157-161 | COVERED |
+| REQ | PROV-01 | Only a complete fresh committed chain may close the credentialed proof gap | 157-161 | COVERED |
+| CONTEXT | API-AUTO | Live provider test runs automatically without nonce or checkpoint | 160 | COVERED |
+| CONTEXT | API-BOUND | Fresh generation max one provider send; retries/fallback/alternate/diagnostic-second/replay all zero | 158, 160 | COVERED |
+| CONTEXT | TRUTH | Any live non-pass is immutable authority:false and stops before synchronization | 157, 160-161 | COVERED |
+| CONTEXT | LOCAL-AUTH | Atomic/no-follow artifacts, exact hashes, immutable inputs and same-process validation establish local authority | 157-161 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker are unrestricted; live invocation still cannot rebuild its certified image | 157-161 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions/push/workflow/repository dispatch/retrigger budget is exactly zero | 157-161 | COVERED |
+| HISTORY | 10-155 | Preserve e2547175 byte-exact; never replay, overwrite, upgrade or synchronize | 157, 160-161 | COVERED |
+| AUTHORITY | SUPERSEDE-156 | Old Plan 10-156 remains unexecuted and cannot write current truth | 157, 161 | COVERED |
+| FIX | 403d2a2 | Preserve Vision defaults; stop/length share exact bounded extraction/schema/provenance pipeline | 158, 160-161 | COVERED |
+| FIX | LENGTH-FAIL-CLOSED | Truncated, malformed, ambiguous, wrong-root, oversized, schema/citation/provenance-invalid length fails closed | 158, 160 | COVERED |
+| FIX | OTHER-REASONS | content_filter/tool_calls/resource/unknown/missing/wrong-type reject before content parsing | 158 | COVERED |
+| AUTHORITY | REGISTRIES | Rotate automatic/audit/sync/final registries as one namespace; stale/mixed fails before side effects | 157 | COVERED |
+| CERT | EXACT-SOURCE | Canonical manifest, full offline suite, build, Compose/runtime, deep review, ASVS and no-drift precede live | 158 | COVERED |
+| BUILD | IMMUTABLE | Fresh exact-source local image, sha256 identity, independent no-rebuild audit | 159 | COVERED |
+| LIVE | FRESH | One new non-replay generation against exact image; complete stop or length alone may pass | 160 | COVERED |
+| SYNC | PASSED-ONLY | Exact committed passed chain is sole authority; non-pass causes zero claim/journal/target writes | 161 | COVERED |
+| AUDIT | FINAL | Fresh full-commit final audit plus provider-disabled regressions/build/Compose/no-drift | 161 | COVERED |
+
+### Exclusions and budgets
+
+- Phase 11 SAFE-01 Linux traversal remains outside Phase 10; CONTEXT contains no deferred idea.
+- Plans 10-157, 10-158, 10-159 and 10-161 have provider-request budget 0. Only Plan 10-160 permits at most one provider HTTP send.
+- All five plans have GitHub Actions run budget 0 and prohibit push, workflow_dispatch, repository_dispatch, rerun and retrigger.
+- Local tests, TypeScript builds and local Docker work are unrestricted. Plan 10-160 cannot rebuild because exact-image continuity is an evidence-integrity gate.
+- Any production/test drift after 10-158 certification invalidates 10-159/160/161 authority and returns work to a new additive certification chain.
+
+**Audit result:** Every current goal, requirement, locked context decision, consumed-generation fact, response-acceptance rule, registry boundary, certification/build/live/sync requirement and final audit is covered. No item is missing or silently deferred.
+
 ## Post-10-51 Failure Cycle: Plans 10-53 through 10-60
 
 The prior table remains historical coverage for Plans 10-38 through 10-52. The following audit covers the newer committed failure at `1b62227`, which supersedes the stale 10-VERIFICATION diagnosis for execution planning.
