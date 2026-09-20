@@ -1,0 +1,88 @@
+{
+  "schema": "evidencelens.hostile-disconfirmation.v1",
+  "case_results": {
+    "product_default_max_tokens_is_exactly_8000": "passed",
+    "compose_review_max_tokens_is_exactly_8000": "passed",
+    "compose_proof_max_tokens_is_exactly_8000": "passed",
+    "host_4000_override_is_ignored": "passed",
+    "host_20000_override_is_ignored": "passed",
+    "host_missing_override_is_ignored": "passed",
+    "host_malformed_override_is_ignored": "passed",
+    "duplicate_runtime_value_is_rejected": "passed",
+    "missing_runtime_value_is_rejected": "passed",
+    "lower_runtime_value_is_rejected": "passed",
+    "higher_runtime_value_is_rejected": "passed",
+    "max_tokens_participates_in_request_fingerprint": "passed",
+    "safe_integer_max_tokens_1_through_20000_is_accepted": "passed",
+    "fractional_zero_negative_overflow_and_non_numeric_max_tokens_are_rejected": "passed",
+    "output_is_limited_to_four_findings": "passed",
+    "title_summary_observation_interpretation_uncertainty_are_bounded": "passed",
+    "follow_up_count_and_text_are_bounded": "passed",
+    "citation_count_is_bounded": "passed",
+    "proof_max_retries_is_zero": "passed",
+    "proof_request_budget_is_one": "passed",
+    "retry_fallback_alternate_diagnostic_second_request_and_replay_are_forbidden": "passed"
+  },
+  "runtime_contract": {
+    "product_default_max_tokens": 8000,
+    "compose_review_max_tokens": 8000,
+    "compose_proof_max_tokens": 8000,
+    "configuration_min_max_tokens": 1,
+    "configuration_max_max_tokens": 20000,
+    "proof_max_retries": 0,
+    "proof_max_provider_requests": 1,
+    "max_findings": 4,
+    "max_title_chars": 120,
+    "max_prose_chars": 360,
+    "max_follow_up_checks": 2,
+    "max_follow_up_chars": 240,
+    "max_citations_per_finding": 4,
+    "request_fingerprint_includes": [
+      "model",
+      "temperature",
+      "maxTokens",
+      "promptVersion",
+      "messages"
+    ]
+  },
+  "compose_expansion": {
+    "command": "DEEPSEEK_API_KEY=<hermetic-invalid-sentinel> EVIDENCELENS_PROOF_DEEPSEEK_API_KEY=<hermetic-invalid-sentinel> docker compose --profile review --profile proof config",
+    "sha256": "76177b482f8b8fc642b4e0da81913e381d92fc41cd607069200ffb019ff7b996",
+    "host_cases": [
+      "4000",
+      "20000",
+      "missing",
+      "malformed"
+    ],
+    "all_expansions_byte_identical": true,
+    "docker_daemon_calls": 0,
+    "docker_builds": 0,
+    "docker_runs": 0
+  },
+  "verification": {
+    "focused_suite_files": 4,
+    "focused_suite_tests": 234,
+    "minimum_focused_suite_tests": 187,
+    "focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/config.test.ts tests/contract/review-provider.test.ts tests/scripts/proof-runtime-spec.test.ts tests/scripts/docker-review-real.test.ts",
+    "full_offline_test_files": 43,
+    "full_offline_tests": 743,
+    "minimum_full_offline_tests": 742,
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "hermetic_provider_transport": "passed"
+  },
+  "side_effects": {
+    "credential_file_reads": 0,
+    "docker_daemon_calls": 0,
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  },
+  "status": "passed"
+}
