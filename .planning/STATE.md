@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-152-PLAN.md
-last_updated: "2026-09-20T14:01:50.363Z"
+stopped_at: Completed 10-153-PLAN.md
+last_updated: "2026-09-20T14:09:01.393Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 184
-  completed_plans: 141
+  completed_plans: 142
   percent: 77
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 153 of 156
+Plan: 154 of 156
 
 - Phase: 10 of 11
-- Status: Plan 10-152 archived consumed generation 86a962db and rotated authority to the certified-8000 recovery chain
-- Progress: Only Plans 10-153 through 10-156 can acquire current certification, build, live-proof, and synchronization authority
-- Last activity: 114 focused and 743 full provider-disabled tests, TypeScript build, archive audit, and diff checks passed
+- Status: Plan 10-153 certified the exact non-overridable 8000-token product/runtime contract at reviewed source 1b2ce26
+- Progress: Plan 10-154 may build only the exact 109-blob certified source; provider authority remains unavailable until Plan 10-155
+- Last activity: 234 focused and 743 full provider-disabled tests, Compose expansion, fixed audits, TypeScript build, ASVS L1, and no-drift checks passed
 
 ## Decisions and Assumptions
 
@@ -221,6 +221,8 @@ Plan: 153 of 156
 - [Phase 10]: Preserve generation 86a962db as byte-exact authority:false and replay_allowed:false history superseded by certified live-output fix ad16455. — Consumed paid evidence cannot regain request, proof, replay, or synchronization authority.
 - [Phase 10]: Only the 10-152/153/154/155/156 namespace may acquire current production authority. — Stale and mixed tuples fail before external side effects.
 - [Phase 10]: Certify the unified product default and Compose review/proof runtime at maxTokens 8000, non-overridable by host input and included in the request fingerprint; configuration remains bounded at 20000, output at four findings, retry at zero and request count at one.
+- [Phase 10]: Authorize Plan 10-154 only from reviewed commit 1b2ce26, its 109-blob canonical manifest, exact runtime contract, and current certifier hashes. — Exact source identity prevents build authority from drifting after certification.
+- [Phase 10]: Keep the product configuration ceiling at 20000 while fixing the certified product/Compose/proof request value at exactly 8000 and retaining independent four-finding output bounds. — This separates safe general configuration validation from the non-overridable certified live contract.
 
 ### Blockers
 
@@ -327,11 +329,12 @@ Plan: 153 of 156
 | Phase 10 P148 | 7min | 2 tasks | 4 files |
 | Phase 10 P149 | 1min | 1 tasks | 2 files | 2026-09-17 |
 | Phase 10 P152 | 42min | 2 tasks | 8 files |
+| Phase 10 P153 | 4min | 2 tasks | 4 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T14:01:50.357Z
-- **Stopped at:** Completed 10-152-PLAN.md
+- **Last session:** 2026-09-20T14:08:40.309Z
+- **Stopped at:** Completed 10-153-PLAN.md
 - **Resume file:** None
 
 ## Next Action
