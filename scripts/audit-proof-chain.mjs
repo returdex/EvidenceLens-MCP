@@ -53,6 +53,7 @@ const inertProseBracketConsumedLivePath = `${phase}/10-137-CONSUMED-LIVE.json`;
 const finishReasonConsumedLivePath = `${phase}/10-142-CONSUMED-LIVE.json`;
 const promptV2ConsumedLivePath = `${phase}/10-147-CONSUMED-LIVE.json`;
 const certifiedOutputConsumedLivePath = `${phase}/10-152-CONSUMED-LIVE.json`;
+const completeLengthConsumedLivePath = `${phase}/10-157-CONSUMED-LIVE.json`;
 const consumedLivePath = `${phase}/10-112-CONSUMED-LIVE.json`;
 const localValidationPath = `${phase}/10-155-LOCAL-VALIDATION.json`;
 const forensicPath = certifiedOutputConsumedLivePath;
@@ -272,6 +273,17 @@ const certifiedOutputConsumedLiveFiles = Object.freeze({
   proof: Object.freeze({ path: `${phase}/10-150-PROOF.json`, sha256: "faceb9e98cddd1742074521e0d5c7dd8359143fdc051f7d07a6d8b3fce5fcd64" }),
   local_validation: Object.freeze({ path: `${phase}/10-150-LOCAL-VALIDATION.json`, sha256: "f2ed421e61e19ad6a8b9e3d0cd72eb1cdd0477778a1472aa78ba8c9f76707b01" }),
 });
+const completeLengthConsumedLiveCommit = "d2c55013ebe814b23712e0599073caae8a650ce6";
+const completeLengthConsumedLiveGeneration = "e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291";
+const completeLengthConsumedLiveFiles = Object.freeze({
+  state: Object.freeze({ path: `${phase}/.10-155-live-state.json`, sha256: "033c847ac8910df63596e965d151039375578bf51df871398fdab56a9a68f67c" }),
+  terminal: Object.freeze({ path: `${phase}/.10-155-terminal-snapshot.json`, sha256: "56a1ae25b39382f613bef2d32e14b95f3a8bf22f65744fca476ee00dfee7862c" }),
+  claim: Object.freeze({ path: `${phase}/.10-155-terminal-snapshot.json.claim`, sha256: "8e491485b283943ca8203d92fd444e9af3c7707ad9da82daacb4dd5548724261" }),
+  transition: Object.freeze({ path: `${phase}/10-155-TRANSITION.json`, sha256: "0f1f76c90a4971bb3630017dddf1992356f437a4c90b28591f2a6e6afeae6b82" }),
+  execution: Object.freeze({ path: `${phase}/10-155-EXECUTION.json`, sha256: "ac6aab31a3cc76619eabed48c819d8c88f91bc0358ba14407a07a37ca96cf4ee" }),
+  proof: Object.freeze({ path: `${phase}/10-155-PROOF.json`, sha256: "621d94c3da887c93a70c1be4ce527f097ef6f2c1e269899471ef39cebc391843" }),
+  local_validation: Object.freeze({ path: `${phase}/10-155-LOCAL-VALIDATION.json`, sha256: "e0986ca3b963c0d6ab1d445ba6b076270291ba5291b3cc6af434aa9f0f3e2a57" }),
+});
 const consumedLiveArtifactKeys = ["commit", "mode", "path", "sha256"];
 const consumedLiveArchiveKeys = ["artifacts", "authority", "certifier_sha256", "generation", "manifest_sha256", "mcp_tools_call_count", "non_planning_tree", "observed_provider_requests", "outcome", "replay_allowed", "reservation_count", "reviewed_commit", "schema", "status"];
 const currentConsumedLiveArchiveKeys = [...consumedLiveArchiveKeys, "cause"];
@@ -279,6 +291,26 @@ const latestConsumedLiveArchiveKeys = [...currentConsumedLiveArchiveKeys, "super
 const immutableImageConsumedLiveArchiveKeys = [...latestConsumedLiveArchiveKeys, "debug_archive_commit"];
 
 export function auditConsumedLiveArchive(value) {
+  if (value?.generation === completeLengthConsumedLiveGeneration) {
+    if (!exactKeys(value, immutableImageConsumedLiveArchiveKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
+      || value.authority !== false || value.replay_allowed !== false || value.cause !== "complete_length_response_not_yet_accepted"
+      || value.superseded_by_fix !== "403d2a2" || value.debug_archive_commit !== "403d2a2"
+      || value.reviewed_commit !== "1b2ce2617818d705f884e8f52e33605ddc9ec85d"
+      || value.manifest_sha256 !== "6b34d456c6b8e8f9817f019b3ee971e5d7b8908c384b255bd832d7726ee0c91d"
+      || value.non_planning_tree !== "488f1df09f7504d22d78957a27a326b3efb438597d788e32deed62011ab974c2"
+      || !exactKeys(value.certifier_sha256, ["audit_live_evidence_sha256", "audit_proof_chain_sha256"])
+      || value.certifier_sha256.audit_live_evidence_sha256 !== "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500"
+      || value.certifier_sha256.audit_proof_chain_sha256 !== "d9f6ea4dda8fe1ff0cb6a968d012f98fecf15d5b19752069c4b7dcd054fbdabf"
+      || value.reservation_count !== 1 || value.mcp_tools_call_count !== 1 || value.observed_provider_requests !== 1
+      || value.outcome !== "request_failed" || value.status !== "gaps_found"
+      || !exactKeys(value.artifacts, Object.keys(completeLengthConsumedLiveFiles))) fail("PROOF_CHAIN_CONSUMED_LIVE");
+    for (const [name, expected] of Object.entries(completeLengthConsumedLiveFiles)) {
+      const artifact = value.artifacts[name];
+      if (!exactKeys(artifact, consumedLiveArtifactKeys) || artifact.commit !== completeLengthConsumedLiveCommit
+        || artifact.mode !== "0600" || artifact.path !== expected.path || artifact.sha256 !== expected.sha256) fail("PROOF_CHAIN_CONSUMED_LIVE");
+    }
+    return Object.freeze({ authority: false, status: "gaps_found" });
+  }
   if (value?.generation === certifiedOutputConsumedLiveGeneration) {
     if (!exactKeys(value, immutableImageConsumedLiveArchiveKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
       || value.authority !== false || value.replay_allowed !== false || value.cause !== "certified_live_output_cap_underprovisioned"
@@ -639,13 +671,13 @@ async function syncDirectory(path) {
   try { await handle.sync(); } finally { await handle.close(); }
 }
 
-export async function createConsumedLiveArchive(path = certifiedOutputConsumedLivePath) {
-  if (path !== certifiedOutputConsumedLivePath) fail("PROOF_CHAIN_ARGV");
+export async function createConsumedLiveArchive(path = completeLengthConsumedLivePath) {
+  if (path !== completeLengthConsumedLivePath) fail("PROOF_CHAIN_ARGV");
   const artifacts = {};
   const parsedArtifacts = {};
-  for (const [name, expected] of Object.entries(certifiedOutputConsumedLiveFiles)) {
+  for (const [name, expected] of Object.entries(completeLengthConsumedLiveFiles)) {
     let committed;
-    try { committed = (await execFileAsync("git", ["show", `${certifiedOutputConsumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
+    try { committed = (await execFileAsync("git", ["show", `${completeLengthConsumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
     catch { fail("PROOF_CHAIN_CONSUMED_LIVE"); }
     let handle;
     try {
@@ -658,14 +690,14 @@ export async function createConsumedLiveArchive(path = certifiedOutputConsumedLi
       const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes); const parsed = JSON.parse(text);
       if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_CONSUMED_LIVE");
       parsedArtifacts[name] = parsed;
-      artifacts[name] = { commit: certifiedOutputConsumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
+      artifacts[name] = { commit: completeLengthConsumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
     } catch (error) {
       if (error instanceof Error && error.message === "PROOF_CHAIN_CONSUMED_LIVE") throw error;
       fail("PROOF_CHAIN_CONSUMED_LIVE");
     } finally { await handle?.close().catch(() => undefined); }
   }
-  if (parsedArtifacts.transition.generation !== certifiedOutputConsumedLiveGeneration
-    || parsedArtifacts.execution.execution_generation !== certifiedOutputConsumedLiveGeneration
+  if (parsedArtifacts.transition.generation !== completeLengthConsumedLiveGeneration
+    || parsedArtifacts.execution.execution_generation !== completeLengthConsumedLiveGeneration
     || parsedArtifacts.proof.status !== "gaps_found" || parsedArtifacts.proof.outcome !== "request_failed"
     || parsedArtifacts.execution.status !== "gaps_found" || parsedArtifacts.execution.outcome !== "request_failed"
     || parsedArtifacts.execution.diagnostic?.code !== "request" || parsedArtifacts.execution.diagnostic?.path !== "transport.fetch"
@@ -679,13 +711,13 @@ export async function createConsumedLiveArchive(path = certifiedOutputConsumedLi
     || parsedArtifacts.terminal.diagnostic?.code !== "provider-finish-reason-length"
     || parsedArtifacts.terminal.observed_provider_requests !== 1 || parsedArtifacts.terminal.request_receipt?.observed_provider_requests !== 1
     || parsedArtifacts.local_validation.validation?.execution !== "passed" || parsedArtifacts.local_validation.validation?.proof !== "passed") fail("PROOF_CHAIN_CONSUMED_LIVE");
-  const value = { artifacts, authority: false, cause: "certified_live_output_cap_underprovisioned", certifier_sha256: {
+  const value = { artifacts, authority: false, cause: "complete_length_response_not_yet_accepted", certifier_sha256: {
     audit_live_evidence_sha256: "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500",
-    audit_proof_chain_sha256: "920d4530ffbae7b415f2c4f5933bfefe7d96faa3bc754a28706e623c51104db7",
-  }, debug_archive_commit: "ad16455", generation: certifiedOutputConsumedLiveGeneration, manifest_sha256: "75da78e69fad1ce563b71046c901014d65dcf1d60cd4b01346a34af8c1d61f1a",
-    mcp_tools_call_count: 1, non_planning_tree: "14bd6a18cf4aa985e74d78c18db78ad911d4376729912c3ed0abd7862597498e",
+    audit_proof_chain_sha256: "d9f6ea4dda8fe1ff0cb6a968d012f98fecf15d5b19752069c4b7dcd054fbdabf",
+  }, debug_archive_commit: "403d2a2", generation: completeLengthConsumedLiveGeneration, manifest_sha256: "6b34d456c6b8e8f9817f019b3ee971e5d7b8908c384b255bd832d7726ee0c91d",
+    mcp_tools_call_count: 1, non_planning_tree: "488f1df09f7504d22d78957a27a326b3efb438597d788e32deed62011ab974c2",
     observed_provider_requests: 1, outcome: "request_failed", replay_allowed: false, reservation_count: 1,
-    reviewed_commit: "023392e08c1145991db685e7b7b92ca2c4da15a1", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found", superseded_by_fix: "ad16455" };
+    reviewed_commit: "1b2ce2617818d705f884e8f52e33605ddc9ec85d", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found", superseded_by_fix: "403d2a2" };
   auditConsumedLiveArchive(value);
   const bytes = Buffer.from(canonicalJson(value)); const temporary = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
   let temp; let reservation;
@@ -792,7 +824,8 @@ function assertBranchExecution(branch, execution) {
 }
 
 export const PROOF_CHAIN_MODES = Object.freeze({
-  "consumed-live-archive": mode(["10-152-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
+  "consumed-live-archive": mode(["10-157-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
+  "consumed-live-archive-10-150": mode(["10-152-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "consumed-live-archive-10-145": mode(["10-147-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "consumed-live-archive-10-140": mode(["10-142-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
   "consumed-live-archive-10-135": mode(["10-137-CONSUMED-LIVE.json"], ["evidencelens.consumed-live-archive.v1"]),
