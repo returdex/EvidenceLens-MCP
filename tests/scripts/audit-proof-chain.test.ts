@@ -484,6 +484,7 @@ describe("proof chain certifier", () => {
     expect(() => auditLiveProof(proof("passed", { finding_count: 0 }))).toThrow("PROOF_CHAIN_STATE");
     expect(() => auditLiveProof(proof("preflight_failed", { status: "passed" }))).toThrow("PROOF_CHAIN_STATE");
     expect(() => auditLiveProof(proof("preflight_failed", { clean_exit: true, fixture_count: 4, finding_count: 1 }))).toThrow("PROOF_CHAIN_STATE");
+    expect(() => auditLiveProof(proof("passed", { finish_reason: "length" }))).toThrow("PROOF_CHAIN_SCHEMA");
   });
 
   it("authenticates a real tools/call, adapter receipt, immutable build and observed lifecycle", () => {

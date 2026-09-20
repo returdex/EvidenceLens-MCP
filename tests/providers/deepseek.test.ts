@@ -209,9 +209,20 @@ describe("DeepSeek provider adapter", () => {
 
   it.each([
     ["truncated JSON", JSON.stringify(draft).slice(0, -1), { path: ["provider", "content", "object"], code: "unbalanced" }],
+    ["empty content", "", { path: ["provider", "message", "reasoning_content"], code: "invalid_type" }],
     ["multiple JSON roots", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "multiple_candidates" }],
+    ["balanced structural ambiguity", `${JSON.stringify(draft)}\n[]`, { path: ["provider", "content", "object"], code: "structural_context" }],
+    ["wrong root", JSON.stringify({ findings: draft.findings, extra: true }), { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["malformed JSON", `private-prefix {"findings":[} private-suffix`, { path: ["provider", "content", "object"], code: "malformed_json" }],
+    ["dangerous root key", `{"findings":[],"__proto__":{"polluted":true}}`, { path: ["provider", "content", "object"], code: "wrong_root" }],
+    ["oversized content", "x".repeat(1_000_001), { path: ["provider", "content", "bytes"], code: "too_big" }],
+    ["too many findings", JSON.stringify({ findings: Array.from({ length: MAX_PROVIDER_FINDINGS + 1 }, (_, index) => ({ ...draft.findings[0], id: `provider-${index}` })) }), { path: ["findings"], code: "too_big" }],
+    ["oversized finding prose", JSON.stringify({ findings: [{ ...draft.findings[0], summary: "x".repeat(MAX_PROVIDER_PROSE_CHARS + 1) }] }), { path: ["findings", "text"], code: "too_big" }],
     ["schema-invalid JSON", JSON.stringify({ findings: [{ ...draft.findings[0], severity: "critical" }] }), { path: ["findings", "enum"], code: "invalid_value" }],
-    ["forged provenance", JSON.stringify({ findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], evidenceId: "forged" }] }] }), { path: ["citations", "evidenceId"], code: "invalid_value" }]
+    ["forged citation evidence", JSON.stringify({ findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], evidenceId: "forged" }] }] }), { path: ["citations", "evidenceId"], code: "invalid_value" }],
+    ["forged citation location", JSON.stringify({ findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], location: { kind: "text", startLine: 2, endLine: 2 } }] }] }), { path: ["citations", "location"], code: "invalid_value" }],
+    ["forged citation hash", JSON.stringify({ findings: [{ ...draft.findings[0], citations: [{ ...draft.findings[0].citations[0], contentHash: "b".repeat(64) }] }] }), { path: ["citations", "contentHash"], code: "invalid_value" }],
+    ["citation provenance mismatch", JSON.stringify({ findings: [{ ...draft.findings[0], evidenceIds: ["forged"] }] }), { path: ["findings", "evidenceIds"], code: "custom" }]
   ] as const)("rejects finish_reason length with %s", async (_name, content, feature) => {
     const diagnostics = recordingSink();
     const transport: DeepSeekTransport = {
@@ -219,6 +230,18 @@ describe("DeepSeek provider adapter", () => {
     };
     await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
     expect(diagnostics.features).toEqual([feature]);
+  });
+
+  it.each([
+    ["missing content", undefined],
+    ["wrong-type content", 42]
+  ] as const)("rejects finish_reason length with %s before extraction", async (_name, content) => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { ...(content !== undefined ? { content } : {}) } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "message", "content"], code: "invalid_type" }]);
   });
 
   it.each([

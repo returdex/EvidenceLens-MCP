@@ -315,6 +315,83 @@ function injectedFetchFailure(code: string, details: Record<string, unknown> = {
 }
 
 describe("production server transport diagnostics", () => {
+  it.each(["stop", "length"] as const)("routes a complete-valid %s response through the production review_evidence tool path", async (finishReason) => {
+    const generation = finishReason === "stop" ? "8".repeat(64) : "9".repeat(64);
+    const key = Buffer.alloc(32, finishReason === "stop" ? 0x68 : 0x69);
+    const requestBudget = createProviderRequestBudget({ generation, key });
+    const receipts: ProviderRequestReceipt[] = [];
+    let transportCalls = 0;
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: {
+        fetch: async () => {
+          transportCalls += 1;
+          return new Response(JSON.stringify({ choices: [{ finish_reason: finishReason, message: { content: '{"findings":[]}' } }] }), {
+            status: 200, headers: { "content-type": "application/json" }
+          });
+        }
+      },
+      providerRequestProof: { requestBudget, receiptSink: (receipt) => { receipts.push(receipt); } }
+    });
+
+    await withProtocolClient(async (request) => {
+      await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: `complete-${finishReason}-regression`, version: "1" } });
+      const first = parseToolPayload(await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest }));
+      expect(first).toMatchObject({ ok: true, metadata: { analyzerName: "deterministic-rules" } });
+      const second = parseToolPayload(await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest }));
+      expect(second).toMatchObject({ ok: false });
+    }, server);
+
+    expect(transportCalls).toBe(1);
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ reservation_count: 1, observed_provider_requests: 1, max_retries: 0, fallback: false, diagnostic_second_call: false });
+    expect(verifyProviderRequestReceipt(receipts[0]!, { generation, key })).toBe(true);
+  });
+
+  it.each([
+    ["truncated", '{"findings":[', ["provider", "content", "object"], "unbalanced", "provider-json-object-unbalanced"],
+    ["multiple", '{"findings":[]}\n{"findings":[]}', ["provider", "content", "object"], "multiple_candidates", "provider-json-object-multiple-candidates"],
+    ["schema-invalid", '{"findings":[{"severity":"critical"}]}', ["findings", "id"], "invalid_type", "finding-draft-id"],
+    ["citation-invalid", JSON.stringify({ findings: [{ id: "provider-1", type: "omission", severity: "medium", confidence: "high", title: "Missing conclusion", summary: "Missing.", observation: "Missing.", interpretation: "Risk.", followUpChecks: ["Check."], evidenceIds: ["forged"], citations: [{ evidenceId: "forged", location: { kind: "text", startLine: 1, endLine: 1 }, visual: false }] }] }), ["citations", "evidenceId"], "invalid_value", "citation-provenance-evidence-id"]
+  ] as const)("authenticates a content-free %s length failure through the production tool and host classifier", async (_name, content, path, code, invariantId) => {
+    const generation = "7".repeat(64);
+    const key = Buffer.alloc(32, 0x67);
+    const environment: Record<string, string | undefined> = {
+      [CHILD_DIAGNOSTIC_GENERATION_ENV]: generation,
+      [CHILD_DIAGNOSTIC_KEY_ENV]: key.toString("hex")
+    };
+    let stderr = "";
+    const diagnosticSink = createChildDiagnosticSinkFromEnvironment(environment, (value) => { stderr += value; });
+    const server = createServer({
+      providerConfig: {
+        apiKey: "synthetic-never-sent", baseUrl: "https://example.invalid", model: "deepseek-v4-pro",
+        timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400
+      },
+      providerTransport: {
+        fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { content } }] }), {
+          status: 200, headers: { "content-type": "application/json" }
+        })
+      },
+      diagnosticSink
+    });
+    await withProtocolClient(async (request) => {
+      await request("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "length-diagnostic-regression", version: "1" } });
+      const result = await request("tools/call", { name: "review_evidence", arguments: completeFindingRequest });
+      expect(parseToolPayload(result)).toMatchObject({ ok: false, code: "PROVIDER_FAILURE" });
+    }, server);
+
+    const collector = new ChildDiagnosticCollector();
+    collector.consume(stderr);
+    collector.markTerminal();
+    const feature = collector.feature({ generation, key });
+    expect(feature).toEqual({ path: [...path], code });
+    expect(classifyDiagnostic([feature])).toMatchObject({ invariant_id: invariantId, repair: "allowlisted" });
+    expect(JSON.stringify({ feature, classified: classifyDiagnostic([feature]) })).not.toContain(content);
+  });
+
   it.each([
     ["no_candidate", "private prose with no JSON object", "provider-json-object-no-candidate"],
     ["multiple_candidates", '{"findings":[]}\n{"findings":[]}', "provider-json-object-multiple-candidates"],

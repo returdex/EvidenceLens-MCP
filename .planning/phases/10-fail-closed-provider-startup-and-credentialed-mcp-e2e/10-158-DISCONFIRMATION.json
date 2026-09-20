@@ -1,0 +1,83 @@
+{
+  "schema": "evidencelens.complete-length-disconfirmation.v1",
+  "status": "passed",
+  "production_contract": {
+    "vision_thinking_override_absent": true,
+    "accepted_finish_reasons": ["stop", "length"],
+    "shared_validation_pipeline": ["bounded_extraction", "strict_schema", "citation_provenance", "request_fingerprint", "public_response"],
+    "max_provider_findings": 4,
+    "complete_valid_length": "passed",
+    "complete_valid_stop": "passed"
+  },
+  "hostile_length_cases": {
+    "truncated_or_unbalanced": "rejected",
+    "empty_missing_or_wrong_type_content": "rejected",
+    "multiple_candidates": "rejected",
+    "balanced_structural_ambiguity": "rejected",
+    "wrong_root": "rejected",
+    "malformed_json": "rejected",
+    "dangerous_or_extra_keys": "rejected",
+    "oversized_content": "rejected",
+    "too_many_or_oversized_findings": "rejected",
+    "schema_invalid_fields": "rejected",
+    "citation_invalid": "rejected",
+    "provenance_invalid": "rejected"
+  },
+  "rejected_finish_reasons": {
+    "missing": "rejected_before_content_parsing",
+    "wrong_type": "rejected_before_content_parsing",
+    "unknown": "rejected_before_content_parsing",
+    "content_filter": "rejected_before_content_parsing",
+    "tool_calls": "rejected_before_content_parsing",
+    "insufficient_system_resource": "rejected_before_content_parsing"
+  },
+  "production_path": {
+    "path": "server -> review_evidence -> provider adapter -> child HMAC diagnostic -> host classifier",
+    "authenticated_content_free_diagnostic": "passed",
+    "raw_provider_content_persisted": false,
+    "finish_reason_value_is_authority": false,
+    "reservation_count": 1,
+    "observed_provider_requests_per_fixture": 1,
+    "max_retries": 0,
+    "fallback": false,
+    "alternate_provider": false,
+    "diagnostic_second_call": false,
+    "second_tool_invocation_blocked": true
+  },
+  "proof_and_sync_gates": {
+    "finish_reason_assertion_rejected_as_proof": true,
+    "gaps_found_live_tuple_rejected_before_writes": true,
+    "passed_record_requires_full_chain_validation": true
+  },
+  "verification": {
+    "focused_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npx vitest run tests/providers/deepseek.test.ts tests/contract/review-tool.test.ts tests/scripts/docker-review-real.test.ts tests/scripts/automatic-live-review.test.ts tests/scripts/audit-proof-chain.test.ts tests/scripts/sync-proof-state.test.ts",
+    "focused_files": 6,
+    "focused_tests": 360,
+    "minimum_focused_tests": 114,
+    "full_command": "EVIDENCELENS_DISABLE_PROVIDER=1 npm test",
+    "full_files": 43,
+    "full_tests": 769,
+    "minimum_full_tests": 746,
+    "changed_test_sha256": {
+      "tests/providers/deepseek.test.ts": "b7ce270976f087929192bdbe6617ea24a6341fcfb4a7acaafcecf157b9a5b772",
+      "tests/contract/review-tool.test.ts": "70a4c5ee41d21b8af1ebda6ecc34442ec07614243f986e0e4ade924c57a440f1",
+      "tests/scripts/docker-review-real.test.ts": "f42b01bf3c9a15d83437cd8ae2e470dc89982b5566c94c231cf3f3d368ff8d6b",
+      "tests/scripts/audit-proof-chain.test.ts": "74f27e60b29bf884c5faa3f398242dc23dce72ba12f6ee97dae2c0ef6ea1e53d",
+      "tests/scripts/sync-proof-state.test.ts": "5e525eac53867efdce42caee2a6ecccc1119c95ed71870c79b1afb3cf0f6546a"
+    }
+  },
+  "side_effects": {
+    "credential_file_reads": 0,
+    "docker_daemon_calls": 0,
+    "docker_builds": 0,
+    "docker_runs": 0,
+    "external_network_requests": 0,
+    "external_provider_requests": 0,
+    "paid_provider_requests": 0,
+    "github_actions_runs": 0,
+    "workflow_dispatches": 0,
+    "repository_dispatches": 0,
+    "git_pushes": 0,
+    "synchronization_target_writes": 0
+  }
+}

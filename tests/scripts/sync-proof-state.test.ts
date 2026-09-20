@@ -107,6 +107,22 @@ describe("sealed proof state synchronization", () => {
     await expect(readFile(paths.journalPath)).rejects.toThrow();
   });
 
+  it.each([
+    ["shaped finish-reason assertion", { ...proof(true), finish_reason: "length" }],
+    ["gaps_found live tuple", proof(false)]
+  ] as const)("rejects %s at the authenticated live authority gate before writes", async (_name, forgedProof) => {
+    const paths = await fixture(true);
+    await writeFile(paths.proofPath, canonicalJson(forgedProof), { mode: 0o600 });
+    const rejectingAuthority = vi.fn(async () => { throw new Error("live tuple is not passed authority"); });
+    await expect(synchronizeProofState(paths, { authorityValidator: rejectingAuthority })).rejects.toThrow("PROOF_SYNC_AUTHORITY");
+    expect(rejectingAuthority).toHaveBeenCalledWith(paths.authorityPaths);
+    await expect(readFile(paths.claimPath)).rejects.toThrow();
+    await expect(readFile(paths.journalPath)).rejects.toThrow();
+    expect(await readFile(paths.phase7Path, "utf8")).toContain("status: gaps_found");
+    expect(await readFile(paths.phase10Path, "utf8")).toContain("status: gaps_found");
+    expect(await readFile(paths.requirementsPath, "utf8")).toContain("[ ] **PROV-01**");
+  });
+
   it("rejects changed tuple members and changed certifier authority during recovery", async () => {
     const paths = await fixture(true);
     await expect(synchronizeProofState(paths, options({ interruptAt: "after-claim" }))).rejects.toThrow("PROOF_SYNC_INTERRUPTED");

@@ -656,6 +656,19 @@ describe("credentialed Docker review harness", () => {
       expect(JSON.stringify(diagnostic)).not.toContain("passed");
     }
   });
+
+  it("never promotes raw content or a finish-reason value into host authority", () => {
+    const unsafe = [
+      [{ path: ["provider", "content", "object"], code: "unbalanced", raw_content: "private provider body", finish_reason: "length" }, "provider-json-object-unbalanced"],
+      [{ path: ["provider", "finish_reason"], code: "length", raw_content: "private provider body", finish_reason: "length" }, "provider-finish-reason-length"]
+    ];
+    for (const [candidate, invariantId] of unsafe) {
+      const classified = classifyDiagnostic([candidate]);
+      const serialized = JSON.stringify(classified);
+      expect(classified).toMatchObject({ invariant_id: invariantId, repair: "allowlisted" });
+      expect(serialized).not.toMatch(/private provider body|finish_reason|"length"|"passed"/u);
+    }
+  });
   it("drives the production orchestration seam through the complete offline-shaped lifecycle", async () => {
     const child = new FakeStdioChild();
     const transcript: any[] = [];
