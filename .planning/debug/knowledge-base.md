@@ -139,3 +139,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Explicitly send thinking.type=disabled and reasoning_effort=none for deepseek-v4-flash-vision-exp requests; retain enabled/high thinking for text models; update the exact request regression and contract documentation.
 - **Files changed:** src/providers/deepseek.ts, tests/providers/deepseek.test.ts, README.md, docs/mcp-contract.md
 ---
+
+## accept-complete-length-response — Complete length responses were rejected before validation
+- **Date:** 2026-09-21
+- **Error patterns:** finish_reason length, complete valid JSON, premature rejection, provider default vision behavior, strict provenance
+- **Root cause:** `parseDrafts` treated `finish_reason=length` as conclusive invalidity before inspecting content, preventing independently complete output from reaching strict extraction, schema, and provenance validation; the prior workaround also overrode provider-default Vision thinking behavior.
+- **Fix:** Allow only `stop` and `length` into the unchanged bounded extraction/schema/provenance pipeline, preserve early rejection for all other finish reasons, and omit Vision thinking overrides.
+- **Files changed:** src/providers/deepseek.ts, tests/providers/deepseek.test.ts, tests/contract/review-tool.test.ts, README.md, docs/mcp-contract.md
+---
