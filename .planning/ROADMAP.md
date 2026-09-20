@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(109 of 156 plans completed; generation 86a962db is consumed gaps evidence, and Plans 10-152 through 10-156 are the current certified-8000 recovery namespace.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(115 of 156 plans completed; generation e2547175 is consumed certified-8000 gaps evidence, and Plan 10-156 is blocked from synchronizing the non-pass.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -673,7 +673,7 @@ Plans:
 - [x] 10-154-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 149** *(gap closure; blocked on Wave 148 completion)*
-- [ ] 10-155-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
+- [x] 10-155-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
 **Wave 150** *(gap closure; only reachable from a passed Wave 149 chain)*
 - [ ] 10-156-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
@@ -705,6 +705,7 @@ Cross-cutting constraints:
 - Fix 77b82a4 keeps maxTokens at 4000 while limiting Prompt v2 to four highest-priority findings, bounding every provider-authored field/follow-up/citation count and length, and enforcing the same exported limits after decode as authenticated findings/too_big. The 10-143 certification and 10-144 image are therefore stale; debug archive 19fae6d records the diagnosis.
 - Generation 86a962dbfa4abe5f13e15796df4ebf333d7080f8f9886fa7b5bf2853f9ef4c0e is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.
 - Fix ad16455 unifies the product default and certified Compose review/proof runtime at maxTokens 8000, makes the certified value non-overridable by the host, binds maxTokens into the request fingerprint, retains the safe configuration maximum 20000, and preserves max-four bounded findings, maxRetries=0 and request budget one. The 10-148 certification and 10-149 image are stale.
+- Generation e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291 is consumed immutable authority:false gaps_found evidence after exactly one authenticated provider send ending with provider-finish-reason-length at maxTokens 8000; it may not be replayed, overwritten, upgraded or synchronized, and Plan 10-156 is blocked.
 - Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121, 10-126, 10-131, 10-136, 10-141, 10-146 and 10-151 are superseded and cannot synchronize. Only Plan 10-156 may synchronize, and only from an exact committed passed 10-152/10-153/10-154/10-155 authority chain; non-pass performs zero target writes.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
@@ -734,7 +735,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 114/156 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 115/156 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies

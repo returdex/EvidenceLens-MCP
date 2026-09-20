@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Completed 10-154-PLAN.md
-last_updated: "2026-09-20T14:13:39.114Z"
+status: blocked
+stopped_at: Completed 10-155-PLAN.md with immutable gaps_found; 10-156 blocked
+last_updated: "2026-09-20T14:17:49.008Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 184
-  completed_plans: 143
+  completed_plans: 144
   percent: 78
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 155 of 156
+Plan: 156 of 156
 
 - Phase: 10 of 11
-- Status: Plan 10-154 built and independently authenticated immutable image sha256:e137c04f140122575674c445a38b11a00de833e925901dcb8d49d336a23da1e0
-- Progress: READY generation 89fc17c9 binds the exact Plan 10-153 source and 8000-token runtime contract with one producer build and zero verifier rebuilds
-- Last activity: 105 focused provider-disabled tests and the independent build-auto proof-chain audit passed with provider/network/GitHub Actions all zero
+- Status: Plan 10-155 sealed immutable generation e2547175 as gaps_found after the sole authorized provider send
+- Progress: reservation=1, tools/call=1, provider send=1, retries/fallback/diagnostic-second-call/replay=0; terminal diagnostic provider-finish-reason-length at maxTokens 8000
+- Last activity: terminal-owner execution/proof audits passed with exit/close 0, no stream truncation, zero GitHub Actions and zero synchronization writes
 
 ## Decisions and Assumptions
 
@@ -225,10 +225,12 @@ Plan: 155 of 156
 - [Phase 10]: Keep the product configuration ceiling at 20000 while fixing the certified product/Compose/proof request value at exactly 8000 and retaining independent four-finding output bounds. — This separates safe general configuration validation from the non-overridable certified live contract.
 - [Phase 10]: Promote generation 89fc17c9336561b527485fe11c037c7a784ee877259d2e6c3c96e597c04fe9d3 as the sole READY Plan 10-154 image after one successful producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-153 source identity and certified 8000-token contract; no production or test source changed during Plan 10-154.
+- [Phase 10]: Preserve generation e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291 as immutable authority:false gaps evidence after exactly one provider send; finish_reason remained length at the certified 8000-token boundary.
+- [Phase 10]: Block Plan 10-156 synchronization; the consumed non-pass cannot be retried, replayed, overwritten or promoted.
 
 ### Blockers
 
-- PROV-01 complete credentialed Docker MCP structural proof remains unverified pending a passed Plan 10-155 live generation and Plan 10-156 synchronization.
+- PROV-01 remains open: Plan 10-155 consumed exactly one provider send and returned authenticated provider-finish-reason-length at maxTokens 8000; Plan 10-156 must not run.
 
 ## Performance Metrics
 
@@ -333,16 +335,17 @@ Plan: 155 of 156
 | Phase 10 P152 | 42min | 2 tasks | 8 files |
 | Phase 10 P153 | 4min | 2 tasks | 4 files |
 | Phase 10 P154 | 1 min | 1 tasks | 1 files |
+| Phase 10 P155 | 2 min | 1 tasks | 7 files | 2026-09-21 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T14:13:39.108Z
-- **Stopped at:** Completed 10-154-PLAN.md
+- **Last session:** 2026-09-20T14:17:49.002Z
+- **Stopped at:** Completed 10-155-PLAN.md with immutable gaps_found; 10-156 blocked
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-155 once from the exact Plan 10-154 immutable image, with at most one provider HTTP send and zero retry, fallback, alternate, replay, or diagnostic follow-up requests.
+Diagnose `provider-finish-reason-length` offline from immutable generation e2547175. Do not replay it and do not execute Plan 10-156; any further live proof requires a newly certified authority chain.
 
 ---
-*Last updated: 2026-09-21 after completing Plan 10-154 immutable image certification*
+*Last updated: 2026-09-21 after sealing Plan 10-155 immutable non-pass evidence*
