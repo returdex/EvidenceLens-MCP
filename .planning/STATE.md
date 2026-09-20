@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Completed 10-153-PLAN.md
-last_updated: "2026-09-20T14:09:01.393Z"
+stopped_at: Completed 10-154-PLAN.md
+last_updated: "2026-09-20T14:13:39.114Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 184
-  completed_plans: 142
-  percent: 77
+  completed_plans: 143
+  percent: 78
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 154 of 156
+Plan: 155 of 156
 
 - Phase: 10 of 11
-- Status: Plan 10-153 certified the exact non-overridable 8000-token product/runtime contract at reviewed source 1b2ce26
-- Progress: Plan 10-154 may build only the exact 109-blob certified source; provider authority remains unavailable until Plan 10-155
-- Last activity: 234 focused and 743 full provider-disabled tests, Compose expansion, fixed audits, TypeScript build, ASVS L1, and no-drift checks passed
+- Status: Plan 10-154 built and independently authenticated immutable image sha256:e137c04f140122575674c445a38b11a00de833e925901dcb8d49d336a23da1e0
+- Progress: READY generation 89fc17c9 binds the exact Plan 10-153 source and 8000-token runtime contract with one producer build and zero verifier rebuilds
+- Last activity: 105 focused provider-disabled tests and the independent build-auto proof-chain audit passed with provider/network/GitHub Actions all zero
 
 ## Decisions and Assumptions
 
@@ -223,6 +223,8 @@ Plan: 154 of 156
 - [Phase 10]: Certify the unified product default and Compose review/proof runtime at maxTokens 8000, non-overridable by host input and included in the request fingerprint; configuration remains bounded at 20000, output at four findings, retry at zero and request count at one.
 - [Phase 10]: Authorize Plan 10-154 only from reviewed commit 1b2ce26, its 109-blob canonical manifest, exact runtime contract, and current certifier hashes. — Exact source identity prevents build authority from drifting after certification.
 - [Phase 10]: Keep the product configuration ceiling at 20000 while fixing the certified product/Compose/proof request value at exactly 8000 and retaining independent four-finding output bounds. — This separates safe general configuration validation from the non-overridable certified live contract.
+- [Phase 10]: Promote generation 89fc17c9336561b527485fe11c037c7a784ee877259d2e6c3c96e597c04fe9d3 as the sole READY Plan 10-154 image after one successful producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve the exact Plan 10-153 source identity and certified 8000-token contract; no production or test source changed during Plan 10-154.
 
 ### Blockers
 
@@ -330,16 +332,17 @@ Plan: 154 of 156
 | Phase 10 P149 | 1min | 1 tasks | 2 files | 2026-09-17 |
 | Phase 10 P152 | 42min | 2 tasks | 8 files |
 | Phase 10 P153 | 4min | 2 tasks | 4 files |
+| Phase 10 P154 | 1 min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T14:08:40.309Z
-- **Stopped at:** Completed 10-153-PLAN.md
+- **Last session:** 2026-09-20T14:13:39.108Z
+- **Stopped at:** Completed 10-154-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-153 to hostile-test and exactly recertify the unified 8000-token product/runtime contract. No provider request is permitted before Plan 10-155.
+Execute Plan 10-155 once from the exact Plan 10-154 immutable image, with at most one provider HTTP send and zero retry, fallback, alternate, replay, or diagnostic follow-up requests.
 
 ---
-*Last updated: 2026-09-21 after completing Plan 10-152 authority rotation*
+*Last updated: 2026-09-21 after completing Plan 10-154 immutable image certification*
