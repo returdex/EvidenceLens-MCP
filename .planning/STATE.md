@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planned
-stopped_at: Completed 10-167-PLAN.md
-last_updated: "2026-09-21T18:40:19.248Z"
+stopped_at: Completed 10-168-PLAN.md
+last_updated: "2026-09-21T18:46:03.088Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 37
-  completed_plans: 35
-  percent: 95
+  completed_plans: 36
+  percent: 97
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 
 - Phase: 10 of 11
-- Status: Plans 10-162 through 10-165 and 10-167 are complete; 10-165 is immutable non-replay history and only the 10-167 through 10-170 chain may acquire current authority
-- Progress: 6 of 9 active plans complete; Plan 10-168 local immutable build is next
-- Last activity: bound authority to actual executed certifier blobs, rehearsed passed synchronization/final audit offline, and certified the exact 10-167 source tuple
+- Status: Plans 10-162 through 10-165, 10-167 and 10-168 are complete; 10-165 is immutable non-replay history and only the 10-167 through 10-170 chain may acquire current authority
+- Progress: 7 of 9 active plans complete; Plan 10-169 one-shot credentialed proof is next
+- Last activity: built generation 3b51c2fb from the exact certified Git archive once and authenticated its immutable image with zero verifier rebuilds
 
 ## Decisions and Assumptions
 
@@ -252,6 +252,8 @@ Plan: 7 of 9
 - [Phase 10]: Current proof authority uses only Plans 10-167 through 10-170; completed 10-165 evidence is historical authority:false and replay_allowed:false. — Prevents a successful but superseded paid generation from authorizing current build, live, sync or final-audit stages.
 - [Phase 10]: Authority-producing commands must execute certifier bytes identical to the reviewed Git blobs and recorded SHA-256 values. — Closes mutable working-tree and caller-selected-script substitution.
 - [Phase 10]: Opening frontmatter ends only at its first exact delimiter line; Markdown body horizontal rules remain body content. — Preserves legitimate Markdown while keeping status authority unique and fail closed.
+- [Phase 10]: Promote generation 3b51c2fbc828b97a0876cd62110c044cc7e1b6e260b9b942e63bf2e1a5198ca8 as the sole READY Plan 10-168 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
+- [Phase 10]: Preserve the exact Plan 10-167 source and certifier identities; no production or test source changed during Plan 10-168. — The build consumed only the certified Git archive.
 
 ### Blockers
 
@@ -371,16 +373,17 @@ Plan: 7 of 9
 | Phase 10 P164 | 2min | 1 tasks | 1 files |
 | Phase 10 P165 | 6min | 1 tasks | 7 files | 2026-09-22 |
 | Phase 10 P167 | 22min | 2 tasks | 16 files |
+| Phase 10 P168 | 4min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T18:40:19.243Z
-- **Stopped at:** Completed 10-167-PLAN.md
+- **Last session:** 2026-09-21T18:46:03.083Z
+- **Stopped at:** Completed 10-168-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-166 passed-only synchronization from committed authority commit `451720c`. No further provider request or image rebuild is permitted.
+Execute Plan 10-169 only under its explicit one-shot provider-request authority. The committed Plan 10-168 image is immutable and must not be rebuilt.
 
 ---
-*Last updated: 2026-09-22 after completing Plan 10-165 one-shot credentialed proof*
+*Last updated: 2026-09-22 after completing Plan 10-168 certified immutable image build*
