@@ -8,9 +8,9 @@ last_updated: "2026-09-22T00:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 192
-  completed_plans: 147
-  percent: 76
+  total_plans: 33
+  completed_plans: 29
+  percent: 88
 ---
 
 # EvidenceLens MCP — Project State
@@ -33,7 +33,7 @@ Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default rec
 - Phase: 10 of 11
 - Status: Plan 10-160 remains immutable authority:false gaps evidence; 10-161 is preserved as non-executable superseded history; new recovery plans are ready
 - Progress: commit ab911a5 removes the default max_tokens cap while preserving explicit 1..393216 configuration and bounded local validation; the new chain rotates authority before any new paid activity
-- Last activity: created credential-free Plans 10-162/163/164, a single-send Plan 10-165, and passed-only synchronization Plan 10-166; every plan has GitHub Actions budget 0
+- Last activity: archived 280 historical Phase 10 plan/summary records outside executable discovery; active work is limited to credential-free Plans 10-162/163/164, single-send Plan 10-165, and passed-only synchronization Plan 10-166
 
 ## Decisions and Assumptions
 

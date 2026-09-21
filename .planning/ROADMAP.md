@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(119 of 164 executable plans completed; generations e2547175 and bc9bd1dd are immutable authority:false evidence, 10-156-SUPERSEDED.md and 10-161-SUPERSEDED.md preserve retired plans outside executable discovery, and Plans 10-162 through 10-166 form the current provider-default recovery chain.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(0 of 5 active plans completed; 280 historical plan/summary records through 10-161 are preserved under `.planning/archive/phase-10-pre-provider-default/`; Plans 10-162 through 10-166 form the current provider-default recovery chain.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -217,9 +217,10 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 164 executable plans
+**Plans**: 5 active executable plans; 280 historical plan/summary records archived outside executable discovery
 
 Plans:
+The entries through Wave 155 below are historical index entries only. Their files are preserved in `.planning/archive/phase-10-pre-provider-default/` and must not be loaded or executed during current recovery work. Current executable discovery begins at Wave 156 / Plan 10-162.
 **Wave 1**
 - [x] 10-01-PLAN.md — Fail-closed provider startup, Docker configuration matrix, and operational contract
 
