@@ -53,7 +53,7 @@ const providerFindingDraftSchema = z.object({
   followUpChecks: z.array(z.string().min(1).max(MAX_PROVIDER_FOLLOW_UP_CHARS)).min(1).max(MAX_PROVIDER_FOLLOW_UP_CHECKS),
   evidenceIds: z.array(z.string().min(1).max(128)).min(1),
   citations: z.array(z.union([providerCitationDraftSchema, providerCitationReferenceSchema])).min(1).max(MAX_PROVIDER_CITATIONS)
-}).strict();
+});
 
 export type ProviderCitationDraft = z.infer<typeof providerCitationDraftSchema> | z.infer<typeof providerCitationReferenceSchema>;
 export type ProviderFindingDraft = z.infer<typeof providerFindingDraftSchema>;
