@@ -1,103 +1,89 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-reviewed: 2026-09-13T09:01:55Z
+reviewed: 2026-09-22T00:00:00Z
 depth: deep
-files_reviewed: 13
+files_reviewed: 27
 files_reviewed_list:
-  - package.json
+  - src/providers/config.ts
+  - src/providers/types.ts
+  - src/providers/deepseek.ts
+  - src/providers/request-budget.ts
+  - src/providers/retry.ts
+  - src/tools/review.ts
+  - src/server.ts
+  - compose.yaml
+  - scripts/proof-runtime-spec.mjs
+  - scripts/docker-review-real.mjs
+  - scripts/automatic-live-review.mjs
+  - scripts/audit-live-readiness.mjs
   - scripts/audit-live-evidence.mjs
   - scripts/audit-proof-chain.mjs
-  - scripts/automatic-live-review.mjs
-  - scripts/docker-review-real.mjs
-  - scripts/live-proof-state.mjs
   - scripts/sync-proof-state.mjs
-  - tests/scripts/audit-live-evidence.test.ts
-  - tests/scripts/audit-proof-chain.test.ts
-  - tests/scripts/automatic-live-review.test.ts
+  - tests/providers/config.test.ts
+  - tests/providers/deepseek.test.ts
+  - tests/providers/request-budget.test.ts
+  - tests/providers/retry.test.ts
+  - tests/contract/review-provider.test.ts
+  - tests/contract/review-tool.test.ts
+  - tests/scripts/proof-runtime-spec.test.ts
   - tests/scripts/docker-review-real.test.ts
-  - tests/scripts/live-proof-state.test.ts
-  - tests/scripts/sync-proof-state.test.ts
+  - tests/scripts/automatic-live-review.test.ts
+  - tests/scripts/audit-proof-chain.test.ts
+  - README.md
+  - docs/mcp-contract.md
 findings:
-  blocker: 6
-  warning: 2
+  critical: 2
+  warning: 1
   info: 0
-  total: 8
+  total: 3
 status: issues_found
 ---
 
 # Phase 10: Code Review Report
 
-**Reviewed:** 2026-09-13T09:01:55Z
+**Reviewed:** 2026-09-22T00:00:00Z
 **Depth:** deep
-**Files Reviewed:** 13
+**Files Reviewed:** 27
 **Status:** issues_found
 
 ## Summary
 
-The Phase 10 gap implementation is not shippable. The automatic commands are stubs, invariant diagnostics are disconnected from the live harness, proof-chain modes accept wrong artifact types, the final proof is not authenticated against Git/execution state, request limits are advisory, and shutdown can report success without observing `close`. The focused suite passes (192/192), but a direct check confirmed `review:auto-build` always exits 50 and a SOURCE record incorrectly passes `build` audit mode.
+The provider request itself now consistently omits `max_tokens` when no explicit value is supplied, includes an explicit value only within 1..393216, fingerprints the same optional shape, treats only `message.content` as authoritative, and validates complete `stop`/`length` JSON through schema and local provenance checks. The one-send provider capability also prevents retry/fallback sends in proof mode.
 
-## Blockers
+However, the current executable proof chain is not ready for another paid run. Its production registries still address the consumed 10-157..160 namespace, and its live preflight does not enforce the documented absence of an ambient `DEEPSEEK_MAX_TOKENS`. In addition, the upstream HTTP envelope is decoded without a byte bound. Plans 10-162 and 10-163 describe the first two corrections, but those corrections do not exist in the submitted source yet; the paid 10-165 step must remain blocked until this report is cleared.
 
-### BL-01: Advertised automatic commands are unconditional stubs
+The configured review scope also named `scripts/automatic-live-review-cli.mjs`, which does not exist. The actual CLI entrypoint is `scripts/automatic-live-review.mjs` through `package.json`; that existing file was reviewed instead and the nonexistent path is not included in `files_reviewed_list`.
 
-**File:** `scripts/automatic-live-review.mjs:123-127` (`package.json:19-20`)
-**Issue:** `main()` validates `auto-build` or `auto-live-once` and then always throws `AUTOMATIC_PREFLIGHT`. It never authenticates artifacts, creates durable state, builds, verifies, or invokes the live harness. Plans 10-28 and 10-35 stopped before Docker for this exact reason, so the planned route cannot close PROV-01.
+## Critical Issues
 
-**Fix:** Implement fixed repository-relative dispatch. Wire `auto-build` to canonical SOURCE/review authentication, exclusive build state, one-build production, and immutable verification; wire `auto-live-once` to ready-build authentication, durable consumption, and exactly one pinned harness execution. Add subprocess tests for both package commands.
+### CR-01: BLOCKER — Production proof and synchronization registries still target the consumed generation
 
-### BL-02: Diagnostic taxonomy is dead code
+**Files:** `scripts/automatic-live-review.mjs:32-43`, `scripts/sync-proof-state.mjs:23-28`, `scripts/audit-proof-chain.mjs:1-1286`
 
-**File:** `scripts/docker-review-real.mjs:92-123,539-577`
-**Issue:** The invariant map/classifier is called only by tests. No parsing, validation, lifecycle, or outer error path creates a feature vector or calls `classifyDiagnostic`; real failures remain only `[docker-review:protocol] failed`. Therefore the promised invariant/fingerprint cannot route an actual repair.
+**Issue:** The zero-argument production entrypoints still bind build/live execution to 10-158/159/160 and synchronization to 10-157..161. The 10-160 state path already represents a consumed authority-false generation. Consequently, invoking `npm run review:auto-live-once` now either fails as a replay or authenticates the obsolete source/image tuple; it cannot produce the planned 10-165 evidence. Likewise, `sync-proof-state.mjs recover` can only resolve the obsolete 10-161 claim/journal. Plan 10-162 promises to rotate these registries, but planning text is not executable enforcement.
 
-**Fix:** Produce typed canonical `{path,code}` failures at allowlisted throw sites, classify once at the outer boundary, and persist only the allowlisted diagnostic separately from the public error. Add a `runReviewHarness` transcript test that verifies the retained diagnostic rather than directly unit-testing the classifier.
+**Fix:** Before any credential read or provider call, rotate every fixed registry and every exact-order audit mode together to the 10-162 forensic archive, 10-163 SOURCE/REVIEW/SECURITY, 10-164 BUILD, 10-165 state/terminal/live tuple, and 10-166 claim/journal. Add tests that invoke both zero-argument production commands and assert the exact new paths, reject every old/mixed path, and prove replay failure occurs before credential access.
 
-### BL-03: Proof-chain modes accept wrong schemas and counts
+### CR-02: BLOCKER — Live preflight does not reject an ambient explicit token cap
 
-**File:** `scripts/audit-proof-chain.mjs:149-154`
-**Issue:** `build`, `diagnostic`, `repair`, `proof`, and `proof-preflight` accept any number of individually valid records sharing identity. They do not enforce mode-specific schema, order, or cardinality. Demonstrably, `node scripts/audit-proof-chain.mjs build 10-34-SOURCE.json` passes.
+**Files:** `scripts/docker-review-real.mjs:196-209`, `scripts/docker-review-real.mjs:540-556`, `scripts/automatic-live-review.mjs:160-166`
 
-**Fix:** Define an exact schema/path sequence and cardinality for every mode, authenticate committed authority inputs, and add subprocess rejection tests for wrong, missing, extra, reordered, and duplicate records.
+**Issue:** `liveProofPreflight()` validates retries and timeout but never checks `DEEPSEEK_MAX_TOKENS`. It then returns `childEnv: { ...baseEnvironment }`, preserving any ambient explicit cap. `runStatefulAutomaticLive()` also begins from `process.env`. Static Compose normalization rejects a cap in the resolved service, but that is not equivalent to rejecting the runtime input that the 10-165 plan and documentation claim is absent. The next paid generation could therefore run under a process containing an unapproved explicit cap while the evidence chain asserts provider-default output behavior; even if the current Compose service happens not to forward that key, the proof does not authenticate that safety property and a later Compose change could silently activate it.
 
-### BL-04: A self-asserted JSON proof can close PROV-01
-
-**File:** `scripts/audit-proof-chain.mjs:58-67,149-154`; `scripts/audit-live-evidence.mjs:18-34`; `scripts/sync-proof-state.mjs:109-117`
-**Issue:** Final validators check only key shapes, hex formatting, outcome, and counts. They never call `auditGitIdentity`, bind to diagnostic/build/repair artifacts, or prove a consumed live generation produced the result. The synchronizer then treats any owner-only canonical proof file as sole authority. A fabricated ten-key passed object can therefore switch both phase reports and REQUIREMENTS to passed.
-
-**Fix:** Certify proof against exact committed SOURCE/reviews, final build, diagnostic, repair set, immutable generation, and durable consumed result/request record. Require synchronization to consume that committed chain-certified proof, not merely a mode-0600 JSON file.
-
-### BL-05: Request limits are delegated to an untrusted callback
-
-**File:** `scripts/automatic-live-review.mjs:81-93,96-120`
-**Issue:** The live functions only pass a controls object to `spawnOnce`; they do not constrain the actual process, count tool/provider calls, disable retry themselves, or bind the callback to `runReviewHarness`. A callback can ignore the object and make multiple requests while durable state records at most one. Mock tests voluntarily comply and do not prove enforcement.
-
-**Fix:** Construct the pinned Docker child and bounded MCP operation inside the reviewed executor, or expose a capability that atomically consumes the sole request token. Reject a second attempted call before it occurs and test with a deliberately noncompliant adapter.
-
-### BL-06: Success can be emitted without a child `close` event
-
-**File:** `scripts/docker-review-real.mjs:476-522`; `tests/scripts/docker-review-real.test.ts:473-482`
-**Issue:** If listeners attach after `exitCode`/`signalCode` becomes non-null, `waitForChildClose` immediately settles using those properties and never observes `close`. The test blesses this by setting only `exitCode=0`. Success may therefore be printed before stdio teardown or a later stream failure, violating the clean-close invariant.
-
-**Fix:** Capture `close` evidence from child creation onward and require actual consistent exit/close metadata. Never infer close from `exitCode`. Test exit-before-listener/close-later, missing-close timeout, mismatched metadata, and late stream errors.
+**Fix:** Make the production live preflight fail before reservation/credential access whenever `DEEPSEEK_MAX_TOKENS` is an own property of the supplied environment. Construct `childEnv` from an explicit allowlist (or explicitly remove the key after rejecting it), and independently assert the resolved review environment has no such key. Add production-path tests for hostile process environment, project `.env`/Compose resolution, and resolved-service injection; each must prove zero Docker spawn and zero provider send.
 
 ## Warnings
 
-### WR-01: Provider request count records intent, not observation
+### WR-01: WARNING — Upstream response decoding is unbounded before content validation
 
-**File:** `scripts/automatic-live-review.mjs:108-115`
-**Issue:** The count becomes one before spawn and is hard-coded to one at terminal transition even when spawn fails before sending a request. This is conservative for replay safety but inaccurate as cost evidence.
+**File:** `src/providers/deepseek.ts:300-304`
 
-**Fix:** Store separate monotonic reservation and observed-request fields. Reserve before spawn, update observation only at the guarded request boundary, and never let uncertainty authorize another attempt.
+**Issue:** The adapter calls `response.json()` before applying the 1,000,000-character limit to `message.content`. That causes the entire response envelope—including ignored fields such as `reasoning_content`, extra choices, usage extensions, or an oversized error-shaped payload—to be buffered and parsed without a byte ceiling. The later content check does not protect this boundary. A malformed or unexpectedly large provider response can therefore consume unbounded memory or fail outside the intended bounded diagnostic path, and this locally detectable gap is not covered by the current response tests.
 
-### WR-02: Final status audit is not scoped to unique frontmatter
-
-**File:** `scripts/audit-live-evidence.mjs:28-33`
-**Issue:** Phase status uses the first `^status:` anywhere, not exactly one YAML-frontmatter field. Duplicate checklist/trace rows are also accepted. Body-only or contradictory status text can satisfy the audit.
-
-**Fix:** Parse one frontmatter block with one status key and require exactly one PROV-01 checklist and trace row. Add duplicate, missing-frontmatter, body-only, and conflicting-state tests.
+**Fix:** Read the response body through a bounded byte reader first, reject overflow with a content-free provider diagnostic, decode UTF-8 fatally, then `JSON.parse` the bounded string. Set a deliberate envelope limit that accommodates the largest supported explicit output plus bounded metadata, and add tests for oversized `reasoning_content`, oversized ignored choices/fields, multibyte boundary cases, malformed UTF-8, and a valid response exactly at the boundary.
 
 ---
 
-_Reviewed: 2026-09-13T09:01:55Z_
+_Reviewed: 2026-09-22T00:00:00Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: deep_
