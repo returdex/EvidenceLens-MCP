@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 160 executable plans
+**Plans**: 164 executable plans
 
 Plans:
 **Wave 1**
@@ -690,8 +690,23 @@ Plans:
 **Wave 154** *(gap closure; blocked on Wave 153 completion)*
 - [x] 10-160-PLAN.md — Run one fresh non-replay generation with at most one provider HTTP send
 
-**Wave 155** *(gap closure; only reachable from a passed Wave 154 chain)*
-- [ ] 10-161-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+**Wave 155** *(retired; Wave 154 was a non-pass)*
+- [x] 10-161-SUPERSEDED.md — Preserved unexecuted synchronization plan; excluded from executable discovery
+
+**Wave 156** *(gap closure; blocked on immutable 10-160 non-pass)*
+- [ ] 10-162-PLAN.md — Archive 10-160, retire 10-161 and rotate all fixed authority registries
+
+**Wave 157** *(gap closure; blocked on Wave 156 completion)*
+- [ ] 10-163-PLAN.md — Offline recertification of provider-default max_tokens omission and exact source authority
+
+**Wave 158** *(gap closure; blocked on Wave 157 completion)*
+- [ ] 10-164-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
+
+**Wave 159** *(gap closure; blocked on Wave 158 completion; at most one paid request)*
+- [ ] 10-165-PLAN.md — Run one fresh non-replay provider-default generation with one-send ceiling
+
+**Wave 160** *(gap closure; only reachable from a passed Wave 159 chain)*
+- [ ] 10-166-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -699,7 +714,8 @@ Cross-cutting constraints:
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-161 have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
+- Plans 10-38 through 10-166 have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
+- The default provider request omits `max_tokens`; only explicit user configuration in the validated range 1..393216 may serialize it. No arbitrary output-token preset is part of the certified chain.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
 - Generation 30f0d9b28c13132e1a79ce6a3afe0f1a9fdd457867e47e67ded8c3a547b83e73 is consumed immutable gaps_found evidence after one authenticated provider send; it may not be replayed, overwritten, upgraded or synchronized.

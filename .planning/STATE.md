@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: blocked
-stopped_at: Completed 10-160-PLAN.md with immutable gaps_found; Plan 10-161 blocked
-last_updated: "2026-09-20T16:23:05.464Z"
+status: planned
+stopped_at: Gap-closure Plans 10-162 through 10-166 created; 10-161 retired unexecuted
+last_updated: "2026-09-22T00:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 188
+  total_plans: 192
   completed_plans: 148
-  percent: 79
+  percent: 77
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (Fail-Closed Provider Startup and Credentialed MCP E2E) — EXECUTING
-Plan: 160 completed; conditional Plan 10-161 blocked by the 10-160 non-pass
+Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default recovery chain
 
 - Phase: 10 of 11
-- Status: Plan 10-160 sealed a fresh credentialed generation as immutable authority:false gaps evidence; Plan 10-161 is blocked
-- Progress: generation bc9bd1dd consumed reservation/tools-call/provider-send counts 1/1/1 and returned the authenticated content-free diagnostic provider-json-object-unbalanced
-- Last activity: one exact-image live Docker MCP run, one provider send, zero retries/replay/GitHub Actions/synchronization writes, followed by passing local proof audits
+- Status: Plan 10-160 remains immutable authority:false gaps evidence; 10-161 is preserved as non-executable superseded history; new recovery plans are ready
+- Progress: commit ab911a5 removes the default max_tokens cap while preserving explicit 1..393216 configuration and bounded local validation; the new chain rotates authority before any new paid activity
+- Last activity: created credential-free Plans 10-162/163/164, a single-send Plan 10-165, and passed-only synchronization Plan 10-166; every plan has GitHub Actions budget 0
 
 ## Decisions and Assumptions
 
@@ -234,10 +234,13 @@ Plan: 160 completed; conditional Plan 10-161 blocked by the 10-160 non-pass
 - [Phase 10]: Promote generation 778344e9bcbea6190bf4b7ed6371d8345acf2187a183738509a06d749f38b692 as the sole READY Plan 10-159 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-158 source identity and complete stop/length acceptance contract; no production or test source changed during Plan 10-159.
 - [Phase 10]: Generation bc9bd1dd remains immutable authority:false after exactly one provider send returned provider-json-object-unbalanced; Plan 10-161 is blocked and the generation cannot be replayed or synchronized.
+- [Phase 10]: Preserve 10-161 byte-for-byte as 10-161-SUPERSEDED.md and exclude it from executable discovery; only Plans 10-162 through 10-166 can acquire current authority.
+- [Phase 10]: The certified default provider request omits max_tokens; explicit maxTokens remains valid only in 1..393216, and no arbitrary output-token preset may be introduced.
+- [Phase 10]: Plans 10-162/163/164 are credential-free preparation, Plan 10-165 permits at most one paid provider send with maxRetries=0 and no replay/fallback, and Plan 10-166 is reachable only from a passed committed chain.
 
 ### Blockers
 
-- PROV-01 remains open: Plan 10-160 consumed one provider send and sealed provider-json-object-unbalanced as authority:false; Plan 10-161 is blocked.
+- PROV-01 remains open: Plan 10-160 is immutable consumed authority:false evidence; Plans 10-162 through 10-166 must complete, and 10-166 remains unreachable unless 10-165 passes.
 
 ## Performance Metrics
 
@@ -351,12 +354,12 @@ Plan: 160 completed; conditional Plan 10-161 blocked by the 10-160 non-pass
 ## Session Continuity
 
 - **Last session:** 2026-09-20T16:23:05.458Z
-- **Stopped at:** Completed 10-160-PLAN.md with immutable gaps_found; Plan 10-161 blocked
+- **Stopped at:** Planned additive gap chain 10-162 through 10-166; ready to execute 10-162
 - **Resume file:** None
 
 ## Next Action
 
-Do not execute Plan 10-161. Diagnose `provider-json-object-unbalanced` offline and create a newly certified/build/live gap chain if another provider request is needed; never replay generation `bc9bd1dd`.
+Execute `$gsd-execute-phase 10 --gaps-only`. The executor must begin with credential-free Plan 10-162, never discover or execute 10-161-SUPERSEDED.md, and stop before 10-166 unless 10-165 is an authenticated pass.
 
 ---
-*Last updated: 2026-09-21 after sealing Plan 10-160 immutable live non-pass evidence*
+*Last updated: 2026-09-22 after planning the provider-default recovery chain*
