@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(2 of 6 active plans completed; 280 historical plan/summary records through 10-161 are preserved under `.planning/archive/phase-10-pre-provider-default/`; Plans 10-162, 10-162.1, and 10-163 through 10-166 form the current provider-default recovery chain.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(3 of 6 active plans completed; 280 historical plan/summary records through 10-161 are preserved under `.planning/archive/phase-10-pre-provider-default/`; Plans 10-162, 10-162.1, and 10-163 through 10-166 form the current provider-default recovery chain.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -701,7 +701,7 @@ The entries through Wave 155 below are historical index entries only. Their file
 - [x] 10-162.1-PLAN.md — Add the canonical owner-only zero-effect disconfirmation evidence generator required by Plan 10-163
 
 **Wave 157** *(gap closure; blocked on Wave 156.1 completion)*
-- [ ] 10-163-PLAN.md — Offline recertification of provider-default max_tokens omission and exact source authority
+- [x] 10-163-PLAN.md — Offline recertification of provider-default max_tokens omission and exact source authority
 
 **Wave 158** *(gap closure; blocked on Wave 157 completion)*
 - [ ] 10-164-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
@@ -771,7 +771,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 2/6 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 3/6 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
@@ -782,4 +782,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-21 after excluding retired Plan 10-156 from executable discovery and planning the complete-length recovery chain through Plan 161*
+*Last updated: 2026-09-22 after completing Plan 10-163 exact-source offline certification*
