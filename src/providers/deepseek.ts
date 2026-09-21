@@ -33,6 +33,7 @@ export interface DeepSeekProofOptions {
 
 const MAX_VISUAL_BYTES = 8_000_000;
 const MAX_REQUEST_BYTES = 24_000_000;
+export const MAX_PROVIDER_RESPONSE_BYTES = 4_194_304;
 
 function canonical(value: unknown): string {
   return JSON.stringify(value);
@@ -121,6 +122,36 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
 function invalidResponse(diagnostics: DiagnosticSink | undefined, path: readonly (string | number)[], code: string): never {
   diagnostics?.emit({ path, code });
   throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
+}
+
+async function readBoundedJson(response: Response, diagnostics?: DiagnosticSink): Promise<unknown> {
+  const reader = response.body?.getReader();
+  if (reader === undefined) invalidResponse(diagnostics, ["provider", "http", "body"], "invalid_type");
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_PROVIDER_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        invalidResponse(diagnostics, ["provider", "http", "bytes"], "too_big");
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    if (error instanceof ProviderError) throw error;
+    invalidResponse(diagnostics, ["provider", "http", "body"], "invalid_format");
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  let text: string;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
+  catch { invalidResponse(diagnostics, ["provider", "http", "utf8"], "invalid_format"); }
+  try { return JSON.parse(text); }
+  catch { invalidResponse(diagnostics, ["provider", "http", "json"], "invalid_format"); }
 }
 
 function findingsFromRoot(value: unknown): ProviderFindingDraft[] | undefined {
@@ -297,8 +328,7 @@ export function createDeepSeekProvider(
             return transport.fetch(`${config.baseUrl}/chat/completions`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` }, body: JSON.stringify(body), signal });
           },
         });
-        let decoded: unknown;
-        try { decoded = await response.json(); } catch { invalidResponse(diagnostics, ["provider", "http", "json"], "invalid_format"); }
+        const decoded = await readBoundedJson(response, diagnostics);
         const findings: ReviewFinding[] = validateProviderFindings(
           normalizedFromProviderEvidence(request.evidence),
           parseDrafts(decoded, diagnostics),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekTransport } from "../../src/providers/deepseek.js";
+import { createDeepSeekProvider, computeProviderInputFingerprint, MAX_PROVIDER_RESPONSE_BYTES, type DeepSeekTransport } from "../../src/providers/deepseek.js";
 import { serializeProviderError } from "../../src/providers/errors.js";
 import {
   MAX_PROVIDER_CITATIONS,
@@ -28,6 +28,17 @@ const draft = { findings: [{ id: "provider-1", type: "omission", severity: "medi
 function transportFor(body: unknown, status = 200): DeepSeekTransport & { calls: RequestInit[] } {
   const calls: RequestInit[] = [];
   return { calls, fetch: async (_input, init) => { calls.push(init); return new Response(status === 200 ? JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(body) } }] }) : "upstream secret body", { status, headers: { "content-type": "application/json" } }); } };
+}
+
+function paddedEnvelope(size: number, pad = "x"): Uint8Array {
+  const envelope = { ignored: "", choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ findings: [] }) } }] };
+  const empty = JSON.stringify(envelope);
+  const padBytes = new TextEncoder().encode(pad).byteLength;
+  const count = Math.floor((size - Buffer.byteLength(empty)) / padBytes);
+  envelope.ignored = pad.repeat(count);
+  let text = JSON.stringify(envelope);
+  text += " ".repeat(size - Buffer.byteLength(text));
+  return new TextEncoder().encode(text);
 }
 
 const config = { apiKey: "secret-key", baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro" as const, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 };
@@ -161,6 +172,33 @@ describe("DeepSeek provider adapter", () => {
 
     const sent = JSON.parse(String(transport.calls[0]!.body)) as Record<string, unknown>;
     expect(sent).not.toHaveProperty("max_tokens");
+  });
+
+  it("accepts a valid multibyte response exactly at the bounded byte limit", async () => {
+    const bytes = paddedEnvelope(MAX_PROVIDER_RESPONSE_BYTES, "界");
+    expect(bytes.byteLength).toBe(MAX_PROVIDER_RESPONSE_BYTES);
+    const transport: DeepSeekTransport = { fetch: async () => new Response(bytes) };
+    await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek" });
+  });
+
+  it.each([
+    ["oversized ignored field", paddedEnvelope(MAX_PROVIDER_RESPONSE_BYTES + 1)],
+    ["oversized reasoning content", new TextEncoder().encode(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ findings: [] }), reasoning_content: "x".repeat(MAX_PROVIDER_RESPONSE_BYTES) } }] }))],
+    ["oversized ignored choice", new TextEncoder().encode(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ findings: [] }) } }, { ignored: "x".repeat(MAX_PROVIDER_RESPONSE_BYTES) }] }))]
+  ])("rejects %s before parsing or inspecting provider content", async (_name, bytes) => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = { fetch: async () => new Response(bytes) };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "http", "bytes"], code: "too_big" }]);
+  });
+
+  it("rejects malformed UTF-8 with a stable content-free diagnostic", async () => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = { fetch: async () => new Response(Uint8Array.from([0x7b, 0xff, 0x7d])) };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "http", "utf8"], code: "invalid_format" }]);
   });
 
   it("preserves provider-default thinking behavior for the bounded vision JSON request", async () => {
@@ -446,7 +484,7 @@ describe("DeepSeek provider adapter", () => {
     }
 
     const diagnostic = recordingSink();
-    const transport: DeepSeekTransport = { fetch: async () => ({ ok: true, json: async () => { throw new Error("private-body"); } }) as Response };
+    const transport: DeepSeekTransport = { fetch: async () => new Response("{") };
     await expect(createDeepSeekProvider(config, transport, diagnostic).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
     expect(diagnostic.features).toEqual([{ path: ["provider", "http", "json"], code: "invalid_format" }]);
   });
