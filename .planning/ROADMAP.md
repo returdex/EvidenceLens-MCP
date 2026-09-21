@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(3 of 6 active plans completed; 280 historical plan/summary records through 10-161 are preserved under `.planning/archive/phase-10-pre-provider-default/`; Plans 10-162, 10-162.1, and 10-163 through 10-166 form the current provider-default recovery chain.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(5 of 6 active plans completed; Plan 10-165 passed with one authenticated provider request, and only Plan 10-166 synchronization remains.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -707,7 +707,7 @@ The entries through Wave 155 below are historical index entries only. Their file
 - [x] 10-164-PLAN.md — Build and authenticate a fresh exact-source immutable local Docker image
 
 **Wave 159** *(gap closure; blocked on Wave 158 completion; at most one paid request)*
-- [ ] 10-165-PLAN.md — Run one fresh non-replay provider-default generation with one-send ceiling
+- [x] 10-165-PLAN.md — Run one fresh non-replay provider-default generation with one-send ceiling
 
 **Wave 160** *(gap closure; only reachable from a passed Wave 159 chain)*
 - [ ] 10-166-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
@@ -771,7 +771,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 4/6 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 5/6 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
@@ -782,4 +782,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-22 after completing Plan 10-163 exact-source offline certification*
+*Last updated: 2026-09-22 after completing Plan 10-165 one-shot credentialed proof*

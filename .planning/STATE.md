@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 status: planned
 stopped_at: Completed 10-164-PLAN.md
-last_updated: "2026-09-21T17:39:39.568Z"
+last_updated: "2026-09-21T17:47:07.333Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 34
-  completed_plans: 33
+  total_plans: 35
+  completed_plans: 34
   percent: 97
 ---
 
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 
 - Phase: 10 of 11
-- Status: Plans 10-162, 10-162.1, and 10-163 completed offline; the consumed generation remains immutable non-authority and one exact source tuple now authorizes Plan 10-164
-- Progress: 3 of 6 active recovery plans complete; Plan 10-164 local immutable-image build is next
-- Last activity: certified the exact 109-blob provider-default source identity with 383 focused and 789 complete offline tests plus clean deep and ASVS reviews
+- Status: Plans 10-162 through 10-165 are complete; the single provider-default live generation passed with authenticated one-send evidence
+- Progress: 5 of 6 active recovery plans complete; Plan 10-166 passed-only synchronization is next
+- Last activity: sealed and committed one successful Docker MCP provider request covering four fixtures and four findings with clean exit and close
 
 ## Decisions and Assumptions
 
@@ -244,10 +244,12 @@ Plan: 5 of 6
 - [Phase 10]: Treat provider finding validation as a bounded interoperability and local-provenance contract, not as a judgment that provider-authored conclusions are substantively true. — The downstream consumer decides whether to accept provider-authored substantive conclusions.
 - [Phase 10]: Promote generation 0cd325ba028813cb93aa86c5fe7ece14711d4655c2765d09d761b4b2a09ff4a5 as the sole READY Plan 10-164 image after one successful local producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-163 source identity; no production or test source changed during Plan 10-164.
+- [Phase 10]: Generation e7dc8262990d684d8e689e8125b668d198b4c9b8f9ca8f21197ff99fb9f1d2b0 is the sole Plan 10-165 live generation and cannot be replayed.
+- [Phase 10]: The authenticated passed proof authorizes Plan 10-166 synchronization; requirement closure remains deferred until that passed-only synchronization completes.
 
 ### Blockers
 
-- PROV-01 remains open: Plan 10-160 is immutable consumed authority:false evidence; Plans 10-162 through 10-166 must complete, and 10-166 remains unreachable unless 10-165 passes.
+- PROV-01 remains open until Plan 10-166 synchronizes the committed passed Plan 10-165 chain; Plan 10-166 is now reachable.
 
 ## Performance Metrics
 
@@ -361,16 +363,17 @@ Plan: 5 of 6
 | Phase 10 P162.1 | 8min | 1 tasks | 3 files |
 | Phase 10 P163 | 5min | 2 tasks | 4 files |
 | Phase 10 P164 | 2min | 1 tasks | 1 files |
+| Phase 10 P165 | 6min | 1 tasks | 7 files | 2026-09-22 |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T17:39:39.563Z
-- **Stopped at:** Completed 10-164-PLAN.md
+- **Last session:** 2026-09-21T17:47:07.328Z
+- **Stopped at:** Completed 10-165-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute local-only Plan 10-164 next from the exact Plan 10-163 source tuple. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
+Execute Plan 10-166 passed-only synchronization from committed authority commit `451720c`. No further provider request or image rebuild is permitted.
 
 ---
-*Last updated: 2026-09-22 after completing Plan 10-163 exact-source offline certification*
+*Last updated: 2026-09-22 after completing Plan 10-165 one-shot credentialed proof*
