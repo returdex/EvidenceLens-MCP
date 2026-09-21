@@ -149,6 +149,9 @@ describe("DeepSeek provider adapter", () => {
     expect(prompt.promptVersion).toBe(PROVIDER_PROMPT_VERSION);
     expect(prompt.instruction).toContain(`at most ${MAX_PROVIDER_FINDINGS} highest-priority distinct findings`);
     expect(prompt.instruction).toContain(`at most ${MAX_PROVIDER_PROSE_CHARS} characters`);
+    expect(prompt.instruction).toContain("exactly these required keys: id, type, severity, confidence, title, summary, observation, interpretation, followUpChecks, evidenceIds, citations");
+    expect(prompt.instruction).toContain(`between 1 and ${MAX_PROVIDER_FOLLOW_UP_CHECKS} non-empty strings`);
+    expect(prompt.instruction).toContain("evidenceIds must be a non-empty array exactly equal to the sorted citation evidenceId values");
     expect(JSON.stringify(sent)).toContain("data:image/png;base64,iVBORw0KGgo=");
     expect(sent).toMatchObject({ thinking: { type: "enabled" }, reasoning_effort: "high" });
     expect(init.method).toBe("POST");
@@ -333,6 +336,23 @@ describe("DeepSeek provider adapter", () => {
     };
     await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
     expect(diagnostics.features).toEqual([feature]);
+  });
+
+  it.each([
+    ["missing required field", { summary: undefined }, { path: ["findings", "text"], code: "too_big" }],
+    ["empty follow-up list", { followUpChecks: [] }, { path: ["findings", "followUpChecks"], code: "too_small" }],
+    ["missing evidence ids", { evidenceIds: undefined }, { path: ["findings", "evidenceIds"], code: "custom" }],
+    ["empty citations", { citations: [] }, { path: ["findings", "citations"], code: "custom" }],
+    ["provider-added key", { rationale: "private provider-authored text" }, { path: ["findings", "keyset"], code: "unrecognized_keys" }],
+    ["unknown finding type", { type: "formatting" }, { path: ["findings", "type"], code: "invalid_value" }]
+  ] as const)("classifies synthetic strict-schema mismatch without retaining content: %s", async (_name, changes, feature) => {
+    const finding = { ...draft.findings[0], ...changes } as Record<string, unknown>;
+    for (const key of Object.keys(finding)) if (finding[key] === undefined) delete finding[key];
+    const diagnostics = recordingSink();
+    await expect(createDeepSeekProvider(config, transportFor({ findings: [finding] }), diagnostics).review(request))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE", message: "Provider response is invalid" });
+    expect(diagnostics.features).toEqual([feature]);
+    expect(JSON.stringify(diagnostics.features)).not.toMatch(/private provider-authored text|rationale|formatting/iu);
   });
 
   it.each([

@@ -9,7 +9,7 @@ import {
 } from "../contracts/review.js";
 import { DEEPSEEK_MODELS } from "./config.js";
 
-export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v2" as const;
+export const PROVIDER_PROMPT_VERSION = "evidencelens-review-v3" as const;
 export const MAX_PROVIDER_FINDINGS = 4;
 export const MAX_PROVIDER_TITLE_CHARS = 120;
 export const MAX_PROVIDER_PROSE_CHARS = 360;

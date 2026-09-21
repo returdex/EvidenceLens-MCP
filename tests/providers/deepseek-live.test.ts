@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { hasProviderCredentialSource, loadProviderConfig } from "../../src/providers/config.js";
 import { createDeepSeekProvider, computeProviderInputFingerprint } from "../../src/providers/deepseek.js";
+import type { DiagnosticFeature, DiagnosticSink } from "../../src/providers/diagnostics.js";
 import { PROVIDER_PROMPT_VERSION, type ProviderReviewRequest } from "../../src/providers/types.js";
 
 const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
@@ -33,7 +34,17 @@ describe("DeepSeek live structural review", () => {
       }
     } satisfies Omit<ProviderReviewRequest, "inputFingerprint">;
     const request: ProviderReviewRequest = { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
-    const result = await createDeepSeekProvider(config).review(request);
+    let feature: DiagnosticFeature | undefined;
+    const diagnostics: DiagnosticSink = { emit(value) { feature ??= value; return true; } };
+    let result;
+    try {
+      result = await createDeepSeekProvider(config, undefined, diagnostics).review(request);
+    } catch {
+      const safe = feature === undefined
+        ? "unavailable"
+        : `${feature.path.map(String).join(".")}:${feature.code}`;
+      throw new Error(`DeepSeek live review failed with content-free diagnostic ${safe}`);
+    }
 
     expect(result.provider).toBe("deepseek");
     expect(result.model).toBe(model);
