@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planned
-stopped_at: Completed 10-169-PLAN.md
-last_updated: "2026-09-21T18:53:49.970Z"
+status: ready_for_verification
+stopped_at: Completed 10-170-PLAN.md
+last_updated: "2026-09-21T19:06:47.821Z"
 progress:
   total_phases: 11
-  completed_phases: 9
-  total_plans: 37
-  completed_plans: 37
+  completed_phases: 10
+  total_plans: 38
+  completed_plans: 38
   percent: 100
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 ## Current Position
 
-Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — COMPLETE
 Plan: 9 of 9
 
 - Phase: 10 of 11
-- Status: Plans 10-162 through 10-165, 10-167 and 10-168 are complete; 10-165 is immutable non-replay history and only the 10-167 through 10-170 chain may acquire current authority
-- Progress: 7 of 9 active plans complete; Plan 10-169 one-shot credentialed proof is next
-- Last activity: built generation 3b51c2fb from the exact certified Git archive once and authenticated its immutable image with zero verifier rebuilds
+- Status: All 9 active Phase 10 plans are complete; the exact committed 10-167/168/169 chain was synchronized and independently audited by Plan 10-170
+- Progress: 9 of 9 active plans complete; Phase 10 is ready for verification
+- Last activity: committed the completed 10-170 transaction and passed the 11-member final audit, live-evidence audit, 794 offline tests, build and static Compose validation
 
 ## Decisions and Assumptions
 
@@ -256,10 +256,12 @@ Plan: 9 of 9
 - [Phase 10]: Preserve the exact Plan 10-167 source and certifier identities; no production or test source changed during Plan 10-168. — The build consumed only the certified Git archive.
 - [Phase 10]: Generation 7d707d4781e33b41ecf5bab21f4f406e5c34b65222604e3b03d58ef44376b57a is the sole Plan 10-169 live generation and cannot be replayed. — The fixed coordinator consumed one exclusive generation and retry or replay is prohibited.
 - [Phase 10]: The passed result used exactly one reservation, tools/call, provider send and authenticated receipt against the immutable Plan 10-168 image. — The sealed counters and terminal receipt prove the one-request budget and immutable-image continuity.
+- [Phase 10]: Only the committed passed 10-167/168/169 tuple and its actually executed certifier blobs authorize the three 10-170 status changes. — Preserves unique passed-only synchronization authority.
+- [Phase 10]: Routine local regression-harness maintenance does not restart the paid proof sequence and is not represented as part of the already-built image; GitHub Actions remain separately quota-sensitive. — Separates unrestricted local test maintenance from quota-sensitive external execution.
 
 ### Blockers
 
-- PROV-01 remains open until Plan 10-170 synchronizes a newly committed passed 10-167/168/169 chain. Plan 10-165 is historical non-replay evidence and Plan 10-166 is retired.
+None.
 
 ## Performance Metrics
 
@@ -377,16 +379,17 @@ Plan: 9 of 9
 | Phase 10 P167 | 22min | 2 tasks | 16 files |
 | Phase 10 P168 | 4min | 1 tasks | 1 files |
 | Phase 10 P169 | 5min | 1 tasks | 7 files |
+| Phase 10 P170 | 8min | 2 tasks | 7 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T18:53:49.965Z
-- **Stopped at:** Completed 10-169-PLAN.md
+- **Last session:** 2026-09-21T19:06:47.816Z
+- **Stopped at:** Completed 10-170-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute Plan 10-169 only under its explicit one-shot provider-request authority. The committed Plan 10-168 image is immutable and must not be rebuilt.
+Verify completed Phase 10 and prepare milestone completion; no provider replay or GitHub Actions run is required.
 
 ---
-*Last updated: 2026-09-22 after completing Plan 10-168 certified immutable image build*
+*Last updated: 2026-09-22 after completing Plan 10-170 passed-chain synchronization and final audit*
