@@ -16,7 +16,7 @@ import { createDeterministicReviewAnalyzer, type ReviewAnalyzer } from "../revie
 import { validateReviewRoles } from "../review/roles.js";
 import { computeProviderInputFingerprint } from "../providers/deepseek.js";
 import { isProviderReviewResultEnvelope, PROVIDER_PROMPT_VERSION, providerInferenceSettingsSchema, providerReviewResultSchema, type ProviderEvidenceItem, type ProviderReviewRequest, type ProviderReviewResult, type ReviewProvider } from "../providers/types.js";
-import { DEFAULT_PROVIDER_MAX_TOKENS, type ProviderConfig } from "../providers/config.js";
+import type { ProviderConfig } from "../providers/config.js";
 import { ProviderError } from "../providers/errors.js";
 import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js";
 import type { DiagnosticSink } from "../providers/diagnostics.js";
@@ -40,11 +40,10 @@ export interface ReviewHandlerOptions {
   onRequestSettled?: () => void;
 }
 
-const DEFAULT_PROVIDER_INFERENCE = {
+const DEFAULT_PROVIDER_INFERENCE: Pick<ProviderConfig, "model" | "temperature" | "maxTokens"> = {
   model: "deepseek-v4-pro",
-  temperature: 0.2,
-  maxTokens: DEFAULT_PROVIDER_MAX_TOKENS
-} as const;
+  temperature: 0.2
+};
 
 function providerEvidence(analysis: ReturnType<typeof buildReviewAnalysisInput>): ProviderEvidenceItem[] {
   const normalizedById = new Map(analysis.normalizedEvidence.map((evidence) => [evidence.source.id, evidence]));
@@ -105,7 +104,7 @@ function providerRequest(
   const inference = providerInferenceSettingsSchema.parse({
     model: config.model,
     temperature: config.temperature,
-    maxTokens: config.maxTokens
+    ...(config.maxTokens === undefined ? {} : { maxTokens: config.maxTokens })
   });
   const withoutFingerprint = structuredClone({
     evidence: providerEvidence(analysis),

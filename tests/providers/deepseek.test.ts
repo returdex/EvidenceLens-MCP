@@ -148,6 +148,21 @@ describe("DeepSeek provider adapter", () => {
     expect(result.modelFindings).toHaveLength(1);
   });
 
+  it("omits max_tokens when no explicit output limit is configured", async () => {
+    const transport = transportFor({ findings: [] });
+    const inference = { model: request.inference.model, temperature: request.inference.temperature };
+    const withoutFingerprint = { ...requestWithoutFingerprint, inference };
+    const providerRequest: ProviderReviewRequest = {
+      ...withoutFingerprint,
+      inputFingerprint: computeProviderInputFingerprint(withoutFingerprint)
+    };
+
+    await createDeepSeekProvider({ ...config, maxTokens: undefined }, transport).review(providerRequest);
+
+    const sent = JSON.parse(String(transport.calls[0]!.body)) as Record<string, unknown>;
+    expect(sent).not.toHaveProperty("max_tokens");
+  });
+
   it("preserves provider-default thinking behavior for the bounded vision JSON request", async () => {
     const visualRequestWithoutFingerprint = {
       ...requestWithoutFingerprint,

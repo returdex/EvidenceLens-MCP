@@ -3,8 +3,7 @@ import { ProviderError } from "./errors.js";
 
 export const PROVIDER_CONFIG_FILE = ".evidencelens.local.json" as const;
 export const DEEPSEEK_MODELS = ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v4-flash-vision-exp"] as const;
-export const DEFAULT_PROVIDER_MAX_TOKENS = 20_000 as const;
-const DEFAULTS = { baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro", timeoutMs: 30_000, maxRetries: 2, maxTotalWaitMs: 10_000, temperature: 0.2, maxTokens: DEFAULT_PROVIDER_MAX_TOKENS } as const;
+const DEFAULTS = { baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro", timeoutMs: 30_000, maxRetries: 2, maxTotalWaitMs: 10_000, temperature: 0.2 } as const;
 const CONFIG_KEYS = ["apiKey", "baseUrl", "model", "timeoutMs", "maxRetries", "maxTotalWaitMs", "temperature", "maxTokens"] as const;
 type ConfigKey = typeof CONFIG_KEYS[number];
 
@@ -16,7 +15,7 @@ export interface ProviderConfig {
   maxRetries: number;
   maxTotalWaitMs: number;
   temperature: number;
-  maxTokens: number;
+  maxTokens?: number;
 }
 
 export interface ProviderConfigOptions {
@@ -116,7 +115,7 @@ export function parseProviderConfig(options: ProviderConfigOptions = {}): Provid
     maxRetries: parseInteger(merged.maxRetries, 0, 2),
     maxTotalWaitMs: parseInteger(merged.maxTotalWaitMs, 1_000, 60_000),
     temperature: parseFiniteNumber(merged.temperature, 0, 2),
-    maxTokens: parseInteger(merged.maxTokens, 1, 20_000)
+    ...(merged.maxTokens === undefined ? {} : { maxTokens: parseInteger(merged.maxTokens, 1, 393_216) })
   };
 }
 

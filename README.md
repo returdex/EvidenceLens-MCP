@@ -41,12 +41,11 @@ Runtime reads the ignored `.evidencelens.local.json` file (or explicitly supplie
   "timeoutMs": 30000,
   "maxRetries": 2,
   "maxTotalWaitMs": 10000,
-  "temperature": 0.2,
-  "maxTokens": 20000
+  "temperature": 0.2
 }
 ```
 
-The default model is `deepseek-v4-pro`; the allowlist is `deepseek-v4-pro`, `deepseek-v4-flash`, and `deepseek-v4-flash-vision-exp`. The default output cap is 8,000 tokens. Thinking mode is enabled with `reasoning_effort: high` for the V4 text models; the vision model uses the official base64 `image_url` Chat Completions format. Timeouts are bounded to 1–120 seconds, retries to 0–2, total retry wait to 1–60 seconds, and inference tokens to 1–20,000. Configuration is typed and fail-closed; arbitrary provider names or npm modules are never loaded. The certified Compose review/proof path fixes the output cap at 8,000 so a host environment cannot silently substitute an unreviewed lower or higher value; proof retries remain zero and the proof request budget remains one.
+The default model is `deepseek-v4-pro`; the allowlist is `deepseek-v4-pro`, `deepseek-v4-flash`, and `deepseek-v4-flash-vision-exp`. By default EvidenceLens omits `max_tokens` and uses DeepSeek's documented model/mode default. An explicit `maxTokens` or `DEEPSEEK_MAX_TOKENS` value is validated between 1 and 393,216 and then forwarded. Thinking mode is enabled with `reasoning_effort: high` for the V4 text models; the vision model uses the official base64 `image_url` Chat Completions format and preserves provider-default thinking behavior. Timeouts are bounded to 1–120 seconds, retries to 0–2, and total retry wait to 1–60 seconds. Configuration is typed and fail-closed; arbitrary provider names or npm modules are never loaded. The certified Compose review/proof path requires `DEEPSEEK_MAX_TOKENS` to be absent and ignores hostile host overrides; proof retries remain zero and the proof request budget remains one.
 
 Provider-enabled local and Docker startup requires a valid `.evidencelens.local.json` file or valid `DEEPSEEK_*` environment configuration. Missing, malformed, conflicting, or unreadable configuration exits with the sanitized `PROVIDER_CONFIGURATION` classification; it never falls back to deterministic-only output. Set exactly `EVIDENCELENS_DISABLE_PROVIDER=1` for intentional offline operation, as used by routine no-network tests and smoke checks. Injected providers and typed `providerConfig` are embedding/test seams, not end-user configuration options.
 

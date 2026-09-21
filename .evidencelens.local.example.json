@@ -5,6 +5,5 @@
   "timeoutMs": 30000,
   "maxRetries": 2,
   "maxTotalWaitMs": 10000,
-  "temperature": 0.2,
-  "maxTokens": 8000
+  "temperature": 0.2
 }

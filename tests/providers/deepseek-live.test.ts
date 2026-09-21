@@ -26,7 +26,11 @@ describe("DeepSeek live structural review", () => {
       solutionClaims: [],
       objective: "Inspect this screenshot and return only findings that can be cited to it.",
       promptVersion: PROVIDER_PROMPT_VERSION,
-      inference: { model, temperature: config.temperature, maxTokens: config.maxTokens }
+      inference: {
+        model,
+        temperature: config.temperature,
+        ...(config.maxTokens === undefined ? {} : { maxTokens: config.maxTokens })
+      }
     } satisfies Omit<ProviderReviewRequest, "inputFingerprint">;
     const request: ProviderReviewRequest = { ...withoutFingerprint, inputFingerprint: computeProviderInputFingerprint(withoutFingerprint) };
     const result = await createDeepSeekProvider(config).review(request);

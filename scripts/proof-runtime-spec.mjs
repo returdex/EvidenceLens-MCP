@@ -5,12 +5,12 @@ import { promisify } from "node:util";
 export const REVIEW_SENTINEL = "EVIDENCELENS_REVIEW_PREFLIGHT_SENTINEL";
 export const PROOF_SENTINEL = "EVIDENCELENS_PROOF_PREFLIGHT_SENTINEL";
 const SECRET_SLOT = "<runtime-secret>";
-export const CERTIFIED_LIVE_MAX_TOKENS = "20000";
+export const CERTIFIED_LIVE_USES_PROVIDER_DEFAULT_MAX_TOKENS = true;
 const execFileAsync = promisify(execFile);
 const providerKeys = [
   "DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL", "DEEPSEEK_MODEL", "DEEPSEEK_TIMEOUT_MS",
   "DEEPSEEK_MAX_RETRIES", "DEEPSEEK_MAX_TOTAL_WAIT_MS", "DEEPSEEK_TEMPERATURE",
-  "DEEPSEEK_MAX_TOKENS", "EVIDENCELENS_ALLOWED_ROOTS",
+  "EVIDENCELENS_ALLOWED_ROOTS",
 ];
 
 function fail(kind = "preflight") {
@@ -43,6 +43,7 @@ function normalizeList(value) {
 
 function normalizeEnvironment(value) {
   if (!ordinary(value)) fail();
+  if (Object.prototype.hasOwnProperty.call(value, "DEEPSEEK_MAX_TOKENS")) fail();
   const result = {};
   for (const key of providerKeys) {
     if (typeof value[key] !== "string") fail();
@@ -86,11 +87,9 @@ function normalizeService(service, name) {
 }
 
 function assertContract(review, proof) {
-  const shared = ["DEEPSEEK_BASE_URL", "DEEPSEEK_MODEL", "DEEPSEEK_TIMEOUT_MS", "DEEPSEEK_MAX_TOTAL_WAIT_MS", "DEEPSEEK_TEMPERATURE", "DEEPSEEK_MAX_TOKENS"];
+  const shared = ["DEEPSEEK_BASE_URL", "DEEPSEEK_MODEL", "DEEPSEEK_TIMEOUT_MS", "DEEPSEEK_MAX_TOTAL_WAIT_MS", "DEEPSEEK_TEMPERATURE"];
   for (const key of shared) if (review.environment[key] !== proof.environment[key]) fail();
-  if (proof.environment.EVIDENCELENS_ALLOWED_ROOTS !== "course=/proof-fixtures" || proof.environment.DEEPSEEK_MAX_RETRIES !== "0"
-    || review.environment.DEEPSEEK_MAX_TOKENS !== CERTIFIED_LIVE_MAX_TOKENS
-    || proof.environment.DEEPSEEK_MAX_TOKENS !== CERTIFIED_LIVE_MAX_TOKENS) fail();
+  if (proof.environment.EVIDENCELENS_ALLOWED_ROOTS !== "course=/proof-fixtures" || proof.environment.DEEPSEEK_MAX_RETRIES !== "0") fail();
   for (const key of ["entrypoint", "command", "workingDir", "user", "readOnly", "tmpfs", "capDrop", "securityOpt", "network"])
     if (JSON.stringify(review[key]) !== JSON.stringify(proof[key])) fail();
 }
@@ -133,8 +132,7 @@ export function proofDockerRunArgv(spec, imageId) {
     for (const key of providerKeys) if (typeof proof.environment[key] !== "string") fail("argv");
     if (proof.environment.DEEPSEEK_API_KEY !== SECRET_SLOT
       || proof.environment.EVIDENCELENS_ALLOWED_ROOTS !== "course=/proof-fixtures"
-      || proof.environment.DEEPSEEK_MAX_RETRIES !== "0"
-      || proof.environment.DEEPSEEK_MAX_TOKENS !== CERTIFIED_LIVE_MAX_TOKENS) fail("argv");
+      || proof.environment.DEEPSEEK_MAX_RETRIES !== "0") fail("argv");
     const argv = ["run", "--rm", "-i", "--read-only", "--tmpfs=/tmp", "--cap-drop=ALL", "--security-opt=no-new-privileges:true", "--network=bridge"];
     argv.push(`--workdir=${proof.workingDir}`, `--user=${proof.user}`, `--entrypoint=${proof.entrypoint[0]}`);
     for (const key of providerKeys) argv.push("--env", `${key}=${proof.environment[key]}`);

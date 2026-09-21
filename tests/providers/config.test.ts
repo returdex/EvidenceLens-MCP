@@ -2,7 +2,7 @@ import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PROVIDER_MAX_TOKENS, DEEPSEEK_MODELS, hasProviderCredentialSource, loadProviderConfig, parseProviderConfig } from "../../src/providers/config.js";
+import { DEEPSEEK_MODELS, hasProviderCredentialSource, loadProviderConfig, parseProviderConfig } from "../../src/providers/config.js";
 import { ProviderError, serializeProviderError } from "../../src/providers/errors.js";
 
 const key = "test-key-only";
@@ -27,8 +27,9 @@ function expectSanitizedConfigurationFailure(attempt: () => unknown, hostileValu
 
 describe("provider configuration", () => {
   it("applies defaults and accepts every allowlisted model", () => {
-    expect(DEFAULT_PROVIDER_MAX_TOKENS).toBe(20000);
-    expect(parseProviderConfig({ localConfig: { apiKey: key }, env: {} })).toMatchObject({ baseUrl: "https://api.deepseek.com", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000, maxTokens: 20000 });
+    const parsed = parseProviderConfig({ localConfig: { apiKey: key }, env: {} });
+    expect(parsed).toMatchObject({ baseUrl: "https://api.deepseek.com", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000 });
+    expect(parsed).not.toHaveProperty("maxTokens");
     for (const model of DEEPSEEK_MODELS) expect(parseProviderConfig({ localConfig: { apiKey: key, model }, env: {} }).model).toBe(model);
   });
 
@@ -92,7 +93,7 @@ describe("provider configuration", () => {
     ["timeoutMs", -1], ["timeoutMs", Number.NaN], ["timeoutMs", Number.POSITIVE_INFINITY], ["timeoutMs", "1000"], ["timeoutMs", 120001],
     ["maxRetries", -1], ["maxRetries", Number.NaN], ["maxRetries", Number.POSITIVE_INFINITY], ["maxRetries", "0"], ["maxRetries", 3],
     ["maxTotalWaitMs", -1], ["maxTotalWaitMs", Number.NaN], ["maxTotalWaitMs", Number.POSITIVE_INFINITY], ["maxTotalWaitMs", "1000"], ["maxTotalWaitMs", 60001],
-    ["maxTokens", -1], ["maxTokens", Number.NaN], ["maxTokens", Number.POSITIVE_INFINITY], ["maxTokens", "1"], ["maxTokens", 20001]
+    ["maxTokens", -1], ["maxTokens", Number.NaN], ["maxTokens", Number.POSITIVE_INFINITY], ["maxTokens", "1"], ["maxTokens", 393217]
   ] as const)("rejects invalid local %s value %#", (field, value) => {
     expectSanitizedConfigurationFailure(
       () => parseProviderConfig({ localConfig: { apiKey: key, [field]: value }, env: {} }),
@@ -103,8 +104,8 @@ describe("provider configuration", () => {
   it("preserves integral bounds and fractional temperature", () => {
     expect(parseProviderConfig({ localConfig: { apiKey: key, timeoutMs: 1000, maxRetries: 0, maxTotalWaitMs: 1000, maxTokens: 1, temperature: 0.25 }, env: {} }))
       .toMatchObject({ timeoutMs: 1000, maxRetries: 0, maxTotalWaitMs: 1000, maxTokens: 1, temperature: 0.25 });
-    expect(parseProviderConfig({ localConfig: { apiKey: key, timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 20000, temperature: 1.75 }, env: {} }))
-      .toMatchObject({ timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 20000, temperature: 1.75 });
+    expect(parseProviderConfig({ localConfig: { apiKey: key, timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 393216, temperature: 1.75 }, env: {} }))
+      .toMatchObject({ timeoutMs: 120000, maxRetries: 2, maxTotalWaitMs: 60000, maxTokens: 393216, temperature: 1.75 });
   });
 
   it("serializes only stable safe error metadata and commits a redacted example", async () => {

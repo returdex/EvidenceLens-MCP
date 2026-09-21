@@ -389,7 +389,7 @@ describe("provider review MCP boundary", () => {
     expect(failureHolder.marker).toBe("failure-remains-writable");
   });
 
-  it("binds the fixed default output cap into the exact provider request fingerprint", async () => {
+  it("binds the provider-default output policy into the exact provider request fingerprint", async () => {
     let capturedRequest: ProviderReviewRequest | undefined;
     const provider: ReviewProvider = {
       name: "local-reviewer",
@@ -399,7 +399,7 @@ describe("provider review MCP boundary", () => {
       }
     };
     expect(payload(await handleReviewRequest(request, { provider }))).toMatchObject({ ok: true });
-    expect(capturedRequest?.inference).toEqual({ model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 20000 });
+    expect(capturedRequest?.inference).toEqual({ model: "deepseek-v4-pro", temperature: 0.2 });
     const { inputFingerprint, ...withoutFingerprint } = capturedRequest!;
     expect(inputFingerprint).toBe(computeProviderInputFingerprint(withoutFingerprint));
     expect(inputFingerprint).not.toBe(computeProviderInputFingerprint({
@@ -418,12 +418,11 @@ describe("provider review MCP boundary", () => {
       { field: "temperature", value: Number.POSITIVE_INFINITY },
       { field: "temperature", value: -0.01 },
       { field: "temperature", value: 2.01 },
-      { field: "maxTokens", value: undefined },
       { field: "maxTokens", value: "4000" },
       { field: "maxTokens", value: Number.NaN },
       { field: "maxTokens", value: Number.POSITIVE_INFINITY },
       { field: "maxTokens", value: 0 },
-      { field: "maxTokens", value: 20_001 },
+      { field: "maxTokens", value: 393_217 },
       { field: "maxTokens", value: 1.5 }
     ];
     for (const testCase of invalidValues) {

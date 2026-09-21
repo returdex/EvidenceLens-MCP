@@ -45,7 +45,7 @@ export const providerInferenceSettingsSchema = z
   .object({
     model: z.enum(DEEPSEEK_MODELS),
     temperature: z.number().finite().min(0).max(2),
-    maxTokens: z.number().finite().int().min(1).max(20_000)
+    maxTokens: z.number().finite().int().min(1).max(393_216).optional()
   })
   .strict();
 

@@ -48,7 +48,7 @@ export function computeProviderInputFingerprint(request: Omit<ProviderReviewRequ
     promptVersion: request.promptVersion,
     model: request.inference.model,
     temperature: request.inference.temperature,
-    maxTokens: request.inference.maxTokens
+    ...(request.inference.maxTokens === undefined ? {} : { maxTokens: request.inference.maxTokens })
   }));
   return digest.digest("hex");
 }
@@ -111,7 +111,7 @@ function buildBody(request: ProviderReviewRequest): Record<string, unknown> {
     model: request.inference.model,
     messages: [{ role: "user", content }],
     temperature: request.inference.temperature,
-    max_tokens: request.inference.maxTokens,
+    ...(request.inference.maxTokens === undefined ? {} : { max_tokens: request.inference.maxTokens }),
     ...thinking,
     response_format: { type: "json_object" },
     stream: false

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  CERTIFIED_LIVE_MAX_TOKENS,
+  CERTIFIED_LIVE_USES_PROVIDER_DEFAULT_MAX_TOKENS,
   PROOF_SENTINEL,
   REVIEW_SENTINEL,
   deriveProofRuntimeSpec,
@@ -28,7 +28,6 @@ function composeObject() {
     DEEPSEEK_MAX_RETRIES: "2",
     DEEPSEEK_MAX_TOTAL_WAIT_MS: "10000",
     DEEPSEEK_TEMPERATURE: "0.2",
-    DEEPSEEK_MAX_TOKENS: "20000",
     EVIDENCELENS_ALLOWED_ROOTS: "course=/workspace",
   };
   return {
@@ -44,18 +43,18 @@ function composeObject() {
 }
 
 describe("credential-free proof runtime specification", () => {
-  it("fixes the certified live output cap and ignores hostile host overrides", async () => {
-    expect(CERTIFIED_LIVE_MAX_TOKENS).toBe("20000");
+  it("uses the provider-default output cap and ignores hostile host overrides", async () => {
+    expect(CERTIFIED_LIVE_USES_PROVIDER_DEFAULT_MAX_TOKENS).toBe(true);
     const runCompose = vi.fn(async (_file: string, _args: string[], options: { env: NodeJS.ProcessEnv }) => {
       expect(options.env.DEEPSEEK_MAX_TOKENS).toBeUndefined();
       return { stdout: JSON.stringify(composeObject()), stderr: "" };
     });
     const result = await deriveProofRuntimeSpec(runCompose, { DEEPSEEK_MAX_TOKENS: "1" });
-    expect(result.review.environment.DEEPSEEK_MAX_TOKENS).toBe("20000");
-    expect(result.proof.environment.DEEPSEEK_MAX_TOKENS).toBe("20000");
+    expect(result.review.environment).not.toHaveProperty("DEEPSEEK_MAX_TOKENS");
+    expect(result.proof.environment).not.toHaveProperty("DEEPSEEK_MAX_TOKENS");
   });
 
-  it.each(["4000", "8000"])("rejects a compose contract that changes both live caps to %s", async (maxTokens) => {
+  it.each(["4000", "20000"])("rejects a compose contract that injects a live cap of %s", async (maxTokens) => {
     const value = composeObject();
     value.services.review.environment.DEEPSEEK_MAX_TOKENS = maxTokens;
     value.services.proof.environment.DEEPSEEK_MAX_TOKENS = maxTokens;
