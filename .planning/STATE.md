@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planned
-stopped_at: Completed 10-163-PLAN.md
-last_updated: "2026-09-21T17:31:55.099Z"
+stopped_at: Completed 10-164-PLAN.md
+last_updated: "2026-09-21T17:39:39.568Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 34
-  completed_plans: 32
-  percent: 94
+  completed_plans: 33
+  percent: 97
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 
 - Phase: 10 of 11
 - Status: Plans 10-162, 10-162.1, and 10-163 completed offline; the consumed generation remains immutable non-authority and one exact source tuple now authorizes Plan 10-164
@@ -242,6 +242,8 @@ Plan: 4 of 6
 - [Phase 10]: Keep disconfirmation-auto outside PROOF_CHAIN_MODES and bind it to one private fixed destination with atomic no-replace installation. — Preserves authority separation and prevents caller-selected or overwrite-capable evidence creation.
 - [Phase 10]: Authorize Plan 10-164 only from reviewed commit d8e9e050c61bed3bc06530da65ce9ef692b09aac, its 109-blob manifest, aggregate tree, and exact certifier pair. — Any later non-planning source drift must fail before Docker or provider activity.
 - [Phase 10]: Treat provider finding validation as a bounded interoperability and local-provenance contract, not as a judgment that provider-authored conclusions are substantively true. — The downstream consumer decides whether to accept provider-authored substantive conclusions.
+- [Phase 10]: Promote generation 0cd325ba028813cb93aa86c5fe7ece14711d4655c2765d09d761b4b2a09ff4a5 as the sole READY Plan 10-164 image after one successful local producer build and zero verifier rebuilds.
+- [Phase 10]: Preserve the exact Plan 10-163 source identity; no production or test source changed during Plan 10-164.
 
 ### Blockers
 
@@ -358,11 +360,12 @@ Plan: 4 of 6
 | Phase 10 P162 | 6min | 2 tasks | 8 files |
 | Phase 10 P162.1 | 8min | 1 tasks | 3 files |
 | Phase 10 P163 | 5min | 2 tasks | 4 files |
+| Phase 10 P164 | 2min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T17:31:55.095Z
-- **Stopped at:** Completed 10-163-PLAN.md
+- **Last session:** 2026-09-21T17:39:39.563Z
+- **Stopped at:** Completed 10-164-PLAN.md
 - **Resume file:** None
 
 ## Next Action
