@@ -36,9 +36,9 @@ const providerCitationDraftSchema = z.object({
 
 const providerCitationReferenceSchema = z.object({
   evidenceId: z.string().min(1).max(128),
-  location: normalizedEvidenceReferenceSchema,
-  visual: z.boolean()
-}).strict();
+  location: normalizedEvidenceReferenceSchema.optional(),
+  visual: z.boolean().optional()
+});
 
 const providerFindingDraftSchema = z.object({
   id: z.string().min(1).max(128),
@@ -102,7 +102,9 @@ export function resolveProviderCitation(
 
   const evidence = normalizedEvidence.find((candidate) => candidate.source.id === parsed.data.evidenceId);
   if (!evidence) fail("Provider citation evidence is not present in normalized evidence", diagnostics, { path: ["citations", "evidenceId"], code: "invalid_value" });
-  if (!evidence.references.some((reference) => sameReference(reference, parsed.data.location))) fail("Provider citation location is not present in normalized evidence", diagnostics, { path: ["citations", "location"], code: "invalid_value" });
+  const location = parsed.data.location ?? (evidence.references.length === 1 ? evidence.references[0] : undefined);
+  if (location === undefined) fail("Provider citation location is ambiguous", diagnostics, { path: ["citations", "location"], code: "too_small" });
+  if (!evidence.references.some((reference) => sameReference(reference, location))) fail("Provider citation location is not present in normalized evidence", diagnostics, { path: ["citations", "location"], code: "invalid_value" });
 
   if ("role" in parsed.data) {
     if (evidence.role !== parsed.data.role) fail("Provider citation role does not match normalized evidence", diagnostics, { path: ["citations", "evidenceId"], code: "invalid_value" });
@@ -110,18 +112,19 @@ export function resolveProviderCitation(
     if (evidence.source.reference !== parsed.data.sourceReference) fail("Provider citation source reference does not match normalized evidence", diagnostics, { path: ["citations", "sourceReference"], code: "invalid_value" });
   }
 
-  const payloadHash = visualPayloadHash(evidence, parsed.data.location);
-  if (parsed.data.visual && payloadHash === undefined) fail("Provider visual citation has no retained payload", diagnostics, { path: ["citations", "visual"], code: "custom" });
+  const payloadHash = visualPayloadHash(evidence, location);
+  const visual = parsed.data.visual ?? payloadHash !== undefined;
+  if (visual && payloadHash === undefined) fail("Provider visual citation has no retained payload", diagnostics, { path: ["citations", "visual"], code: "custom" });
   if ("visualPayloadSha256" in parsed.data && parsed.data.visualPayloadSha256 !== undefined && parsed.data.visualPayloadSha256 !== payloadHash) fail("Provider visual payload hash does not match normalized evidence", diagnostics, { path: ["citations", "contentHash"], code: "invalid_value" });
-  if ((evidence.source.type === "image" || evidence.source.type === "screenshot") && !parsed.data.visual) fail("Image citations must be visual", diagnostics, { path: ["citations", "visual"], code: "custom" });
+  if ((evidence.source.type === "image" || evidence.source.type === "screenshot") && !visual) fail("Image citations must be visual", diagnostics, { path: ["citations", "visual"], code: "custom" });
 
   return {
     evidenceId: evidence.source.id,
     role: evidence.role,
     contentHash: evidence.contentHash,
     sourceReference: evidence.source.reference,
-    location: parsed.data.location,
-    visual: parsed.data.visual,
+    location,
+    visual,
     ...(payloadHash ? { visualPayloadSha256: payloadHash } : {})
   };
 }

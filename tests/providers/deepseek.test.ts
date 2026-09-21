@@ -358,7 +358,8 @@ describe("DeepSeek provider adapter", () => {
     const providerDraft = {
       findings: [{
         ...draft.findings[0],
-        rationale: "provider-only extension"
+        rationale: "provider-only extension",
+        citations: [{ ...draft.findings[0]!.citations[0], providerNote: "provider-only extension" }]
       }],
     };
 
@@ -366,6 +367,7 @@ describe("DeepSeek provider adapter", () => {
 
     expect(result.modelFindings).toHaveLength(1);
     expect(result.modelFindings[0]).not.toHaveProperty("rationale");
+    expect(result.modelFindings[0]?.citations[0]).not.toHaveProperty("providerNote");
   });
 
   it.each([

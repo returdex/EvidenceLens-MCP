@@ -63,12 +63,39 @@ describe("DeepSeek vision provenance boundary", () => {
     });
   });
 
+  it("fills a unique local citation location and visual flag from evidenceId alone", async () => {
+    const compact = { ...finding, citations: [{ evidenceId: "screenshot" }] };
+    const result = await createDeepSeekProvider({ apiKey: "test-key", baseUrl: "https://example.test", model: request.inference.model, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 }, transportFor(JSON.stringify({ findings: [compact] }))).review(request);
+    expect(result.modelFindings[0]?.citations[0]).toMatchObject({
+      evidenceId: "screenshot", location: { kind: "image", width: 1, height: 1 }, visual: true,
+      contentHash: imageHash, sourceReference: "fixture://screenshot.png"
+    });
+  });
+
+  it("ignores provider-added citation fields and uses local provenance", async () => {
+    const compact = { ...finding, citations: [{ evidenceId: "screenshot", contentHash: textHash, providerNote: "ignored" }] };
+    const result = await createDeepSeekProvider({ apiKey: "test-key", baseUrl: "https://example.test", model: request.inference.model, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 }, transportFor(JSON.stringify({ findings: [compact] }))).review(request);
+    expect(result.modelFindings[0]?.citations[0]).toMatchObject({ contentHash: imageHash, sourceReference: "fixture://screenshot.png" });
+    expect(result.modelFindings[0]?.citations[0]).not.toHaveProperty("providerNote");
+  });
+
+  it("requires an explicit location when one evidence item has multiple references", async () => {
+    const multiWithoutFingerprint = {
+      ...withoutFingerprint,
+      evidence: withoutFingerprint.evidence.map((item) => item.evidenceId === "brief"
+        ? { ...item, references: [{ kind: "text" as const, startLine: 1, endLine: 1 }, { kind: "text" as const, startLine: 2, endLine: 2 }] }
+        : item)
+    };
+    const multiRequest: ProviderReviewRequest = { ...multiWithoutFingerprint, inputFingerprint: computeProviderInputFingerprint(multiWithoutFingerprint) };
+    const compact = { ...finding, evidenceIds: ["brief"], citations: [{ evidenceId: "brief" }] };
+    await expect(createDeepSeekProvider({ apiKey: "test-key", baseUrl: "https://example.test", model: request.inference.model, timeoutMs: 1_000, maxRetries: 0, maxTotalWaitMs: 1_000, temperature: 0.2, maxTokens: 400 }, transportFor(JSON.stringify({ findings: [compact] }))).review(multiRequest))
+      .rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+  });
+
   it.each([
     ["malformed JSON", "not-json"],
     ["unknown evidence", JSON.stringify({ findings: [{ ...finding, citations: [{ ...finding.citations[0], evidenceId: "forged" }], evidenceIds: ["forged"] }] })],
-    ["missing location", JSON.stringify({ findings: [{ ...finding, citations: [{ evidenceId: "screenshot", visual: true }] }] })],
     ["non-visual image citation", JSON.stringify({ findings: [{ ...finding, citations: [{ ...finding.citations[0], visual: false }] }] })],
-    ["forged extra provenance", JSON.stringify({ findings: [{ ...finding, citations: [{ ...finding.citations[0], contentHash: textHash }] }] })],
     ["duplicate citations", JSON.stringify({ findings: [{ ...finding, citations: [finding.citations[0], finding.citations[0]], evidenceIds: ["screenshot", "screenshot"] }] })],
     ["invalid finding field", JSON.stringify({ findings: [{ ...finding, severity: "critical" }] })]
   ])("rejects %s without fallback", async (_label, content) => {
