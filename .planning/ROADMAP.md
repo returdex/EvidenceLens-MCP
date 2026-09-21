@@ -15,7 +15,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 7: DeepSeek Vision Provenance Closure** - Make credentialed vision findings satisfy the local provenance contract. (completed 2026-08-25)
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
-- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(5 of 6 active plans completed; Plan 10-165 passed with one authenticated provider request, and only Plan 10-166 synchronization remains.)*
+- [ ] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(5 of 9 active plans completed; the 10-165 proof is retained as non-replay history after certifier drift, and Plans 10-167 through 10-170 form the current authority chain.)*
 - [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
 
 ## Phase Details
@@ -709,8 +709,20 @@ The entries through Wave 155 below are historical index entries only. Their file
 **Wave 159** *(gap closure; blocked on Wave 158 completion; at most one paid request)*
 - [x] 10-165-PLAN.md — Run one fresh non-replay provider-default generation with one-send ceiling
 
-**Wave 160** *(gap closure; only reachable from a passed Wave 159 chain)*
-- [ ] 10-166-PLAN.md — Synchronize and independently audit passed project truth; non-pass performs zero writes
+**Wave 160** *(retired after the executed certifier changed)*
+- 10-166-SUPERSEDED.md — Preserved unexecuted synchronization plan; the 10-165 proof binds the pre-fix certifier and cannot authorize current synchronization
+
+**Wave 161** *(offline gap closure; blocked on immutable 10-165 historical evidence)*
+- [ ] 10-167-PLAN.md — Fix actual-executed-certifier binding, hostile-test and rehearse full passed synchronization/final audit, then certify exact source/review/security authority
+
+**Wave 162** *(local immutable build; blocked on Wave 161)*
+- [ ] 10-168-PLAN.md — Build once from the exact 10-167 Git archive and independently authenticate the existing image without rebuild
+
+**Wave 163** *(one automatic paid request; blocked on Wave 162)*
+- [ ] 10-169-PLAN.md — Run exactly one fresh non-replay immutable-image Docker MCP request with maxRetries=0
+
+**Wave 164** *(passed-only synchronization; reachable only from passed Wave 163)*
+- [ ] 10-170-PLAN.md — Transactionally synchronize the new passed chain and independently audit committed project truth
 
 Cross-cutting constraints:
 - SAFE-04 and PROV-01 remain open until every gap plan passes verification.
@@ -718,7 +730,7 @@ Cross-cutting constraints:
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-166, including prerequisite Plan 10-162.1, have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
+- Plans 10-38 through 10-170, including prerequisite Plan 10-162.1, have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
 - The default provider request omits `max_tokens`; only explicit user configuration in the validated range 1..393216 may serialize it. No arbitrary output-token preset is part of the certified chain.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.
@@ -742,7 +754,7 @@ Cross-cutting constraints:
 - Fix ad16455 unifies the product default and certified Compose review/proof runtime at maxTokens 8000, makes the certified value non-overridable by the host, binds maxTokens into the request fingerprint, retains the safe configuration maximum 20000, and preserves max-four bounded findings, maxRetries=0 and request budget one. The 10-148 certification and 10-149 image are stale.
 - Generation e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291 is consumed immutable authority:false gaps_found evidence after exactly one authenticated provider send ending with provider-finish-reason-length at maxTokens 8000; it may not be replayed, overwritten, upgraded or synchronized, and retired Plan 10-156 is preserved byte-exact as non-executable `10-156-SUPERSEDED.md`.
 - Fix 403d2a2 preserves provider-default Vision request behavior and admits only exact `stop` or `length` to the same bounded unique extraction, strict schema, citation and local provenance pipeline. A `length` result succeeds only when independently complete and valid; truncation, ambiguity, malformed/wrong-root/oversized content, invalid schema/citations/provenance and every other finish reason remain fail closed. The earlier Vision thinking override is removed and must not be reintroduced.
-- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121, 10-126, 10-131, 10-136, 10-141, 10-146 and 10-151 are superseded; retired Plans 10-156 and 10-161 are additionally removed from executable discovery as `10-156-SUPERSEDED.md` and `10-161-SUPERSEDED.md`. None can synchronize. Only Plan 10-166 may synchronize, and only from the exact committed passed fresh 10-162/10-163/10-164/10-165 authority chain; non-pass performs zero claim, journal and target writes.
+- Plans 10-52, 10-60, 10-66, 10-71, 10-76, 10-81, 10-86, 10-91, 10-96, 10-101, 10-106, 10-111, 10-116, 10-121, 10-126, 10-131, 10-136, 10-141, 10-146 and 10-151 are superseded; retired Plans 10-156, 10-161 and 10-166 are additionally removed from executable discovery as `*-SUPERSEDED.md`. None can synchronize. Only Plan 10-170 may synchronize, and only from the exact committed passed fresh 10-167/10-168/10-169 authority chain whose recorded certifier hashes identify the committed blobs actually executed; every old or non-pass tuple performs zero claim, journal and target writes.
 
 ### Phase 11: Linux Filesystem Traversal Hardening
 **Goal**: Linux anchored filesystem traversal enforces the documented no-follow invariant for untrusted path components and the milestone planning record matches verified reality.

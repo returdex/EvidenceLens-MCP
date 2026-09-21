@@ -245,11 +245,14 @@ Plan: 6 of 6
 - [Phase 10]: Promote generation 0cd325ba028813cb93aa86c5fe7ece14711d4655c2765d09d761b4b2a09ff4a5 as the sole READY Plan 10-164 image after one successful local producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-163 source identity; no production or test source changed during Plan 10-164.
 - [Phase 10]: Generation e7dc8262990d684d8e689e8125b668d198b4c9b8f9ca8f21197ff99fb9f1d2b0 is the sole Plan 10-165 live generation and cannot be replayed.
-- [Phase 10]: The authenticated passed proof authorizes Plan 10-166 synchronization; requirement closure remains deferred until that passed-only synchronization completes.
+- [Phase 10]: Preserve the committed 10-165 passed proof byte-for-byte as authority:false for the current chain and replay_allowed:false history. — Parser fix 011beab changed the certifier identity after that proof, so it cannot authorize synchronization.
+- [Phase 10]: Retire unexecuted Plan 10-166 byte-for-byte as 10-166-SUPERSEDED.md and exclude it from executable discovery.
+- [Phase 10]: Only Plans 10-167/168/169/170 may acquire current certification, image, live-proof and synchronization authority; actual executed committed certifier bytes must match every recorded certifier hash.
+- [Phase 10]: Complete the synthetic passed synchronization and final-audit rehearsal, hostile substitutions, deep review and ASVS review offline in Plan 10-167 before Plan 10-169 may spend at most one provider request.
 
 ### Blockers
 
-- PROV-01 remains open until Plan 10-166 synchronizes the committed passed Plan 10-165 chain; Plan 10-166 is now reachable.
+- PROV-01 remains open until Plan 10-170 synchronizes a newly committed passed 10-167/168/169 chain. Plan 10-165 is historical non-replay evidence and Plan 10-166 is retired.
 
 ## Performance Metrics
 

@@ -533,3 +533,34 @@ Plan 10-150 consumed generation `86a962dbfa4abe5f13e15796df4ebf333d7080f8f9886fa
 | SYNC NEW-CHAIN-ONLY | Only complete 10-152/153/154/155 authority may update final truth | 10-156 |
 
 Deferred ideas and Phase 11 SAFE-01 are excluded. All current goal, SAFE-04/PROV-01 requirements, locked context decisions, consumed 10-150 truth, certified 8000-token contract, exact-source build, one-send live execution and passed-only synchronization are covered; no phase split is required.
+## Post-10-165 Certifier-Identity Recovery: Plans 10-167 through 10-170
+
+Plan 10-165 passed one authenticated provider request, but parser fix `011beab` changed `scripts/audit-live-evidence.mjs` afterward. Because the proof binds the old certifier hash, it is valid historical evidence but cannot authorize synchronization. Plan 10-166 is therefore preserved as unexecuted `10-166-SUPERSEDED.md` and excluded from executable discovery.
+
+| Source | ID | Required outcome | Plan(s) | Status |
+|---|---|---|---|---|
+| GOAL | Phase 10 | Complete authenticated Docker MCP/provider/public-schema proof without weakening fail-closed startup | 167-170 | COVERED |
+| REQ | SAFE-04 | Keep configuration and all retained failures sanitized; expose no credential or raw provider content | 167-170 | COVERED |
+| REQ | PROV-01 | Only a complete fresh committed chain may close provenance | 167-170 | COVERED |
+| FIX | ACTUAL-CERTIFIER | Recorded hashes identify the exact committed certifier blobs actually executed | 167-170 | COVERED |
+| FIX | FRONTMATTER | Parse only opening frontmatter; preserve Markdown body `---`; reject duplicate/missing/malformed status | 167, 170 | COVERED |
+| TEST | OFFLINE-FIRST | Synthetic passed synchronization/final audit and hostile zero-write cases pass before paid execution | 167 | COVERED |
+| REVIEW | EXACT-SOURCE | Complete provider-disabled suite, build, Compose, deep review, ASVS and no-drift certify one exact source | 167 | COVERED |
+| BUILD | IMMUTABLE | Build once from exact Git archive; independent verifier does not rebuild | 168 | COVERED |
+| LIVE | FRESH | One new non-replay exact-image request with maxRetries=0 and no fallback or second call | 169 | COVERED |
+| SYNC | PASSED-ONLY | Only exact committed new pass may write claim/journal and three truth targets | 170 | COVERED |
+| HISTORY | 10-165 | Preserve bytes and commit; authority=false for new chain and replay forbidden | 167, 169-170 | COVERED |
+| AUTHORITY | SUPERSEDE-166 | Preserve unexecuted plan outside executable discovery and never reuse against new certifier | planning preflight, 167, 170 | COVERED |
+| CONTEXT | API-AUTO | One provider test runs automatically without per-run human authorization | 169 | COVERED |
+| CONTEXT | LOCAL-UNLIMITED | Local tests/builds/Docker may run; live execution cannot rebuild its exact image | 167-170 | COVERED |
+| CONTEXT | GHA-BUDGET | GitHub Actions, push, dispatch, rerun and retrigger budget is zero | 167-170 | COVERED |
+
+### Exclusions and budgets
+
+- Plan 10-167 completes all source/test changes and offline synchronization rehearsal before paid work. Any failed offline gate blocks all later plans.
+- Plans 10-167, 10-168 and 10-170 have provider-request budget 0. Only Plan 10-169 permits at most one provider HTTP send, with `maxRetries=0`, no retry, fallback, alternate image, diagnostic second request or replay.
+- All plans have GitHub Actions run budget 0. Local tests, TypeScript builds and Docker builds/runs are not quota-limited, except Plan 10-169 may not rebuild because it must consume the exact 10-168 image.
+- No redundant archive plan is added: the complete committed 10-165 proof tuple and summary already preserve the historical bytes. Current registries enforce non-authority and replay refusal.
+- Any production or test drift after 10-167 certification invalidates Plans 10-168 through 10-170 and requires a new additive certification chain.
+
+**Audit result:** Every current goal, requirement, parser fix, certifier-identity gap, offline-first decision, immutable build, bounded paid request, passed-only synchronization and historical non-replay requirement is covered. No item is missing or deferred.
