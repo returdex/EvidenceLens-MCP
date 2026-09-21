@@ -21,6 +21,11 @@ describe("live evidence audit", () => {
     expect(auditLiveEvidence(proof("passed"), phase(7, "passed"), phase(10, "passed"), requirements(true))).toEqual({ passed: true });
   });
 
+  it("allows Markdown horizontal rules after the opening frontmatter", () => {
+    const phase10 = `${phase(10, "passed")}\n## Evidence\n\n---\n\nVerified body content.\n`;
+    expect(auditLiveEvidence(proof("passed"), phase(7, "passed"), phase10, requirements(true))).toEqual({ passed: true });
+  });
+
   it.each(["diagnostic_failed", "preflight_failed", "review_failed", "build_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close"])("forces %s to the three-way gap state", (outcome) => {
     expect(auditLiveEvidence(proof(outcome), phase(7, "gaps_found"), phase(10, "gaps_found"), requirements(false))).toEqual({ passed: false });
   });
