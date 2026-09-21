@@ -1,10 +1,10 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmod, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, CURRENT_CONSUMED_LIVE_ARCHIVE_PATH, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, CURRENT_CONSUMED_LIVE_ARCHIVE_PATH, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateDisconfirmationRecord, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -67,6 +67,77 @@ describe("proof chain certifier", () => {
   const build = buildRecord;
   const execution = executionRecord;
   const boundProof = { ...proofRecord, source_sha256: digest(source), review_sha256: digest(deep), security_sha256: digest(asvs) };
+
+  it("creates one canonical owner-only fixed-path disconfirmation record without external effects", async () => {
+    const repoRoot = process.cwd();
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-disconfirmation-"));
+    const target = join(root, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-163-DISCONFIRMATION.json");
+    const marker = join(root, "external-called");
+    try {
+      await mkdir(join(target, ".."), { recursive: true });
+      for (const command of ["docker", "curl", "wget", "gh"]) {
+        await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
+      }
+      const result = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "disconfirmation-auto"], {
+        cwd: root, encoding: "utf8", env: { PATH: `${root}:${process.env.PATH}`, DEEPSEEK_API_KEY: "must-not-be-read" },
+      });
+      expect(result).toMatchObject({ status: 0, stderr: "" });
+      expect(result.stdout).toBe('{"status":"ready"}\n');
+      const bytes = await readFile(target, "utf8");
+      const record = JSON.parse(bytes);
+      expect(bytes).toBe(canonicalJson(record));
+      expect(validateDisconfirmationRecord(record)).toEqual({ status: "ready" });
+      expect((await lstat(target)).mode & 0o777).toBe(0o600);
+      expect(record.side_effects).toEqual({
+        credential_reads: 0, dispatches: 0, docker_invocations: 0, github_actions_runs: 0,
+        network_requests: 0, paid_provider_requests: 0, provider_requests: 0, pushes: 0,
+        unrelated_target_writes: 0,
+      });
+      expect(bytes).not.toContain("must-not-be-read");
+      await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+      expect((await readdir(join(target, ".."))).filter((name) => name.includes(".tmp-"))).toEqual([]);
+      const replay = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "disconfirmation-auto"], { cwd: root, encoding: "utf8" });
+      expect(replay).toMatchObject({ status: 1, stdout: "", stderr: "PROOF_CHAIN_REPLAY\n" });
+      expect(await readFile(target, "utf8")).toBe(bytes);
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
+  it("rejects extra argv and a pre-existing symlink without replacing its target", async () => {
+    const repoRoot = process.cwd();
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-disconfirmation-hostile-"));
+    const phaseDir = join(root, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e");
+    const target = join(phaseDir, "10-163-DISCONFIRMATION.json");
+    const unrelated = join(root, "unrelated");
+    try {
+      await mkdir(phaseDir, { recursive: true });
+      await writeFile(unrelated, "preserve", { mode: 0o600 });
+      await symlink(unrelated, target);
+      const hostile = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "disconfirmation-auto"], { cwd: root, encoding: "utf8" });
+      expect(hostile).toMatchObject({ status: 1, stdout: "", stderr: "PROOF_CHAIN_REPLAY\n" });
+      expect(await readFile(unrelated, "utf8")).toBe("preserve");
+      expect((await lstat(target)).isSymbolicLink()).toBe(true);
+      const extra = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "disconfirmation-auto", target], { cwd: root, encoding: "utf8" });
+      expect(extra).toMatchObject({ status: 1, stdout: "", stderr: "PROOF_CHAIN_ARGV\n" });
+      expect((await readdir(phaseDir)).filter((name) => name.includes(".tmp-"))).toEqual([]);
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
+  it("rejects malformed disconfirmation evidence and keeps the command outside authority modes", () => {
+    const valid = {
+      cases: { complete_content_acceptance: "passed", explicit_max_tokens_bounds: "passed", hostile_output_rejection: "passed", provider_default_omits_max_tokens: "passed" },
+      schema: "evidencelens.hostile-disconfirmation.v1",
+      side_effects: { credential_reads: 0, dispatches: 0, docker_invocations: 0, github_actions_runs: 0, network_requests: 0, paid_provider_requests: 0, provider_requests: 0, pushes: 0, unrelated_target_writes: 0 },
+      status: "ready",
+    };
+    expect(validateDisconfirmationRecord(valid)).toEqual({ status: "ready" });
+    for (const changed of [
+      { ...valid, extra: true },
+      { ...valid, status: "passed" },
+      { ...valid, cases: { ...valid.cases, hostile_output_rejection: "failed" } },
+      { ...valid, side_effects: { ...valid.side_effects, provider_requests: 1 } },
+    ]) expect(() => validateDisconfirmationRecord(changed)).toThrow("PROOF_CHAIN_DISCONFIRMATION");
+    expect(PROOF_CHAIN_MODES).not.toHaveProperty("disconfirmation-auto");
+  });
 
   it("publishes a frozen exact registry without draft modes", () => {
     expect(CURRENT_CONSUMED_LIVE_ARCHIVE_PATH).toMatch(/10-162-CONSUMED-LIVE\.json$/u);
