@@ -418,6 +418,10 @@ describe("proof chain certifier", () => {
       execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
       execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
+      // Isolate this pre-completion rehearsal from a real completed 10-170
+      // transaction already present in the repository being cloned.
+      await rm(join(checkout, phasePath, "10-170-SYNC-CLAIM.json"), { force: true });
+      await rm(join(checkout, phasePath, "10-170-SYNC-JOURNAL.json"), { force: true });
       const reviewedCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: checkout, encoding: "utf8" }).trim();
       const manifest = await createNonPlanningManifest({ repoDir: checkout, reviewedCommit });
       const manifestByPath = new Map(manifest.entries.map((entry) => [entry.path, entry.sha256]));
@@ -451,7 +455,11 @@ describe("proof chain certifier", () => {
         ["10-169-EXECUTION.json", canonicalJson(execution)], ["10-169-PROOF.json", canonicalJson(proofRecord)],
         ["10-169-LOCAL-VALIDATION.json", canonicalJson(validation)],
       ];
-      for (const [name, bytes] of artifacts) await writeFile(join(checkout, phasePath, name), bytes, { mode: 0o600 });
+      for (const [name, bytes] of artifacts) {
+        const artifactPath = join(checkout, phasePath, name);
+        await writeFile(artifactPath, bytes, { mode: 0o600 });
+        await chmod(artifactPath, 0o600);
+      }
       execFileSync("git", ["add", phasePath], { cwd: checkout });
       execFileSync("git", ["commit", "-qm", "materialize synthetic passed authority"], { cwd: checkout });
       for (const command of ["docker", "curl", "wget", "gh"]) await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
@@ -505,6 +513,7 @@ describe("proof chain certifier", () => {
         expect(result.stdout).toBe("");
         expect([
           "PROOF_CHAIN_COMMITTED\n",
+          "PROOF_CHAIN_EXECUTED_CERTIFIER\n",
           "PROOF_CHAIN_IDENTITY\n",
           "PROOF_CHAIN_LOCAL_VALIDATION\n",
           "PROOF_CHAIN_RECEIPT\n",
