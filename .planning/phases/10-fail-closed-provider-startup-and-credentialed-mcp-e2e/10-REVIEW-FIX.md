@@ -1,36 +1,30 @@
 ---
 phase: 10-fail-closed-provider-startup-and-credentialed-mcp-e2e
-review: 10-REVIEW.md
-fixed: 2026-09-22T00:00:00Z
+fixed: 2026-09-22T05:25:00Z
 status: all_fixed
-findings_fixed:
-  critical: 3
-  warning: 1
-  total: 4
+findings_fixed: 2
+findings_remaining: 0
 ---
 
-# Phase 10 Review Fix
+# Phase 10 Code Review Fix
 
-All findings discovered across the initial review and two offline re-review passes were fixed before live validation. No Docker command, provider request, network request, or GitHub Actions workflow was run.
+Both release-blocking synchronization findings are resolved without issuing a new provider request or changing the executed certifier identity.
 
-## Fixes
+## CR-01: passed-only completion authority
 
-- **CR-01:** Rotated all current automatic execution, proof audit, and synchronization registries to the 10-162 through 10-166 namespace. The prior 10-157 through 10-161 records remain reachable only through explicit historical audit modes.
-- **CR-02:** Rejects an own `DEEPSEEK_MAX_TOKENS` property before state creation, credential access, Compose resolution, Docker spawn, or provider send. Both the resolved service environment and controlled child environment must omit the key.
-- **WR-01:** Replaced unbounded `response.json()` decoding with a 4 MiB byte-bounded stream reader, fatal UTF-8 decoding, and `JSON.parse`. Overflow and decode failures emit stable content-free diagnostics.
-- **Re-review blocker:** Changed the consumed-live archive creator and its fixed zero-argument CLI from the already-existing historical `10-157-CONSUMED-LIVE.json` path to the current `10-162-CONSUMED-LIVE.json` path, while retaining historical 10-160 inputs for authentication.
+Live and legacy completion routes now require `status: passed` and `outcome: passed`; only the five-member preflight route accepts a non-passed gap state. Recovery also binds the claim schema and intended state to the selected route.
+
+## CR-02: certified-byte binding
+
+The child certifier returns its authenticated commit identity. The synchronization parent derives the ordered authority digests from those immutable Git objects, reopens the working authority files, and rejects any mismatch before claim creation. Success-only validators and post-certification mutation are covered by fail-closed tests.
 
 ## Verification
 
-- `EVIDENCELENS_DISABLE_PROVIDER=1 npm test`: 43 files, 779 tests passed.
 - `npm run build`: passed.
-- Focused provider, automatic runner, Docker harness, proof-chain, and synchronization suites passed.
-- Final deep re-review: clean, 0 critical and 0 warning findings; 322 focused tests passed.
-- `git diff --check`: passed before each implementation commit.
-
-## Commits
-
-- `199b20a` — `fix(provider): bound upstream response decoding`
-- `f79ed1c` — `fix(proof): reject ambient output caps`
-- `2fc8aa3` — `fix(proof): rotate current evidence registries`
-- `373eef3` — `fix(proof): create current consumed archive`
+- `npm test`: 795/795 passed with the real provider test excluded by the standard offline script.
+- Focused proof synchronization suite: 172/172 passed.
+- `final-audit-auto`: passed.
+- `audit-live-evidence.mjs`: passed.
+- Provider requests: 0.
+- Docker daemon commands: 0.
+- GitHub Actions runs: 0.
