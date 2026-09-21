@@ -79,7 +79,7 @@
 | REVW-02 | Phase 4 | Complete |
 | REVW-03 | Phase 4 | Complete |
 | REVW-04 | Phase 4 | Complete |
-| PROV-01 | Phase 10 | Gap: credentialed Docker MCP proof |
+| PROV-01 | Phase 10 | Complete |
 | PROV-02 | Phase 5 | Complete |
 | DEPL-01 | Phase 8 | Complete |
 | DEPL-02 | Phase 6 | Complete |
