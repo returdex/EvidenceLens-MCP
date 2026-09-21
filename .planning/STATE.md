@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planned
-stopped_at: Gap-closure Plans 10-162 through 10-166 created; 10-161 retired unexecuted
-last_updated: "2026-09-22T00:00:00.000Z"
+stopped_at: Completed 10-162-PLAN.md
+last_updated: "2026-09-21T17:03:50.284Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 33
-  completed_plans: 29
-  percent: 88
+  completed_plans: 30
+  percent: 91
 ---
 
 # EvidenceLens MCP — Project State
@@ -20,20 +20,20 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 10 — Fail-Closed Provider Startup and Credentialed MCP E2E
+**Current focus:** Phase 10 — fail-closed-provider-startup-and-credentialed-mcp-e2e
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 10 (Fail-Closed Provider Startup and Credentialed MCP E2E) — EXECUTING
-Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default recovery chain
+Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
+Plan: 2 of 5
 
 - Phase: 10 of 11
-- Status: Plan 10-160 remains immutable authority:false gaps evidence; 10-161 is preserved as non-executable superseded history; new recovery plans are ready
-- Progress: commit ab911a5 removes the default max_tokens cap while preserving explicit 1..393216 configuration and bounded local validation; the new chain rotates authority before any new paid activity
-- Last activity: archived 280 historical Phase 10 plan/summary records outside executable discovery; active work is limited to credential-free Plans 10-162/163/164, single-send Plan 10-165, and passed-only synchronization Plan 10-166
+- Status: Plan 10-162 completed offline; the consumed 10-160 generation is sealed as immutable non-authority and current registries begin at 10-162
+- Progress: 1 of 5 active recovery plans complete; Plan 10-163 is the next credential-free certification step
+- Last activity: created the exact 10-160 consumed archive, verified 786 offline tests, and restricted current authority to Plans 10-162 through 10-166
 
 ## Decisions and Assumptions
 
@@ -237,6 +237,8 @@ Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default rec
 - [Phase 10]: Preserve 10-161 byte-for-byte as 10-161-SUPERSEDED.md and exclude it from executable discovery; only Plans 10-162 through 10-166 can acquire current authority.
 - [Phase 10]: The certified default provider request omits max_tokens; explicit maxTokens remains valid only in 1..393216, and no arbitrary output-token preset may be introduced.
 - [Phase 10]: Plans 10-162/163/164 are credential-free preparation, Plan 10-165 permits at most one paid provider send with maxRetries=0 and no replay/fallback, and Plan 10-166 is reachable only from a passed committed chain.
+- [Phase 10]: Generation bc9bd1dd remains immutable authority:false and replay_allowed:false history bound to commit 0c4b1d0. — Consumed paid evidence remains auditable but cannot authorize replay, proof, or synchronization.
+- [Phase 10]: Only the ordered 10-162/163/164/165/166 namespace may acquire current recovery authority. — Stale and mixed archive, certification, image, live-proof, and synchronization tuples must fail before side effects.
 
 ### Blockers
 
@@ -350,16 +352,17 @@ Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default rec
 | Phase 10 P158 | 7min | 2 tasks | 9 files | 2026-09-21 |
 | Phase 10 P159 | 1 min | 1 tasks | 1 files |
 | Phase 10 P160 | 2min | 1 tasks | 8 files |
+| Phase 10 P162 | 6min | 2 tasks | 8 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-20T16:23:05.458Z
-- **Stopped at:** Planned additive gap chain 10-162 through 10-166; ready to execute 10-162
+- **Last session:** 2026-09-21T17:03:50.279Z
+- **Stopped at:** Completed 10-162-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute `$gsd-execute-phase 10 --gaps-only`. The executor must begin with credential-free Plan 10-162, never discover or execute 10-161-SUPERSEDED.md, and stop before 10-166 unless 10-165 is an authenticated pass.
+Execute credential-free Plan 10-163 next. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
 
 ---
-*Last updated: 2026-09-22 after planning the provider-default recovery chain*
+*Last updated: 2026-09-22 after completing Plan 10-162 offline authority rotation*
