@@ -113,7 +113,7 @@ describe("proof chain certifier", () => {
   });
 
   it("accepts only the exact authority-revoked current consumed-live archive", async () => {
-    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-157-CONSUMED-LIVE.json";
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-162-CONSUMED-LIVE.json";
     const archive = JSON.parse(await readFile(path, "utf8"));
     expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "gaps_found" });
     expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "gaps_found" });

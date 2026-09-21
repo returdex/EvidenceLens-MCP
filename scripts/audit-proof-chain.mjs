@@ -285,6 +285,17 @@ const completeLengthConsumedLiveFiles = Object.freeze({
   proof: Object.freeze({ path: `${phase}/10-155-PROOF.json`, sha256: "621d94c3da887c93a70c1be4ce527f097ef6f2c1e269899471ef39cebc391843" }),
   local_validation: Object.freeze({ path: `${phase}/10-155-LOCAL-VALIDATION.json`, sha256: "e0986ca3b963c0d6ab1d445ba6b076270291ba5291b3cc6af434aa9f0f3e2a57" }),
 });
+const providerDefaultConsumedLiveCommit = "0c4b1d0d55e839327d28ec6c93a0c5858b52a8fa";
+const providerDefaultConsumedLiveGeneration = "bc9bd1dd55b095d4a279c87fca014398b5ede9452ff9c5bcb46fa4707af34bde";
+const providerDefaultConsumedLiveFiles = Object.freeze({
+  state: Object.freeze({ path: `${phase}/.10-160-live-state.json`, sha256: "2f2eaddfbabdbe381c614b7f450c157e5a54df6935511e1a1d40264b8a123180" }),
+  terminal: Object.freeze({ path: `${phase}/.10-160-terminal-snapshot.json`, sha256: "11ebd3874afc1e2e24f28c084207cf74aa99a8d118278dc96c6a7c8f43c7f2c4" }),
+  claim: Object.freeze({ path: `${phase}/.10-160-terminal-snapshot.json.claim`, sha256: "6ad27388b5390b7c8677c321eb28edd11c08be9312c2f972ae3181e6cc3812a9" }),
+  transition: Object.freeze({ path: `${phase}/10-160-TRANSITION.json`, sha256: "7f81fd2e71a43327686a93833543fd586374973c5b0e291bc8c9a3d320a82cce" }),
+  execution: Object.freeze({ path: `${phase}/10-160-EXECUTION.json`, sha256: "ce650cc19735087cf4930a4f9164abb8665b548394b3575878924ffb98ba4ef6" }),
+  proof: Object.freeze({ path: `${phase}/10-160-PROOF.json`, sha256: "3da8747e58daa0fcf4f3c08a0e8d69b8469679108eb68d9ad6943ab0d722de02" }),
+  local_validation: Object.freeze({ path: `${phase}/10-160-LOCAL-VALIDATION.json`, sha256: "596b5eed3b2d79cc26914de31d7a298cf09c971cb942bbcb8abaf9f41f5e93ee" }),
+});
 const consumedLiveArtifactKeys = ["commit", "mode", "path", "sha256"];
 const consumedLiveArchiveKeys = ["artifacts", "authority", "certifier_sha256", "generation", "manifest_sha256", "mcp_tools_call_count", "non_planning_tree", "observed_provider_requests", "outcome", "replay_allowed", "reservation_count", "reviewed_commit", "schema", "status"];
 const currentConsumedLiveArchiveKeys = [...consumedLiveArchiveKeys, "cause"];
@@ -292,6 +303,25 @@ const latestConsumedLiveArchiveKeys = [...currentConsumedLiveArchiveKeys, "super
 const immutableImageConsumedLiveArchiveKeys = [...latestConsumedLiveArchiveKeys, "debug_archive_commit"];
 
 export function auditConsumedLiveArchive(value) {
+  if (value?.generation === providerDefaultConsumedLiveGeneration) {
+    if (!exactKeys(value, currentConsumedLiveArchiveKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
+      || value.authority !== false || value.replay_allowed !== false || value.cause !== "provider_json_object_unbalanced"
+      || value.reviewed_commit !== "7c995348a802e24fb1ddb6703c2cb26369cec93d"
+      || value.manifest_sha256 !== "89296db2fd0959f3cff8e0d7be51d28cce47ef616bb3c59459f60ed05547219b"
+      || value.non_planning_tree !== "ca6a62b20f67f97908d53e16d964e427d5123ad78618038c398efe03dad05fb3"
+      || !exactKeys(value.certifier_sha256, ["audit_live_evidence_sha256", "audit_proof_chain_sha256"])
+      || value.certifier_sha256.audit_live_evidence_sha256 !== "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500"
+      || value.certifier_sha256.audit_proof_chain_sha256 !== "69a33efb173afe442b90be3a793b8d17ca6842a5550f997e37aa1f6a64c8f7e5"
+      || value.reservation_count !== 1 || value.mcp_tools_call_count !== 1 || value.observed_provider_requests !== 1
+      || value.outcome !== "request_failed" || value.status !== "gaps_found"
+      || !exactKeys(value.artifacts, Object.keys(providerDefaultConsumedLiveFiles))) fail("PROOF_CHAIN_CONSUMED_LIVE");
+    for (const [name, expected] of Object.entries(providerDefaultConsumedLiveFiles)) {
+      const artifact = value.artifacts[name];
+      if (!exactKeys(artifact, consumedLiveArtifactKeys) || artifact.commit !== providerDefaultConsumedLiveCommit
+        || artifact.mode !== "0600" || artifact.path !== expected.path || artifact.sha256 !== expected.sha256) fail("PROOF_CHAIN_CONSUMED_LIVE");
+    }
+    return Object.freeze({ authority: false, status: "gaps_found" });
+  }
   if (value?.generation === completeLengthConsumedLiveGeneration) {
     if (!exactKeys(value, immutableImageConsumedLiveArchiveKeys) || value.schema !== "evidencelens.consumed-live-archive.v1"
       || value.authority !== false || value.replay_allowed !== false || value.cause !== "complete_length_response_not_yet_accepted"
@@ -676,9 +706,9 @@ export async function createConsumedLiveArchive(path = CURRENT_CONSUMED_LIVE_ARC
   if (path !== CURRENT_CONSUMED_LIVE_ARCHIVE_PATH) fail("PROOF_CHAIN_ARGV");
   const artifacts = {};
   const parsedArtifacts = {};
-  for (const [name, expected] of Object.entries(completeLengthConsumedLiveFiles)) {
+  for (const [name, expected] of Object.entries(providerDefaultConsumedLiveFiles)) {
     let committed;
-    try { committed = (await execFileAsync("git", ["show", `${completeLengthConsumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
+    try { committed = (await execFileAsync("git", ["show", `${providerDefaultConsumedLiveCommit}:${expected.path}`], { encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
     catch { fail("PROOF_CHAIN_CONSUMED_LIVE"); }
     let handle;
     try {
@@ -691,14 +721,14 @@ export async function createConsumedLiveArchive(path = CURRENT_CONSUMED_LIVE_ARC
       const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes); const parsed = JSON.parse(text);
       if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_CONSUMED_LIVE");
       parsedArtifacts[name] = parsed;
-      artifacts[name] = { commit: completeLengthConsumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
+      artifacts[name] = { commit: providerDefaultConsumedLiveCommit, mode: "0600", path: expected.path, sha256: expected.sha256 };
     } catch (error) {
       if (error instanceof Error && error.message === "PROOF_CHAIN_CONSUMED_LIVE") throw error;
       fail("PROOF_CHAIN_CONSUMED_LIVE");
     } finally { await handle?.close().catch(() => undefined); }
   }
-  if (parsedArtifacts.transition.generation !== completeLengthConsumedLiveGeneration
-    || parsedArtifacts.execution.execution_generation !== completeLengthConsumedLiveGeneration
+  if (parsedArtifacts.transition.generation !== providerDefaultConsumedLiveGeneration
+    || parsedArtifacts.execution.execution_generation !== providerDefaultConsumedLiveGeneration
     || parsedArtifacts.proof.status !== "gaps_found" || parsedArtifacts.proof.outcome !== "request_failed"
     || parsedArtifacts.execution.status !== "gaps_found" || parsedArtifacts.execution.outcome !== "request_failed"
     || parsedArtifacts.execution.diagnostic?.code !== "request" || parsedArtifacts.execution.diagnostic?.path !== "transport.fetch"
@@ -709,16 +739,17 @@ export async function createConsumedLiveArchive(path = CURRENT_CONSUMED_LIVE_ARC
     || parsedArtifacts.execution.fixture_count !== 0 || parsedArtifacts.execution.finding_count !== 0
     || parsedArtifacts.execution.exit?.code !== 0 || parsedArtifacts.execution.close?.code !== 0
     || parsedArtifacts.terminal.branch !== "post_fetch_non_pass" || parsedArtifacts.terminal.stream_truncated !== false
-    || parsedArtifacts.terminal.diagnostic?.code !== "provider-finish-reason-length"
+    || parsedArtifacts.terminal.diagnostic?.code !== "provider-json-object-unbalanced"
     || parsedArtifacts.terminal.observed_provider_requests !== 1 || parsedArtifacts.terminal.request_receipt?.observed_provider_requests !== 1
+    || parsedArtifacts.state.max_provider_requests !== 1 || parsedArtifacts.claim.max_provider_requests !== 1 || parsedArtifacts.claim.status !== "consumed"
     || parsedArtifacts.local_validation.validation?.execution !== "passed" || parsedArtifacts.local_validation.validation?.proof !== "passed") fail("PROOF_CHAIN_CONSUMED_LIVE");
-  const value = { artifacts, authority: false, cause: "complete_length_response_not_yet_accepted", certifier_sha256: {
+  const value = { artifacts, authority: false, cause: "provider_json_object_unbalanced", certifier_sha256: {
     audit_live_evidence_sha256: "62d56935b86e2956e83221948c992ca2a44f51b3522f2817678c4d3c66dbd500",
-    audit_proof_chain_sha256: "d9f6ea4dda8fe1ff0cb6a968d012f98fecf15d5b19752069c4b7dcd054fbdabf",
-  }, debug_archive_commit: "403d2a2", generation: completeLengthConsumedLiveGeneration, manifest_sha256: "6b34d456c6b8e8f9817f019b3ee971e5d7b8908c384b255bd832d7726ee0c91d",
-    mcp_tools_call_count: 1, non_planning_tree: "488f1df09f7504d22d78957a27a326b3efb438597d788e32deed62011ab974c2",
+    audit_proof_chain_sha256: "69a33efb173afe442b90be3a793b8d17ca6842a5550f997e37aa1f6a64c8f7e5",
+  }, generation: providerDefaultConsumedLiveGeneration, manifest_sha256: "89296db2fd0959f3cff8e0d7be51d28cce47ef616bb3c59459f60ed05547219b",
+    mcp_tools_call_count: 1, non_planning_tree: "ca6a62b20f67f97908d53e16d964e427d5123ad78618038c398efe03dad05fb3",
     observed_provider_requests: 1, outcome: "request_failed", replay_allowed: false, reservation_count: 1,
-    reviewed_commit: "1b2ce2617818d705f884e8f52e33605ddc9ec85d", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found", superseded_by_fix: "403d2a2" };
+    reviewed_commit: "7c995348a802e24fb1ddb6703c2cb26369cec93d", schema: "evidencelens.consumed-live-archive.v1", status: "gaps_found" };
   auditConsumedLiveArchive(value);
   const bytes = Buffer.from(canonicalJson(value)); const temporary = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
   let temp; let reservation;
