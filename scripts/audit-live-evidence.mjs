@@ -17,9 +17,10 @@ function exact(value, keys) {
 }
 function uniqueFrontmatterStatus(text) {
   if (typeof text !== "string" || !text.startsWith("---\n")) throw new Error("live evidence audit failed");
-  const end = text.indexOf("\n---\n", 4);
-  if (end < 0) throw new Error("live evidence audit failed");
-  const matches = [...text.slice(4, end).matchAll(/^status:\s*(passed|gaps_found)\s*$/gmu)];
+  const lines = text.split("\n");
+  const endLine = lines.slice(1).findIndex((line) => line === "---") + 1;
+  if (endLine < 1) throw new Error("live evidence audit failed");
+  const matches = [...lines.slice(1, endLine).join("\n").matchAll(/^status:\s*(passed|gaps_found)\s*$/gmu)];
   if (matches.length !== 1) throw new Error("live evidence audit failed");
   return matches[0][1];
 }

@@ -47,12 +47,12 @@ describe("automatic immutable review runner", () => {
     expect(source).toContain("AUTOMATIC_TERMINAL_MISSING");
   });
 
-  it("pins production to 10-162/163/164/165 and isolates stale namespaces behind forensic compatibility", async () => {
+  it("pins production to 10-167/168/169/170 and isolates stale namespaces behind forensic compatibility", async () => {
     const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
-    expect(source).toContain("10-162-CONSUMED-LIVE.json");
-    expect(source).toContain("10-163-SOURCE.json");
-    expect(source).toContain("10-164-FINAL-BUILD.json");
-    expect(source).toContain(".10-165-live-state.json");
+    expect(source).toContain("10-167-CONSUMED-LIVE.json");
+    expect(source).toContain("10-167-SOURCE.json");
+    expect(source).toContain("10-168-FINAL-BUILD.json");
+    expect(source).toContain(".10-169-live-state.json");
     expect(source).not.toContain("10-156-SUPERSEDED.md");
     expect(source).not.toContain("10-142-CONSUMED-LIVE.json");
     expect(source).not.toContain("10-137-CONSUMED-LIVE.json");

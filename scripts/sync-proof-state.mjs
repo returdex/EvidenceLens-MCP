@@ -21,10 +21,10 @@ function tupleNamesFor(length) {
 }
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
 export const FIXED_SYNC_PATHS = Object.freeze({
-  forensic: `${phaseDirectory}/10-162-CONSUMED-LIVE.json`, source: `${phaseDirectory}/10-163-SOURCE.json`, review: `${phaseDirectory}/10-163-REVIEW.md`,
-  security: `${phaseDirectory}/10-163-SECURITY.md`, build: `${phaseDirectory}/10-164-FINAL-BUILD.json`, transition: `${phaseDirectory}/10-165-TRANSITION.json`,
-  execution: `${phaseDirectory}/10-165-EXECUTION.json`, proof: `${phaseDirectory}/10-165-PROOF.json`, localValidation: `${phaseDirectory}/10-165-LOCAL-VALIDATION.json`,
-  claim: `${phaseDirectory}/10-166-SYNC-CLAIM.json`, journal: `${phaseDirectory}/10-166-SYNC-JOURNAL.json`,
+  forensic: `${phaseDirectory}/10-167-CONSUMED-LIVE.json`, source: `${phaseDirectory}/10-167-SOURCE.json`, review: `${phaseDirectory}/10-167-REVIEW.md`,
+  security: `${phaseDirectory}/10-167-SECURITY.md`, build: `${phaseDirectory}/10-168-FINAL-BUILD.json`, transition: `${phaseDirectory}/10-169-TRANSITION.json`,
+  execution: `${phaseDirectory}/10-169-EXECUTION.json`, proof: `${phaseDirectory}/10-169-PROOF.json`, localValidation: `${phaseDirectory}/10-169-LOCAL-VALIDATION.json`,
+  claim: `${phaseDirectory}/10-170-SYNC-CLAIM.json`, journal: `${phaseDirectory}/10-170-SYNC-JOURNAL.json`,
   phase7: ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md", phase10: `${phaseDirectory}/10-VERIFICATION.md`, requirements: ".planning/REQUIREMENTS.md",
 });
 const execFileAsync = promisify(execFile);
@@ -68,10 +68,10 @@ function once(text, pattern, replacement) {
 }
 function replaceFrontmatterStatus(text, state) {
   if (!text.startsWith("---\n")) fail("PROOF_SYNC_STALE");
-  const end = text.indexOf("\n---", 4);
-  if (end < 0) fail("PROOF_SYNC_STALE");
-  const frontmatter = once(text.slice(0, end), /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
-  return `${frontmatter}${text.slice(end)}`;
+  const match = /^---\n([\s\S]*?)\n---(?:\n|$)/u.exec(text);
+  if (!match) fail("PROOF_SYNC_STALE");
+  const frontmatter = once(match[1], /^status: (?:passed|gaps_found)$/mu, `status: ${state}`);
+  return `---\n${frontmatter}\n---${text.slice(match[0].length - (match[0].endsWith("\n") ? 1 : 0))}`;
 }
 function replacements(proof, originals) {
   const state = proof.outcome === "passed" ? "passed" : "gaps_found";

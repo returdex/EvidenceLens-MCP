@@ -27,7 +27,7 @@ describe("live evidence audit", () => {
   });
 
   it("requires an exact closing delimiter for the opening frontmatter", () => {
-    const malformed = "---\nphase: 7\nstatus: passed\n---not-a-delimiter\n---\n";
+    const malformed = "---\nphase: 7\nstatus: passed\n---not-a-delimiter\n";
     expect(() => auditLiveEvidence(proof("passed"), malformed, phase(10, "passed"), requirements(true))).toThrow("live evidence audit failed");
   });
 

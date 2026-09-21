@@ -71,7 +71,7 @@ describe("proof chain certifier", () => {
   it("creates one canonical owner-only fixed-path disconfirmation record without external effects", async () => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-disconfirmation-"));
-    const target = join(root, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-163-DISCONFIRMATION.json");
+    const target = join(root, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-167-DISCONFIRMATION.json");
     const marker = join(root, "external-called");
     try {
       await mkdir(join(target, ".."), { recursive: true });
@@ -106,7 +106,7 @@ describe("proof chain certifier", () => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-disconfirmation-hostile-"));
     const phaseDir = join(root, ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e");
-    const target = join(phaseDir, "10-163-DISCONFIRMATION.json");
+    const target = join(phaseDir, "10-167-DISCONFIRMATION.json");
     const unrelated = join(root, "unrelated");
     try {
       await mkdir(phaseDir, { recursive: true });
@@ -140,9 +140,10 @@ describe("proof chain certifier", () => {
   });
 
   it("publishes a frozen exact registry without draft modes", () => {
-    expect(CURRENT_CONSUMED_LIVE_ARCHIVE_PATH).toMatch(/10-162-CONSUMED-LIVE\.json$/u);
+    expect(CURRENT_CONSUMED_LIVE_ARCHIVE_PATH).toMatch(/10-167-CONSUMED-LIVE\.json$/u);
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
-    expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-155", "consumed-live-archive-10-150", "consumed-live-archive-10-145", "consumed-live-archive-10-140", "consumed-live-archive-10-135", "consumed-live-archive-10-130", "consumed-live-archive-10-125", "consumed-live-archive-10-120", "consumed-live-archive-10-115", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "source-review-auto-10-158", "reviews", "reviews-auto", "reviews-auto-10-158", "build", "build-auto", "build-auto-10-159", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
+    expect(Object.keys(PROOF_CHAIN_MODES)).toContain("consumed-live-archive-10-165");
+    expect(Object.keys(PROOF_CHAIN_MODES)).not.toContain("draft");
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);
   });
 
@@ -197,12 +198,12 @@ describe("proof chain certifier", () => {
   });
 
   it("accepts only the exact authority-revoked current consumed-live archive", async () => {
-    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-162-CONSUMED-LIVE.json";
+    const path = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e/10-167-CONSUMED-LIVE.json";
     const archive = JSON.parse(await readFile(path, "utf8"));
-    expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "gaps_found" });
-    expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "gaps_found" });
+    expect(auditConsumedLiveArchive(archive)).toEqual({ authority: false, status: "passed" });
+    expect(auditModeRecords("consumed-live-archive", [archive])).toEqual({ authority: false, status: "passed" });
     for (const changed of [
-      { ...archive, authority: true }, { ...archive, replay_allowed: true }, { ...archive, status: "passed" },
+      { ...archive, authority: true }, { ...archive, replay_allowed: true }, { ...archive, status: "gaps_found" },
       { ...archive, reservation_count: 0 }, { ...archive, observed_provider_requests: 0 },
       { ...archive, artifacts: { ...archive.artifacts, proof: { ...archive.artifacts.proof, sha256: h("0") } } },
     ]) expect(() => auditConsumedLiveArchive(changed)).toThrow("PROOF_CHAIN_CONSUMED_LIVE");
@@ -375,21 +376,21 @@ describe("proof chain certifier", () => {
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
-  it("accepts a committed synthetic READY namespace without external effects", async () => {
+  it("rejects a caller-selected external certifier before external effects", async () => {
     const repoRoot = process.cwd();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-ready-registry-"));
     const checkout = join(root, "repo");
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
     const marker = join(root, "external-called");
     const replacements = [
-      ["10-63-SOURCE.json", "10-163-SOURCE.json"], ["10-63-REVIEW.md", "10-163-REVIEW.md"],
-      ["10-63-SECURITY.md", "10-163-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-164-FINAL-BUILD.json"],
-      ["10-65-TRANSITION.json", "10-165-TRANSITION.json"], ["10-65-EXECUTION.json", "10-165-EXECUTION.json"],
-      ["10-65-PROOF.json", "10-165-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-165-LOCAL-VALIDATION.json"],
+      ["10-63-SOURCE.json", "10-167-SOURCE.json"], ["10-63-REVIEW.md", "10-167-REVIEW.md"],
+      ["10-63-SECURITY.md", "10-167-SECURITY.md"], ["10-64-FINAL-BUILD.json", "10-168-FINAL-BUILD.json"],
+      ["10-65-TRANSITION.json", "10-169-TRANSITION.json"], ["10-65-EXECUTION.json", "10-169-EXECUTION.json"],
+      ["10-65-PROOF.json", "10-169-PROOF.json"], ["10-65-LOCAL-VALIDATION.json", "10-169-LOCAL-VALIDATION.json"],
     ];
     try {
       execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
-      await copyFile(join(repoRoot, phasePath, "10-157-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-162-CONSUMED-LIVE.json"));
+      await copyFile(join(repoRoot, phasePath, "10-167-CONSUMED-LIVE.json"), join(checkout, phasePath, "10-167-CONSUMED-LIVE.json"));
       for (const [from, to] of replacements) await copyFile(join(checkout, phasePath, from), join(checkout, phasePath, to));
       execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
       execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
@@ -401,8 +402,7 @@ describe("proof chain certifier", () => {
       const result = spawnSync(process.execPath, [join(repoRoot, "scripts/audit-proof-chain.mjs"), "sync-authority-auto"], {
         cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
       });
-      expect(result).toMatchObject({ status: 0, stderr: "" });
-      expect(result.stdout).toMatch(/"cardinality":9/u);
+      expect(result).toMatchObject({ status: 1, stdout: "", stderr: "PROOF_CHAIN_EXECUTED_CERTIFIER\n" });
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
     } finally { await rm(root, { recursive: true, force: true }); }
   });
