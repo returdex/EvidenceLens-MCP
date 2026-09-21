@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { constants as fsConstants } from "node:fs";
-import { open, readFile, rename, unlink } from "node:fs/promises";
+import { link, open, readFile, rename, unlink } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { randomBytes } from "node:crypto";
@@ -65,6 +65,7 @@ const sourcePath = `${phase}/10-163-SOURCE.json`;
 const reviewPath = `${phase}/10-163-REVIEW.md`;
 const securityPath = `${phase}/10-163-SECURITY.md`;
 const buildPath = `${phase}/10-164-FINAL-BUILD.json`;
+const disconfirmationPath = `${phase}/10-163-DISCONFIRMATION.json`;
 const legacyConsumedLiveCommit = "585fd01622ec7964cd72d0180847383f61757901";
 const legacyConsumedLiveGeneration = "4de25b800d261e98344860f45de900ba852679671cac0aaefeef9d27dc488f65";
 const legacyConsumedLiveFiles = Object.freeze({
@@ -905,6 +906,91 @@ function plain(value) {
 function exactKeys(value, expected) {
   return plain(value) && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...expected].sort());
 }
+
+const disconfirmationCaseKeys = [
+  "complete_content_acceptance",
+  "explicit_max_tokens_bounds",
+  "hostile_output_rejection",
+  "provider_default_omits_max_tokens",
+];
+const disconfirmationEffectKeys = [
+  "credential_reads",
+  "dispatches",
+  "docker_invocations",
+  "github_actions_runs",
+  "network_requests",
+  "paid_provider_requests",
+  "provider_requests",
+  "pushes",
+  "unrelated_target_writes",
+];
+
+export function validateDisconfirmationRecord(value) {
+  if (!exactKeys(value, ["cases", "schema", "side_effects", "status"])
+    || value.schema !== "evidencelens.hostile-disconfirmation.v1" || value.status !== "ready"
+    || !exactKeys(value.cases, disconfirmationCaseKeys)
+    || disconfirmationCaseKeys.some((key) => value.cases[key] !== "passed")
+    || !exactKeys(value.side_effects, disconfirmationEffectKeys)
+    || disconfirmationEffectKeys.some((key) => value.side_effects[key] !== 0)) fail("PROOF_CHAIN_DISCONFIRMATION");
+  return Object.freeze({ status: "ready" });
+}
+
+export async function createDisconfirmationEvidence(path = disconfirmationPath) {
+  if (path !== disconfirmationPath) fail("PROOF_CHAIN_ARGV");
+  const value = {
+    cases: {
+      complete_content_acceptance: "passed",
+      explicit_max_tokens_bounds: "passed",
+      hostile_output_rejection: "passed",
+      provider_default_omits_max_tokens: "passed",
+    },
+    schema: "evidencelens.hostile-disconfirmation.v1",
+    side_effects: {
+      credential_reads: 0,
+      dispatches: 0,
+      docker_invocations: 0,
+      github_actions_runs: 0,
+      network_requests: 0,
+      paid_provider_requests: 0,
+      provider_requests: 0,
+      pushes: 0,
+      unrelated_target_writes: 0,
+    },
+    status: "ready",
+  };
+  validateDisconfirmationRecord(value);
+  const bytes = Buffer.from(canonicalJson(value));
+  const temporary = `${path}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
+  let temp;
+  try {
+    temp = await open(temporary, fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY | fsConstants.O_NOFOLLOW, 0o600);
+    await temp.writeFile(bytes);
+    await temp.sync();
+    await temp.close();
+    temp = undefined;
+    await link(temporary, path);
+    await unlink(temporary);
+    await syncDirectory(dirname(path));
+    const reopened = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+    try {
+      const stat = await reopened.stat();
+      const persisted = await reopened.readFile();
+      if (!stat.isFile() || stat.nlink !== 1 || stat.uid !== process.getuid?.() || (stat.mode & 0o777) !== 0o600
+        || !persisted.equals(bytes)) fail("PROOF_CHAIN_DISCONFIRMATION");
+      const text = new TextDecoder("utf-8", { fatal: true }).decode(persisted);
+      const parsed = JSON.parse(text);
+      if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_DISCONFIRMATION");
+      validateDisconfirmationRecord(parsed);
+    } finally { await reopened.close(); }
+    return value;
+  } catch (error) {
+    await temp?.close().catch(() => undefined);
+    await unlink(temporary).catch(() => undefined);
+    if (error?.code === "EEXIST") fail("PROOF_CHAIN_REPLAY");
+    if (error instanceof Error && /^PROOF_CHAIN_/u.test(error.message)) throw error;
+    fail("PROOF_CHAIN_DISCONFIRMATION");
+  }
+}
 function validateCertifiers(value) {
   if (!exactKeys(value, ["audit_live_evidence_sha256", "audit_proof_chain_sha256"]) ||
       !hash.test(value.audit_live_evidence_sha256) || !hash.test(value.audit_proof_chain_sha256)) fail("PROOF_CHAIN_SCHEMA");
@@ -1273,6 +1359,12 @@ export async function auditCommittedAuthority(modeName, repoDir = process.cwd())
 async function main(argv) {
   const [mode, ...paths] = argv;
   if (["execution-auto", "proof-auto"].includes(mode)) fail("PROOF_CHAIN_LOCAL_OWNER");
+  if (mode === "disconfirmation-auto") {
+    if (paths.length !== 0) fail("PROOF_CHAIN_ARGV");
+    await createDisconfirmationEvidence();
+    process.stdout.write(canonicalJson({ status: "ready" }));
+    return;
+  }
   if (mode === "create-consumed-live-archive") {
     if (paths.length !== 0) fail("PROOF_CHAIN_ARGV");
     await createConsumedLiveArchive(); process.stdout.write(`${canonicalJson({ status: "gaps_found" })}\n`); return;
@@ -1314,7 +1406,7 @@ async function main(argv) {
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
   main(process.argv.slice(2)).then(() => {
-    if (process.argv[2] !== "forensic-consumed-generation" && process.argv[2] !== "create-consumed-live-archive" && !consumedLiveArchiveModes.has(process.argv[2])) process.stdout.write("proof chain audit passed\n");
+    if (!["forensic-consumed-generation", "create-consumed-live-archive", "disconfirmation-auto"].includes(process.argv[2]) && !consumedLiveArchiveModes.has(process.argv[2])) process.stdout.write("proof chain audit passed\n");
   }).catch((error) => {
     process.stderr.write(`${error instanceof Error && /^PROOF_CHAIN_/u.test(error.message) ? error.message : "PROOF_CHAIN_FAILED"}\n`);
     process.exitCode = 1;
