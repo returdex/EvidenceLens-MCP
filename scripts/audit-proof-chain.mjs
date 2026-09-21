@@ -1412,7 +1412,8 @@ export async function auditCommittedAuthority(modeName, repoDir = process.cwd())
   return Object.freeze({ ...result, cardinality: paths.length, full_commit: committed.fullCommit });
 }
 async function main(argv) {
-  const [mode, ...paths] = argv;
+  const [mode, ...suppliedPaths] = argv;
+  let paths = suppliedPaths;
   if (["execution-auto", "proof-auto"].includes(mode)) fail("PROOF_CHAIN_LOCAL_OWNER");
   if (mode === "disconfirmation-auto") {
     if (paths.length !== 0) fail("PROOF_CHAIN_ARGV");
@@ -1435,12 +1436,16 @@ async function main(argv) {
     process.stdout.write(`${canonicalJson({ status: "ready" })}\n`); return;
   }
   const specification = PROOF_CHAIN_MODES[mode];
+  if (specification && paths.length === 0 && ["source-review-auto", "reviews-auto", "build-auto"].includes(mode)) {
+    paths = [...specification.paths];
+  }
   if (!specification || paths.length !== specification.paths.length || new Set(paths).size !== paths.length
     || paths.some((path, index) => path !== specification.paths[index])) fail("PROOF_CHAIN_ARGV");
   if (specification.committed) await assertCommittedInputs(paths);
   if (mode === "forensic-consumed-generation") await assertConsumedState();
   const records = await Promise.all(paths.map((path) => load(path, mode === "forensic-consumed-generation")));
   auditModeRecords(mode, records);
+  if (["source-review-auto", "reviews-auto", "build-auto"].includes(mode)) await assertExecutedCertifierIdentity(records.at(-1)?.schema === "evidencelens.asvs-review.v2" ? records.at(-1) : records[0]);
   if (mode !== "forensic-consumed-generation" && !consumedLiveArchiveModes.has(mode)) await Promise.all(records.map((record) => auditGitIdentity(record)));
   if (mode === "forensic-consumed-generation") {
     process.stdout.write(`${canonicalJson({ status: "gaps_found" })}\n`);
