@@ -26,7 +26,7 @@ const tupleNames = (length: number) => length === 5
     ? ["forensic", "source", "review", "security", "build", "transition", "execution", "proof", "local_validation"]
     : ["proof", "execution", "build", "source", "review", "security"];
 const authority = vi.fn(async (paths: string[]) => ({
-  branch: paths.length === 5 ? "preflight_started" : "ready",
+  branch: paths.length === 5 ? "preflight_started" : "preflight_authenticated",
   tuple_sha256: Object.fromEntries(await Promise.all(paths.map(async (path, index) => [tupleNames(paths.length)[index], sha256Hex(await readFile(path))]))),
 }));
 const options = (extra = {}) => ({ ...extra, authorityValidator: authority });

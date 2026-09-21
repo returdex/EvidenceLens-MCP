@@ -135,7 +135,7 @@ async function defaultAuthorityValidator(authorityPaths) {
 }
 
 function validateCertifiedAuthority(value, tupleNames) {
-  const expectedBranch = tupleNames === preflightTupleNames ? "preflight_started" : "ready";
+  const expectedBranch = tupleNames === preflightTupleNames ? "preflight_started" : "preflight_authenticated";
   if (!plain(value) || value.branch !== expectedBranch
     || !exact(value.tuple_sha256, tupleNames)
     || tupleNames.some((name) => !hash.test(value.tuple_sha256[name]))) fail("PROOF_SYNC_AUTHORITY");
