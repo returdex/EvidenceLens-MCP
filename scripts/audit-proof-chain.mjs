@@ -1329,7 +1329,7 @@ async function readFixedCommittedTuple(paths, repoDir = process.cwd()) {
   try { fullCommit = (await execFileAsync("git", ["rev-parse", "HEAD^{commit}"], { cwd: repoDir, encoding: "utf8" })).stdout.trim(); }
   catch { fail("PROOF_CHAIN_COMMITTED"); }
   if (!/^[0-9a-f]{40}$/u.test(fullCommit)) fail("PROOF_CHAIN_COMMITTED");
-  const values = [];
+  const values = []; const tupleSha256 = [];
   for (const path of paths) {
     let canonical;
     try { canonical = (await execFileAsync("git", ["show", `${fullCommit}:${path}`], { cwd: repoDir, encoding: null, maxBuffer: 1024 * 1024 })).stdout; }
@@ -1339,6 +1339,7 @@ async function readFixedCommittedTuple(paths, repoDir = process.cwd()) {
       handle = await open(path, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
       const before = await handle.stat({ bigint: true }); const working = await handle.readFile(); const after = await handle.stat({ bigint: true });
       if (!before.isFile() || before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size || !working.equals(canonical)) fail("PROOF_CHAIN_COMMITTED");
+      tupleSha256.push(sha256Hex(working));
       const text = new TextDecoder("utf-8", { fatal: true }).decode(working);
       try { const parsed = JSON.parse(text); if (canonicalJson(parsed) !== text) fail("PROOF_CHAIN_COMMITTED"); values.push(parsed); }
       catch (error) { if (error instanceof Error && error.message === "PROOF_CHAIN_COMMITTED") throw error; values.push(evidence(text)); }
@@ -1347,7 +1348,7 @@ async function readFixedCommittedTuple(paths, repoDir = process.cwd()) {
       fail("PROOF_CHAIN_COMMITTED");
     } finally { await handle?.close().catch(() => undefined); }
   }
-  return { fullCommit, values };
+  return { fullCommit, tupleSha256, values };
 }
 
 async function assertExecutedCertifierIdentity(record, repoDir = process.cwd()) {
@@ -1409,7 +1410,11 @@ export async function auditCommittedAuthority(modeName, repoDir = process.cwd())
   const identityRecord = branch === "preflight_started" ? committed.values[3] : committed.values[1];
   await assertExecutedCertifierIdentity(identityRecord, repoDir);
   const result = registryFromRecords(committed.values.slice(0, registry.paths.length), registry);
-  return Object.freeze({ ...result, cardinality: paths.length, full_commit: committed.fullCommit });
+  const tupleNames = registry === BRANCH_AUTHORITY_REGISTRIES.live
+    ? ["forensic", "source", "review", "security", "build", "transition", "execution", "proof", "local_validation"]
+    : ["forensic", "transition", "execution", "proof", "local_validation"];
+  const tuple_sha256 = Object.fromEntries(tupleNames.map((name, index) => [name, committed.tupleSha256[index]]));
+  return Object.freeze({ ...result, cardinality: paths.length, full_commit: committed.fullCommit, tuple_sha256 });
 }
 async function main(argv) {
   const [mode, ...suppliedPaths] = argv;

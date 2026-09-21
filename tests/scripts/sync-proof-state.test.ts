@@ -2,7 +2,7 @@ import { chmod, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
+import { canonicalJson, sha256Hex } from "../../scripts/audit-live-readiness.mjs";
 import { FIXED_SYNC_PATHS, recoverProofSynchronization, synchronizeProofState } from "../../scripts/sync-proof-state.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -20,7 +20,15 @@ async function fixture(passed = true) {
   return paths;
 }
 
-const authority = vi.fn(async () => undefined);
+const tupleNames = (length: number) => length === 5
+  ? ["forensic", "transition", "execution", "proof", "local_validation"]
+  : length === 9
+    ? ["forensic", "source", "review", "security", "build", "transition", "execution", "proof", "local_validation"]
+    : ["proof", "execution", "build", "source", "review", "security"];
+const authority = vi.fn(async (paths: string[]) => ({
+  branch: paths.length === 5 ? "preflight_started" : "ready",
+  tuple_sha256: Object.fromEntries(await Promise.all(paths.map(async (path, index) => [tupleNames(paths.length)[index], sha256Hex(await readFile(path))]))),
+}));
 const options = (extra = {}) => ({ ...extra, authorityValidator: authority });
 
 describe("sealed proof state synchronization", () => {
@@ -83,11 +91,14 @@ describe("sealed proof state synchronization", () => {
     expect(counters).toEqual({ docker: 0, credential: 0, provider: 0, spawn: 0 });
   });
 
-  it("keeps every non-pass in mutually consistent gap state", async () => {
-    const paths = await fixture(false); await synchronizeProofState(paths, options());
+  it("rejects a non-pass legacy authority before any synchronization write", async () => {
+    const paths = await fixture(false);
+    await expect(synchronizeProofState(paths, options())).rejects.toThrow("PROOF_SYNC_AUTHORITY");
     expect(await readFile(paths.phase7Path, "utf8")).toContain("status: gaps_found");
     expect(await readFile(paths.phase10Path, "utf8")).toContain("status: gaps_found");
     expect(await readFile(paths.requirementsPath, "utf8")).toContain("[ ] **PROV-01**");
+    await expect(readFile(paths.claimPath)).rejects.toThrow();
+    await expect(readFile(paths.journalPath)).rejects.toThrow();
   });
 
   it("fails closed on sealed proof tampering and stale targets", async () => {
@@ -118,19 +129,32 @@ describe("sealed proof state synchronization", () => {
   });
 
   it.each([
-    ["shaped finish-reason assertion", { ...proof(true), finish_reason: "length" }],
-    ["gaps_found live tuple", proof(false)]
-  ] as const)("rejects %s at the authenticated live authority gate before writes", async (_name, forgedProof) => {
+    ["shaped finish-reason assertion", { ...proof(true), finish_reason: "length" }, "live evidence audit failed"],
+    ["gaps_found live tuple", proof(false), "PROOF_SYNC_AUTHORITY"]
+  ] as const)("rejects %s before writes", async (_name, forgedProof, expectedError) => {
     const paths = await fixture(true);
     await writeFile(paths.proofPath, canonicalJson(forgedProof), { mode: 0o600 });
-    const rejectingAuthority = vi.fn(async () => { throw new Error("live tuple is not passed authority"); });
-    await expect(synchronizeProofState(paths, { authorityValidator: rejectingAuthority })).rejects.toThrow("PROOF_SYNC_AUTHORITY");
-    expect(rejectingAuthority).toHaveBeenCalledWith(paths.authorityPaths);
+    await expect(synchronizeProofState(paths, options())).rejects.toThrow(expectedError);
     await expect(readFile(paths.claimPath)).rejects.toThrow();
     await expect(readFile(paths.journalPath)).rejects.toThrow();
     expect(await readFile(paths.phase7Path, "utf8")).toContain("status: gaps_found");
     expect(await readFile(paths.phase10Path, "utf8")).toContain("status: gaps_found");
     expect(await readFile(paths.requirementsPath, "utf8")).toContain("[ ] **PROV-01**");
+  });
+
+  it("rejects a success-only validator and a post-certification tuple mutation", async () => {
+    const paths = await fixture(true);
+    await expect(synchronizeProofState(paths, { authorityValidator: async () => undefined })).rejects.toThrow("PROOF_SYNC_AUTHORITY");
+    await expect(readFile(paths.claimPath)).rejects.toThrow();
+
+    const mutatingValidator = async (members: string[]) => {
+      const certified = await authority(members);
+      await writeFile(members[1], canonicalJson({ changed_after_certification: true }), { mode: 0o600 });
+      return certified;
+    };
+    await expect(synchronizeProofState(paths, { authorityValidator: mutatingValidator })).rejects.toThrow("PROOF_SYNC_AUTHORITY");
+    await expect(readFile(paths.claimPath)).rejects.toThrow();
+    await expect(readFile(paths.journalPath)).rejects.toThrow();
   });
 
   it("rejects changed tuple members and changed certifier authority during recovery", async () => {

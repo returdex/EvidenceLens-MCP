@@ -19,6 +19,12 @@ function tupleNamesFor(length) {
   if (length === 6) return legacyTupleNames;
   fail("PROOF_SYNC_AUTHORITY");
 }
+function claimSchemaFor(length) {
+  if (length === 5) return "evidencelens.preflight-sync-claim.v1";
+  if (length === 9) return "evidencelens.live-sync-claim.v1";
+  if (length === 6) return "evidencelens.sync-claim.v2";
+  fail("PROOF_SYNC_AUTHORITY");
+}
 const phaseDirectory = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
 export const FIXED_SYNC_PATHS = Object.freeze({
   forensic: `${phaseDirectory}/10-167-CONSUMED-LIVE.json`, source: `${phaseDirectory}/10-167-SOURCE.json`, review: `${phaseDirectory}/10-167-REVIEW.md`,
@@ -112,26 +118,45 @@ async function createJournal(path, claimSha256) { const value = { claim_sha256: 
 
 async function defaultAuthorityValidator(authorityPaths) {
   try {
-    await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
-      cwd: process.cwd(), env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
+    const { stdout } = await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
+      cwd: process.cwd(), encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
     });
+    return JSON.parse(stdout.trim().split("\n")[0]);
   } catch { fail("PROOF_SYNC_AUTHORITY"); }
+}
+
+function validateCertifiedAuthority(value, tupleNames) {
+  const expectedBranch = tupleNames === preflightTupleNames ? "preflight_started" : "ready";
+  if (!plain(value) || value.branch !== expectedBranch
+    || !exact(value.tuple_sha256, tupleNames)
+    || tupleNames.some((name) => !hash.test(value.tuple_sha256[name]))) fail("PROOF_SYNC_AUTHORITY");
+  return value;
+}
+
+function validateProofState(proof, tupleNames) {
+  if (tupleNames === preflightTupleNames) {
+    if (proof.status !== "gaps_found" || proof.outcome === "passed") fail("PROOF_SYNC_AUTHORITY");
+  } else if (proof.status !== "passed" || proof.outcome !== "passed") fail("PROOF_SYNC_AUTHORITY");
 }
 
 async function authenticateAuthority(paths, validator = defaultAuthorityValidator) {
   if (!Array.isArray(paths.authorityPaths) || ![5, 6, 9].includes(paths.authorityPaths.length)
     || new Set(paths.authorityPaths).size !== paths.authorityPaths.length || !paths.authorityPaths.includes(paths.proofPath)
     || typeof validator !== "function") fail("PROOF_SYNC_AUTHORITY");
-  try { await validator(paths.authorityPaths); } catch (error) {
+  const tupleNames = tupleNamesFor(paths.authorityPaths.length);
+  let certified;
+  try { certified = validateCertifiedAuthority(await validator(paths.authorityPaths), tupleNames); } catch (error) {
     if (error instanceof Error && error.message.startsWith("PROOF_SYNC_")) throw error;
     fail("PROOF_SYNC_AUTHORITY");
   }
   const bytes = await Promise.all(paths.authorityPaths.map((path) => readBytes(path)));
-  const tupleNames = tupleNamesFor(paths.authorityPaths.length);
+  const observed = Object.fromEntries(tupleNames.map((name, index) => [name, sha256Hex(bytes[index])]));
+  if (tupleNames.some((name) => observed[name] !== certified.tuple_sha256[name])) fail("PROOF_SYNC_AUTHORITY");
   const proofIndex = paths.authorityPaths.indexOf(paths.proofPath);
   return {
+    branch: certified.branch,
     proof: bytes[proofIndex],
-    tuple_sha256: Object.fromEntries(tupleNames.map((name, index) => [name, sha256Hex(bytes[index])])),
+    tuple_sha256: observed,
   };
 }
 
@@ -160,10 +185,10 @@ export async function synchronizeProofState(paths, options = {}) {
   const sealed = await loadProof(paths.proofPath);
   if (!sealed.bytes.equals(authority.proof)) fail("PROOF_SYNC_AUTHORITY");
   const authorityNames = tupleNamesFor(paths.authorityPaths.length);
-  if (authorityNames === preflightTupleNames && (sealed.value.status !== "gaps_found" || sealed.value.outcome === "passed")) fail("PROOF_SYNC_AUTHORITY");
+  validateProofState(sealed.value, authorityNames);
   const targets = targetPaths(paths); const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targets[name])])));
   const next = replacements(sealed.value, originals);
-  const claimSchema = paths.authorityPaths.length === 5 ? "evidencelens.preflight-sync-claim.v1" : paths.authorityPaths.length === 9 ? "evidencelens.live-sync-claim.v1" : "evidencelens.sync-claim.v2";
+  const claimSchema = claimSchemaFor(paths.authorityPaths.length);
   const claim = validateClaim({ intended_state: sealed.value.outcome === "passed" ? "passed" : "gaps_found", original_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(originals[name])])), replacement_sha256: Object.fromEntries(names.map((name) => [name, sha256Hex(next[name])])), schema: claimSchema, tuple_sha256: authority.tuple_sha256 });
   const claimBytes = Buffer.from(canonicalJson(claim)); await exclusive(paths.claimPath, claimBytes);
   if (options.interruptAt === "after-claim") fail("PROOF_SYNC_INTERRUPTED");
@@ -175,6 +200,9 @@ export async function recoverProofSynchronization(paths, _sideEffects = undefine
   const authority = await authenticateAuthority(paths, options.authorityValidator);
   const sealed = await loadProof(paths.proofPath); const claimRecord = await readCanonical(paths.claimPath, validateClaim);
   const tupleNames = tupleNamesFor(paths.authorityPaths.length);
+  validateProofState(sealed.value, tupleNames);
+  const intendedState = sealed.value.outcome === "passed" ? "passed" : "gaps_found";
+  if (claimRecord.value.schema !== claimSchemaFor(paths.authorityPaths.length) || claimRecord.value.intended_state !== intendedState) fail("PROOF_SYNC_TAMPERED");
   if (!sealed.bytes.equals(authority.proof) || tupleNames.some((name) => authority.tuple_sha256[name] !== claimRecord.value.tuple_sha256[name])) fail("PROOF_SYNC_TAMPERED");
   const originals = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readBytes(targetPaths(paths)[name])])));
   // Derive replacements from any still-original target, or reconstruct them from
