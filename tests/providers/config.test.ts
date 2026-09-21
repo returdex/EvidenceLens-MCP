@@ -27,8 +27,8 @@ function expectSanitizedConfigurationFailure(attempt: () => unknown, hostileValu
 
 describe("provider configuration", () => {
   it("applies defaults and accepts every allowlisted model", () => {
-    expect(DEFAULT_PROVIDER_MAX_TOKENS).toBe(8000);
-    expect(parseProviderConfig({ localConfig: { apiKey: key }, env: {} })).toMatchObject({ baseUrl: "https://api.deepseek.com", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000, maxTokens: 8000 });
+    expect(DEFAULT_PROVIDER_MAX_TOKENS).toBe(20000);
+    expect(parseProviderConfig({ localConfig: { apiKey: key }, env: {} })).toMatchObject({ baseUrl: "https://api.deepseek.com", model: DEEPSEEK_MODELS[0], timeoutMs: 30000, maxRetries: 2, maxTotalWaitMs: 10000, maxTokens: 20000 });
     for (const model of DEEPSEEK_MODELS) expect(parseProviderConfig({ localConfig: { apiKey: key, model }, env: {} }).model).toBe(model);
   });
 

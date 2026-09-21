@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import { createDeepSeekProvider, computeProviderInputFingerprint, type DeepSeekTransport } from "../../src/providers/deepseek.js";
 import { serializeProviderError } from "../../src/providers/errors.js";
 import {
+  MAX_PROVIDER_CITATIONS,
   MAX_PROVIDER_FINDINGS,
+  MAX_PROVIDER_FOLLOW_UP_CHARS,
+  MAX_PROVIDER_FOLLOW_UP_CHECKS,
   MAX_PROVIDER_PROSE_CHARS,
+  MAX_PROVIDER_TITLE_CHARS,
   PROVIDER_PROMPT_VERSION,
   type ProviderReviewRequest
 } from "../../src/providers/types.js";
@@ -207,9 +211,55 @@ describe("DeepSeek provider adapter", () => {
     await expect(createDeepSeekProvider(config, transport).review(request)).resolves.toMatchObject({ provider: "deepseek", modelFindings: [{ id: "provider-1" }] });
   });
 
+  it("accepts a complete boundary-sized response whose byte envelope exceeds the former numeric output ceiling", async () => {
+    const evidence = Array.from({ length: MAX_PROVIDER_CITATIONS }, (_, index) => ({
+      evidenceId: `evidence-${index}`,
+      role: "assignment_brief" as const,
+      type: "text" as const,
+      contentHash: String(index).repeat(64),
+      sourceReference: `inline://evidence-${index}`,
+      references: [{ kind: "text" as const, startLine: index + 1, endLine: index + 1 }],
+      text: `Requirement ${index}`
+    }));
+    const boundaryWithoutFingerprint = { ...requestWithoutFingerprint, evidence, inference: { ...requestWithoutFingerprint.inference, maxTokens: 20_000 } };
+    const boundaryRequest: ProviderReviewRequest = { ...boundaryWithoutFingerprint, inputFingerprint: computeProviderInputFingerprint(boundaryWithoutFingerprint) };
+    const citations = evidence.map((item, index) => ({ evidenceId: item.evidenceId, location: { kind: "text" as const, startLine: index + 1, endLine: index + 1 }, visual: false }));
+    const evidenceIds = citations.map((citation) => citation.evidenceId);
+    const findings = Array.from({ length: MAX_PROVIDER_FINDINGS }, (_, index) => ({
+      id: `boundary-${index}`,
+      type: "evidence_quality" as const,
+      severity: "high" as const,
+      confidence: "unknown" as const,
+      title: "t".repeat(MAX_PROVIDER_TITLE_CHARS),
+      summary: "s".repeat(MAX_PROVIDER_PROSE_CHARS),
+      observation: "o".repeat(MAX_PROVIDER_PROSE_CHARS),
+      interpretation: "i".repeat(MAX_PROVIDER_PROSE_CHARS),
+      uncertainty: "u".repeat(MAX_PROVIDER_PROSE_CHARS),
+      followUpChecks: Array.from({ length: MAX_PROVIDER_FOLLOW_UP_CHECKS }, () => "f".repeat(MAX_PROVIDER_FOLLOW_UP_CHARS)),
+      evidenceIds,
+      citations
+    }));
+    const content = JSON.stringify({ findings });
+    expect(Buffer.byteLength(content, "utf8")).toBeGreaterThan(8_000);
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { content } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider({ ...config, maxTokens: 20_000 }, transport).review(boundaryRequest))
+      .resolves.toMatchObject({ modelFindings: { length: MAX_PROVIDER_FINDINGS } });
+  });
+
+  it("never treats reasoning_content as the final JSON result", async () => {
+    const diagnostics = recordingSink();
+    const transport: DeepSeekTransport = {
+      fetch: async () => new Response(JSON.stringify({ choices: [{ finish_reason: "length", message: { content: "", reasoning_content: JSON.stringify(draft) } }] }), { status: 200, headers: { "content-type": "application/json" } })
+    };
+    await expect(createDeepSeekProvider(config, transport, diagnostics).review(request)).rejects.toMatchObject({ code: "PROVIDER_INVALID_RESPONSE" });
+    expect(diagnostics.features).toEqual([{ path: ["provider", "content", "object"], code: "no_candidate" }]);
+  });
+
   it.each([
     ["truncated JSON", JSON.stringify(draft).slice(0, -1), { path: ["provider", "content", "object"], code: "unbalanced" }],
-    ["empty content", "", { path: ["provider", "message", "reasoning_content"], code: "invalid_type" }],
+    ["empty content", "", { path: ["provider", "content", "object"], code: "no_candidate" }],
     ["multiple JSON roots", `${JSON.stringify(draft)}\n${JSON.stringify(draft)}`, { path: ["provider", "content", "object"], code: "multiple_candidates" }],
     ["balanced structural ambiguity", `${JSON.stringify(draft)}\n[]`, { path: ["provider", "content", "object"], code: "structural_context" }],
     ["wrong root", JSON.stringify({ findings: draft.findings, extra: true }), { path: ["provider", "content", "object"], code: "wrong_root" }],

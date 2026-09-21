@@ -399,7 +399,7 @@ describe("provider review MCP boundary", () => {
       }
     };
     expect(payload(await handleReviewRequest(request, { provider }))).toMatchObject({ ok: true });
-    expect(capturedRequest?.inference).toEqual({ model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 8000 });
+    expect(capturedRequest?.inference).toEqual({ model: "deepseek-v4-pro", temperature: 0.2, maxTokens: 20000 });
     const { inputFingerprint, ...withoutFingerprint } = capturedRequest!;
     expect(inputFingerprint).toBe(computeProviderInputFingerprint(withoutFingerprint));
     expect(inputFingerprint).not.toBe(computeProviderInputFingerprint({

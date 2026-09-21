@@ -254,13 +254,9 @@ function parseDrafts(response: unknown, diagnostics?: DiagnosticSink): ProviderF
   }
   const message = choice?.message;
   const content = message?.content;
-  const reasoningContent = message?.reasoning_content;
   if (typeof content !== "string") invalidResponse(diagnostics, ["provider", "message", "content"], "invalid_type");
   if (content.length > 1_000_000) invalidResponse(diagnostics, ["provider", "content", "bytes"], "too_big");
-  if (content.length === 0 && typeof reasoningContent !== "string") {
-    invalidResponse(diagnostics, ["provider", "message", "reasoning_content"], "invalid_type");
-  }
-  const candidates = [content, ...(typeof content === "string" && content.length === 0 ? [reasoningContent] : [])];
+  const candidates = [content];
   let extractionFailure: JsonObjectExtractionFailure = "no_candidate";
   for (const candidate of candidates) {
     if (typeof candidate !== "string" || candidate.length > 1_000_000 || candidate.length === 0) continue;

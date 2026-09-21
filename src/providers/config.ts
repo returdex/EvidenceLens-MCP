@@ -3,7 +3,7 @@ import { ProviderError } from "./errors.js";
 
 export const PROVIDER_CONFIG_FILE = ".evidencelens.local.json" as const;
 export const DEEPSEEK_MODELS = ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v4-flash-vision-exp"] as const;
-export const DEFAULT_PROVIDER_MAX_TOKENS = 8_000 as const;
+export const DEFAULT_PROVIDER_MAX_TOKENS = 20_000 as const;
 const DEFAULTS = { baseUrl: "https://api.deepseek.com", model: "deepseek-v4-pro", timeoutMs: 30_000, maxRetries: 2, maxTotalWaitMs: 10_000, temperature: 0.2, maxTokens: DEFAULT_PROVIDER_MAX_TOKENS } as const;
 const CONFIG_KEYS = ["apiKey", "baseUrl", "model", "timeoutMs", "maxRetries", "maxTotalWaitMs", "temperature", "maxTokens"] as const;
 type ConfigKey = typeof CONFIG_KEYS[number];

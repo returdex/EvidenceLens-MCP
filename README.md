@@ -42,7 +42,7 @@ Runtime reads the ignored `.evidencelens.local.json` file (or explicitly supplie
   "maxRetries": 2,
   "maxTotalWaitMs": 10000,
   "temperature": 0.2,
-  "maxTokens": 8000
+  "maxTokens": 20000
 }
 ```
 

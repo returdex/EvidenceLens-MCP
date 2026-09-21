@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 export const REVIEW_SENTINEL = "EVIDENCELENS_REVIEW_PREFLIGHT_SENTINEL";
 export const PROOF_SENTINEL = "EVIDENCELENS_PROOF_PREFLIGHT_SENTINEL";
 const SECRET_SLOT = "<runtime-secret>";
-export const CERTIFIED_LIVE_MAX_TOKENS = "8000";
+export const CERTIFIED_LIVE_MAX_TOKENS = "20000";
 const execFileAsync = promisify(execFile);
 const providerKeys = [
   "DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL", "DEEPSEEK_MODEL", "DEEPSEEK_TIMEOUT_MS",

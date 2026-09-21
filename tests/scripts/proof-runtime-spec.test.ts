@@ -28,7 +28,7 @@ function composeObject() {
     DEEPSEEK_MAX_RETRIES: "2",
     DEEPSEEK_MAX_TOTAL_WAIT_MS: "10000",
     DEEPSEEK_TEMPERATURE: "0.2",
-    DEEPSEEK_MAX_TOKENS: "8000",
+    DEEPSEEK_MAX_TOKENS: "20000",
     EVIDENCELENS_ALLOWED_ROOTS: "course=/workspace",
   };
   return {
@@ -45,17 +45,17 @@ function composeObject() {
 
 describe("credential-free proof runtime specification", () => {
   it("fixes the certified live output cap and ignores hostile host overrides", async () => {
-    expect(CERTIFIED_LIVE_MAX_TOKENS).toBe("8000");
+    expect(CERTIFIED_LIVE_MAX_TOKENS).toBe("20000");
     const runCompose = vi.fn(async (_file: string, _args: string[], options: { env: NodeJS.ProcessEnv }) => {
       expect(options.env.DEEPSEEK_MAX_TOKENS).toBeUndefined();
       return { stdout: JSON.stringify(composeObject()), stderr: "" };
     });
     const result = await deriveProofRuntimeSpec(runCompose, { DEEPSEEK_MAX_TOKENS: "1" });
-    expect(result.review.environment.DEEPSEEK_MAX_TOKENS).toBe("8000");
-    expect(result.proof.environment.DEEPSEEK_MAX_TOKENS).toBe("8000");
+    expect(result.review.environment.DEEPSEEK_MAX_TOKENS).toBe("20000");
+    expect(result.proof.environment.DEEPSEEK_MAX_TOKENS).toBe("20000");
   });
 
-  it.each(["4000", "20000"])("rejects a compose contract that changes both live caps to %s", async (maxTokens) => {
+  it.each(["4000", "8000"])("rejects a compose contract that changes both live caps to %s", async (maxTokens) => {
     const value = composeObject();
     value.services.review.environment.DEEPSEEK_MAX_TOKENS = maxTokens;
     value.services.proof.environment.DEEPSEEK_MAX_TOKENS = maxTokens;
@@ -129,7 +129,7 @@ describe("credential-free proof runtime specification", () => {
     ["extra environment", (proof: any) => { proof.environment.EXTRA = "x"; }],
     ["proof variable leak", (proof: any) => { proof.environment.DEEPSEEK_MODEL = "EVIDENCELENS_PROOF_DEEPSEEK_API_KEY"; }],
     ["lower output cap", (proof: any) => { proof.environment.DEEPSEEK_MAX_TOKENS = "4000"; }],
-    ["higher output cap", (proof: any) => { proof.environment.DEEPSEEK_MAX_TOKENS = "20000"; }],
+    ["higher output cap", (proof: any) => { proof.environment.DEEPSEEK_MAX_TOKENS = "20001"; }],
   ])("rejects mutated runtime contract: %s", async (_name, mutate) => {
     const spec = await deriveProofRuntimeSpec(async () => ({ stdout: JSON.stringify(composeObject()), stderr: "" }), {});
     mutate(spec.proof);
