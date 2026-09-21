@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planned
-stopped_at: Completed 10-162-PLAN.md
-last_updated: "2026-09-21T17:03:50.284Z"
+stopped_at: Completed 10-162.1-PLAN.md
+last_updated: "2026-09-21T17:22:37.448Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 34
-  completed_plans: 30
-  percent: 88
+  completed_plans: 31
+  percent: 91
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,12 +28,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 
 - Phase: 10 of 11
-- Status: Plan 10-162 completed offline; the consumed 10-160 generation is sealed as immutable non-authority and current registries begin at 10-162
-- Progress: 1 of 6 active recovery plans complete; Plan 10-162.1 is the next credential-free prerequisite, followed by unchanged Plan 10-163 certification
-- Last activity: created the exact 10-160 consumed archive, verified 786 offline tests, and restricted current authority to Plans 10-162 through 10-166
+- Status: Plans 10-162 and 10-162.1 completed offline; the consumed generation remains immutable non-authority and the Plan 10-163 prerequisite now exists
+- Progress: 2 of 6 active recovery plans complete; Plan 10-163 offline certification is next
+- Last activity: added and verified the canonical owner-only zero-effect disconfirmation generator and artifact with 79 focused offline tests
 
 ## Decisions and Assumptions
 
@@ -239,6 +239,7 @@ Plan: 2 of 6
 - [Phase 10]: Plans 10-162/163/164 are credential-free preparation, Plan 10-165 permits at most one paid provider send with maxRetries=0 and no replay/fallback, and Plan 10-166 is reachable only from a passed committed chain.
 - [Phase 10]: Generation bc9bd1dd remains immutable authority:false and replay_allowed:false history bound to commit 0c4b1d0. — Consumed paid evidence remains auditable but cannot authorize replay, proof, or synchronization.
 - [Phase 10]: Only the ordered 10-162/163/164/165/166 namespace may acquire current recovery authority. — Stale and mixed archive, certification, image, live-proof, and synchronization tuples must fail before side effects.
+- [Phase 10]: Keep disconfirmation-auto outside PROOF_CHAIN_MODES and bind it to one private fixed destination with atomic no-replace installation. — Preserves authority separation and prevents caller-selected or overwrite-capable evidence creation.
 
 ### Blockers
 
@@ -353,16 +354,17 @@ Plan: 2 of 6
 | Phase 10 P159 | 1 min | 1 tasks | 1 files |
 | Phase 10 P160 | 2min | 1 tasks | 8 files |
 | Phase 10 P162 | 6min | 2 tasks | 8 files |
+| Phase 10 P162.1 | 8min | 1 tasks | 3 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T17:03:50.279Z
-- **Stopped at:** Completed 10-162-PLAN.md
+- **Last session:** 2026-09-21T17:22:37.442Z
+- **Stopped at:** Completed 10-162.1-PLAN.md
 - **Resume file:** None
 
 ## Next Action
 
-Execute credential-free Plan 10-162.1 next, then resume Plan 10-163 unchanged. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
+Execute credential-free Plan 10-163 next. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
 
 ---
-*Last updated: 2026-09-22 after completing Plan 10-162 offline authority rotation*
+*Last updated: 2026-09-22 after completing the offline Plan 10-162.1 disconfirmation prerequisite*
