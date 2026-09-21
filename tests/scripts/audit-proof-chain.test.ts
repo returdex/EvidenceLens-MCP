@@ -451,14 +451,7 @@ describe("proof chain certifier", () => {
         ["10-169-EXECUTION.json", canonicalJson(execution)], ["10-169-PROOF.json", canonicalJson(proofRecord)],
         ["10-169-LOCAL-VALIDATION.json", canonicalJson(validation)],
       ];
-      for (const [name, bytes] of artifacts) {
-        const artifactPath = join(checkout, phasePath, name);
-        await writeFile(artifactPath, bytes, { mode: 0o600 });
-        // Git checkouts materialize tracked files as 0644. writeFile's mode is
-        // creation-only, so explicitly restore the owner-only evidence mode
-        // when this rehearsal overwrites already-committed current artifacts.
-        await chmod(artifactPath, 0o600);
-      }
+      for (const [name, bytes] of artifacts) await writeFile(join(checkout, phasePath, name), bytes, { mode: 0o600 });
       execFileSync("git", ["add", phasePath], { cwd: checkout });
       execFileSync("git", ["commit", "-qm", "materialize synthetic passed authority"], { cwd: checkout });
       for (const command of ["docker", "curl", "wget", "gh"]) await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
@@ -512,7 +505,6 @@ describe("proof chain certifier", () => {
         expect(result.stdout).toBe("");
         expect([
           "PROOF_CHAIN_COMMITTED\n",
-          "PROOF_CHAIN_EXECUTED_CERTIFIER\n",
           "PROOF_CHAIN_IDENTITY\n",
           "PROOF_CHAIN_LOCAL_VALIDATION\n",
           "PROOF_CHAIN_RECEIPT\n",
