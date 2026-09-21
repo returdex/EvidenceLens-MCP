@@ -121,7 +121,16 @@ async function defaultAuthorityValidator(authorityPaths) {
     const { stdout } = await execFileAsync(process.execPath, ["scripts/audit-proof-chain.mjs", "sync-authority-auto"], {
       cwd: process.cwd(), encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1" }, maxBuffer: 1024 * 1024,
     });
-    return JSON.parse(stdout.trim().split("\n")[0]);
+    const certified = JSON.parse(stdout.trim().split("\n")[0]);
+    if (!plain(certified) || !/^[0-9a-f]{40}$/u.test(certified.full_commit)) fail("PROOF_SYNC_AUTHORITY");
+    const tupleNames = tupleNamesFor(authorityPaths.length);
+    const committedBytes = await Promise.all(authorityPaths.map(async (path) => (await execFileAsync("git", ["show", `${certified.full_commit}:${path}`], {
+      cwd: process.cwd(), encoding: null, maxBuffer: 1024 * 1024,
+    })).stdout));
+    return {
+      branch: certified.branch,
+      tuple_sha256: Object.fromEntries(tupleNames.map((name, index) => [name, sha256Hex(committedBytes[index])])),
+    };
   } catch { fail("PROOF_SYNC_AUTHORITY"); }
 }
 
