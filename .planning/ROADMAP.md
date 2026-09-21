@@ -217,7 +217,7 @@ Plans:
   1. Missing, invalid, or conflicting provider settings fail closed with sanitized errors in local and Docker startup paths, while explicit offline disablement remains available.
   2. A credentialed, opt-in structural test exercises stdio `tools/call`, four evidence roles, allowlisted filesystem reads, provider DTO conversion, finding merge, and final public schema validation.
   3. Phase 7 receives independent verification evidence and routine tests remain credential-free and no-network.
-**Plans**: 5 active executable plans; 280 historical plan/summary records archived outside executable discovery
+**Plans**: 6 active executable plans; 280 historical plan/summary records archived outside executable discovery
 
 Plans:
 The entries through Wave 155 below are historical index entries only. Their files are preserved in `.planning/archive/phase-10-pre-provider-default/` and must not be loaded or executed during current recovery work. Current executable discovery begins at Wave 156 / Plan 10-162.
@@ -697,7 +697,10 @@ The entries through Wave 155 below are historical index entries only. Their file
 **Wave 156** *(gap closure; blocked on immutable 10-160 non-pass)*
 - [x] 10-162-PLAN.md — Archive 10-160, retire 10-161 and rotate all fixed authority registries
 
-**Wave 157** *(gap closure; blocked on Wave 156 completion)*
+**Wave 156.1** *(offline prerequisite gap closure; blocked on Wave 156 completion)*
+- [ ] 10-162.1-PLAN.md — Add the canonical owner-only zero-effect disconfirmation evidence generator required by Plan 10-163
+
+**Wave 157** *(gap closure; blocked on Wave 156.1 completion)*
 - [ ] 10-163-PLAN.md — Offline recertification of provider-default max_tokens omission and exact source authority
 
 **Wave 158** *(gap closure; blocked on Wave 157 completion)*
@@ -715,7 +718,7 @@ Cross-cutting constraints:
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
 - Local evidence authority uses atomic write/rename, exact content hashes, immutable identities and same-process validation; Git commits preserve durable copies but are not local validation prerequisites.
-- Plans 10-38 through 10-166 have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
+- Plans 10-38 through 10-166, including prerequisite Plan 10-162.1, have GitHub Actions run budget 0: no push, workflow/repository dispatch, rerun, or retrigger loop is permitted.
 - The default provider request omits `max_tokens`; only explicit user configuration in the validated range 1..393216 may serialize it. No arbitrary output-token preset is part of the certified chain.
 - Local tests, builds, Docker builds and Docker runs are not quota-limited and may be repeated when implementation or recertification requires them. Only GitHub Actions executions consume the finite CI quota; provider/API calls retain their separate paid-request ceilings.
 - Rebuilding is prohibited only inside a live-proof invocation when necessary to preserve its certified immutable-image identity. Stale local images may be replaced before live execution without a separate build-count authorization.

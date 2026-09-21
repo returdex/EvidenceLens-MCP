@@ -8,9 +8,9 @@ last_updated: "2026-09-21T17:03:50.284Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 33
+  total_plans: 34
   completed_plans: 30
-  percent: 91
+  percent: 88
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,11 +28,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 2 of 5
+Plan: 2 of 6
 
 - Phase: 10 of 11
 - Status: Plan 10-162 completed offline; the consumed 10-160 generation is sealed as immutable non-authority and current registries begin at 10-162
-- Progress: 1 of 5 active recovery plans complete; Plan 10-163 is the next credential-free certification step
+- Progress: 1 of 6 active recovery plans complete; Plan 10-162.1 is the next credential-free prerequisite, followed by unchanged Plan 10-163 certification
 - Last activity: created the exact 10-160 consumed archive, verified 786 offline tests, and restricted current authority to Plans 10-162 through 10-166
 
 ## Decisions and Assumptions
@@ -362,7 +362,7 @@ Plan: 2 of 5
 
 ## Next Action
 
-Execute credential-free Plan 10-163 next. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
+Execute credential-free Plan 10-162.1 next, then resume Plan 10-163 unchanged. Never discover or execute `10-161-SUPERSEDED.md`, and stop before Plan 10-166 unless Plan 10-165 is an authenticated pass.
 
 ---
 *Last updated: 2026-09-22 after completing Plan 10-162 offline authority rotation*
