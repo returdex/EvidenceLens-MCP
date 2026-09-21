@@ -9,8 +9,8 @@ progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 192
-  completed_plans: 148
-  percent: 77
+  completed_plans: 147
+  percent: 76
 ---
 
 # EvidenceLens MCP — Project State
@@ -228,12 +228,12 @@ Plan: 162 planned; Plans 10-162 through 10-166 form the new provider-default rec
 - [Phase 10]: Preserve generation e2547175c86af57836fe18a8bcdb395b8f81094b839fc6983633563b59490291 as immutable authority:false gaps evidence after exactly one provider send; finish_reason remained length at the certified 8000-token boundary.
 - [Phase 10]: Preserve retired Plan 10-156 byte-exact as non-executable 10-156-SUPERSEDED.md; the consumed non-pass cannot be retried, replayed, overwritten, promoted or rediscovered as an executable plan.
 - [Phase 10]: Generation e2547175 remains immutable authority:false and replay_allowed:false history; correction 403d2a2 cannot promote the consumed request.
-- [Phase 10]: Only the ordered 10-157 through 10-161 namespace may acquire current recovery authority; 10-156-SUPERSEDED.md remains outside executable discovery.
+- [Phase 10]: The ordered 10-157 through 10-160 chain is consumed non-authority history, and retired 10-161 is preserved outside executable discovery; only the ordered 10-162 through 10-166 namespace may acquire current recovery authority.
 - [Phase 10]: Treat stop and length identically after the two-value finish gate; only independently complete, bounded and locally proven content may succeed.
 - [Phase 10]: Authorize Plan 10-159 only from reviewed commit 7c99534, canonical manifest 89296db2, aggregate tree ca6a62b2 and the current certifier pair.
 - [Phase 10]: Promote generation 778344e9bcbea6190bf4b7ed6371d8345acf2187a183738509a06d749f38b692 as the sole READY Plan 10-159 image after one producer build and zero verifier rebuilds.
 - [Phase 10]: Preserve the exact Plan 10-158 source identity and complete stop/length acceptance contract; no production or test source changed during Plan 10-159.
-- [Phase 10]: Generation bc9bd1dd remains immutable authority:false after exactly one provider send returned provider-json-object-unbalanced; Plan 10-161 is blocked and the generation cannot be replayed or synchronized.
+- [Phase 10]: Generation bc9bd1dd remains immutable authority:false after exactly one provider send returned provider-json-object-unbalanced; unexecuted Plan 10-161 is preserved as non-executable superseded history, and the generation cannot be replayed or synchronized.
 - [Phase 10]: Preserve 10-161 byte-for-byte as 10-161-SUPERSEDED.md and exclude it from executable discovery; only Plans 10-162 through 10-166 can acquire current authority.
 - [Phase 10]: The certified default provider request omits max_tokens; explicit maxTokens remains valid only in 1..393216, and no arbitrary output-token preset may be introduced.
 - [Phase 10]: Plans 10-162/163/164 are credential-free preparation, Plan 10-165 permits at most one paid provider send with maxRetries=0 and no replay/fallback, and Plan 10-166 is reachable only from a passed committed chain.
