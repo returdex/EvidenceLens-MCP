@@ -147,3 +147,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Allow only `stop` and `length` into the unchanged bounded extraction/schema/provenance pipeline, preserve early rejection for all other finish reasons, and omit Vision thinking overrides.
 - **Files changed:** src/providers/deepseek.ts, tests/providers/deepseek.test.ts, tests/contract/review-tool.test.ts, README.md, docs/mcp-contract.md
 ---
+
+## provider-json-object-unbalanced — Certified output budget and final-content authority were unsound
+- **Date:** 2026-09-21
+- **Error patterns:** provider-json-object-unbalanced, maxTokens 8000, message.content, reasoning_content, finish_reason length, one provider send
+- **Root cause:** The discarded live bytes cannot prove the provider's exact truncation mechanism, but offline evidence confirmed two contract defects: the certified `max_tokens=8000` ceiling was below the maximum response admitted by the shared four-finding contract, and empty `message.content` incorrectly delegated final-result authority to `reasoning_content`.
+- **Fix:** Raise product and certified review/proof `max_tokens` to the existing validated configuration ceiling of 20000, preserve provider-default Vision behavior, and accept final JSON exclusively from `message.content`; incomplete or otherwise invalid content remains fail closed.
+- **Files changed:** src/providers/config.ts, src/providers/deepseek.ts, scripts/proof-runtime-spec.mjs, compose.yaml, README.md, tests/providers/config.test.ts, tests/providers/deepseek.test.ts, tests/scripts/proof-runtime-spec.test.ts, tests/contract/review-provider.test.ts
+---
