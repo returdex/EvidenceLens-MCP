@@ -25,10 +25,20 @@ const options = (extra = {}) => ({ ...extra, authorityValidator: authority });
 
 describe("sealed proof state synchronization", () => {
   it("uses fixed 10-166 outputs and includes the 10-165 LOCAL_VALIDATION", () => {
-    expect(FIXED_SYNC_PATHS.claim).toMatch(/10-166-SYNC-CLAIM\.json$/u);
-    expect(FIXED_SYNC_PATHS.journal).toMatch(/10-166-SYNC-JOURNAL\.json$/u);
-    expect(FIXED_SYNC_PATHS.localValidation).toMatch(/10-165-LOCAL-VALIDATION\.json$/u);
-    expect(FIXED_SYNC_PATHS.forensic).toMatch(/10-162-CONSUMED-LIVE\.json$/u);
+    expect(FIXED_SYNC_PATHS.claim).toMatch(/10-170-SYNC-CLAIM\.json$/u);
+    expect(FIXED_SYNC_PATHS.journal).toMatch(/10-170-SYNC-JOURNAL\.json$/u);
+    expect(FIXED_SYNC_PATHS.localValidation).toMatch(/10-169-LOCAL-VALIDATION\.json$/u);
+    expect(FIXED_SYNC_PATHS.forensic).toMatch(/10-167-CONSUMED-LIVE\.json$/u);
+  });
+
+  it("preserves body horizontal rules byte-for-byte during status replacement", async () => {
+    const paths = await fixture(true);
+    const body = "\n## Evidence\n\n---\n\nstatus: retained-evidence-status\n";
+    await writeFile(paths.phase7Path, `---\nphase: 7\nstatus: gaps_found\n---\n${body}`);
+    await writeFile(paths.phase10Path, `---\nphase: 10\nstatus: gaps_found\n---\n${body}`);
+    await synchronizeProofState(paths, options());
+    expect(await readFile(paths.phase7Path, "utf8")).toBe(`---\nphase: 7\nstatus: passed\n---\n${body}`);
+    expect(await readFile(paths.phase10Path, "utf8")).toBe(`---\nphase: 10\nstatus: passed\n---\n${body}`);
   });
 
   it("permits a five-member authority only for gaps_found and tags its claim distinctly", async () => {

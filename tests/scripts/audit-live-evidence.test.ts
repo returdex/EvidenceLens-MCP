@@ -26,6 +26,11 @@ describe("live evidence audit", () => {
     expect(auditLiveEvidence(proof("passed"), phase(7, "passed"), phase10, requirements(true))).toEqual({ passed: true });
   });
 
+  it("requires an exact closing delimiter for the opening frontmatter", () => {
+    const malformed = "---\nphase: 7\nstatus: passed\n---not-a-delimiter\n---\n";
+    expect(() => auditLiveEvidence(proof("passed"), malformed, phase(10, "passed"), requirements(true))).toThrow("live evidence audit failed");
+  });
+
   it.each(["diagnostic_failed", "preflight_failed", "review_failed", "build_failed", "request_failed", "timeout", "protocol_failed", "disclosure", "malformed", "abnormal_close"])("forces %s to the three-way gap state", (outcome) => {
     expect(auditLiveEvidence(proof(outcome), phase(7, "gaps_found"), phase(10, "gaps_found"), requirements(false))).toEqual({ passed: false });
   });

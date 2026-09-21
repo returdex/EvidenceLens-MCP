@@ -152,12 +152,25 @@ describe("proof chain certifier", () => {
     expect(FINAL_AUDIT_REGISTRIES.preflight).toHaveLength(7);
     expect(FINAL_AUDIT_REGISTRIES.live).toHaveLength(11);
     for (const paths of [BRANCH_AUTHORITY_REGISTRIES.preflight.paths, BRANCH_AUTHORITY_REGISTRIES.live.paths]) {
-      expect(paths[0]).toMatch(/10-162-CONSUMED-LIVE\.json$/u);
-      expect(paths.at(-1)).toMatch(/10-165-LOCAL-VALIDATION\.json$/u);
+      expect(paths[0]).toMatch(/10-167-CONSUMED-LIVE\.json$/u);
+      expect(paths.at(-1)).toMatch(/10-169-LOCAL-VALIDATION\.json$/u);
       expect(new Set(paths).size).toBe(paths.length);
       expect(Object.isFrozen(paths)).toBe(true);
     }
     expect(BRANCH_AUTHORITY_REGISTRIES.preflight.schema).not.toBe(BRANCH_AUTHORITY_REGISTRIES.live.schema);
+  });
+
+  it("rotates current source, build, live and final-audit authority to 10-167 through 10-170", () => {
+    expect(PROOF_CHAIN_MODES["source-review-auto"].paths).toEqual([
+      expect.stringMatching(/10-167-SOURCE\.json$/u), expect.stringMatching(/10-167-REVIEW\.md$/u),
+    ]);
+    expect(PROOF_CHAIN_MODES["reviews-auto"].paths).toEqual([
+      expect.stringMatching(/10-167-SOURCE\.json$/u), expect.stringMatching(/10-167-REVIEW\.md$/u), expect.stringMatching(/10-167-SECURITY\.md$/u),
+    ]);
+    expect(PROOF_CHAIN_MODES["build-auto"].paths[0]).toMatch(/10-168-FINAL-BUILD\.json$/u);
+    expect(FINAL_AUDIT_REGISTRIES.live.slice(-2)).toEqual([
+      expect.stringMatching(/10-170-SYNC-CLAIM\.json$/u), expect.stringMatching(/10-170-SYNC-JOURNAL\.json$/u),
+    ]);
   });
 
   it("rejects local audit modes without a live owner capability and after capability closure", () => {
