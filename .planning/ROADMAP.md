@@ -713,7 +713,7 @@ The entries through Wave 155 below are historical index entries only. Their file
 - 10-166-SUPERSEDED.md — Preserved unexecuted synchronization plan; the 10-165 proof binds the pre-fix certifier and cannot authorize current synchronization
 
 **Wave 161** *(offline gap closure; blocked on immutable 10-165 historical evidence)*
-- [ ] 10-167-PLAN.md — Fix actual-executed-certifier binding, hostile-test and rehearse full passed synchronization/final audit, then certify exact source/review/security authority
+- [x] 10-167-PLAN.md — Fix actual-executed-certifier binding, hostile-test and rehearse full passed synchronization/final audit, then certify exact source/review/security authority
 
 **Wave 162** *(local immutable build; blocked on Wave 161)*
 - [ ] 10-168-PLAN.md — Build once from the exact 10-167 Git archive and independently authenticate the existing image without rebuild
@@ -783,7 +783,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 5/6 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 6/9 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
