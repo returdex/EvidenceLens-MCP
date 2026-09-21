@@ -39,7 +39,7 @@ describe("automatic immutable review runner", () => {
 
   it("binds live execution to the authenticated production harness without a spawnOnce authority", async () => {
     const source = await readFile("scripts/automatic-live-review.mjs", "utf8");
-    expect(source).toContain('import { runReviewHarness } from "./docker-review-real.mjs"');
+    expect(source).toContain('runReviewHarness } from "./docker-review-real.mjs"');
     expect(source).toContain("options.runHarness ?? runReviewHarness");
     expect(source).not.toContain("spawnOnce");
     expect(source).toContain("recordRequestEvidence(options.path, requestEvidence)");
@@ -83,6 +83,20 @@ describe("automatic immutable review runner", () => {
       max_retries: 0,
       max_tools_calls: 1,
     });
+  });
+
+  it("rejects an ambient output cap before state creation, credential access, or harness spawn", async () => {
+    const root = await mkdtemp(join(tmpdir(), "automatic-max-tokens-"));
+    const readCredential = vi.fn(async () => "must-not-be-read");
+    const runHarness = vi.fn();
+    await expect(runStatefulAutomaticLive({
+      authenticateReadyBuild: vi.fn(), generation: "f".repeat(64),
+      harnessOptions: { environment: { DEEPSEEK_MAX_TOKENS: "20000" } },
+      path: join(root, "state.json"), terminalPath: join(root, "terminal.json"),
+      readCredential, runHarness,
+    })).rejects.toThrow("AUTOMATIC_PREFLIGHT");
+    expect(readCredential).not.toHaveBeenCalled();
+    expect(runHarness).not.toHaveBeenCalled();
   });
 
   it("exports substantive fixed production dispatchers without the unconditional stub", async () => {

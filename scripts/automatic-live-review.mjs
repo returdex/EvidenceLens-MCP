@@ -13,7 +13,7 @@ import { auditExecutionAuto, auditProofAuto, closeTerminalOwnerCapability, creat
 import { produceBuildGeneration } from "./docker-proof-produce.mjs";
 import { verifyExistingBuild } from "./docker-proof-verify-existing.mjs";
 import { authenticateTerminalSnapshot, completeWrapper, createAuthenticatedTerminalSnapshot, createProofState, readProofState, recordProviderAttempt, recordRequestEvidence, transitionProofState } from "./live-proof-state.mjs";
-import { runReviewHarness } from "./docker-review-real.mjs";
+import { assertProviderDefaultOutputEnvironment, runReviewHarness } from "./docker-review-real.mjs";
 
 export const AUTOMATIC_BUILD_CONTROLS = Object.freeze({ build_count: 1, verifier_build_count: 0 });
 export const AUTOMATIC_LIVE_CONTROLS = Object.freeze({
@@ -115,6 +115,8 @@ export async function runAutomaticBuild(options) {
 
 export async function runStatefulAutomaticLive(options) {
   if (!plain(options) || typeof options.path !== "string" || typeof options.terminalPath !== "string" || !lower64.test(options.generation)) fail("AUTOMATIC_PREFLIGHT");
+  try { assertProviderDefaultOutputEnvironment(options.harnessOptions?.environment ?? process.env); }
+  catch { fail("AUTOMATIC_PREFLIGHT"); }
   const interrupt = typeof options.interrupt === "function" ? options.interrupt : async () => undefined;
   const terminalKey = randomBytes(32);
   const finishEvidence = async (snapshot) => {

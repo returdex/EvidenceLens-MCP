@@ -936,6 +936,22 @@ describe("credentialed Docker review harness", () => {
     expect(result.toolsCallTimeoutMs).toBeGreaterThan(result.providerTimeoutMs);
   });
 
+  it("rejects every explicit output cap before Compose resolution and omits it from the child environment", async () => {
+    expect(() => liveProofPreflight(
+      { DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "0" },
+      { DEEPSEEK_MAX_TOKENS: "20000" }
+    )).toThrowError(new Error("[docker-review:preflight] failed"));
+    expect(() => liveProofPreflight(
+      { DEEPSEEK_TIMEOUT_MS: "30000", DEEPSEEK_MAX_RETRIES: "0", DEEPSEEK_MAX_TOKENS: "20000" },
+      {}
+    )).toThrowError(new Error("[docker-review:preflight] failed"));
+
+    const runCompose = vi.fn();
+    await expect(resolveLiveProof(runCompose, { DEEPSEEK_MAX_TOKENS: "20000" }))
+      .rejects.toThrowError(new Error("[docker-review:preflight] failed"));
+    expect(runCompose).not.toHaveBeenCalled();
+  });
+
   it("resolves the real review Compose preflight without a proof-only credential", async () => {
     const environment = {
       PATH: process.env.PATH,

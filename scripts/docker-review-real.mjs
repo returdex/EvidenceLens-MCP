@@ -193,8 +193,15 @@ export function isJsonRpcResponse(message, expectedId) {
   return hasResult !== hasError;
 }
 
+export function assertProviderDefaultOutputEnvironment(environment) {
+  if (environment === null || typeof environment !== "object"
+    || Object.prototype.hasOwnProperty.call(environment, "DEEPSEEK_MAX_TOKENS")) fail("preflight");
+}
+
 export function liveProofPreflight(resolvedEnvironment, baseEnvironment = process.env) {
   try {
+    assertProviderDefaultOutputEnvironment(baseEnvironment);
+    assertProviderDefaultOutputEnvironment(resolvedEnvironment);
     const retry = resolvedEnvironment?.DEEPSEEK_MAX_RETRIES;
     const rawTimeout = resolvedEnvironment?.DEEPSEEK_TIMEOUT_MS ?? "30000";
     if (retry !== "0" || !/^(?:0|[1-9]\d*)$/u.test(rawTimeout)) fail("preflight");
@@ -538,6 +545,7 @@ export async function resolveReviewModel(runCompose = execFileAsync) {
 }
 
 export async function resolveLiveProof(runCompose = execFileAsync, baseEnvironment = process.env) {
+  assertProviderDefaultOutputEnvironment(baseEnvironment);
   const childEnv = {
     ...baseEnvironment,
     DEEPSEEK_MAX_RETRIES: "0",
