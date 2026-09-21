@@ -4,7 +4,7 @@ import { chmod, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
+import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, CURRENT_CONSUMED_LIVE_ARCHIVE_PATH, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
 
 const h = (c: string) => c.repeat(64);
@@ -69,6 +69,7 @@ describe("proof chain certifier", () => {
   const boundProof = { ...proofRecord, source_sha256: digest(source), review_sha256: digest(deep), security_sha256: digest(asvs) };
 
   it("publishes a frozen exact registry without draft modes", () => {
+    expect(CURRENT_CONSUMED_LIVE_ARCHIVE_PATH).toMatch(/10-162-CONSUMED-LIVE\.json$/u);
     expect(Object.isFrozen(PROOF_CHAIN_MODES)).toBe(true);
     expect(Object.keys(PROOF_CHAIN_MODES)).toEqual(["consumed-live-archive", "consumed-live-archive-10-155", "consumed-live-archive-10-150", "consumed-live-archive-10-145", "consumed-live-archive-10-140", "consumed-live-archive-10-135", "consumed-live-archive-10-130", "consumed-live-archive-10-125", "consumed-live-archive-10-120", "consumed-live-archive-10-115", "consumed-live-archive-10-110", "consumed-live-archive-10-105", "consumed-live-archive-10-100", "consumed-live-archive-10-95", "consumed-live-archive-10-90", "consumed-live-archive-10-85", "consumed-live-archive-10-80", "consumed-live-archive-10-75", "consumed-live-archive-10-70", "consumed-live-archive-10-65", "consumed-live-archive-10-59", "forensic-consumed-generation", "source-review", "source-review-auto", "source-review-auto-10-158", "reviews", "reviews-auto", "reviews-auto-10-158", "build", "build-auto", "build-auto-10-159", "diagnostic", "repair", "repair-set", "execution", "proof", "sync-authority"]);
     expect(PROOF_CHAIN_MODES.build.schemas).toEqual(["evidencelens.build.v2", "evidencelens.source.v2", "evidencelens.deep-review.v2", "evidencelens.asvs-review.v2"]);

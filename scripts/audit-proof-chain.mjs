@@ -54,6 +54,7 @@ const finishReasonConsumedLivePath = `${phase}/10-142-CONSUMED-LIVE.json`;
 const promptV2ConsumedLivePath = `${phase}/10-147-CONSUMED-LIVE.json`;
 const certifiedOutputConsumedLivePath = `${phase}/10-152-CONSUMED-LIVE.json`;
 const completeLengthConsumedLivePath = `${phase}/10-157-CONSUMED-LIVE.json`;
+export const CURRENT_CONSUMED_LIVE_ARCHIVE_PATH = `${phase}/10-162-CONSUMED-LIVE.json`;
 const consumedLivePath = `${phase}/10-112-CONSUMED-LIVE.json`;
 const localValidationPath = `${phase}/10-165-LOCAL-VALIDATION.json`;
 const forensicPath = `${phase}/10-162-CONSUMED-LIVE.json`;
@@ -671,8 +672,8 @@ async function syncDirectory(path) {
   try { await handle.sync(); } finally { await handle.close(); }
 }
 
-export async function createConsumedLiveArchive(path = completeLengthConsumedLivePath) {
-  if (path !== completeLengthConsumedLivePath) fail("PROOF_CHAIN_ARGV");
+export async function createConsumedLiveArchive(path = CURRENT_CONSUMED_LIVE_ARCHIVE_PATH) {
+  if (path !== CURRENT_CONSUMED_LIVE_ARCHIVE_PATH) fail("PROOF_CHAIN_ARGV");
   const artifacts = {};
   const parsedArtifacts = {};
   for (const [name, expected] of Object.entries(completeLengthConsumedLiveFiles)) {
