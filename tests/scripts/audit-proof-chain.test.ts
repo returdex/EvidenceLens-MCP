@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { auditBuildAuto, auditChainRecord, auditConsumedGenerationForensic, auditConsumedGenerationForensicFile, auditConsumedLiveArchive, auditExecution, auditExecutionAuto, auditLiveProof, auditModeRecords, auditProofAuto, auditRepairSet, auditSourceAndReports, BRANCH_AUTHORITY_REGISTRIES, closeTerminalOwnerCapability, createTerminalOwnerCapability, CURRENT_CONSUMED_LIVE_ARCHIVE_PATH, FINAL_AUDIT_REGISTRIES, PROOF_CHAIN_MODES, validateDisconfirmationRecord, validateTerminalOwnerReceipt } from "../../scripts/audit-proof-chain.mjs";
 import { canonicalJson } from "../../scripts/audit-live-readiness.mjs";
+import { createNonPlanningManifest } from "../../scripts/live-review-source-set.mjs";
 
 const h = (c: string) => c.repeat(64);
 const digest = (value: unknown) => createHash("sha256").update(canonicalJson(value)).digest("hex");
@@ -403,6 +404,66 @@ describe("proof chain certifier", () => {
         cwd: checkout, encoding: "utf8", env: { ...process.env, EVIDENCELENS_DISABLE_PROVIDER: "1", PATH: `${root}:${process.env.PATH}` },
       });
       expect(result).toMatchObject({ status: 1, stdout: "", stderr: "PROOF_CHAIN_EXECUTED_CERTIFIER\n" });
+      await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
+  it("rehearses a complete committed passed synchronization and final audit offline", async () => {
+    const repoRoot = process.cwd();
+    const root = await mkdtemp(join(tmpdir(), "evidencelens-passed-rehearsal-"));
+    const checkout = join(root, "repo");
+    const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
+    const marker = join(root, "external-called");
+    try {
+      execFileSync("git", ["clone", "-q", "--no-hardlinks", repoRoot, checkout]);
+      execFileSync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: checkout });
+      execFileSync("git", ["config", "user.name", "Evidence Fixture"], { cwd: checkout });
+      const reviewedCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: checkout, encoding: "utf8" }).trim();
+      const manifest = await createNonPlanningManifest({ repoDir: checkout, reviewedCommit });
+      const manifestByPath = new Map(manifest.entries.map((entry) => [entry.path, entry.sha256]));
+      const syntheticIdentity = {
+        certifier_sha256: {
+          audit_live_evidence_sha256: manifestByPath.get("scripts/audit-live-evidence.mjs"),
+          audit_proof_chain_sha256: manifestByPath.get("scripts/audit-proof-chain.mjs"),
+        },
+        manifest_sha256: digest(manifest.entries), non_planning_tree: manifest.nonPlanningTree, reviewed_commit: reviewedCommit,
+      };
+      const readJson = async (name: string) => JSON.parse(await readFile(join(checkout, phasePath, name), "utf8"));
+      const source = { ...syntheticIdentity, schema: "evidencelens.source.v2", status: "ready" };
+      const deep = { ...syntheticIdentity, schema: "evidencelens.deep-review.v2", status: "ready" };
+      const asvs = { ...syntheticIdentity, schema: "evidencelens.asvs-review.v2", status: "ready" };
+      const build = { ...(await readJson("10-164-FINAL-BUILD.json")), ...syntheticIdentity };
+      const transition = await readJson("10-165-TRANSITION.json");
+      const execution = { ...(await readJson("10-165-EXECUTION.json")), ...syntheticIdentity, build_generation: build.generation, image_id: build.image_id };
+      const proofRecord = {
+        ...(await readJson("10-165-PROOF.json")), ...syntheticIdentity,
+        build_sha256: digest(build), execution_sha256: digest(execution), review_sha256: digest(deep), security_sha256: digest(asvs), source_sha256: digest(source),
+      };
+      const validation = {
+        ...(await readJson("10-165-LOCAL-VALIDATION.json")), generation: transition.generation,
+        artifact_sha256: { execution: digest(execution), proof: digest(proofRecord), transition: digest(transition) },
+      };
+      const artifacts: Array<[string, string]> = [
+        ["10-167-SOURCE.json", canonicalJson(source)],
+        ["10-167-REVIEW.md", `# Synthetic deep review\n\n\`\`\`json evidencelens-evidence\n${JSON.stringify(deep)}\n\`\`\`\n`],
+        ["10-167-SECURITY.md", `---\nstatus: ready\n---\n# Synthetic security review\n\n\`\`\`json evidencelens-evidence\n${JSON.stringify(asvs)}\n\`\`\`\n`],
+        ["10-168-FINAL-BUILD.json", canonicalJson(build)], ["10-169-TRANSITION.json", canonicalJson(transition)],
+        ["10-169-EXECUTION.json", canonicalJson(execution)], ["10-169-PROOF.json", canonicalJson(proofRecord)],
+        ["10-169-LOCAL-VALIDATION.json", canonicalJson(validation)],
+      ];
+      for (const [name, bytes] of artifacts) await writeFile(join(checkout, phasePath, name), bytes, { mode: 0o600 });
+      execFileSync("git", ["add", phasePath], { cwd: checkout });
+      execFileSync("git", ["commit", "-qm", "materialize synthetic passed authority"], { cwd: checkout });
+      for (const command of ["docker", "curl", "wget", "gh"]) await writeFile(join(root, command), `#!/bin/sh\nprintf called >> '${marker}'\nexit 99\n`, { mode: 0o700 });
+      const env = { ...process.env, PATH: `${root}:${process.env.PATH}`, EVIDENCELENS_DISABLE_PROVIDER: "1" };
+      const sync = spawnSync(process.execPath, ["scripts/sync-proof-state.mjs", "recover"], { cwd: checkout, encoding: "utf8", env });
+      expect(sync).toMatchObject({ status: 0, stderr: "", stdout: "proof state synchronization complete\n" });
+      expect(await readFile(join(checkout, ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md"), "utf8")).toContain("\n---\n");
+      execFileSync("git", ["add", ".planning/phases/07-deepseek-vision-provenance-closure/07-VERIFICATION.md", `${phasePath}/10-VERIFICATION.md`, ".planning/REQUIREMENTS.md", `${phasePath}/10-170-SYNC-CLAIM.json`, `${phasePath}/10-170-SYNC-JOURNAL.json`], { cwd: checkout });
+      execFileSync("git", ["commit", "-qm", "commit synthetic synchronization"], { cwd: checkout });
+      const finalAudit = spawnSync(process.execPath, ["scripts/audit-proof-chain.mjs", "final-audit-auto"], { cwd: checkout, encoding: "utf8", env });
+      expect(finalAudit).toMatchObject({ status: 0, stderr: "" });
+      expect(finalAudit.stdout).toMatch(/"cardinality":11/u);
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
     } finally { await rm(root, { recursive: true, force: true }); }
   });
