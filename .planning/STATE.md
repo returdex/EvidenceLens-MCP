@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planned
-stopped_at: Completed 10-168-PLAN.md
-last_updated: "2026-09-21T18:46:03.088Z"
+stopped_at: Completed 10-169-PLAN.md
+last_updated: "2026-09-21T18:53:49.970Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 37
-  completed_plans: 36
-  percent: 97
+  completed_plans: 37
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-22)
 ## Current Position
 
 Phase: 10 (fail-closed-provider-startup-and-credentialed-mcp-e2e) — EXECUTING
-Plan: 8 of 9
+Plan: 9 of 9
 
 - Phase: 10 of 11
 - Status: Plans 10-162 through 10-165, 10-167 and 10-168 are complete; 10-165 is immutable non-replay history and only the 10-167 through 10-170 chain may acquire current authority
@@ -254,6 +254,8 @@ Plan: 8 of 9
 - [Phase 10]: Opening frontmatter ends only at its first exact delimiter line; Markdown body horizontal rules remain body content. — Preserves legitimate Markdown while keeping status authority unique and fail closed.
 - [Phase 10]: Promote generation 3b51c2fbc828b97a0876cd62110c044cc7e1b6e260b9b942e63bf2e1a5198ca8 as the sole READY Plan 10-168 image after one producer build and zero verifier rebuilds. — The fixed exact-source producer and independent no-rebuild verifier both passed.
 - [Phase 10]: Preserve the exact Plan 10-167 source and certifier identities; no production or test source changed during Plan 10-168. — The build consumed only the certified Git archive.
+- [Phase 10]: Generation 7d707d4781e33b41ecf5bab21f4f406e5c34b65222604e3b03d58ef44376b57a is the sole Plan 10-169 live generation and cannot be replayed. — The fixed coordinator consumed one exclusive generation and retry or replay is prohibited.
+- [Phase 10]: The passed result used exactly one reservation, tools/call, provider send and authenticated receipt against the immutable Plan 10-168 image. — The sealed counters and terminal receipt prove the one-request budget and immutable-image continuity.
 
 ### Blockers
 
@@ -374,11 +376,12 @@ Plan: 8 of 9
 | Phase 10 P165 | 6min | 1 tasks | 7 files | 2026-09-22 |
 | Phase 10 P167 | 22min | 2 tasks | 16 files |
 | Phase 10 P168 | 4min | 1 tasks | 1 files |
+| Phase 10 P169 | 5min | 1 tasks | 7 files |
 
 ## Session Continuity
 
-- **Last session:** 2026-09-21T18:46:03.083Z
-- **Stopped at:** Completed 10-168-PLAN.md
+- **Last session:** 2026-09-21T18:53:49.965Z
+- **Stopped at:** Completed 10-169-PLAN.md
 - **Resume file:** None
 
 ## Next Action

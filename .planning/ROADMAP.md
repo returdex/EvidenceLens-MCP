@@ -719,7 +719,7 @@ The entries through Wave 155 below are historical index entries only. Their file
 - [x] 10-168-PLAN.md — Build once from the exact 10-167 Git archive and independently authenticate the existing image without rebuild
 
 **Wave 163** *(one automatic paid request; blocked on Wave 162)*
-- [ ] 10-169-PLAN.md — Run exactly one fresh non-replay immutable-image Docker MCP request with maxRetries=0
+- [x] 10-169-PLAN.md — Run exactly one fresh non-replay immutable-image Docker MCP request with maxRetries=0
 
 **Wave 164** *(passed-only synchronization; reachable only from passed Wave 163)*
 - [ ] 10-170-PLAN.md — Transactionally synchronize the new passed chain and independently audit committed project truth
@@ -783,7 +783,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. DeepSeek Vision Provenance Closure | 1/1 | Complete | 2026-08-25 |
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
-| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 7/9 | In Progress|  |
+| 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 8/9 | In Progress|  |
 | 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
 
 ## Dependencies
