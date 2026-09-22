@@ -117,6 +117,8 @@ describe("configured filesystem policy", () => {
 
     const policy = createFilesystemPolicy([{ id: "course", path: root }]);
     const authorized = policy.authorize({ kind: "filesystem", rootId: "course", relativePath: "alias.txt" });
+    expect(authorized.relativePath).toBe("brief.txt");
+    expect(authorized.resolvedPath).toBe(join(realpathSync(root), "brief.txt"));
     expect(authorized.reference).toBe("filesystem://course/brief.txt");
     expect(Object.keys(policy)).not.toEqual(expect.arrayContaining(["write", "delete", "rename", "mkdir", "chmod"]));
   });

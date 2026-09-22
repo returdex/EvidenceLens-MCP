@@ -65,6 +65,9 @@ function defaultAdapter(): FilesystemReadAdapter {
         throw stableError("ACCESS_DENIED", "Filesystem access denied");
       }
       if (process.platform !== "linux") throw new Error("Anchored filesystem reads are unavailable on this platform");
+      if (typeof constants.O_DIRECTORY !== "number" || typeof constants.O_NOFOLLOW !== "number") {
+        throw stableError("ACCESS_DENIED", "Filesystem access denied");
+      }
 
       let directory: FileHandle | undefined;
       try {
@@ -73,16 +76,16 @@ function defaultAdapter(): FilesystemReadAdapter {
         // construction, so refusing this trusted proc hop would reject every
         // Linux container read with ELOOP. Keep O_NOFOLLOW on each untrusted
         // evidence path component below.
-        directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0));
+        directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | constants.O_DIRECTORY);
         for (const component of components.slice(0, -1)) {
-          const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0));
+          const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
           await directory.close();
           directory = next;
         }
 
         const leaf = components[components.length - 1];
         if (leaf === undefined) throw new Error("Invalid anchored filesystem path");
-        const file = await nodeOpen(`/proc/self/fd/${directory.fd}/${leaf}`, flags | (constants.O_NOFOLLOW ?? 0));
+        const file = await nodeOpen(`/proc/self/fd/${directory.fd}/${leaf}`, flags | constants.O_NOFOLLOW);
         await directory.close();
         directory = undefined;
         return {
@@ -132,10 +135,11 @@ export async function readFilesystemEvidence(
       if (authorized.rootDescriptor !== undefined && adapter.openAnchored !== undefined) {
         descriptor = await adapter.openAnchored(authorized.rootDescriptor, authorized.relativePath, constants.O_RDONLY);
       } else if (authorized.rootDescriptor === undefined && adapter.stat !== undefined && adapter.open !== undefined) {
+        if (typeof constants.O_NOFOLLOW !== "number") throw stableError("ACCESS_DENIED", "Filesystem access denied");
         targetStat = await adapter.stat(authorized.resolvedPath);
         if (!targetStat.isFile) throw stableError("ACCESS_DENIED", "Filesystem target is not a regular file");
         if (targetStat.size > limit) throw stableError("LIMIT_EXCEEDED", "Filesystem evidence exceeds the configured size limit");
-        descriptor = await adapter.open(authorized.resolvedPath, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+        descriptor = await adapter.open(authorized.resolvedPath, constants.O_RDONLY | constants.O_NOFOLLOW);
       } else {
         throw stableError("ACCESS_DENIED", "Filesystem target is not authorized");
       }

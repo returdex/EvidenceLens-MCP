@@ -107,8 +107,10 @@ export function createFilesystemPolicy(
       const canonicalPath = primitives.realpathSync(root.path);
       primitives.accessSync(canonicalPath, constants.R_OK);
       if (!primitives.statSync(canonicalPath).isDirectory() || canonicalPaths.has(canonicalPath)) configurationFailure();
+      if (injectedPrimitives === undefined && process.platform === "linux" &&
+          (typeof constants.O_DIRECTORY !== "number" || typeof constants.O_NOFOLLOW !== "number")) configurationFailure();
       const descriptor = injectedPrimitives === undefined
-        ? openSync(canonicalPath, constants.O_RDONLY | (constants.O_DIRECTORY ?? 0) | (constants.O_NOFOLLOW ?? 0))
+        ? openSync(canonicalPath, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW)
         : undefined;
       if (descriptor !== undefined && !fstatSync(descriptor).isDirectory()) configurationFailure();
       canonicalRoots.set(root.id, { id: root.id, path: canonicalPath, descriptor });
