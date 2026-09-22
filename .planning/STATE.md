@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_for_milestone_audit
-stopped_at: Phase 11 verified; fresh milestone audit pending
-last_updated: "2026-09-22T13:30:14.442Z"
+status: milestone_complete
+stopped_at: v1.0 re-audit found 20/20 requirements satisfied with tech debt
+last_updated: "2026-09-22T13:33:17.585Z"
 progress:
   total_phases: 11
   completed_phases: 11
@@ -20,7 +20,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** v1.0 — Phase 11 verified; fresh milestone audit pending
+**Current focus:** v1.0 re-audit: tech debt review
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -31,9 +31,9 @@ Phase: 11 (linux-filesystem-traversal-hardening) — VERIFIED
 Plan: 2 of 2 complete
 
 - Phase: 11 of 11
-- Status: Phase 11 verified; SAFE-01 complete; fresh v1.0 milestone audit pending
+- Status: Phase 11 verified and SAFE-01 complete; fresh v1.0 re-audit found tech debt for review
 - Progress: 11 of 11 phases verified; 39 of 39 executable plans complete
-- Last activity: Phase 11 passed 8/8 must-haves, and SAFE-01 was marked complete from committed verification evidence
+- Last activity: fresh v1.0 re-audit found 20/20 requirements satisfied with Nyquist coverage and two Phase 9 warnings retained as debt
 
 ## Decisions and Assumptions
 
@@ -385,13 +385,13 @@ None.
 
 ## Session Continuity
 
-- **Last session:** 2026-09-22T13:30:14.437Z
-- **Stopped at:** Phase 11 verified; fresh milestone audit pending
-- **Resume file:** .planning/phases/11-linux-filesystem-traversal-hardening/11-VERIFICATION.md
+- **Last session:** 2026-09-22T13:33:17.579Z
+- **Stopped at:** v1.0 re-audit found 20/20 requirements satisfied with tech debt
+- **Resume file:** .planning/v1.0-MILESTONE-REAUDIT-2026-09-22.md
 
 ## Next Action
 
-Run a fresh v1.0 milestone audit from current committed evidence. Provider requests and GitHub Actions runs are not required.
+Review `.planning/v1.0-MILESTONE-REAUDIT-2026-09-22.md` and decide whether to accept its tech debt before `$gsd-complete-milestone v1.0`. No provider request or GitHub Actions run is required for this decision.
 
 ---
-*Last updated: 2026-09-22 after Phase 11 verification*
+*Last updated: 2026-09-22 after v1.0 re-audit*
