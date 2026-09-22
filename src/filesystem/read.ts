@@ -79,14 +79,20 @@ function defaultAdapter(): FilesystemReadAdapter {
         directory = await nodeOpen(`/proc/self/fd/${rootDescriptor}`, constants.O_RDONLY | constants.O_DIRECTORY);
         for (const component of components.slice(0, -1)) {
           const next = await nodeOpen(`/proc/self/fd/${directory.fd}/${component}`, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
-          await directory.close();
+          const previous = directory;
           directory = next;
+          await previous.close();
         }
 
         const leaf = components[components.length - 1];
         if (leaf === undefined) throw new Error("Invalid anchored filesystem path");
         const file = await nodeOpen(`/proc/self/fd/${directory.fd}/${leaf}`, flags | constants.O_NOFOLLOW);
-        await directory.close();
+        try {
+          await directory.close();
+        } catch (error) {
+          await file.close();
+          throw error;
+        }
         directory = undefined;
         return {
           fstat: async () => defaultStat(await file.stat()),
