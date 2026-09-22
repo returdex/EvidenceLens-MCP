@@ -28,7 +28,7 @@
 
 ### Provenance and Safety
 
-- [ ] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
+- [x] **SAFE-01**: The server only reads files under explicitly configured allowlisted roots.
 - [x] **SAFE-02**: Default requests cannot write, delete, or mutate local files.
 - [x] **SAFE-03**: Findings include source path, page/line/cell references when available, content hashes, model/provider version, and review timestamp or request identifier.
 - [x] **SAFE-04**: Access denials, unsupported formats, size limits, and provider failures are returned without exposing unintended filesystem details or secrets.
@@ -71,7 +71,7 @@
 | EVID-03 | Phase 2 | Complete |
 | EVID-04 | Phase 2 | Complete |
 | EVID-05 | Phase 2 | Complete |
-| SAFE-01 | Phase 11 | Pending |
+| SAFE-01 | Phase 11 | Complete |
 | SAFE-02 | Phase 3 | Complete |
 | SAFE-03 | Phase 9 | Complete |
 | SAFE-04 | Phase 10 | Complete |

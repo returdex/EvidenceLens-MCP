@@ -16,17 +16,16 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - Evidence normalization contract and provenance pipeline validated in Phase 2.
 - Text, PDF, image/screenshot, and table normalization with hashes and visual context validated in Phase 2.
-- Read-only allowlisted filesystem boundary, bounded reads, provenance, and sanitized failures validated in Phase 3.
+- Read-only allowlisted filesystem boundary, bounded reads, provenance, and sanitized failures validated in Phase 3; Linux component no-follow traversal and substitution denial validated in Phase 11 (SAFE-01).
+- Controlled read-only text, PDF, image, screenshot, and table evidence access validated across Phases 2, 3, and 11.
 - Replaceable provider boundary, DeepSeek configuration/adapter, provenance validation, bounded retries, and unchanged MCP contract validated in Phase 5.
 - Stable public analyzer/provider attribution, deterministic-only byte equality, provider-backed variability, and strict provider-result rejection validated in Phase 9.
 
 ### Active
 
 - [ ] Expose an MCP server that clients can call for evidence inspection and review.
-- [ ] Provide controlled read-only tools for text, PDF, image, screenshot, and table evidence. (Normalization validated in Phase 2; filesystem access remains active work.)
 - [ ] Support multimodal model review of visual evidence, including charts, scans, screenshots, and image-based text.
 - [ ] Compare assignment briefs, rubrics, teacher instructions, and a current solution for omissions and conflicts.
-- [ ] Enforce an allowlisted filesystem boundary and prevent unauthorized writes or reads.
 - [ ] Support Docker deployment and a replaceable model-provider boundary.
 
 ### Out of Scope
@@ -58,7 +57,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Treat EvidenceLens as an independent second reviewer | Keeps primary-agent reasoning and external evidence checking separate | — Pending |
-| Make read-only, allowlisted access the default | Reduces accidental disclosure and mutation risk | — Pending |
+| Make read-only, allowlisted access the default | Reduces accidental disclosure and mutation risk | Validated in Phase 11 |
 | Use a model-provider adapter | Allows DeepSeek first while preserving local/compatible model options | Validated in Phase 5 |
 | Make provenance part of the finding contract | Enables auditability, merging, cross-model comparison, and final checks | — Pending |
 | Use MCP as the integration boundary | Lets Codex, Dify, Claude, and other clients call the same service | — Pending |
@@ -81,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-05 after Phase 9 completion*
+*Last updated: 2026-09-22 after Phase 11 verification*

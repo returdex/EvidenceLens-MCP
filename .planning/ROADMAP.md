@@ -16,7 +16,7 @@ EvidenceLens will be built from the outside-in: lock the MCP contract first, the
 - [x] **Phase 8: Docker Runtime Verification Closure** - Complete Docker-enabled image, mount, and stdio smoke verification. (completed 2026-08-25)
 - [x] **Phase 9: Public Provider Attribution and Determinism Contract** - Expose safe analyzer attribution and define deterministic versus provider-backed response semantics. (completed 2026-09-05)
 - [x] **Phase 10: Fail-Closed Provider Startup and Credentialed MCP E2E** - Enforce consistent provider configuration failures and verify the complete DeepSeek MCP path. *(9 of 9 active plans completed; the committed 10-167/168/169 chain was synchronized and independently audited by Plan 10-170.)* (completed 2026-09-22)
-- [ ] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence.
+- [x] **Phase 11: Linux Filesystem Traversal Hardening** - Restore the declared no-follow path invariant and synchronize milestone evidence. (completed 2026-09-22)
 
 ## Phase Details
 
@@ -791,7 +791,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 9/9 | Complete   | 2026-09-21 |
-| 11. Linux Filesystem Traversal Hardening | 2/2 | Awaiting verification |  |
+| 11. Linux Filesystem Traversal Hardening | 2/2 | Complete    | 2026-09-22 |
 
 ## Dependencies
 

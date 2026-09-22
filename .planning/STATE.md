@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_for_verification
-stopped_at: Phase 11 plans executed; independent verification pending
-last_updated: "2026-09-22T13:27:49.267Z"
+status: ready_for_milestone_audit
+stopped_at: Phase 11 verified; fresh milestone audit pending
+last_updated: "2026-09-22T13:30:14.442Z"
 progress:
   total_phases: 11
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 39
-  completed_plans: 39
+  completed_plans: 40
   percent: 100
 ---
 
@@ -20,20 +20,20 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-22)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 11 — linux-filesystem-traversal-hardening
+**Current focus:** v1.0 — Phase 11 verified; fresh milestone audit pending
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 11 (linux-filesystem-traversal-hardening) — READY FOR VERIFICATION
-Plan: 2 of 2
+Phase: 11 (linux-filesystem-traversal-hardening) — VERIFIED
+Plan: 2 of 2 complete
 
 - Phase: 11 of 11
-- Status: Phase 11 evidence ready for independent verification; SAFE-01 pending
-- Progress: 2 of 2 Phase 11 plans executed; Phase 10 verified
-- Last activity: Linux no-follow traversal, offline regressions and both plan summaries completed; independent Phase 11 verification pending
+- Status: Phase 11 verified; SAFE-01 complete; fresh v1.0 milestone audit pending
+- Progress: 11 of 11 phases verified; 39 of 39 executable plans complete
+- Last activity: Phase 11 passed 8/8 must-haves, and SAFE-01 was marked complete from committed verification evidence
 
 ## Decisions and Assumptions
 
@@ -385,13 +385,13 @@ None.
 
 ## Session Continuity
 
-- **Last session:** 2026-09-22T13:27:49.262Z
-- **Stopped at:** Phase 11 plans executed; independent verification pending
-- **Resume file:** .planning/phases/11-linux-filesystem-traversal-hardening/11-READINESS.md
+- **Last session:** 2026-09-22T13:30:14.437Z
+- **Stopped at:** Phase 11 verified; fresh milestone audit pending
+- **Resume file:** .planning/phases/11-linux-filesystem-traversal-hardening/11-VERIFICATION.md
 
 ## Next Action
 
-Independently verify Phase 11 before closing SAFE-01 or re-auditing the milestone. Provider requests and GitHub Actions runs are not required.
+Run a fresh v1.0 milestone audit from current committed evidence. Provider requests and GitHub Actions runs are not required.
 
 ---
-*Last updated: 2026-09-22 during Phase 11 execution*
+*Last updated: 2026-09-22 after Phase 11 verification*
