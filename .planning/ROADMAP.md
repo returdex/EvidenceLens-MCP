@@ -765,7 +765,14 @@ Cross-cutting constraints:
   1. Every untrusted Linux evidence path component is opened or validated with an equivalent no-follow guarantee without breaking the trusted proc-descriptor hop.
   2. Deterministic Linux-focused regression tests reject intermediate symlink substitution and preserve valid read-only fixture access.
   3. ROADMAP, REQUIREMENTS, STATE, and verification artifacts consistently reflect completed and pending work before the next milestone audit.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [ ] 11-01-PLAN.md — Enforce no-follow on every untrusted Linux component and prove the production reader under Docker
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 11-02-PLAN.md — Review credential-free evidence and reconcile current verification and planning truth
 
 ## Progress
 
@@ -784,7 +791,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 9/9 | Complete   | 2026-09-21 |
-| 11. Linux Filesystem Traversal Hardening | 0/TBD | Not started | - |
+| 11. Linux Filesystem Traversal Hardening | 0/2 | Planned    |  |
 
 ## Dependencies
 
@@ -794,4 +801,4 @@ Security and provenance are introduced before external model calls so later phas
 
 ---
 *Roadmap created: 2026-08-22*
-*Last updated: 2026-09-22 after completing Plan 10-165 one-shot credentialed proof*
+*Last updated: 2026-09-22 after planning Phase 11*
