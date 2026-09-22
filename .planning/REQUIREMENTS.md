@@ -35,7 +35,7 @@
 
 ### Provider and Deployment
 
-- [x] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract. *(Complete credentialed Docker MCP structural proof remains pending; Plan 10-103 authenticated the exact-source diagnostics for the fresh recovery chain.)*
+- [x] **PROV-01**: DeepSeek Vision/Flash can be configured as the initial model provider without changing the MCP contract. *(Complete credentialed Docker MCP structural proof is recorded in the passed Phase 10 verification.)*
 - [x] **PROV-02**: The model provider is isolated behind an adapter that can later support a local model or another compatible API.
 - [x] **DEPL-01**: The service runs from a documented Docker image/configuration with read-only evidence mounts.
 - [x] **DEPL-02**: A local development path and a minimal end-to-end review example are documented.
@@ -91,4 +91,4 @@
 
 ---
 *Requirements defined: 2026-08-22*
-*Last updated: 2026-09-03 after v1.0 milestone gap planning*
+*Last updated: 2026-09-22 after Phase 11 verification*
