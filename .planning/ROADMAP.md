@@ -772,7 +772,7 @@ Plans:
 - [x] 11-01-PLAN.md — Enforce no-follow on every untrusted Linux component and prove the production reader under Docker
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 11-02-PLAN.md — Review credential-free evidence and reconcile current verification and planning truth
+- [x] 11-02-PLAN.md — Review credential-free evidence and reconcile current verification and planning truth
 
 ## Progress
 
@@ -791,7 +791,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Docker Runtime Verification Closure | 1/1 | Complete | 2026-08-25 |
 | 9. Public Provider Attribution and Determinism Contract | 9/9 | Complete | 2026-09-05 |
 | 10. Fail-Closed Provider Startup and Credentialed MCP E2E | 9/9 | Complete   | 2026-09-21 |
-| 11. Linux Filesystem Traversal Hardening | 1/2 | In Progress|  |
+| 11. Linux Filesystem Traversal Hardening | 2/2 | Awaiting verification |  |
 
 ## Dependencies
 
