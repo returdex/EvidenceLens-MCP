@@ -725,7 +725,7 @@ The entries through Wave 155 below are historical index entries only. Their file
 - [x] 10-170-PLAN.md — Transactionally synchronize the new passed chain and independently audit committed project truth
 
 Cross-cutting constraints:
-- SAFE-04 and PROV-01 remain open until every gap plan passes verification.
+- SAFE-04 and PROV-01 were closed after the Phase 10 gap plans passed verification; the original closure gate is satisfied.
 - Future Phase 10 API/provider tests may run automatically without per-run human authorization; every plan must enforce a declared finite request cap, disabled retries and fallback, and truthful failure retention.
 - Plans 10-51, 10-59, 10-65 and 10-70 are closed historical evidence: their committed consumed states cannot be replayed, overwritten, upgraded, or used as synchronization authority. Plan 10-72 preserves 10-70 and rotates fixed production authority to the 10-73/74/75/76 chain.
 - Provider identity, final public schema, and retained verification evidence must be validated without exposing credentials or raw external diagnostics.
