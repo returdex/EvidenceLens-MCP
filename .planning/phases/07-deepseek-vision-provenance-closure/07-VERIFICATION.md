@@ -1,55 +1,34 @@
 ---
 phase: 07-deepseek-vision-provenance-closure
 status: passed
-verified: 2026-09-06
+verified: 2026-09-22
 requirements: [PROV-01]
-evidence_source: phase-10
+evidence_source: phase-10-169-and-10-170
 ---
 
 # Phase 7 Verification: DeepSeek Vision Provenance Closure
 
-## Goal
+## Goal and result
 
-Verify that DeepSeek Vision can be invoked through the production provider and complete Docker MCP stdio path while public findings retain locally bound provenance and disclose no credentials or raw provider output.
-
-## Required Artifacts and Key Links
-
-- `src/providers/deepseek.ts` sends the official Vision `image_url` request and delegates compact references to local validation.
-- `src/providers/provenance.ts` resolves provider references against normalized local evidence before constructing public citations.
-- `tests/providers/vision-provenance.test.ts` exercises representative and malformed provider responses without credentials or network access.
-- `tests/providers/deepseek-live.test.ts` is the narrower opt-in adapter-only Vision structural check.
-- `scripts/docker-review-real.mjs` performs the complete credentialed Docker MCP stdio structural check.
-
-## Requirement Coverage
-
-| Requirement | Offline evidence | Authorized live evidence | Status |
-|---|---|---|---|
-| PROV-01 | Credential-free provider/provenance contracts, full suite, build, and offline Docker smoke passed. | A fresh committed-challenge `npm run review:authorized-once` execution was separately authorized for the immutable proof image after every hardened offline gate passed; it returned a sanitized protocol non-pass. | **Gap:** complete credentialed MCP structural success is not proven. |
+DeepSeek Vision was exercised through the production provider and complete Docker MCP stdio path. Public findings retained locally bound provenance without disclosing credentials or raw provider output. **Result: passed.**
 
 ## Evidence
 
-### Credential-free results
+| Boundary | Current evidence | Result |
+|---|---|---|
+| Provider Vision request and local provenance | `src/providers/deepseek.ts`, `src/providers/provenance.ts`, provider and vision-provenance contract tests | Verified |
+| Adapter-only opt-in live check | `tests/providers/deepseek-live.test.ts` was separately executed successfully; this is narrower than the Docker proof | Verified, not used alone to close PROV-01 |
+| Complete credentialed Docker MCP path | Committed `10-169-EXECUTION.json` and `10-169-PROOF.json`: one observed provider request, one `review_evidence` tools/call, four fixtures, four findings, public schema and provenance checks, clean observed exit and close | Verified |
+| Independent authority and state | `10-170-SYNC-CLAIM.json` and completed journal, committed `final-audit-auto`, and live-evidence consistency audit | Verified |
 
-- `env -u DEEPSEEK_API_KEY npm test -- --run tests/providers/config.test.ts tests/providers/deepseek-live.test.ts tests/contract/public-contract-docs.test.ts` — passed 29 tests; the default test script excluded the opt-in live test and made no provider request.
-- `npm run build` — passed.
-- Phase 10 Plan 02 also recorded `npm test` passing all 200 credential-free tests and `npm run docker:smoke` passing the offline Docker MCP path.
+The earlier 2026-09-13 `docker:review:real` protocol non-pass was genuine but was superseded by the later authenticated `10-169` passed execution. It remains in Git history and consumed failure archives; it is not the current PROV-01 outcome.
 
-These commands validate configuration redaction, local provenance, documentation, and offline MCP behavior. They do not establish a successful real-provider response.
+## Scope
 
-### Authorized live outcome
+Routine tests remain credential-free by default; `npm test` excludes the opt-in live provider test. The successful structural proof validates the MCP/provider/public-response path, not the truth of model prose. Findings are checked for basic response structure and locally grounded citation provenance; downstream projects remain responsible for substantive judgment.
 
-<!-- live-proof:start -->
-command: npm run docker:review:real
-timestamp: 2026-09-13T05:50:10.000Z
-outcome: [docker-review:protocol] failed
-interpretation: complete credentialed Docker MCP structural proof remains unproven
-status: gaps_found
-<!-- live-proof:end -->
+The `10-170` synchronization claim records the earlier status-only transition of this file. This updated explanatory body is a later committed documentation revision, not a claim that the old replacement hash describes the present bytes. No provider replay was performed to refresh this report.
 
-The fresh committed-challenge command was separately authorized and executed exactly once against the immutable image with retries forced to zero and finite absolute deadlines. The durable outcome was `failed`, retained above as the bounded sanitized protocol non-pass. No fallback, timeout extension, alternate provider command, diagnostic provider call, or second attempt was run.
+## Conclusion
 
-## Scope and Conclusion
-
-Phase 7's earlier adapter-level live result is narrower evidence: it does not substitute for the complete Docker MCP stdio proof. Routine tests remain credential-free and no-network, and injected-provider E2E is not credentialed proof. Provider-backed model prose is variable; neither live command promises byte-for-byte prose equality.
-
-PROV-01 must not be claimed complete from the current Phase 10 evidence. A future separately authorized atomic immutable-image run must complete all structural assertions before this report can be changed to `status: passed`.
+PROV-01 is complete on the committed Phase 10 proof chain. No further paid provider request is needed for Phase 7 verification.
