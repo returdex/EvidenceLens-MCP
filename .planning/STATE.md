@@ -387,11 +387,11 @@ None.
 
 - **Last session:** 2026-09-22T13:33:17.579Z
 - **Stopped at:** v1.0 re-audit found 20/20 requirements satisfied with tech debt
-- **Resume file:** .planning/v1.0-MILESTONE-REAUDIT-2026-09-22.md
+- **Resume file:** .planning/v1.0-MILESTONE-AUDIT.md
 
 ## Next Action
 
-Review `.planning/v1.0-MILESTONE-REAUDIT-2026-09-22.md` and decide whether to accept its tech debt before `$gsd-complete-milestone v1.0`. No provider request or GitHub Actions run is required for this decision.
+Review `.planning/v1.0-MILESTONE-AUDIT.md` and decide whether to accept its tech debt before `$gsd-complete-milestone v1.0`. No provider request or GitHub Actions run is required for this decision.
 
 ---
 *Last updated: 2026-09-22 after v1.0 re-audit*

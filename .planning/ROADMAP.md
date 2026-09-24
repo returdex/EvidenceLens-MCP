@@ -761,7 +761,7 @@ Cross-cutting constraints:
 **Depends on**: Phase 10
 **Requirements**: [SAFE-01]
 **Gap Closure**: Closes the v1.0 audit warning about intermediate path-component symlink handling and removes stale roadmap/state evidence before re-audit.
-**Current re-audit**: `.planning/v1.0-MILESTONE-REAUDIT-2026-09-22.md` records 20/20 requirements satisfied with tech debt. The 2026-09-05 audit remains historical.
+**Current audit**: `.planning/v1.0-MILESTONE-AUDIT.md` records 20/20 requirements satisfied with tech debt. The 2026-09-05 report remains a named historical snapshot.
 **Success Criteria** (what must be TRUE):
   1. Every untrusted Linux evidence path component is opened or validated with an equivalent no-follow guarantee without breaking the trusted proc-descriptor hop.
   2. Deterministic Linux-focused regression tests reject intermediate symlink substitution and preserve valid read-only fixture access.
