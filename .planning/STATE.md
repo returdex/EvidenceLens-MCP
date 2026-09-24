@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
+milestone_name: MVP
 status: milestone_complete
-stopped_at: v1.0 re-audit found 20/20 requirements satisfied with tech debt
-last_updated: "2026-09-22T13:33:17.585Z"
+stopped_at: v1.0 MVP archived locally; release version decision pending
+last_updated: "2026-09-24T08:02:14.817Z"
 progress:
   total_phases: 11
   completed_phases: 11
@@ -17,23 +17,23 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-22)
+See: `.planning/PROJECT.md` (updated 2026-09-24)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** v1.0 re-audit: tech debt review
+**Current focus:** Planning the next milestone and deciding the release version
 
 **Version:** 0.1.3
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Phase: 11 (linux-filesystem-traversal-hardening) — VERIFIED
-Plan: 2 of 2 complete
+Milestone: v1.0 MVP — ARCHIVED LOCALLY
 
-- Phase: 11 of 11
-- Status: Phase 11 verified and SAFE-01 complete; fresh v1.0 re-audit found tech debt for review
-- Progress: 11 of 11 phases verified; 39 of 39 executable plans complete
-- Last activity: fresh v1.0 re-audit found 20/20 requirements satisfied with Nyquist coverage and two Phase 9 warnings retained as debt
+- Status: 11 of 11 phases and 39 of 39 executable plans complete
+- Requirements: 20 of 20 v1 requirements complete
+- Artifact audit: 0 open items
+- Accepted debt: missing Nyquist validation outside Phase 9; Phase 9 WR-01 and WR-02; paid proof remains bound to certified Phase 10 source
+- Last activity: archived v1.0 roadmap, requirements, current audit, project evolution, and retrospective
 
 ## Decisions and Assumptions
 
@@ -385,13 +385,13 @@ None.
 
 ## Session Continuity
 
-- **Last session:** 2026-09-22T13:33:17.579Z
-- **Stopped at:** v1.0 re-audit found 20/20 requirements satisfied with tech debt
-- **Resume file:** .planning/v1.0-MILESTONE-AUDIT.md
+- **Last session:** 2026-09-24
+- **Stopped at:** v1.0 MVP archived locally; release version decision pending
+- **Resume file:** .planning/milestones/v1.0-MILESTONE-AUDIT.md
 
 ## Next Action
 
-Review `.planning/v1.0-MILESTONE-AUDIT.md` and decide whether to accept its tech debt before `$gsd-complete-milestone v1.0`. No provider request or GitHub Actions run is required for this decision.
+Choose the product release version before creating or publishing a tag. The current product version is `0.1.3`, while a `1.0.0` major release requires explicit human confirmation under the configured release policy. Use `$gsd-new-milestone` when ready to plan the next milestone.
 
 ---
-*Last updated: 2026-09-22 after v1.0 re-audit*
+*Last updated: 2026-09-24 after v1.0 milestone archival*
