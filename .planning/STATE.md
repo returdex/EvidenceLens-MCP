@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: ready_to_plan
-stopped_at: Phase 13 verified; Phase 14 ready to plan
-last_updated: "2026-10-02T16:47:05.907439Z"
-last_activity: 2026-10-03 -- Phase 13 execution and verification complete
+status: ready_to_execute
+stopped_at: Phase 14 planned; ready to execute 14-01
+last_updated: "2026-10-02T17:58:43.983013Z"
+last_activity: 2026-10-03 -- Phase 14 planning complete
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
+  total_plans: 6
   completed_plans: 4
   percent: 50
 ---
@@ -29,12 +29,13 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 14 (Template and Disclosure Review) — READY TO PLAN
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-03 -- Phase 13 execution and verification complete
+Phase: 14 (Template and Disclosure Review) — READY TO EXECUTE
+Plan: 0 of 2
+Status: Ready to execute
+Last activity: 2026-10-03 -- Phase 14 planning complete
 
-- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 2/4; all 4 currently planned plans are executed.
+- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 2/4; 4 of 6 currently planned plans are executed.
+- Phase 14 planning: 2 plans / 2 dependent waves, 5/5 requirements and 9/9 inherited decisions covered. Structure and inline checker passed; eight synthetic cases are planned, not yet executed.
 - Requirements: 8 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03). Repository Skill entrypoint and three stage prompts are implemented. Phase 14/15 requirements remain pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
 - Development version: 0.2.2; no tag or release published.
@@ -402,12 +403,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-03
-- **Stopped at:** Phase 13 verified; Phase 14 ready to plan
-- **Resume file:** .planning/phases/13-reusable-skill-and-stage-prompts/13-VERIFICATION.md
+- **Stopped at:** Phase 14 planned; ready to execute 14-01
+- **Resume file:** .planning/phases/14-template-and-disclosure-review/14-01-PLAN.md
 
 ## Next Action
 
-Run `$gsd-plan-phase 14` for original-template checks, restoration handoff, contextual draft residue and accurate centralized disclosure. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
+Run `$gsd-execute-phase 14` using the verified plans for original-template checks, restoration handoff, contextual draft residue and accurate centralized disclosure. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
 
 ---
-*Last updated: 2026-10-03 after Phase 13 execution and verification*
+*Last updated: 2026-10-03 after Phase 14 planning*

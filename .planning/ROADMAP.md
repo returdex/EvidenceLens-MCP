@@ -83,7 +83,14 @@ Plans:
 3. Draft-residue review identifies contextual defects while retaining required disclosures, original instructions and experimental AI material.
 4. Work records, assignment content and the required disclosure location are separated without unsupported repeated AI labels.
 5. Disclosure contradictions and incomplete records are surfaced accurately; no unsupported AI percentage or manual-only provenance is generated.
-**Plans**: TBD.
+**Plan count**: 2; ready to execute.
+
+Plans:
+**Wave 1**
+- [ ] 14-01-PLAN.md — Template/restoration, contextual residue and disclosure checks wired into the existing Skill.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 14-02-PLAN.md — Eight synthetic acceptance scenarios, observed repairs and Phase 15 handoff.
 
 ### Phase 15: Current-Version Recheck and Workflow Acceptance
 
@@ -102,7 +109,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 2/4 | 4/4 planned so far | 8/16 | Phase 14 ready to plan | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 2/4 | 4/6 planned so far | 8/16 | Phase 14 ready to execute | — |
 
 ## Deferred Work
 
@@ -120,4 +127,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 13 execution and verification*
+*Last updated: 2026-10-03 after Phase 14 planning*
