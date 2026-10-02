@@ -1,23 +1,26 @@
 # Phase 12: Task Baseline and Current Artifact Scope — Context
 
 **Gathered:** 2026-10-03
-**Status:** Ready for planning
+**Status:** Planning complete — ready to execute
 
 ## Phase boundary
 
 Define the smallest reusable task baseline and reference workflow for sourced requirements, incremental clarifications, designated current artifacts, continued assistance and explicit content exclusions. This phase does not introduce a policy platform, change the MCP schema or build document editing.
 
+<decisions>
 ## Confirmed decisions
 
-- AI-assisted progress is the default. Course restrictions, unknown policy and conflicts remain visible audit information, but do not automatically stop all user-authorized analysis, planning or review.
-- Continuing work is not permission or compliance evidence. Preserve the actual course statement even if absent from a working copy; do not repeatedly report an unchanged policy finding in every step.
-- Centralized disclosure is accepted. Work records, assignment content and required disclosure can be separate; disclosures must accurately reflect known uses and uncertainty.
-- User-specified reading exclusions and tool permissions remain enforced. Exclude before model ingestion; if unavailable, skip the affected content and continue the rest. Do not claim reliable isolation merely because a prompt says to ignore already-read text.
-- Review the user-designated current artifact. Old artifacts are optional context, not the default scoring target; a version difference alone is not a defect.
-- Merge new information into the existing baseline; preserve valid earlier conclusions and show changes.
-- Requirements must have a source or be explicitly labeled as user preference/advice. Resolve source conflicts using scope, dates and authority; do not assume a universal document-type ranking.
-- Original templates remain intact; working copies may simplify display. Template restoration and residue checks are delivered in Phase 14.
-- One repository Skill with Markdown references is the initial delivery. Do not create a database or generic configuration engine for this workflow.
+- **D-01:** AI-assisted progress is the default. Course restrictions, unknown policy and conflicts remain visible audit information, but do not automatically stop all user-authorized analysis, planning or review.
+- **D-02:** Continuing work is not permission or compliance evidence. Preserve the actual course statement even if absent from a working copy; do not repeatedly report an unchanged policy finding in every step.
+- **D-03:** Centralized disclosure is accepted. Work records, assignment content and required disclosure can be separate; disclosures must accurately reflect known uses and uncertainty.
+- **D-04:** User-specified reading exclusions and tool permissions remain enforced. Exclude before model ingestion; if unavailable, skip the affected content and continue the rest. Do not claim reliable isolation merely because a prompt says to ignore already-read text.
+- **D-05:** Review the user-designated current artifact. Old artifacts are optional context, not the default scoring target; a version difference alone is not a defect.
+- **D-06:** Merge new information into the existing baseline; preserve valid earlier conclusions and show changes.
+- **D-07:** Requirements must have a source or be explicitly labeled as user preference/advice. Resolve source conflicts using scope, dates and authority; do not assume a universal document-type ranking.
+- **D-08:** Original templates remain intact; working copies may simplify display. Template restoration and residue checks are delivered in Phase 14.
+- **D-09:** One repository Skill with Markdown references is the initial delivery. Do not create a database or generic configuration engine for this workflow.
+
+</decisions>
 
 ## Implementation discretion
 
@@ -47,3 +50,13 @@ Automatic Codex invocation, multi-provider comparisons, persistent indexing, ful
 ## Planning provenance
 
 Derived from the milestone discussion and the user's final correction on 2026-10-03. Private source chats and excerpts are not included in this repository. The four-phase proposal is retained with POL-01 updated to prioritize continued AI assistance.
+
+<canonical_refs>
+## Canonical references
+
+- `.planning/REQUIREMENTS.md` — CTX-01, CTX-02, CTX-03, POL-01, POL-02.
+- `.planning/ROADMAP.md` — Phase 12 goal and Phase 13–15 boundaries.
+- `src/review/roles.ts` — existing four-role admission contract.
+- `docs/mcp-contract.md` — read-only service and source/provenance limits.
+- `.planning/phases/11-linux-filesystem-traversal-hardening/11-02-SUMMARY.md` — prior filesystem assurance scope, not fresh verification.
+</canonical_refs>

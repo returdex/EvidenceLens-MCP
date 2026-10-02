@@ -44,7 +44,14 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 3. The current artifact is identified from the user's scope and actual inspected material; old versions do not silently become grading targets.
 4. Restrictive, unknown or conflicting course policy is reported independently while authorized work continues; continuation is never labeled as proof of permission or compliance.
 5. Explicitly excluded content stays outside model processing or is skipped with a visible coverage limit while remaining work continues.
-**Plans**: TBD — context recorded; ready for `$gsd-plan-phase 12`.
+**Plan count**: 2; ready to execute.
+
+Plans:
+**Wave 1**
+- [ ] 12-01-PLAN.md — Baseline worksheet/workflow and bounded pre-read source gate.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 12-02-PLAN.md — Synthetic workflow evaluation, targeted repairs and Phase 13 handoff.
 
 ### Phase 13: Reusable Skill and Stage Prompts
 
@@ -88,7 +95,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 0/4 | 0/TBD | 0/16 | Ready for Phase 12 planning | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 0/4 | 0/2 planned so far | 0/16 | Phase 12 ready to execute | — |
 
 ## Deferred Work
 
@@ -106,4 +113,4 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after v1.1 initialization*
+*Last updated: 2026-10-03 after Phase 12 planning*
