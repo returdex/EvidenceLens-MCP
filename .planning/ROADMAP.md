@@ -63,7 +63,14 @@ Plans:
 2. Preparation succeeds without a solution; MCP invocation only occurs with genuine required evidence and never uses fabricated roles.
 3. Generated prompts state inputs, permitted actions, checks, evidence locations and expected outputs; prompt generation alone does not authorize execution or broader access.
 4. A requested review yields a requirements-to-evidence matrix, explicit coverage limits and prioritized minimal actions within the existing authorization.
-**Plans**: TBD.
+**Plan count**: 2; ready to execute.
+
+Plans:
+**Wave 1**
+- [ ] 13-01-PLAN.md — Skill entrypoint and portable stage prompts.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 13-02-PLAN.md — Synthetic prompt/review trials, targeted repairs and handoff.
 
 ### Phase 14: Template and Disclosure Review
 
@@ -95,7 +102,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 1/4 | 2/2 planned so far | 5/16 | Phase 13 ready to plan | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 1/4 | 2/4 planned so far | 5/16 | Phase 13 ready to execute | — |
 
 ## Deferred Work
 
@@ -113,4 +120,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 12 execution and verification*
+*Last updated: 2026-10-03 after Phase 13 planning*
