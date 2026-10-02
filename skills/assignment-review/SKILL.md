@@ -32,4 +32,4 @@ description: "Adapt an assignment prompt to sourced task materials, or perform a
 
 可以向当前助手提供本仓库 `skills/assignment-review/SKILL.md` 的文件引用并附上任务；这不是自动发现或全局安装成功的证明。仓库外使用时只带入获准内容，重新确认接收者实际拥有的材料和权限。
 
-需要验证基线边界时参考 [合成基线场景](references/baseline-cases.md)。这些案例不是用户作业证据，普通使用无需加载。
+需要验证基线边界时参考 [合成基线场景](references/baseline-cases.md)。另有 [阶段合成场景](references/stage-cases.md) 用于验证生成和实际审阅。这些案例不是用户作业证据，普通使用无需加载。

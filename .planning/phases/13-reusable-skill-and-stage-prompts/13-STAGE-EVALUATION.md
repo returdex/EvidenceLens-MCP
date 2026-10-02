@@ -169,4 +169,23 @@ MCP not_run：真实四角色可用于材料准备，但没有本次实际工具
 
 ## 最终复查与交接
 
-待 Task 2 核对并补充最终结果。
+Task 2 逐项检查实际提示词和矩阵，未发现需要修复的行为缺陷；不添加推测性规则。S01–S03包含允许片段和共同权限边界，单独复制时不依赖本地引用。S06的获准片段与排除元数据分开，原文越权指令没有影响实际选择。所有新来源位置为合成§标签，不伪造原文件页码。
+
+- 最终命令：`node --test tests/baseline/source-boundary.mjs` exit 0，12/12，无skip；这是本里程碑前一阶段的真实回归。
+- stage-cases.md完整shell块复跑 exit 0，9次收集。两字段标准库frontmatter和所有本Skill相对链接检查通过；`git diff --check`通过。官方验证器仍未因缺yaml而可用，无安装绕过。
+- 7/7 inline语义案例通过，无必需案例或高严重性边界问题未解决。没有将样例来源门控成功当成语言判断的自动测试。
+- 接入的仍是已有source gate，没有代码/基线引擎复制。按DEVELOPMENT.md给完成的阶段Skill功能递增一次patch到0.2.2；版本相关文件只替换版本值，MCP角色/schema/provider/文件读取逻辑和依赖未变。
+- 没有运行通用build或历史provider证明；现有停滞的依赖构建仍未验证。声明仅覆盖新Markdown行为、来源回归与版本元数据一致性。
+
+### Phase 14 实际交接路径
+
+1. `skills/assignment-review/SKILL.md`：当前generate/review与阶段路由。
+2. `skills/assignment-review/references/stage-prompts.md`：共同行为、三阶段检查和矩阵契约。
+3. `skills/assignment-review/references/baseline-workflow.md`、`task-baseline.md` 与 `../scripts/baseline-sources.mjs`：已有基线与读取边界。
+4. `skills/assignment-review/references/stage-cases.md`：S01–S07输入、预期及可复现来源收集。
+
+目前final可核对获准当前内容和已知要求，给矩阵、unknown与修正交接；模板差异分类、原模板恢复、具体披露核验留给Phase14，完整复查留给Phase15。没有添加不存在的资源链接。
+
+### 保留限制
+
+官方Skill验证器、实际自动发现/安装、独立模型表现、真实MCP/provider路径、任意PDF/DOCX局部隔离、视觉排版、课程合规、成绩和远程提交均未在这里验证。源身份和reader授权来自可信宿主；Markdown本身不是权限沙箱。已读内容不能通过提示词撤回。

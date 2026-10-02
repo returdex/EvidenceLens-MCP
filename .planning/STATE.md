@@ -23,7 +23,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
 **Current focus:** Phase 13 — Reusable Skill and Stage Prompts
 
-**Version:** 0.2.1 (development; no release published)
+**Version:** 0.2.2 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
@@ -37,7 +37,7 @@ Last activity: 2026-10-02 -- Phase 13 execution started
 - Phase 13 planning: 2 plans / 2 waves; 3/3 requirements and 8/8 inherited decisions covered. Plan structure and inline checker passed; implementation/trials remain pending. Milestone phase progress is 1/4; executed plans are 2/4 currently planned.
 - Requirements: 5 of 16 complete (CTX-01/02/03, POL-01/02); Phase 12 references and source gate implemented. Phase 13 Skill entrypoint remains pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
-- Development version: 0.2.1; no tag or release published.
+- Development version: 0.2.2; no tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
 - Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.
