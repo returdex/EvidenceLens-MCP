@@ -48,7 +48,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 
 Plans:
 **Wave 1**
-- [ ] 12-01-PLAN.md — Baseline worksheet/workflow and bounded pre-read source gate.
+- [x] 12-01-PLAN.md — Baseline worksheet/workflow and bounded pre-read source gate.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 12-02-PLAN.md — Synthetic workflow evaluation, targeted repairs and Phase 13 handoff.
