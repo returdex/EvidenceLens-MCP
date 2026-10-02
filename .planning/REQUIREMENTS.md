@@ -1,0 +1,90 @@
+# Requirements: EvidenceLens MCP v1.1
+
+**Defined:** 2026-10-03
+**Milestone:** Assignment Prompt Adaptation and Staged Review
+**Core value:** Trustworthy, independently checked findings grounded in controlled local evidence.
+
+## v1.1 Requirements
+
+### Task baseline and current artifact
+
+- [ ] **CTX-01**: User can provide a standard prompt and available assignment materials and receive a task baseline that distinguishes sourced requirements, user preferences, conflicts and missing information.
+- [ ] **CTX-02**: User can add clarifications or revised constraints and receive an incremental baseline update that explains the changes while preserving still-valid work.
+- [ ] **CTX-03**: User can designate the current artifact and review mode; the review identifies the actual material inspected and does not grade old versions by default.
+
+### Continued assistance and policy assessment
+
+- [ ] **POL-01**: User can continue authorized AI-assisted analysis, planning and review when course policy is restrictive, unknown or conflicting; the workflow reports policy evidence and compliance status separately rather than using that status as a blanket execution stop or claiming that continuation proves permission.
+- [ ] **POL-02**: User can exclude content from reading or model processing before it enters the analysis context; when reliable exclusion is unavailable, the workflow skips the affected content, reports the coverage limit and continues the remaining work.
+
+Policy information is evidence to assess, not tool authorization. A course-policy finding does not itself cancel all user-authorized work. Conversely, continuation does not erase a restriction, authorize excluded reads or external transfers, or make a false declaration true. Explicit user access exclusions and host/tool permissions still apply. Report a stable policy finding once and revisit it only when relevant evidence changes; distinguish work progress from submission compliance.
+
+### Reusable Skill and stage prompts
+
+- [ ] **SKL-01**: User can use one repository-managed Skill to generate preparation, in-progress and final-review prompts, including preparation before a solution exists.
+- [ ] **SKL-02**: User receives prompts with explicit inputs, authorized actions, checks and output expectations; absent evidence is reported rather than fabricated to satisfy the existing MCP role contract.
+- [ ] **SKL-03**: User can request execution of the generated review within existing authorization and receive a requirements-to-evidence matrix, scope limits and prioritized minimal actions.
+
+### Template preservation and draft residue
+
+- [ ] **TPL-01**: User can preserve the original template's source/content identity and distinguish required structure, normal completion, necessary additions and optional formatting changes in a working copy.
+- [ ] **TPL-02**: User can obtain a source-backed restoration checklist and correction handoff for missing template structure or declarations; unknown original text is not reconstructed as fact and signatures or factual attestations are not automatically affirmed.
+- [ ] **TPL-03**: User can review contextual draft-residue findings for TODOs, comments, chat language and tool markers without treating required disclosures, original instructions, low-fidelity placeholders or experimental AI screenshots as automatic deletion targets.
+
+### Accurate centralized disclosure
+
+- [ ] **DIS-01**: User can separate private work records, assignment content and the required disclosure location, avoiding unsupported demands for repeated AI labels throughout the work.
+- [ ] **DIS-02**: User can compare known AI uses with the disclosure and see specific omissions, contradictions or incomplete records; the workflow does not invent usage percentages, manual-only provenance or compliance claims.
+
+### Current-version recheck and final review
+
+- [ ] **REV-01**: User can recheck the current version and see findings classified as still present, resolved, unverifiable or no longer applicable; regression reminders require current evidence and an affected requirement, not a difference alone.
+- [ ] **REV-02**: User receives a bounded final-review conclusion separating mandatory defects, rubric gaps, optional improvements and unverified items, and separating local readiness from remote submission status.
+- [ ] **REV-03**: User can run documented synthetic end-to-end cases covering initial analysis, incremental changes, template-restoration handoff and current-version recheck without exposing private coursework or requiring paid provider calls.
+
+## Future Requirements
+
+- **REVW-05**: Multi-provider comparison and disagreement surfacing.
+- **REVW-06**: Incremental server-side evidence indexing and cache reuse.
+- **REVW-07**: General configurable review policies in the MCP service; v1.1 addresses the course-specific workflow at Skill level only.
+- **SAFE-05**: Hosted authentication and audit-log storage.
+- Automatic Codex invocation and cross-model usage/comparison statistics.
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Universal automatic assignment completion | This milestone produces prompts, reviews and correction handoffs; the service remains an independent reviewer |
+| MCP evidence mutation, automatic signing or submission | Existing read-only and authorization boundaries remain in force |
+| Fabricated declarations or hidden policy changes | Continuing assistance must not falsify policy evidence, actual usage or provenance |
+| General DOCX/PDF editor or restoration engine | Reuse existing host tools for separately authorized corrections; report unsupported inspection honestly |
+| AI authorship detection from prose style | Style does not establish authorship or a defensible AI percentage |
+| Private course-chat ingestion into public fixtures | Use synthetic examples and general rules; keep source chats local |
+| Broad history crawling, database or policy platform | A single Skill and small reference set suffice for the initial workflow |
+| Automatic paid provider proof or live submission | Existing one-shot provider authorization and remote-state evidence requirements remain separate |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CTX-01 | Phase 12 | Pending |
+| CTX-02 | Phase 12 | Pending |
+| CTX-03 | Phase 12 | Pending |
+| POL-01 | Phase 12 | Pending |
+| POL-02 | Phase 12 | Pending |
+| SKL-01 | Phase 13 | Pending |
+| SKL-02 | Phase 13 | Pending |
+| SKL-03 | Phase 13 | Pending |
+| TPL-01 | Phase 14 | Pending |
+| TPL-02 | Phase 14 | Pending |
+| TPL-03 | Phase 14 | Pending |
+| DIS-01 | Phase 14 | Pending |
+| DIS-02 | Phase 14 | Pending |
+| REV-01 | Phase 15 | Pending |
+| REV-02 | Phase 15 | Pending |
+| REV-03 | Phase 15 | Pending |
+
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. All remain unimplemented/unverified.
+
+---
+*Last updated: 2026-10-03 after confirmation of continued AI assistance and centralized disclosure*

@@ -22,10 +22,19 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-- [ ] Compare independent findings from multiple model providers and surface disagreements (`REVW-05`).
-- [ ] Support incremental evidence indexing and cache reuse across reviews (`REVW-06`).
-- [ ] Add configurable review policies for course-specific rubrics and institutional formats (`REVW-07`).
-- [ ] Add optional authenticated multi-user access and audit log storage for hosted deployments (`SAFE-05`).
+- [ ] Build a reusable assignment prompt and review Skill with a source-backed, incrementally updated task baseline (`CTX-01` to `CTX-03`).
+- [ ] Continue user-authorized AI assistance while reporting course policy independently and respecting explicit content-access exclusions (`POL-01`, `POL-02`).
+- [ ] Generate and execute stage-specific review prompts without fabricated MCP inputs (`SKL-01` to `SKL-03`).
+- [ ] Preserve original templates, identify restoration needs and draft residue, and check accurate centralized disclosure (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`).
+- [ ] Review the current artifact, retire resolved findings, and validate the complete workflow using synthetic cases (`REV-01` to `REV-03`).
+
+### Deferred
+
+- Multi-provider comparison and disagreement surfacing (`REVW-05`).
+- Incremental evidence indexing and cache reuse (`REVW-06`).
+- General server-side policy configuration beyond this milestone's Skill workflow (`REVW-07`, partially addressed by v1.1).
+- Optional authenticated multi-user access and audit log storage (`SAFE-05`).
+- Automatic Codex invocation and cross-model usage/comparison statistics.
 
 ### Out of Scope
 
@@ -41,7 +50,22 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - The implementation and validation surface contains 18,042 lines of TypeScript/JavaScript across `src/`, `scripts/`, and `tests/`.
 - Current evidence includes a 795-test offline regression run, focused Linux traversal checks, Docker stdio/mount smoke checks, and an authenticated one-request DeepSeek proof bound to the certified Phase 10 source.
 - Accepted debt is recorded in `milestones/v1.0-MILESTONE-AUDIT.md`: most phases lack Nyquist `VALIDATION.md`, two Phase 9 warnings remain, and the current-source provider path was verified offline rather than with a new paid request.
-- Product version remains `0.1.3`; selecting and publishing a release version is a separate release decision.
+- The v1.0 product baseline was `0.1.3`. Milestone v1.1 opens the `0.2.0` development line under DEVELOPMENT.md; this is not a published release or a claim that v1.1 features already exist.
+
+## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
+
+**Goal:** Turn a reusable user prompt and evolving assignment evidence into preparation, progress-review, and final-review workflows that advance work without losing source accuracy or overusing old versions.
+
+**Target features:**
+- One repository-managed Skill plus minimal reference templates and synthetic evaluation cases.
+- A current-artifact baseline with source provenance, incremental clarification handling, and explicit access exclusions.
+- Separate course-policy assessment from task progress: a course prohibition or unresolved policy does not by itself stop all user-authorized assistance, and continuing does not imply permission or compliance.
+- Original-template preservation, restoration handoff, contextual draft-residue checks, and truthful disclosure in the required place without redundant labels throughout the work.
+- Current-version findings, evidence-backed regression checks, and bounded final-review conclusions.
+
+**Scope:** Phases 12–15; 16 requirements. Keep MCP read-only. Use Skill-level planning when required review evidence is absent; do not fabricate a solution or teacher instruction to satisfy the existing four-role contract. Use existing host document tools for separately authorized corrections rather than adding an editing engine.
+
+**Research:** Reuse the collected user workflow patterns; private course chats and coursework stay outside the public repository. No new ecosystem research or dependencies are required to define this milestone.
 
 ## Constraints
 
@@ -53,6 +77,14 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Key Decisions
 
+Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-03:
+- AI-assisted progress is the default; task execution status and policy compliance status must remain distinct.
+- Centralized disclosure must reflect known usage; no invented manual-only process or unsupported compliance claims.
+- The original template remains authoritative for restoration, while policy statements are preserved even if a working copy omits their display.
+- Current-version review is the default. Differences from an older version alone are not defects.
+- Prior phase directories remain in place because proof tooling references their paths; historical artifacts are not cleared during initialization.
+
+
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Treat EvidenceLens as an independent second reviewer | Keeps primary-agent reasoning and external evidence checking separate | ✓ Validated in v1.0 |
@@ -63,5 +95,9 @@ Produce trustworthy, independently checked findings grounded in controlled local
 | Separate paid provider proof from routine regression | Preserves exact evidence and prevents accidental cost or replay | ✓ Validated in v1.0 |
 | Bind live claims to exact source and immutable image identities | Keeps external evidence scoped to the code actually executed | ✓ Validated in v1.0 |
 
+## Evolution
+
+After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
+
 ---
-*Last updated: 2026-09-24 after v1.0 milestone*
+*Last updated: 2026-10-03 after v1.1 scope confirmation*

@@ -1,43 +1,54 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: milestone_complete
-stopped_at: v1.0 MVP archived locally; release version decision pending
-last_updated: "2026-09-24T08:02:14.817Z"
+milestone: v1.1
+milestone_name: Assignment Prompt Adaptation and Staged Review
+status: planning
+stopped_at: Phase 12 context ready for planning
+last_updated: "2026-10-02T14:37:33.103473Z"
+last_activity: 2026-10-03
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 39
-  completed_plans: 39
-  percent: 100
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-24)
+See: `.planning/PROJECT.md` (updated 2026-10-03)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Planning the next milestone and deciding the release version
+**Current focus:** Phase 12 task baseline and current artifact scope — ready for planning
 
-**Version:** 0.1.3
+**Version:** 0.2.0 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
-Milestone: v1.0 MVP — ARCHIVED LOCALLY
+Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
+Phase: 12 of 15 (Task Baseline and Current Artifact Scope; first of four active phases)
+Plan: Not created
+Status: Ready for planning
+Last activity: 2026-10-03 — Scope confirmed, 16 requirements mapped to Phases 12-15, Phase 12 context recorded
 
-- Status: 11 of 11 phases and 39 of 39 executable plans complete
-- Requirements: 20 of 20 v1 requirements complete
-- Artifact audit: 0 open items
-- Accepted debt: missing Nyquist validation outside Phase 9; Phase 9 WR-01 and WR-02; paid proof remains bound to certified Phase 10 source
-- Last activity: archived v1.0 roadmap, requirements, current audit, project evolution, and retrospective
+- Requirements: 0 of 16 complete; no v1.1 functionality claimed as implemented.
+- Development version: 0.2.0; no tag or release published.
+- Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
+- Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
+- Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.
+- Remote synchronization is deferred: origin/main is 737 pre-existing commits behind the starting checkout; publishing that history exceeds this milestone-initialization change. This does not block Phase 12 planning.
 
 ## Decisions and Assumptions
 
 ### Decisions
+
+- [Milestone v1.1] Prioritize continued user-authorized AI assistance; assess policy separately, preserve actual restrictions and do not equate continuation with permission or compliance.
+- [Milestone v1.1] Centralized truthful disclosure, original-template preservation, contextual residue checks and current-version review are in scope.
+- [Milestone v1.1] Deliver one repository Skill with small references and synthetic cases; retain MCP read-only boundaries and the four-role contract.
+- [Milestone v1.1] Preserve historical phase directories referenced by proof tooling rather than invoking destructive phases.clear.
 
 - Greenfield repository; no existing implementation was detected.
 - Standard phase granularity and sequential execution are configured.
@@ -385,13 +396,13 @@ None.
 
 ## Session Continuity
 
-- **Last session:** 2026-09-24
-- **Stopped at:** v1.0 MVP archived locally; release version decision pending
-- **Resume file:** .planning/milestones/v1.0-MILESTONE-AUDIT.md
+- **Last session:** 2026-10-03
+- **Stopped at:** v1.1 initialized; Phase 12 context ready for detailed planning
+- **Resume file:** .planning/phases/12-task-baseline-and-current-artifact-scope/12-CONTEXT.md
 
 ## Next Action
 
-Choose the product release version before creating or publishing a tag. The current product version is `0.1.3`, while a `1.0.0` major release requires explicit human confirmation under the configured release policy. Use `$gsd-new-milestone` when ready to plan the next milestone.
+Run `$gsd-plan-phase 12` using the confirmed context. No further milestone-scope confirmation is needed. New features are not implemented yet; explicit host access exclusions and existing provider authorizations remain in force.
 
 ---
-*Last updated: 2026-09-24 after v1.0 milestone archival*
+*Last updated: 2026-10-03 after v1.1 initialization*
