@@ -148,7 +148,23 @@ R-01 active：比较两方案（T-01 §1）；P-01 restricted：使用 AI 审阅
 
 ## 最终检查与局限
 
-待 Plan 12-02 Task 2 在代码审阅及最终复查后补充命令结果和交接。
+- Task 2 未发现需要修复的案例行为缺口。B01–B07 共 7 个 inline 语义试验通过；13 次真实收集记录与基线解释一致。没有把参考文件存在当成行为验收。
+- 最终运行 `node --test tests/baseline/source-boundary.mjs`：exit 0，12/12，0 skipped。本文复现块：exit 0，13 steps；workflow CLI：exit 0；相对链接、合成场景元数据完整性与排除内容缺席检查通过。
+- 静态审阅范围包含 helper、tests、三份 references；没有未解决的高严重性发现。标准审阅报告另见 `12-REVIEW.md`，不声称独立审阅者参与。
+- 按 DEVELOPMENT.md 将这一项完成的 Phase 12 功能记为 patch 0.2.1；版本相关运行时/断言/fixture 仅替换版本字符串。通过与前一提交归一化比较确认 MCP 行为、四角色契约、依赖完全未改；没有更新历史证明文件。
+- 当前里程碑没有更早阶段的回归套件；按计划，不重试先前因依赖读取无结果而停止的通用 build/test。此处只证明新 stdlib 路径及版本元数据一致性，不宣称整体构建或运行时新版本已验证。
+- 元数据和 reader 由可信宿主提供：已知别名须正确分组；未声明别名、任意宿主工具、恶意 JavaScript 回调和回调内部 I/O 不属于 helper 的隔离保证。
+- 没有对 PDF/DOCX 局部隔离、视觉排版、真实课程合规、成绩、通用模型抗注入或远程提交做验证。无法可靠部分排除时始终整文档跳过。若此前已有暴露，必须显式报告；新隔离结论需新的净化上下文。
+
+### Phase 13 交接
+
+按顺序加载以下实际存在的仓库路径：
+1. `skills/assignment-review/references/baseline-workflow.md`：先执行来源门控，再按允许内容建立基线。
+2. `skills/assignment-review/references/task-baseline.md`：八节模板、稳定 S/R/P/C ID、变化与未知状态。
+3. `skills/assignment-review/scripts/baseline-sources.mjs`：严格元数据输入；selector 返回 reads/skipped/currentArtifact；collector 返回 selection/items/unavailable；成功读取与选择分开。
+4. `skills/assignment-review/references/baseline-cases.md`：复用 B01–B07 检验以后 stage routing。
+
+这些 references 现在就可直接使用。Phase 13 才创建 SKILL.md 与分阶段提示词；Phase 14 负责恢复与披露检查，Phase 15 负责完整复查流程。
 
 ## 原始选择结果摘要（来自实际收集）
 

@@ -23,7 +23,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
 **Current focus:** Phase 12 — Task Baseline and Current Artifact Scope
 
-**Version:** 0.2.0 (development; no release published)
+**Version:** 0.2.1 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
@@ -36,7 +36,7 @@ Last activity: 2026-10-02 -- Phase 12 execution started
 
 - Requirements: 0 of 16 complete; no v1.1 functionality claimed as implemented.
 - Phase 12 planning validation: two plans in two waves; 5/5 phase requirements and 9/9 confirmed decisions covered. Plan structure and inline quality checks passed; planned runtime checks have not run.
-- Development version: 0.2.0; no tag or release published.
+- Development version: 0.2.1; no tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
 - Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.

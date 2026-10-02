@@ -22,7 +22,7 @@ import { reviewFindingSchema, type ReviewFinding } from "../contracts/review.js"
 import type { DiagnosticSink } from "../providers/diagnostics.js";
 
 const SERVER_NAME = "evidencelens";
-const SERVER_VERSION = "0.2.0";
+const SERVER_VERSION = "0.2.1";
 const GENERATED_AT = "1970-01-01T00:00:00.000Z";
 const SUPPORTED_EVIDENCE_TYPES = new Set(["text", "pdf", "image", "screenshot", "table"]);
 const TRUSTED_ANALYZER_IDENTITY = {
