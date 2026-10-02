@@ -21,9 +21,9 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 
 ### Reusable Skill and stage prompts
 
-- [ ] **SKL-01**: User can use one repository-managed Skill to generate preparation, in-progress and final-review prompts, including preparation before a solution exists.
-- [ ] **SKL-02**: User receives prompts with explicit inputs, authorized actions, checks and output expectations; absent evidence is reported rather than fabricated to satisfy the existing MCP role contract.
-- [ ] **SKL-03**: User can request execution of the generated review within existing authorization and receive a requirements-to-evidence matrix, scope limits and prioritized minimal actions.
+- [x] **SKL-01**: User can use one repository-managed Skill to generate preparation, in-progress and final-review prompts, including preparation before a solution exists.
+- [x] **SKL-02**: User receives prompts with explicit inputs, authorized actions, checks and output expectations; absent evidence is reported rather than fabricated to satisfy the existing MCP role contract.
+- [x] **SKL-03**: User can request execution of the generated review within existing authorization and receive a requirements-to-evidence matrix, scope limits and prioritized minimal actions.
 
 ### Template preservation and draft residue
 
@@ -72,9 +72,9 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | CTX-03 | Phase 12 | Complete |
 | POL-01 | Phase 12 | Complete |
 | POL-02 | Phase 12 | Complete |
-| SKL-01 | Phase 13 | Pending |
-| SKL-02 | Phase 13 | Pending |
-| SKL-03 | Phase 13 | Pending |
+| SKL-01 | Phase 13 | Complete |
+| SKL-02 | Phase 13 | Complete |
+| SKL-03 | Phase 13 | Complete |
 | TPL-01 | Phase 14 | Pending |
 | TPL-02 | Phase 14 | Pending |
 | TPL-03 | Phase 14 | Pending |
@@ -84,7 +84,7 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | REV-02 | Phase 15 | Pending |
 | REV-03 | Phase 15 | Pending |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 5 verified in Phase 12; 11 remain pending.
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 8 verified in Phases 12-13; 8 remain pending.
 
 ---
-*Last updated: 2026-10-03 after Phase 12 verification*
+*Last updated: 2026-10-03 after Phase 13 verification*

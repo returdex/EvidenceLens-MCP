@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: executing
-stopped_at: Phase 13 plan 13-01 complete; executing 13-02
-last_updated: "2026-10-02T16:27:46.167Z"
-last_activity: 2026-10-02 -- Phase 13 execution started
+status: ready_to_plan
+stopped_at: Phase 13 verified; Phase 14 ready to plan
+last_updated: "2026-10-02T16:47:05.907439Z"
+last_activity: 2026-10-03 -- Phase 13 execution and verification complete
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 50
 ---
 
@@ -21,7 +21,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-10-03)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 13 — Reusable Skill and Stage Prompts
+**Current focus:** Phase 14 — Template and Disclosure Review
 
 **Version:** 0.2.2 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -29,13 +29,13 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 13 (Reusable Skill and Stage Prompts) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 13
-Last activity: 2026-10-02 -- Phase 13 execution started
+Phase: 14 (Template and Disclosure Review) — READY TO PLAN
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-03 -- Phase 13 execution and verification complete
 
-- Phase 13 planning: 2 plans / 2 waves; 3/3 requirements and 8/8 inherited decisions covered. Plan structure and inline checker passed; implementation/trials remain pending. Milestone phase progress is 1/4; executed plans are 2/4 currently planned.
-- Requirements: 5 of 16 complete (CTX-01/02/03, POL-01/02); Phase 12 references and source gate implemented. Phase 13 Skill entrypoint remains pending.
+- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 2/4; all 4 currently planned plans are executed.
+- Requirements: 8 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03). Repository Skill entrypoint and three stage prompts are implemented. Phase 14/15 requirements remain pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
 - Development version: 0.2.2; no tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
@@ -402,12 +402,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-03
-- **Stopped at:** Phase 13 planned; ready to execute 13-01
-- **Resume file:** .planning/phases/13-reusable-skill-and-stage-prompts/13-01-PLAN.md
+- **Stopped at:** Phase 13 verified; Phase 14 ready to plan
+- **Resume file:** .planning/phases/13-reusable-skill-and-stage-prompts/13-VERIFICATION.md
 
 ## Next Action
 
-Run `$gsd-execute-phase 13` using the verified plans. Reuse the implemented Phase 12 references and helper; the full stage Skill is not yet implemented. Existing access exclusions, provider authorizations and remote-sync hold remain in force.
+Run `$gsd-plan-phase 14` for original-template checks, restoration handoff, contextual draft residue and accurate centralized disclosure. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
 
 ---
-*Last updated: 2026-10-03 after Phase 13 planning*
+*Last updated: 2026-10-03 after Phase 13 execution and verification*

@@ -23,9 +23,9 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - ✓ Sourced incremental task baselines and current-artifact identification — Phase 12 (`CTX-01` to `CTX-03`), with directly usable references and synthetic evaluation.
 - ✓ Continued authorized analysis with separate policy assessment and pre-read document-group exclusions — Phase 12 (`POL-01`, `POL-02`), within a trusted host-reader boundary.
 
-### Active
+- ✓ Repository Skill generates three portable stage prompts and executes bounded reviews with evidence matrices — Phase 13 (`SKL-01` to `SKL-03`), verified with synthetic inline trials.
 
-- [ ] Generate and execute stage-specific review prompts without fabricated MCP inputs (`SKL-01` to `SKL-03`).
+### Active
 - [ ] Preserve original templates, identify restoration needs and draft residue, and check accurate centralized disclosure (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`).
 - [ ] Review the current artifact, retire resolved findings, and validate the complete workflow using synthetic cases (`REV-01` to `REV-03`).
 
@@ -55,7 +55,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Phase 12 complete: task baseline references, metadata selection and bounded injected-reader collection are implemented. Twelve stdlib checks and seven inline synthetic scenarios passed. Development version 0.2.1; no new release or remote sync. Phase 13 will add the repository Skill entrypoint and stage routing. Broader build/runtime checks from milestone initialization remain unverified.
+Phases 12-13 complete: sourced baseline and bounded source collection, repository Skill entrypoint, three stage prompts and requested review matrices are implemented. Phase 13 passed twelve boundary regression checks and seven inline synthetic scenarios with nine actual collection steps. Development version 0.2.2; no new release or remote sync. Phase 14 is ready to plan template/restoration/disclosure details. Global installation, actual provider integration for this Skill and broader build/runtime checks from milestone initialization remain unverified.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -105,4 +105,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-03 after Phase 12 execution and verification*
+*Last updated: 2026-10-03 after Phase 13 execution and verification*

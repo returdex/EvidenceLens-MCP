@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phase 12 complete; development version 0.2.1)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-13 complete; development version 0.2.2)
 
 ## Phases
 
@@ -29,7 +29,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 ## v1.1 Active Phases
 
 - [x] **Phase 12: Task Baseline and Current Artifact Scope** — Sourced, incremental context and continued assistance with explicit access boundaries. (completed 2026-10-03)
-- [ ] **Phase 13: Reusable Skill and Stage Prompts** — One Skill for preparation, progress review and final review.
+- [x] **Phase 13: Reusable Skill and Stage Prompts** — One Skill for preparation, progress review and final review. (completed 2026-10-03)
 - [ ] **Phase 14: Template and Disclosure Review** — Original-template checks, restoration handoff, draft residue and accurate centralized disclosure.
 - [ ] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases.
 
@@ -63,14 +63,14 @@ Plans:
 2. Preparation succeeds without a solution; MCP invocation only occurs with genuine required evidence and never uses fabricated roles.
 3. Generated prompts state inputs, permitted actions, checks, evidence locations and expected outputs; prompt generation alone does not authorize execution or broader access.
 4. A requested review yields a requirements-to-evidence matrix, explicit coverage limits and prioritized minimal actions within the existing authorization.
-**Plan count**: 2; ready to execute.
+**Plan count**: 2/2 complete; verified 2026-10-03.
 
 Plans:
 **Wave 1**
 - [x] 13-01-PLAN.md — Skill entrypoint and portable stage prompts.
 
-**Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 13-02-PLAN.md — Synthetic prompt/review trials, targeted repairs and handoff.
+**Wave 2** *(Wave 1 dependency satisfied)*
+- [x] 13-02-PLAN.md — Synthetic prompt/review trials, targeted repairs and handoff.
 
 ### Phase 14: Template and Disclosure Review
 
@@ -102,7 +102,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 1/4 | 2/4 planned so far | 5/16 | Phase 13 ready to execute | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 2/4 | 4/4 planned so far | 8/16 | Phase 14 ready to plan | — |
 
 ## Deferred Work
 
@@ -120,4 +120,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 13 planning*
+*Last updated: 2026-10-03 after Phase 13 execution and verification*
