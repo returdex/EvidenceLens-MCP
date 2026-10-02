@@ -8,14 +8,14 @@
 
 ### Task baseline and current artifact
 
-- [ ] **CTX-01**: User can provide a standard prompt and available assignment materials and receive a task baseline that distinguishes sourced requirements, user preferences, conflicts and missing information.
-- [ ] **CTX-02**: User can add clarifications or revised constraints and receive an incremental baseline update that explains the changes while preserving still-valid work.
-- [ ] **CTX-03**: User can designate the current artifact and review mode; the review identifies the actual material inspected and does not grade old versions by default.
+- [x] **CTX-01**: User can provide a standard prompt and available assignment materials and receive a task baseline that distinguishes sourced requirements, user preferences, conflicts and missing information.
+- [x] **CTX-02**: User can add clarifications or revised constraints and receive an incremental baseline update that explains the changes while preserving still-valid work.
+- [x] **CTX-03**: User can designate the current artifact and review mode; the review identifies the actual material inspected and does not grade old versions by default.
 
 ### Continued assistance and policy assessment
 
-- [ ] **POL-01**: User can continue authorized AI-assisted analysis, planning and review when course policy is restrictive, unknown or conflicting; the workflow reports policy evidence and compliance status separately rather than using that status as a blanket execution stop or claiming that continuation proves permission.
-- [ ] **POL-02**: User can exclude content from reading or model processing before it enters the analysis context; when reliable exclusion is unavailable, the workflow skips the affected content, reports the coverage limit and continues the remaining work.
+- [x] **POL-01**: User can continue authorized AI-assisted analysis, planning and review when course policy is restrictive, unknown or conflicting; the workflow reports policy evidence and compliance status separately rather than using that status as a blanket execution stop or claiming that continuation proves permission.
+- [x] **POL-02**: User can exclude content from reading or model processing before it enters the analysis context; when reliable exclusion is unavailable, the workflow skips the affected content, reports the coverage limit and continues the remaining work.
 
 Policy information is evidence to assess, not tool authorization. A course-policy finding does not itself cancel all user-authorized work. Conversely, continuation does not erase a restriction, authorize excluded reads or external transfers, or make a false declaration true. Explicit user access exclusions and host/tool permissions still apply. Report a stable policy finding once and revisit it only when relevant evidence changes; distinguish work progress from submission compliance.
 
@@ -67,11 +67,11 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CTX-01 | Phase 12 | Pending |
-| CTX-02 | Phase 12 | Pending |
-| CTX-03 | Phase 12 | Pending |
-| POL-01 | Phase 12 | Pending |
-| POL-02 | Phase 12 | Pending |
+| CTX-01 | Phase 12 | Complete |
+| CTX-02 | Phase 12 | Complete |
+| CTX-03 | Phase 12 | Complete |
+| POL-01 | Phase 12 | Complete |
+| POL-02 | Phase 12 | Complete |
 | SKL-01 | Phase 13 | Pending |
 | SKL-02 | Phase 13 | Pending |
 | SKL-03 | Phase 13 | Pending |
@@ -84,7 +84,7 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | REV-02 | Phase 15 | Pending |
 | REV-03 | Phase 15 | Pending |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. All remain unimplemented/unverified.
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 5 verified in Phase 12; 11 remain pending.
 
 ---
-*Last updated: 2026-10-03 after confirmation of continued AI assistance and centralized disclosure*
+*Last updated: 2026-10-03 after Phase 12 verification*

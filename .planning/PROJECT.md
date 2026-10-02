@@ -20,10 +20,11 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - ✓ Allowlisted read-only access, Linux no-follow traversal, provenance, and sanitized failures — v1.0 (`SAFE-01` to `SAFE-04`).
 - ✓ Replaceable DeepSeek provider integration and reproducible Docker/local deployment — v1.0 (`PROV-01`, `PROV-02`, `DEPL-01`, `DEPL-02`).
 
+- ✓ Sourced incremental task baselines and current-artifact identification — Phase 12 (`CTX-01` to `CTX-03`), with directly usable references and synthetic evaluation.
+- ✓ Continued authorized analysis with separate policy assessment and pre-read document-group exclusions — Phase 12 (`POL-01`, `POL-02`), within a trusted host-reader boundary.
+
 ### Active
 
-- [ ] Build a reusable assignment prompt and review Skill with a source-backed, incrementally updated task baseline (`CTX-01` to `CTX-03`).
-- [ ] Continue user-authorized AI assistance while reporting course policy independently and respecting explicit content-access exclusions (`POL-01`, `POL-02`).
 - [ ] Generate and execute stage-specific review prompts without fabricated MCP inputs (`SKL-01` to `SKL-03`).
 - [ ] Preserve original templates, identify restoration needs and draft residue, and check accurate centralized disclosure (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`).
 - [ ] Review the current artifact, retire resolved findings, and validate the complete workflow using synthetic cases (`REV-01` to `REV-03`).
@@ -51,6 +52,10 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - Current evidence includes a 795-test offline regression run, focused Linux traversal checks, Docker stdio/mount smoke checks, and an authenticated one-request DeepSeek proof bound to the certified Phase 10 source.
 - Accepted debt is recorded in `milestones/v1.0-MILESTONE-AUDIT.md`: most phases lack Nyquist `VALIDATION.md`, two Phase 9 warnings remain, and the current-source provider path was verified offline rather than with a new paid request.
 - The v1.0 product baseline was `0.1.3`. Milestone v1.1 opens the `0.2.0` development line under DEVELOPMENT.md; this is not a published release or a claim that v1.1 features already exist.
+
+## Current State
+
+Phase 12 complete: task baseline references, metadata selection and bounded injected-reader collection are implemented. Twelve stdlib checks and seven inline synthetic scenarios passed. Development version 0.2.1; no new release or remote sync. Phase 13 will add the repository Skill entrypoint and stage routing. Broader build/runtime checks from milestone initialization remain unverified.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -100,4 +105,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-03 after v1.1 scope confirmation*
+*Last updated: 2026-10-03 after Phase 12 execution and verification*

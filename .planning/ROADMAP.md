@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (planning; development version 0.2.0)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phase 12 complete; development version 0.2.1)
 
 ## Phases
 
@@ -28,7 +28,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 
 ## v1.1 Active Phases
 
-- [ ] **Phase 12: Task Baseline and Current Artifact Scope** — Sourced, incremental context and continued assistance with explicit access boundaries.
+- [x] **Phase 12: Task Baseline and Current Artifact Scope** — Sourced, incremental context and continued assistance with explicit access boundaries. (completed 2026-10-03)
 - [ ] **Phase 13: Reusable Skill and Stage Prompts** — One Skill for preparation, progress review and final review.
 - [ ] **Phase 14: Template and Disclosure Review** — Original-template checks, restoration handoff, draft residue and accurate centralized disclosure.
 - [ ] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases.
@@ -44,14 +44,14 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 3. The current artifact is identified from the user's scope and actual inspected material; old versions do not silently become grading targets.
 4. Restrictive, unknown or conflicting course policy is reported independently while authorized work continues; continuation is never labeled as proof of permission or compliance.
 5. Explicitly excluded content stays outside model processing or is skipped with a visible coverage limit while remaining work continues.
-**Plan count**: 2; ready to execute.
+**Plan count**: 2/2 complete; verified 2026-10-03.
 
 Plans:
 **Wave 1**
 - [x] 12-01-PLAN.md — Baseline worksheet/workflow and bounded pre-read source gate.
 
-**Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 12-02-PLAN.md — Synthetic workflow evaluation, targeted repairs and Phase 13 handoff.
+**Wave 2** *(Wave 1 dependency satisfied)*
+- [x] 12-02-PLAN.md — Synthetic workflow evaluation, targeted repairs and Phase 13 handoff.
 
 ### Phase 13: Reusable Skill and Stage Prompts
 
@@ -95,7 +95,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 0/4 | 0/2 planned so far | 0/16 | Phase 12 ready to execute | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 1/4 | 2/2 planned so far | 5/16 | Phase 13 ready to plan | — |
 
 ## Deferred Work
 
@@ -113,4 +113,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 12 planning*
+*Last updated: 2026-10-03 after Phase 12 execution and verification*
