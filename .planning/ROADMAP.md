@@ -67,7 +67,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 13-01-PLAN.md — Skill entrypoint and portable stage prompts.
+- [x] 13-01-PLAN.md — Skill entrypoint and portable stage prompts.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 13-02-PLAN.md — Synthetic prompt/review trials, targeted repairs and handoff.
