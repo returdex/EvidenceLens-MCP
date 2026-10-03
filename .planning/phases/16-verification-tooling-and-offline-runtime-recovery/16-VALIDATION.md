@@ -34,8 +34,8 @@ Planning contract only; no official validator, build or full runtime test was ex
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Type | Automated command / evidence | Available | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 16-01-01 | 01 | 1 | VAL-01 | T-16-01/02 | Isolated dependency, no secrets | prerequisite | Selected Python import yaml + installed distribution version equals exact pin | Official script exists; yaml missing in probed interpreter | pending |
-| 16-01-02 | 01 | 1 | VAL-01 | T-16-01/03 | Real validator, current input | validator/control | Selected Python official quick_validate.py skills/assignment-review => 0; missing-description temp target => nonzero | Script/target exist; env prerequisite pending | pending |
+| 16-01-01 | 01 | 1 | VAL-01 | T-16-01/02 | Isolated dependency, no secrets | prerequisite | Selected Python import yaml + installed distribution version equals exact pin | Isolated Python 3.14.5 / PyYAML 6.0.3; tooling evidence | green |
+| 16-01-02 | 01 | 1 | VAL-01 | T-16-01/03 | Real validator, current input | validator/control | Selected Python official quick_validate.py skills/assignment-review => 0; missing-description temp target => nonzero | Actual official exit 0 / negative exit 1; tooling evidence | green |
 | 16-02-01 | 02 | 2 | VAL-02 | T-16-04/05 | Bounded owned process, offline path | diagnostic/smoke | node/npm/tsc/vitest version + single project-config test under caps, actual outcome retained | Existing scripts; startup health not established | pending |
 | 16-02-02 | 02 | 2 | VAL-02 | T-16-04/05/06 | Current-source offline success | build/regression | npm run build; npm test; exits, counts, exclusions, source and lock digests | Existing entrypoints; prior stall unresolved | pending |
 | 16-02-03 | 02 | 2 | VAL-01, VAL-02 | T-16-03/06 | No false sign-off or stale pass | regression/reconciliation | node --test tests/baseline/source-boundary.mjs; link/metadata checks; git diff --check; prior actual exits for unchanged input | Existing stdlib test; runbooks/evidence pending | pending |

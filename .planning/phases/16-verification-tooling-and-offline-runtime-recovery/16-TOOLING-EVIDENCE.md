@@ -25,4 +25,17 @@ Pip artifact provenance (actual pip install report): `https://files.pythonhosted
 
 All commands used temporary stdlib subprocess supervision, `start_new_session=True`, output capture, explicit deadlines and owned-group checks. No timeout or surviving owned process group occurred. No provider invocation. Raw logs and pip report are temporary local artifacts; durable sanitized results are here.
 
-Task 1 acceptance: PASS — actual import/version equals pin, artifact provenance recorded, production dependencies and official script unchanged. [Runbook](../../../docs/development-validation.md) contains reproduction and cleanup scope. Task 2 official execution remains pending at this point.
+Task 1 acceptance: PASS — actual import/version equals pin, artifact provenance recorded, production dependencies and official script unchanged. [Runbook](../../../docs/development-validation.md) contains reproduction and cleanup scope. Task 2 results follow.
+
+## Task 2 official execution
+
+Source `41611b6`; only `.planning/STATE.md` dirty at validation start. Skill and external validator hashes above rechecked unchanged. Exact argv: selected venv Python, official absolute script path above, `skills/assignment-review`; negative control substitutes a fresh temporary synthetic directory containing `---\nname: negative-control\n---\n# Synthetic fixture\n` for the last argument. No real target edits.
+
+| Run | UTC start | Cap / elapsed seconds | Exit | Actual output |
+|---|---|---|---|---|
+| official-positive | 2026-10-03T16:46:03.943607+00:00 | 30.0 / 0.038 | 0 | `Skill is valid!` |
+| official-negative | 2026-10-03T16:46:04.032400+00:00 | 30.0 / 0.04 | 1 | `Missing 'description' in frontmatter` |
+
+No timeout, stderr exception or remaining owned group. Missing-description exit 1 is the expected control success, not an unresolved target failure. Relative Markdown link check covers Skill references and runbook; `git diff --check` passed. Original default/bundled import failures remain recorded above; narrow earlier stdlib fallback is not reclassified as official success.
+
+Task 2 acceptance: PASS; VAL-01 / TD-V now supported. Official validation checks metadata/placeholder structure, not semantic behavior, host Skill discovery or provider operation. VAL-02 / TD-B remains pending for Plan 02. Historical milestone audit unchanged.
