@@ -22,3 +22,34 @@ Negative control: create a temporary directory containing `SKILL.md` with exactl
 Keep venv, pip reports and raw logs outside Git. Remove only task-owned temporary files after evidence capture if cleanup is desired. Record the actual script/Skill SHA-256 and interpreter/dependency version: an updated external validator requires fresh evidence.
 
 [Phase 16 tooling evidence](../.planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-TOOLING-EVIDENCE.md) records actual commands and environment outcomes. Official acceptance checks frontmatter and unfinished placeholders only; semantic review remains separately scoped.
+
+## Offline runtime diagnosis and acceptance
+
+Use the checked-in [package scripts](../package.json) and [lock](../package-lock.json). Node v26.0.0/npm 11.12.1 were observed on macOS arm64; lock versions are TypeScript 5.9.3 and Vitest 3.2.7. Existing package engine constraints apply. The real Compose CLI is needed by two local configuration-resolution tests; these parse config with synthetic credentials and do not start containers. Do not replace the full test script with unfiltered `vitest run`.
+
+Before execution, inspect test subprocess/transport paths. Remove inherited provider credentials and overrides from child environments, set `EVIDENCELENS_DISABLE_PROVIDER=1`, remove inherited Compose overrides and set `COMPOSE_DISABLE_ENV_FILE=1`. This is explicit test isolation, not a network sandbox. Never run production paid proof scripts as a validation shortcut.
+
+Record Git HEAD/dirty paths and the lock hash. First probe Node/npm versions, local compiler/runner `--version`, and the focused project-config test (60-second ceiling). Use the same owned-process method as above. If startup fails, inspect a sampled owned process and its open file before changing dependencies.
+
+Actual Phase 16 recovery used a temporary directory containing only unchanged package.json/package-lock.json:
+
+```sh
+# cwd is the temporary directory, not the repository
+npm ci --ignore-scripts --no-audit --no-fund
+```
+
+Limit installation to 180 seconds. Inspect lifecycle/native prerequisites first; Phase 16's locked darwin-arm64 optional binaries supported a runner startup test without install scripts. The `--prefix` form failed for the observed npm invocation; changing cwd succeeded without changing the lock. Preserve the old tree, then move the new exact-locked tree into the original checkout only after a diagnostic startup succeeds. Never `npm update` or delete existing dependencies speculatively.
+
+Phase 16's original dependencies are preserved locally at `.phase16-recovery/node_modules` (excluded via `.git/info/exclude`, not committed). Initial movement out of the checkout stalled; same-parent preservation succeeded. Do not delete this backup while recovery is unresolved. Recovered primary startup still timed out; see the runtime report for final acceptance status.
+
+Required acceptance commands, from the primary checkout:
+
+```sh
+npm run build
+npm test
+node --test tests/baseline/source-boundary.mjs
+```
+
+Use 300 seconds initially for build, 900 for the full suite, and 60 for the separate boundary suite. A ceiling extension requires observed progress and a recorded new ceiling; Phase 16 recorded one build extension to 600 seconds. `npm test` excludes the one live-provider file deliberately; capture all actual pass/fail/skip totals. The Node boundary suite is not discovered by Vitest. Build must exit 0 before any full-suite result can establish current compiled-server acceptance. Existing dist or a RUN banner cannot stand in for completion.
+
+[Runtime evidence](../.planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-RUNTIME-EVIDENCE.md) retains failures, recovery details and results. A working scratch runner does not establish primary-path recovery. Linux-specific anchored filesystem tests, real Docker containers, paid providers and remote CI require separate evidence.

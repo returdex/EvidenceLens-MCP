@@ -46,7 +46,7 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 
 Added 2026-10-04 after user confirmation of Phases 16-17. These six verification obligations are separate from the original 16 completed functional requirements. All are recommended (`should`) audit cleanup, now in the approved milestone scope; none is a newly discovered functional failure.
 
-- [ ] **VAL-01**: Official assignment-review Skill validation completes successfully in a reproducible environment with interpreter/dependency and command evidence (TD-V; Phase 16).
+- [x] **VAL-01**: Official assignment-review Skill validation completes successfully in a reproducible environment with interpreter/dependency and command evidence (TD-V; Phase 16).
 - [ ] **VAL-02**: The stalled local build/test path is diagnosed and current build plus provider-disabled offline tests complete with reproducible, source-bound results; actual failures/skips remain visible (TD-B; Phase 16).
 - [ ] **VAL-03**: Phase 12 has a task/requirement-mapped `12-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-12; Phase 17).
 - [ ] **VAL-04**: Phase 13 has a task/requirement-mapped `13-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-13; Phase 17).
@@ -96,14 +96,14 @@ Re-audit after closure work; missing artifacts becoming present does not by itse
 | REV-01 | Phase 15 | Complete |
 | REV-02 | Phase 15 | Complete |
 | REV-03 | Phase 15 | Complete |
-| VAL-01 | Phase 16 | Pending |
+| VAL-01 | Phase 16 | Complete |
 | VAL-02 | Phase 16 | Pending |
 | VAL-03 | Phase 17 | Pending |
 | VAL-04 | Phase 17 | Pending |
 | VAL-05 | Phase 17 | Pending |
 | VAL-06 | Phase 17 | Pending |
 
-**Coverage:** 22 requirements; 22 mapped; 0 unmapped. Original 16 functional requirements remain verified in Phases 12-15; 6 approved audit-closure requirements are Pending in Phases 16-17. The prior 16/16 audit remains historical evidence, not acceptance of these new closure obligations.
+**Coverage:** 22 requirements; 22 mapped; 0 unmapped. Original 16 functional requirements remain verified in Phases 12-15; VAL-01 is complete; 5 approved audit-closure requirements remain Pending in Phases 16-17. The prior 16/16 audit remains historical evidence, not acceptance of these new closure obligations.
 
 ---
 *Last updated: 2026-10-04 after confirmed gap-closure phase creation*
