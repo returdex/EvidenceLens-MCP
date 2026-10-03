@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: ready_to_execute
+status: executing
 stopped_at: Phase 14 planned; ready to execute 14-01
-last_updated: "2026-10-02T17:58:43.983013Z"
-last_activity: 2026-10-03 -- Phase 14 planning complete
+last_updated: "2026-10-03T01:31:32.755Z"
+last_activity: 2026-10-03 -- Phase 14 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 6
   completed_plans: 4
-  percent: 50
+  percent: 67
 ---
 
 # EvidenceLens MCP — Project State
@@ -23,22 +23,22 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
 **Current focus:** Phase 14 — Template and Disclosure Review
 
-**Version:** 0.2.2 (development; no release published)
+**Version:** 0.2.3 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
 
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 14 (Template and Disclosure Review) — READY TO EXECUTE
-Plan: 0 of 2
-Status: Ready to execute
-Last activity: 2026-10-03 -- Phase 14 planning complete
+Phase: 14 (Template and Disclosure Review) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 14
+Last activity: 2026-10-03 -- Phase 14 execution started
 
 - Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 2/4; 4 of 6 currently planned plans are executed.
 - Phase 14 planning: 2 plans / 2 dependent waves, 5/5 requirements and 9/9 inherited decisions covered. Structure and inline checker passed; eight synthetic cases are planned, not yet executed.
 - Requirements: 8 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03). Repository Skill entrypoint and three stage prompts are implemented. Phase 14/15 requirements remain pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
-- Development version: 0.2.2; no tag or release published.
+- Development version: 0.2.3; no tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
 - Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.
