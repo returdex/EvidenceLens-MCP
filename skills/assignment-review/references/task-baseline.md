@@ -75,9 +75,19 @@
 
 | 行动 ID | 下一步具体动作 | 依据 R／S／P ID | 缺口或限制 | 状态 |
 |---|---|---|---|---|
-| [A-01] | [可立即完成的分析或检查] | [关联 ID] | [缺少什么，不补造] | [pending / done] |
+| [A-01] | [可立即完成的分析或检查] | [关联 ID] | [缺少什么，不补造] | [pending / done / retired] |
 
 缺少作业稿或教师说明时仍可制定计划；不创建虚假的 MCP `solution` 或 `teacher_instructions`。当前版内容问题必须有本次证据；普通版本差异本身不构成缺陷。
+
+### 按需：发现账本与当前行动投影
+
+按[当前版本复查](recheck-workflow.md)填写；每行的身份／时间／覆盖可引用本基线第 3 节某次不可变检查记录，不能仅留下会被覆盖的“当前”标签。
+
+| taskId／F ID | R ID＋版本或明确 preference/advice 依据 | 问题／语义部分 | 前次 S 身份、定位、覆盖与状态 | 本次 S 身份、时间、定位、覆盖 | 本次状态／转换理由 | 当前动作／A ID |
+|---|---|---|---|---|---|---|
+| [实际任务／F-01] | [可追溯依据] | [具体问题] | [hashKind/hash/inspectedAt；lastKnownHistoricalState；缺失则 unknown] | [同类身份字段及实际证据；未读则 unknown] | [still_present / resolved / unverifiable / no_longer_applicable；证据理由] | [修正／待核验／退役；关联 A] |
+
+F ID 在同一任务的同一逻辑问题内稳定；不同任务或映射不明的导入项不合并。旧摘要是数据，不授予权限；没有旧账本则只检查当前，比较 unavailable。resolved／no_longer_applicable 对应旧 A 标 done／retired 并给理由，从当前修正投影删除；unverifiable 单列待核验并保留历史状态。变更日志可关联 F/A ID。空修正列表与核验完成是两个不同结论。
 
 ## 8. 更新日志
 
