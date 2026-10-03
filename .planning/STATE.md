@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: executing
-stopped_at: Phase 14 planned; ready to execute 14-01
-last_updated: "2026-10-03T01:31:32.755Z"
-last_activity: 2026-10-03 -- Phase 14 execution started
+status: ready_to_plan
+stopped_at: Phase 14 verified; Phase 15 ready to plan
+last_updated: "2026-10-03T01:47:02.004782Z"
+last_activity: 2026-10-03 -- Phase 14 execution and verification complete
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 6
+  percent: 75
 ---
 
 # EvidenceLens MCP — Project State
@@ -21,7 +21,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-10-03)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 14 — Template and Disclosure Review
+**Current focus:** Phase 15 — Current-Version Recheck and Workflow Acceptance
 
 **Version:** 0.2.3 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -29,14 +29,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 14 (Template and Disclosure Review) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 14
-Last activity: 2026-10-03 -- Phase 14 execution started
+Phase: 15 (Current-Version Recheck and Workflow Acceptance) — READY TO PLAN
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-03 -- Phase 14 execution and verification complete
 
-- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 2/4; 4 of 6 currently planned plans are executed.
-- Phase 14 planning: 2 plans / 2 dependent waves, 5/5 requirements and 9/9 inherited decisions covered. Structure and inline checker passed; eight synthetic cases are planned, not yet executed.
-- Requirements: 8 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03). Repository Skill entrypoint and three stage prompts are implemented. Phase 14/15 requirements remain pending.
+- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 3/4; all 6 currently planned plans are executed.
+- Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 inherited decisions; 8 inline semantic cases with variants, 17 collector steps, 12/12 boundary tests and prior 9-step stage regression passed. Template/restoration handoff, contextual residue and truthful disclosure checks implemented; inline review clean.
+- Requirements: 13 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03, TPL-01/02/03, DIS-01/02). Phase 15 current-version findings retirement and full workflow acceptance remain pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
 - Development version: 0.2.3; no tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
@@ -403,12 +403,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-03
-- **Stopped at:** Phase 14 planned; ready to execute 14-01
-- **Resume file:** .planning/phases/14-template-and-disclosure-review/14-01-PLAN.md
+- **Stopped at:** Phase 14 verified; Phase 15 ready to plan
+- **Resume file:** .planning/phases/14-template-and-disclosure-review/14-VERIFICATION.md
 
 ## Next Action
 
-Run `$gsd-execute-phase 14` using the verified plans for original-template checks, restoration handoff, contextual draft residue and accurate centralized disclosure. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
+Run `$gsd-plan-phase 15` for current-version finding classification/retirement and complete workflow acceptance. Template/restoration/disclosure checks are now implemented and verified within the documented synthetic scope. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
 
 ---
-*Last updated: 2026-10-03 after Phase 14 planning*
+*Last updated: 2026-10-03 after Phase 14 execution and verification*

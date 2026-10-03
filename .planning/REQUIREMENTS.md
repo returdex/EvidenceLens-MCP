@@ -27,14 +27,14 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 
 ### Template preservation and draft residue
 
-- [ ] **TPL-01**: User can preserve the original template's source/content identity and distinguish required structure, normal completion, necessary additions and optional formatting changes in a working copy.
-- [ ] **TPL-02**: User can obtain a source-backed restoration checklist and correction handoff for missing template structure or declarations; unknown original text is not reconstructed as fact and signatures or factual attestations are not automatically affirmed.
-- [ ] **TPL-03**: User can review contextual draft-residue findings for TODOs, comments, chat language and tool markers without treating required disclosures, original instructions, low-fidelity placeholders or experimental AI screenshots as automatic deletion targets.
+- [x] **TPL-01**: User can preserve the original template's source/content identity and distinguish required structure, normal completion, necessary additions and optional formatting changes in a working copy.
+- [x] **TPL-02**: User can obtain a source-backed restoration checklist and correction handoff for missing template structure or declarations; unknown original text is not reconstructed as fact and signatures or factual attestations are not automatically affirmed.
+- [x] **TPL-03**: User can review contextual draft-residue findings for TODOs, comments, chat language and tool markers without treating required disclosures, original instructions, low-fidelity placeholders or experimental AI screenshots as automatic deletion targets.
 
 ### Accurate centralized disclosure
 
-- [ ] **DIS-01**: User can separate private work records, assignment content and the required disclosure location, avoiding unsupported demands for repeated AI labels throughout the work.
-- [ ] **DIS-02**: User can compare known AI uses with the disclosure and see specific omissions, contradictions or incomplete records; the workflow does not invent usage percentages, manual-only provenance or compliance claims.
+- [x] **DIS-01**: User can separate private work records, assignment content and the required disclosure location, avoiding unsupported demands for repeated AI labels throughout the work.
+- [x] **DIS-02**: User can compare known AI uses with the disclosure and see specific omissions, contradictions or incomplete records; the workflow does not invent usage percentages, manual-only provenance or compliance claims.
 
 ### Current-version recheck and final review
 
@@ -75,16 +75,16 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | SKL-01 | Phase 13 | Complete |
 | SKL-02 | Phase 13 | Complete |
 | SKL-03 | Phase 13 | Complete |
-| TPL-01 | Phase 14 | Pending |
-| TPL-02 | Phase 14 | Pending |
-| TPL-03 | Phase 14 | Pending |
-| DIS-01 | Phase 14 | Pending |
-| DIS-02 | Phase 14 | Pending |
+| TPL-01 | Phase 14 | Complete |
+| TPL-02 | Phase 14 | Complete |
+| TPL-03 | Phase 14 | Complete |
+| DIS-01 | Phase 14 | Complete |
+| DIS-02 | Phase 14 | Complete |
 | REV-01 | Phase 15 | Pending |
 | REV-02 | Phase 15 | Pending |
 | REV-03 | Phase 15 | Pending |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 8 verified in Phases 12-13; 8 remain pending.
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 13 verified in Phases 12-14; 3 remain pending.
 
 ---
-*Last updated: 2026-10-03 after Phase 13 verification*
+*Last updated: 2026-10-03 after Phase 14 verification*
