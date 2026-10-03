@@ -200,3 +200,13 @@ final/process，当前W-08，实际本批可读T-08/R-08/H-08/W-08；U-08为用�
 D-01=C01/C07；D-02=C01/C02/C04；D-03=C03；D-04=C05/C06；D-05=C04/C05；D-06=C04重复；D-07=C02/C06实读轨迹；D-08=C08；D-09=本报告明确无编辑/安装/provider/全流程退役声明。9/9覆盖。
 
 T-14-01原本身份=C01/C02/C07；02虚假恢复=C04；03误删=C03/C05；04排除泄露=C06；05虚构完整性=C04/C05；06生成授权=C08；07伪验证=实际17步轨迹与本轮全文语义输出；08修复扩大范围=最终差异与回归检查。八个场景及所列变体均满足预期；最终收尾检查见后续段落。
+
+
+## 最终检查与 Phase 15 交接
+
+- 最终标准审阅未发现需修改产品规则的缺陷；没有引入猜测性修复。仅增加可选案例链接，普通使用不需加载案例。
+- Phase 13 stage-cases完整shell块于2026-10-03T01:42:16Z退出0，9步收集回归；现有node:test边界套件12/12通过，无失败/跳过。语义结论仍来自上述实际inline输出，不由collector成功替代。
+- 本Skill全部Markdown相对链接和两字段frontmatter标准库检查通过；git diff --check通过。官方quick_validate缺少yaml而退出1，按计划采用限定格式的替代校验，无新增依赖。
+- product新增template-disclosure.md与template-disclosure-cases.md；原有入口、stage/baseline参考接入。helper/roles/provider/运行时逻辑未变。版本更新在阶段目标通过后的独立收尾中核验。
+- Phase 15使用skills/assignment-review/SKILL.md、references/template-disclosure.md、references/stage-prompts.md、references/task-baseline.md、scripts/baseline-sources.mjs及本报告；完整路径均从skills/assignment-review起算。接下来实现current findings分类/退役及端到端复查验收，不能把本轮重复政策观察当作完整复查系统。
+- 实际能力是差异/残留/披露检查和恢复交接；未编辑真实文档、签署或提交。官方安装发现、独立模型、真实provider、任意DOCX/PDF排除、视觉渲染、课程合规和远程提交仍未在本轮验证。此前通用build停滞仍非通过，未重跑历史付费证明；remote-sync hold保留。
