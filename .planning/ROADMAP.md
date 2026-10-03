@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-14 complete; development version 0.2.3)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-15 verified; milestone audit pending; development version 0.2.4)
 
 ## Phases
 
@@ -31,7 +31,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 - [x] **Phase 12: Task Baseline and Current Artifact Scope** — Sourced, incremental context and continued assistance with explicit access boundaries. (completed 2026-10-03)
 - [x] **Phase 13: Reusable Skill and Stage Prompts** — One Skill for preparation, progress review and final review. (completed 2026-10-03)
 - [x] **Phase 14: Template and Disclosure Review** — Original-template checks, restoration handoff, draft residue and accurate centralized disclosure. (completed 2026-10-03)
-- [ ] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases.
+- [x] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases. (completed 2026-10-03)
 
 ### Phase 12: Task Baseline and Current Artifact Scope
 
@@ -102,21 +102,21 @@ Plans:
 2. Regression reminders cite current evidence and an affected requirement; ordinary changes alone do not trigger warnings.
 3. Final conclusions distinguish mandatory defects, rubric gaps, optional improvements and unknowns, and do not equate local readiness with remote submission.
 4. Documented synthetic end-to-end cases cover preparation, incremental updates, template-restoration handoff and recheck without private coursework or paid provider calls.
-**Plan count**: 2; ready to execute.
+**Plan count**: 2/2 complete; verified 2026-10-03.
 
 Plans:
 **Wave 1**
-- [ ] 15-01-PLAN.md — Current-version finding transitions, action retirement and bounded final-report routing.
+- [x] 15-01-PLAN.md — Current-version finding transitions, action retirement and bounded final-report routing.
 
-**Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 15-02-PLAN.md — Connected synthetic workflow, recheck variants, observed repairs and milestone-audit handoff.
+**Wave 2** *(Wave 1 dependency satisfied)*
+- [x] 15-02-PLAN.md — Connected synthetic workflow, recheck variants, observed repairs and milestone-audit handoff.
 
 ## Progress
 
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 3/4 | 6/8 | 13/16 | Phase 15 ready to execute | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 4/4 | 8/8 | 16/16 | Milestone audit pending | — |
 
 ## Deferred Work
 
@@ -134,4 +134,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 planning*
+*Last updated: 2026-10-03 after Phase 15 verification*

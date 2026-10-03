@@ -27,9 +27,11 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Source-backed template comparison/restoration handoff, contextual residue and truthful centralized disclosure checks — Phase 14 (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`), verified with eight inline synthetic scenarios.
 
+- ✓ Current-version finding lifecycle, action retirement and bounded final reports with connected synthetic workflow acceptance — Phase 15 (`REV-01` to `REV-03`), six inline groups and 18 actual collector steps.
+
 ### Active
 
-- [ ] Review the current artifact, retire resolved findings, and validate the complete workflow using synthetic cases (`REV-01` to `REV-03`).
+- Milestone audit pending; all 16 phase requirements verified.
 
 ### Deferred
 
@@ -57,7 +59,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Phases 12-14 complete: sourced baseline and bounded source collection, repository stage Skill, template/restoration handoff, contextual residue and accurate disclosure checks are implemented. Phase 14 passed eight inline semantic scenarios with 17 actual collection steps, twelve boundary tests and prior nine-step stage regression. Development version 0.2.3; no new release or remote sync. Phase 15 has two verified plans ready to execute current-version finding retirement and complete workflow acceptance; its six synthetic case groups remain pending. Global discovery/installation, actual provider integration for this Skill, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
+Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit remains pending. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -107,4 +109,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 planning*
+*Last updated: 2026-10-03 after Phase 15 verification*

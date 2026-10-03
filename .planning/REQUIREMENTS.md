@@ -38,9 +38,9 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 
 ### Current-version recheck and final review
 
-- [ ] **REV-01**: User can recheck the current version and see findings classified as still present, resolved, unverifiable or no longer applicable; regression reminders require current evidence and an affected requirement, not a difference alone.
-- [ ] **REV-02**: User receives a bounded final-review conclusion separating mandatory defects, rubric gaps, optional improvements and unverified items, and separating local readiness from remote submission status.
-- [ ] **REV-03**: User can run documented synthetic end-to-end cases covering initial analysis, incremental changes, template-restoration handoff and current-version recheck without exposing private coursework or requiring paid provider calls.
+- [x] **REV-01**: User can recheck the current version and see findings classified as still present, resolved, unverifiable or no longer applicable; regression reminders require current evidence and an affected requirement, not a difference alone.
+- [x] **REV-02**: User receives a bounded final-review conclusion separating mandatory defects, rubric gaps, optional improvements and unverified items, and separating local readiness from remote submission status.
+- [x] **REV-03**: User can run documented synthetic end-to-end cases covering initial analysis, incremental changes, template-restoration handoff and current-version recheck without exposing private coursework or requiring paid provider calls.
 
 ## Future Requirements
 
@@ -80,11 +80,11 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | TPL-03 | Phase 14 | Complete |
 | DIS-01 | Phase 14 | Complete |
 | DIS-02 | Phase 14 | Complete |
-| REV-01 | Phase 15 | Pending |
-| REV-02 | Phase 15 | Pending |
-| REV-03 | Phase 15 | Pending |
+| REV-01 | Phase 15 | Complete |
+| REV-02 | Phase 15 | Complete |
+| REV-03 | Phase 15 | Complete |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 13 verified in Phases 12-14; 3 remain pending.
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 16 verified in Phases 12-15; 0 pending phase requirements. Milestone audit remains pending.
 
 ---
-*Last updated: 2026-10-03 after Phase 14 verification*
+*Last updated: 2026-10-03 after Phase 15 verification*
