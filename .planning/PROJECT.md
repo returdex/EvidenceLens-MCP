@@ -25,8 +25,10 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Repository Skill generates three portable stage prompts and executes bounded reviews with evidence matrices — Phase 13 (`SKL-01` to `SKL-03`), verified with synthetic inline trials.
 
+- ✓ Source-backed template comparison/restoration handoff, contextual residue and truthful centralized disclosure checks — Phase 14 (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`), verified with eight inline synthetic scenarios.
+
 ### Active
-- [ ] Preserve original templates, identify restoration needs and draft residue, and check accurate centralized disclosure (`TPL-01` to `TPL-03`, `DIS-01`, `DIS-02`).
+
 - [ ] Review the current artifact, retire resolved findings, and validate the complete workflow using synthetic cases (`REV-01` to `REV-03`).
 
 ### Deferred
