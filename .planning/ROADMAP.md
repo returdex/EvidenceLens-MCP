@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-15 verified; audit complete with verification debt; development version 0.2.4)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-17 (Phases 12-15 verified; approved verification closure in Phases 16-17; development version 0.2.4)
 
 ## Phases
 
@@ -32,6 +32,9 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 - [x] **Phase 13: Reusable Skill and Stage Prompts** — One Skill for preparation, progress review and final review. (completed 2026-10-03)
 - [x] **Phase 14: Template and Disclosure Review** — Original-template checks, restoration handoff, draft residue and accurate centralized disclosure. (completed 2026-10-03)
 - [x] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases. (completed 2026-10-03)
+
+- [ ] **Phase 16: Verification Tooling and Offline Runtime Recovery** — Close official-validator and stalled offline build/test evidence debt.
+- [ ] **Phase 17: Retrospective Validation and Audit Closure** — Fill Phase 12-15 validation records and re-audit the expanded milestone.
 
 ### Phase 12: Task Baseline and Current Artifact Scope
 
@@ -111,12 +114,39 @@ Plans:
 **Wave 2** *(Wave 1 dependency satisfied)*
 - [x] 15-02-PLAN.md — Connected synthetic workflow, recheck variants, observed repairs and milestone-audit handoff.
 
+### Phase 16: Verification Tooling and Offline Runtime Recovery
+
+**Goal**: Obtain reproducible official Skill-validation and current offline build/test results after diagnosing the existing environment limitations.
+**Depends on**: Phase 15
+**Requirements**: VAL-01, VAL-02
+**Gap Closure**: TD-V and TD-B from [v1.1 audit](v1.1-MILESTONE-AUDIT.md); recommended verification debt, approved for closure on 2026-10-04.
+**Success Criteria**:
+1. The actual official Skill validator runs successfully against assignment-review with recorded interpreter, dependency provenance, command and output; the narrow fallback is not relabeled an official pass.
+2. The earlier build/test stall is diagnosed using bounded observations; current `npm run build` and provider-disabled offline tests finish with recorded outcomes and source identity. Skips, failures and host constraints are explicit; unresolved required checks prevent closure.
+3. Any repair addresses an observed cause, preserves dependency/runtime behavior unless a specific fix is justified, and retains exact-source historical paid-proof boundaries. No paid call or remote CI is used to fill local proof.
+**Task groups**: 3 — validator environment and official run; bounded stall diagnosis and targeted repair; build/offline regression evidence and handoff.
+**Plan count**: TBD; not planned or executed. Next `$gsd-plan-phase 16`.
+
+### Phase 17: Retrospective Validation and Audit Closure
+
+**Goal**: Provide honest, task-mapped validation records for Phases 12-15 and reconcile the milestone audit using actual Phase 16/17 evidence.
+**Depends on**: Phase 16
+**Requirements**: VAL-03, VAL-04, VAL-05, VAL-06
+**Gap Closure**: TD-12, TD-13, TD-14, TD-15 from [v1.1 audit](v1.1-MILESTONE-AUDIT.md); recommended verification debt, approved for closure on 2026-10-04.
+**Success Criteria**:
+1. Each original phase has its own `NN-VALIDATION.md` mapping original tasks/requirements to actual behavioral checks, commands, evidence and sign-off, preserving historical reports.
+2. Existing meaningful tests are reused; only demonstrated coverage gaps justify additions. Language judgments remain explicitly manual/inline where not automatically established; headings or expected prose alone are not semantic tests.
+3. Nyquist fields reflect actual coverage. Manual-only or unavailable checks remain visible and cannot become `nyquist_compliant: true` merely because files now exist. Residual debt is retained for explicit disposition.
+4. The expanded milestone is re-audited against original 16 functional requirements plus 6 approved validation requirements; TD-V/TD-B closure is checked against Phase 16, all six debt IDs are reconciled, and any remaining gaps stay open. Validation for Phases 16/17 is planned alongside their execution to avoid recreating missing-document debt.
+**Task groups**: 3 — reconstruct four task/evidence maps; run meaningful checks and complete validation records; re-audit and synchronize final status.
+**Plan count**: TBD; not planned or executed. Plan after Phase 16's actual outcomes.
+
 ## Progress
 
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 4/4 | 8/8 | 16/16 | Audited: tech_debt; not archived | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 4/6 | 8 completed; 16-17 TBD | 16/22 | Phase 16 ready to plan | — |
 
 ## Deferred Work
 
@@ -130,10 +160,12 @@ Plans:
 
 - The reviewed four-phase scope is retained with the user's 2026-10-03 correction: continued AI assistance is the default, and policy assessment is a separate dimension.
 - Research uses existing workflow evidence; no additional ecosystem research is needed for this milestone definition.
-- Prior phase directories remain at their original paths because proof scripts and tests reference them. The destructive GSD `phases.clear` operation is intentionally not used. Active milestone accounting covers Phases 12-15 only.
+- Prior phase directories remain at their original paths because proof scripts and tests reference them. The destructive GSD `phases.clear` operation is intentionally not used. Original feature scope covers Phases 12-15; approved verification closure extends active accounting through Phase 17.
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-04 after v1.1 milestone audit*
+*Last updated: 2026-10-04 after confirmed gap-closure phase creation*
 
 Audit: [v1.1-MILESTONE-AUDIT.md](v1.1-MILESTONE-AUDIT.md) — 16/16 requirements, 6/6 integration links and 6/6 scoped flows; no functional blockers. Verification debt and remote-sync hold remain.
+
+The audit remains a historical 16-requirement snapshot. Phases 16-17 are approved, pending cleanup work; none of the six debts is closed merely by this roadmap update.

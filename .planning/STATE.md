@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: milestone_audited_tech_debt
-stopped_at: v1.1 audit complete; verification debt decision pending
-last_updated: "2026-10-03T16:04:54.131779+00:00"
-last_activity: 2026-10-04 -- v1.1 audit complete; verification debt decision pending
+status: ready_to_plan
+stopped_at: Gap-closure Phases 16-17 created; ready to plan Phase 16
+last_updated: "2026-10-03T16:10:54.001242+00:00"
+last_activity: 2026-10-04 -- Gap-closure Phases 16-17 created; ready to plan Phase 16
 progress:
-  total_phases: 4
+  total_phases: 6
   completed_phases: 4
   total_plans: 8
   completed_plans: 8
-  percent: 100
+  percent: 67
 ---
 
 # EvidenceLens MCP — Project State
@@ -21,7 +21,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-10-04)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** v1.1 audit complete — verification debt review
+**Current focus:** Phase 16 — Verification Tooling and Offline Runtime Recovery
 
 **Version:** 0.2.4 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -29,18 +29,18 @@ See: `.planning/PROJECT.md` (updated 2026-10-04)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 15 (Current-Version Recheck and Workflow Acceptance) — COMPLETE
-Plan: 2 of 2 complete
-Status: Milestone audited — tech_debt; no functional blockers
-Last activity: 2026-10-04 -- v1.1 audit complete; version 0.2.4 unchanged
+Phase: 16 (Verification Tooling and Offline Runtime Recovery) — READY TO PLAN
+Plan: Not planned; Phase 16/17 plan counts TBD
+Status: Approved verification closure; ready to plan Phase 16
+Last activity: 2026-10-04 -- Phases 16-17 created; version 0.2.4 unchanged
 
 - Phase 12 verified: 2/2 plans, 5/5 requirements, 12 boundary tests and 7 inline trials/13 collection steps. Historical proof preserved.
 - Phase 13 verified: 2/2 plans, 3/3 requirements, 8/8 decisions; seven inline cases and nine collection steps. Historical semantic proof preserved.
 - Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 decisions; eight inline cases and 17 collection steps. Historical semantic proof preserved.
 - Phase 15 verified: 2/2 plans, 3/3 requirements, 9/9 decisions, 4/4 success criteria; six inline semantic groups/all variants, 18 collection steps, 12/12 boundary tests, 9/17 prior collection regressions. Standard inline review clean, no independent evaluator claimed.
-- Milestone phase-level progress: 4/4 phases, 8/8 plans, 16/16 requirements; audit complete with tech_debt (16/16 requirements, 6/6 integration links, 6/6 flows); no functional blockers. No archive or publication.
+- Expanded milestone: 4/6 phases complete; 8 existing plans complete, new phase plan counts TBD. Original 16 functional requirements complete; 6 VAL closure requirements pending (16/22 total). Original audit remains tech_debt until evidence-backed re-audit; phase creation does not close debt. No archive or publication.
 - Development version: 0.2.4; 11 version paths pass exact bounded metadata substitution, package/lock/config match, dependencies unchanged. No tag or release published.
-- Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
+- Prior phase paths retained because proof tooling references them; active scope is Phases 12-17.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
 - Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.
 - Remote synchronization is deferred: origin/main is 737 pre-existing commits behind the starting checkout; publishing that history exceeds this milestone-initialization change. This does not block subsequent local phase work.
@@ -404,12 +404,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-04
-- **Stopped at:** v1.1 audit complete; verification debt decision pending
-- **Resume file:** .planning/v1.1-MILESTONE-AUDIT.md
+- **Stopped at:** Gap-closure Phases 16-17 created; ready to plan Phase 16
+- **Resume file:** .planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-CONTEXT.md
 
 ## Next Action
 
-Review `.planning/v1.1-MILESTONE-AUDIT.md`: 16/16 requirements and all scoped connections/flows satisfied. Status tech_debt for four missing Nyquist validation documents, unavailable official Skill validator and earlier stalled broad build/runtime verification. Accept debt with `$gsd-complete-milestone v1.1`, or plan cleanup with `$gsd-plan-milestone-gaps`; no automatic advancement. Existing source exclusions, provider proof limits, inherited v1.0 debt and remote-sync hold remain in force. Audit did not archive, tag, publish or push.
+Run `$gsd-plan-phase 16` using its confirmed context and the audit TD-V/TD-B evidence. Phase 17 follows Phase 16 for TD-12/13/14/15 validation records and expanded milestone re-audit. Eight existing plans remain complete; Phase 16/17 plan counts are not yet known. No functional requirement was reset. Existing provider proof limits, accepted v1.0 debt and remote-sync hold remain in force; automatic advancement is disabled.
 
 ---
-*Last updated: 2026-10-04 after v1.1 milestone audit*
+*Last updated: 2026-10-04 after confirmed gap-closure phase creation*

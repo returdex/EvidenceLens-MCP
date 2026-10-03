@@ -42,6 +42,19 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 - [x] **REV-02**: User receives a bounded final-review conclusion separating mandatory defects, rubric gaps, optional improvements and unverified items, and separating local readiness from remote submission status.
 - [x] **REV-03**: User can run documented synthetic end-to-end cases covering initial analysis, incremental changes, template-restoration handoff and current-version recheck without exposing private coursework or requiring paid provider calls.
 
+## Approved audit-closure requirements
+
+Added 2026-10-04 after user confirmation of Phases 16-17. These six verification obligations are separate from the original 16 completed functional requirements. All are recommended (`should`) audit cleanup, now in the approved milestone scope; none is a newly discovered functional failure.
+
+- [ ] **VAL-01**: Official assignment-review Skill validation completes successfully in a reproducible environment with interpreter/dependency and command evidence (TD-V; Phase 16).
+- [ ] **VAL-02**: The stalled local build/test path is diagnosed and current build plus provider-disabled offline tests complete with reproducible, source-bound results; actual failures/skips remain visible (TD-B; Phase 16).
+- [ ] **VAL-03**: Phase 12 has a task/requirement-mapped `12-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-12; Phase 17).
+- [ ] **VAL-04**: Phase 13 has a task/requirement-mapped `13-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-13; Phase 17).
+- [ ] **VAL-05**: Phase 14 has a task/requirement-mapped `14-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-14; Phase 17).
+- [ ] **VAL-06**: Phase 15 has a task/requirement-mapped `15-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-15; Phase 17).
+
+Re-audit after closure work; missing artifacts becoming present does not by itself prove complete automated coverage. Any remaining manual-only or failed checks stay explicit. Accepted v1.0 debt is not silently expanded into this cleanup scope.
+
 ## Future Requirements
 
 - **REVW-05**: Multi-provider comparison and disagreement surfacing.
@@ -83,8 +96,14 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | REV-01 | Phase 15 | Complete |
 | REV-02 | Phase 15 | Complete |
 | REV-03 | Phase 15 | Complete |
+| VAL-01 | Phase 16 | Pending |
+| VAL-02 | Phase 16 | Pending |
+| VAL-03 | Phase 17 | Pending |
+| VAL-04 | Phase 17 | Pending |
+| VAL-05 | Phase 17 | Pending |
+| VAL-06 | Phase 17 | Pending |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 16 verified in Phases 12-15; 0 pending phase requirements. Milestone audit complete: 16/16 satisfied; verification debt recorded in v1.1-MILESTONE-AUDIT.md.
+**Coverage:** 22 requirements; 22 mapped; 0 unmapped. Original 16 functional requirements remain verified in Phases 12-15; 6 approved audit-closure requirements are Pending in Phases 16-17. The prior 16/16 audit remains historical evidence, not acceptance of these new closure obligations.
 
 ---
-*Last updated: 2026-10-04 after v1.1 milestone audit*
+*Last updated: 2026-10-04 after confirmed gap-closure phase creation*
