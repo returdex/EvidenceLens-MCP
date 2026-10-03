@@ -29,11 +29,12 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Current-version finding lifecycle, action retirement and bounded final reports with connected synthetic workflow acceptance — Phase 15 (`REV-01` to `REV-03`), six inline groups and 18 actual collector steps.
 
+- ✓ Reproducible official Skill validation and current offline runtime acceptance — Phase 16 (`VAL-01`, `VAL-02`); fresh build, 795 offline tests and separate 12-test baseline pass.
+
 ### Active
 
-- [ ] Verification tooling and offline runtime recovery — Phase 16 (`VAL-01`, `VAL-02`).
 - [ ] Retrospective validation and audit closure — Phase 17 (`VAL-03` to `VAL-06`).
-- Original 16 functional requirements remain validated; six approved audit-closure obligations are pending.
+- Original 16 functional requirements remain validated; VAL-01/02 are validated; four retrospective audit-closure obligations remain pending.
 
 ### Deferred
 
@@ -61,7 +62,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. The user confirmed two closure phases (16 then 17) on 2026-10-04; Phase 16 Plan 01 has completed official Skill validation in an isolated pinned environment. Plan 02 reproduced primary-path file I/O stalls; exact-lock dependency recovery has produced a fresh successful 517.410s build; full-suite acceptance is still running. Phase 17 awaits detailed planning. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and current broad build/runtime acceptance remain unverified.
+Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. The user confirmed two closure phases (16 then 17) on 2026-10-04; Phase 16 is now complete: official Skill validation in an isolated pinned environment, a fresh successful 517.410s build, final default offline suite with 43 files/795 passes and zero failures/skips, and separate 12-test baseline. Exact-lock dependencies were recovered reversibly; a legacy test fixture now supplies synthetic v1.0 requirements in its temporary checkout. Earlier I/O stalls and failed attempts remain recorded; the filesystem delay's underlying cause is unknown. Phase 17 awaits detailed planning for four retrospective validation records and the re-audit. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration and real document editing/rendering remain outside this acceptance. Historical paid proof remains source-bound and unchanged.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -111,4 +112,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-04 after Phase 16 planning*
+*Last updated: 2026-10-04 after Phase 16 execution and verification*

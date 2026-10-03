@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: executing
-stopped_at: Phase 16 Plan 02 runtime recovery; official validator complete
-last_updated: "2026-10-03T17:10:19.722118+00:00"
-last_activity: 2026-10-04 -- Phase 16 Plan 01 complete; runtime verification in progress
+status: ready_to_plan
+stopped_at: Phase 16 complete; Phase 17 ready to plan
+last_updated: "2026-10-03T17:51:15.781346+00:00"
+last_activity: 2026-10-04 -- Phase 16 verified; Phase 17 ready to plan
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
+  percent: 83
 ---
 
 # EvidenceLens MCP — Project State
@@ -21,7 +21,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-10-04)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** Phase 16 — Verification Tooling and Offline Runtime Recovery
+**Current focus:** Phase 17 — Retrospective Validation and Audit Closure
 
 **Version:** 0.2.4 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -29,20 +29,21 @@ See: `.planning/PROJECT.md` (updated 2026-10-04)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 16 (Verification Tooling and Offline Runtime Recovery) — EXECUTING
-Plan: 2 of 2
-Status: Executing Phase 16
-Last activity: 2026-10-04 -- Official validator passed; bounded runtime recovery ongoing
+Phase: 17 (Retrospective Validation and Audit Closure) — READY TO PLAN
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-04 -- Phase 16 verified; both plans complete
 
 - Phase 12 verified: 2/2 plans, 5/5 requirements, 12 boundary tests and 7 inline trials/13 collection steps. Historical proof preserved.
 - Phase 13 verified: 2/2 plans, 3/3 requirements, 8/8 decisions; seven inline cases and nine collection steps. Historical semantic proof preserved.
 - Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 decisions; eight inline cases and 17 collection steps. Historical semantic proof preserved.
 - Phase 15 verified: 2/2 plans, 3/3 requirements, 9/9 decisions, 4/4 success criteria; six inline semantic groups/all variants, 18 collection steps, 12/12 boundary tests, 9/17 prior collection regressions. Standard inline review clean, no independent evaluator claimed.
-- Expanded milestone: 4/6 phases complete; 9/10 known plans complete; Phase 17 plan count TBD. Original 16 functional requirements complete; VAL-01 complete; 5 VAL closure requirements pending (17/22 total). Original audit remains tech_debt until evidence-backed re-audit; TD-V now has official closure evidence; TD-B remains unresolved. No archive or publication.
+- Phase 16 verified: 2/2 plans, VAL-01/02 and 3/3 success criteria; official validator/control, fresh build, full offline 795 tests and separate 12-test baseline pass. Standard inline review complete.
+- Expanded milestone: 5/6 phases complete; 10/10 known plans complete; Phase 17 plan count TBD. Original 16 functional requirements and VAL-01/02 complete (18/22 total); VAL-03–06 pending. Progress percent uses completed phases (5/6), not known plans. Original audit remains historical tech_debt pending Phase 17 re-audit; TD-V/TD-B have closure evidence. No archive or publication.
 - Development version: 0.2.4; 11 version paths pass exact bounded metadata substitution, package/lock/config match, dependencies unchanged. No tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-17.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
-- Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; neither is recorded as passed.
+- Initialization validation: 16/16 requirement mappings, GSD Phase 12 discovery, version consistency and metadata-only runtime/fixture changes passed. Build and focused offline tests were stopped after over five minutes of dependency-file reads without results; those original attempts remain non-passes. Phase 16 subsequently obtained fresh successful build and full offline acceptance; see its runtime evidence.
 - Remote synchronization is deferred: origin/main is 737 pre-existing commits behind the starting checkout; publishing that history exceeds this milestone-initialization change. This does not block subsequent local phase work.
 
 ## Decisions and Assumptions
@@ -404,16 +405,16 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-04
-- **Stopped at:** Phase 16 planned; ready to execute 16-01
-- **Resume file:** .planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-01-PLAN.md
+- **Stopped at:** Phase 16 complete; Phase 17 ready to plan
+- **Resume file:** .planning/phases/17-retrospective-validation-and-audit-closure/17-CONTEXT.md
 
 ## Next Action
 
-Run `$gsd-execute-phase 16`: 16-01 establishes actual official validator evidence; dependent 16-02 diagnoses and verifies current build/offline tests. Both plans pass structure, 2/2 requirement and 6/6 decision coverage checks; five task rows remain pending in draft 16-VALIDATION.md. Historical audit and VAL-01/02 remain unclosed until actual execution. Phase 17 remains unplanned. Product 0.2.4, no auto-advance, paid-proof and remote-sync limits unchanged.
+Run `$gsd-plan-phase 17`: reconstruct Phase 12–15 validation maps and re-audit all six approved debt IDs using Phase 16's current evidence. VAL-01/02 complete; VAL-03–06 pending. No automatic advance, paid-proof replay, release or push. Development version 0.2.4 and remote-history hold remain.
+
+## Phase 16 execution outcome — 2026-10-04
+
+Official target validation passed with pinned isolated PyYAML 6.0.3 and malformed control rejected. Exact-lock dependency recovery preserved the old tree at ignored `.phase16-recovery/node_modules/original`. Fresh build passed in 517.410s; final default npm test passed all 43 files/795 tests in 8.452s, with zero failures/skips; separate baseline 12/12 and affected regression 86/86 passed. A six-line legacy test fixture correction preserves the production stale-state guard and checks parent requirements remain unchanged. Prior failures and unknown filesystem delay cause remain in 16-RUNTIME-EVIDENCE.md. Historical audit and paid proof are unchanged.
 
 ---
-*Last updated: 2026-10-04 after Phase 16 planning*
-
-## Phase 16 execution update — 2026-10-04
-
-Plan 01 complete (41611b6, f86cb71, 6a59d39): isolated PyYAML 6.0.3, official target pass/control rejection. Plan 02 diagnosis d259bee: repeated dependency/source I/O stalls; exact-lock reconstruction preserved old dependencies under ignored .phase16-recovery/node_modules. Primary smoke still times out; 300s build timeout, extended build passed in 517.410s; full offline suite running. Separate baseline 12/12 passed in 58.805s. Runtime gap remains; read 16-02-PROGRESS and 16-RUNTIME-EVIDENCE before resumption. No product version bump, push, paid replay or Phase 17 auto-advance.
+*Last updated: 2026-10-04 after Phase 16 execution and verification*

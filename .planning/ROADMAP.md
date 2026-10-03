@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-17 (Phases 12-15 verified; approved verification closure in Phases 16-17; development version 0.2.4)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-17 (Phases 12-16 verified; Phase 17 retrospective closure ready to plan; development version 0.2.4)
 
 ## Phases
 
@@ -33,7 +33,7 @@ Full phase definitions, dependencies, plans, and cross-cutting constraints are a
 - [x] **Phase 14: Template and Disclosure Review** — Original-template checks, restoration handoff, draft residue and accurate centralized disclosure. (completed 2026-10-03)
 - [x] **Phase 15: Current-Version Recheck and Workflow Acceptance** — Retire resolved findings and verify the complete workflow using synthetic cases. (completed 2026-10-03)
 
-- [ ] **Phase 16: Verification Tooling and Offline Runtime Recovery** — Close official-validator and stalled offline build/test evidence debt.
+- [x] **Phase 16: Verification Tooling and Offline Runtime Recovery** — Close official-validator and stalled offline build/test evidence debt. (completed 2026-10-04)
 - [ ] **Phase 17: Retrospective Validation and Audit Closure** — Fill Phase 12-15 validation records and re-audit the expanded milestone.
 
 ### Phase 12: Task Baseline and Current Artifact Scope
@@ -125,14 +125,14 @@ Plans:
 2. The earlier build/test stall is diagnosed using bounded observations; current `npm run build` and provider-disabled offline tests finish with recorded outcomes and source identity. Skips, failures and host constraints are explicit; unresolved required checks prevent closure.
 3. Any repair addresses an observed cause, preserves dependency/runtime behavior unless a specific fix is justified, and retains exact-source historical paid-proof boundaries. No paid call or remote CI is used to fill local proof.
 **Task groups**: 3 — validator environment and official run; bounded stall diagnosis and targeted repair; build/offline regression evidence and handoff.
-**Plan count**: 2; Plan 01 complete, Plan 02 executing with a retained runtime gap.
+**Plan count**: 2/2 complete; verified 2026-10-04. Official validator/control, fresh build and 795 offline tests plus separate 12-test baseline passed.
 
 Plans:
 **Wave 1**
 - [x] 16-01-PLAN.md — Isolated official Skill validator environment and actual validation evidence.
 
-**Wave 2** *(Wave 1 complete; runtime recovery in progress)*
-- [ ] 16-02-PLAN.md — Bounded runtime diagnosis/recovery, current build/offline tests and validation handoff.
+**Wave 2** *(complete)*
+- [x] 16-02-PLAN.md — Bounded runtime diagnosis/recovery, current build/offline tests and validation handoff.
 
 **Cross-cutting constraints:** D-01 scoped debt closure; D-02 minimal observed-cause repairs; D-03 honest automated/manual/failure coverage; D-04 bounded processes and no paid/remote activity; D-05 evidence-backed validation; D-06 version/sync/auto-advance boundaries.
 
@@ -155,7 +155,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 4/6 | 9/10 known; Phase 17 TBD | 17/22 | Phase 16 runtime verification incomplete | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 5/6 | 10/10 known; Phase 17 TBD | 18/22 | Phase 17 ready to plan | — |
 
 ## Deferred Work
 
@@ -173,8 +173,8 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-04 after Phase 16 planning*
+*Last updated: 2026-10-04 after Phase 16 execution and verification*
 
 Audit: [v1.1-MILESTONE-AUDIT.md](v1.1-MILESTONE-AUDIT.md) — 16/16 requirements, 6/6 integration links and 6/6 scoped flows; no functional blockers. Verification debt and remote-sync hold remain.
 
-The audit remains a historical 16-requirement snapshot. Phase 16 Plan 01 now closes TD-V with official evidence; Plan 02 / TD-B remains unresolved. Phase 17 remains unplanned; its four document debts remain open.
+The audit remains a historical 16-requirement snapshot. Phase 16 provides actual closure evidence for TD-V and TD-B; Phase 17 will reconcile these in the re-audit. Phase 17 remains unplanned; its four document debts remain open.
