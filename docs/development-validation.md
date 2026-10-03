@@ -40,7 +40,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 
 Limit installation to 180 seconds. Inspect lifecycle/native prerequisites first; Phase 16's locked darwin-arm64 optional binaries supported a runner startup test without install scripts. The `--prefix` form failed for the observed npm invocation; changing cwd succeeded without changing the lock. Preserve the old tree, then move the new exact-locked tree into the original checkout only after a diagnostic startup succeeds. Never `npm update` or delete existing dependencies speculatively.
 
-Phase 16's original dependencies are preserved locally at `.phase16-recovery/node_modules` (excluded via `.git/info/exclude`, not committed). Initial movement out of the checkout stalled; same-parent preservation succeeded. Do not delete this backup while recovery is unresolved. Recovered primary startup still timed out; see the runtime report for final acceptance status.
+Phase 16's original dependencies are preserved locally at `.phase16-recovery/node_modules/original` (excluded via `.git/info/exclude`, not committed). Initial movement out of the checkout stalled; same-parent preservation succeeded. Do not delete this backup while recovery is unresolved. Recovered primary startup initially timed out; see the runtime report for final acceptance status. Inspect the actual backup name after moving it: a `node_modules 2` directory was admitted by Vitest during this run. Git ignore does not define test discovery. Keep all backups beneath a literal `node_modules` exclusion container and verify the file list before a full run.
 
 Required acceptance commands, from the primary checkout:
 
@@ -53,3 +53,17 @@ node --test tests/baseline/source-boundary.mjs
 Use 300 seconds initially for build, 900 for the full suite, and 60 for the separate boundary suite. A ceiling extension requires observed progress and a recorded new ceiling; Phase 16 recorded one build extension to 600 seconds. `npm test` excludes the one live-provider file deliberately; capture all actual pass/fail/skip totals. The Node boundary suite is not discovered by Vitest. Build must exit 0 before any full-suite result can establish current compiled-server acceptance. Existing dist or a RUN banner cannot stand in for completion.
 
 [Runtime evidence](../.planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-RUNTIME-EVIDENCE.md) retains failures, recovery details and results. A working scratch runner does not establish primary-path recovery. Linux-specific anchored filesystem tests, real Docker containers, paid providers and remote CI require separate evidence.
+
+After any dependency preservation/recovery, run:
+
+```sh
+node node_modules/vitest/vitest.mjs list --filesOnly --exclude tests/providers/deepseek-live.test.ts
+```
+
+Compare the paths with all tracked `tests/**/*.test.ts` except the one live-provider test. Phase 16 expects 43 files on its recorded source; derive a fresh expected set if source changes. Extra vendor/backup tests or missing intended files invalidate the run scope. Preserve the normal npm test command and its assertions.
+
+## Phase 16 verified outcome
+
+Fresh primary build passed. After exact-lock recovery and correcting a synthetic legacy-proof test fixture, the unchanged default `npm test` passed all 43 files / 795 tests in 8.452s, zero failures/skips. The separate boundary suite passed 12/12. No permanent worker override or relaxed timeout is required by the final result. Earlier 300s build, startup and I/O timeouts remain in the evidence; their underlying OS/storage cause was not established.
+
+When testing a historical proof-sync flow, provide its matching synthetic requirement state in the temporary checkout. The current milestone's requirements are not a v1.0 fixture. Keep production stale-state guards and real planning documents intact.
