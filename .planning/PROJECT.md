@@ -61,7 +61,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. The user confirmed two closure phases (16 then 17) on 2026-10-04; both await detailed planning and execution. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
+Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. The user confirmed two closure phases (16 then 17) on 2026-10-04; Phase 16 now has two checked dependent plans and a draft validation strategy; Phase 17 awaits detailed planning. No closure task has executed. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -111,4 +111,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-04 after confirmed gap-closure phase creation*
+*Last updated: 2026-10-04 after Phase 16 planning*

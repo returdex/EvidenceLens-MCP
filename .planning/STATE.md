@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: ready_to_plan
-stopped_at: Gap-closure Phases 16-17 created; ready to plan Phase 16
-last_updated: "2026-10-03T16:10:54.001242+00:00"
-last_activity: 2026-10-04 -- Gap-closure Phases 16-17 created; ready to plan Phase 16
+status: ready_to_execute
+stopped_at: Phase 16 planned; ready to execute 16-01
+last_updated: "2026-10-03T16:24:54.265838+00:00"
+last_activity: 2026-10-04 -- Phase 16 planning complete
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 8
+  total_plans: 10
   completed_plans: 8
-  percent: 67
+  percent: 80
 ---
 
 # EvidenceLens MCP — Project State
@@ -29,16 +29,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-04)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 16 (Verification Tooling and Offline Runtime Recovery) — READY TO PLAN
-Plan: Not planned; Phase 16/17 plan counts TBD
-Status: Approved verification closure; ready to plan Phase 16
-Last activity: 2026-10-04 -- Phases 16-17 created; version 0.2.4 unchanged
+Phase: 16 (Verification Tooling and Offline Runtime Recovery) — READY TO EXECUTE
+Plan: 0 of 2 executed; Phase 17 plan count TBD
+Status: Ready to execute
+Last activity: 2026-10-03 -- Phase 16 planning complete
 
 - Phase 12 verified: 2/2 plans, 5/5 requirements, 12 boundary tests and 7 inline trials/13 collection steps. Historical proof preserved.
 - Phase 13 verified: 2/2 plans, 3/3 requirements, 8/8 decisions; seven inline cases and nine collection steps. Historical semantic proof preserved.
 - Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 decisions; eight inline cases and 17 collection steps. Historical semantic proof preserved.
 - Phase 15 verified: 2/2 plans, 3/3 requirements, 9/9 decisions, 4/4 success criteria; six inline semantic groups/all variants, 18 collection steps, 12/12 boundary tests, 9/17 prior collection regressions. Standard inline review clean, no independent evaluator claimed.
-- Expanded milestone: 4/6 phases complete; 8 existing plans complete, new phase plan counts TBD. Original 16 functional requirements complete; 6 VAL closure requirements pending (16/22 total). Original audit remains tech_debt until evidence-backed re-audit; phase creation does not close debt. No archive or publication.
+- Expanded milestone: 4/6 phases complete; 8/10 known plans complete; Phase 17 plan count TBD. Original 16 functional requirements complete; 6 VAL closure requirements pending (16/22 total). Original audit remains tech_debt until evidence-backed re-audit; phase creation does not close debt. No archive or publication.
 - Development version: 0.2.4; 11 version paths pass exact bounded metadata substitution, package/lock/config match, dependencies unchanged. No tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-17.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
@@ -404,12 +404,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-04
-- **Stopped at:** Gap-closure Phases 16-17 created; ready to plan Phase 16
-- **Resume file:** .planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-CONTEXT.md
+- **Stopped at:** Phase 16 planned; ready to execute 16-01
+- **Resume file:** .planning/phases/16-verification-tooling-and-offline-runtime-recovery/16-01-PLAN.md
 
 ## Next Action
 
-Run `$gsd-plan-phase 16` using its confirmed context and the audit TD-V/TD-B evidence. Phase 17 follows Phase 16 for TD-12/13/14/15 validation records and expanded milestone re-audit. Eight existing plans remain complete; Phase 16/17 plan counts are not yet known. No functional requirement was reset. Existing provider proof limits, accepted v1.0 debt and remote-sync hold remain in force; automatic advancement is disabled.
+Run `$gsd-execute-phase 16`: 16-01 establishes actual official validator evidence; dependent 16-02 diagnoses and verifies current build/offline tests. Both plans pass structure, 2/2 requirement and 6/6 decision coverage checks; five task rows remain pending in draft 16-VALIDATION.md. Historical audit and VAL-01/02 remain unclosed until actual execution. Phase 17 remains unplanned. Product 0.2.4, no auto-advance, paid-proof and remote-sync limits unchanged.
 
 ---
-*Last updated: 2026-10-04 after confirmed gap-closure phase creation*
+*Last updated: 2026-10-04 after Phase 16 planning*

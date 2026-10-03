@@ -125,7 +125,16 @@ Plans:
 2. The earlier build/test stall is diagnosed using bounded observations; current `npm run build` and provider-disabled offline tests finish with recorded outcomes and source identity. Skips, failures and host constraints are explicit; unresolved required checks prevent closure.
 3. Any repair addresses an observed cause, preserves dependency/runtime behavior unless a specific fix is justified, and retains exact-source historical paid-proof boundaries. No paid call or remote CI is used to fill local proof.
 **Task groups**: 3 — validator environment and official run; bounded stall diagnosis and targeted repair; build/offline regression evidence and handoff.
-**Plan count**: TBD; not planned or executed. Next `$gsd-plan-phase 16`.
+**Plan count**: 2; planned and checked 2026-10-04, not executed.
+
+Plans:
+**Wave 1**
+- [ ] 16-01-PLAN.md — Isolated official Skill validator environment and actual validation evidence.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 16-02-PLAN.md — Bounded runtime diagnosis/recovery, current build/offline tests and validation handoff.
+
+**Cross-cutting constraints:** D-01 scoped debt closure; D-02 minimal observed-cause repairs; D-03 honest automated/manual/failure coverage; D-04 bounded processes and no paid/remote activity; D-05 evidence-backed validation; D-06 version/sync/auto-advance boundaries.
 
 ### Phase 17: Retrospective Validation and Audit Closure
 
@@ -146,7 +155,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 4/6 | 8 completed; 16-17 TBD | 16/22 | Phase 16 ready to plan | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 4/6 | 8/10 known; Phase 17 TBD | 16/22 | Phase 16 ready to execute | — |
 
 ## Deferred Work
 
@@ -164,8 +173,8 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-04 after confirmed gap-closure phase creation*
+*Last updated: 2026-10-04 after Phase 16 planning*
 
 Audit: [v1.1-MILESTONE-AUDIT.md](v1.1-MILESTONE-AUDIT.md) — 16/16 requirements, 6/6 integration links and 6/6 scoped flows; no functional blockers. Verification debt and remote-sync hold remain.
 
-The audit remains a historical 16-requirement snapshot. Phases 16-17 are approved, pending cleanup work; none of the six debts is closed merely by this roadmap update.
+The audit remains a historical 16-requirement snapshot. Phase 16 has two checked plans; Phase 17 remains unplanned cleanup work; none of the six debts is closed merely by this roadmap update.
