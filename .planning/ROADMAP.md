@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-15 verified; milestone audit pending; development version 0.2.4)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-15 (Phases 12-15 verified; audit complete with verification debt; development version 0.2.4)
 
 ## Phases
 
@@ -116,7 +116,7 @@ Plans:
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 4/4 | 8/8 | 16/16 | Milestone audit pending | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 4/4 | 8/8 | 16/16 | Audited: tech_debt; not archived | — |
 
 ## Deferred Work
 
@@ -134,4 +134,6 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 verification*
+*Last updated: 2026-10-04 after v1.1 milestone audit*
+
+Audit: [v1.1-MILESTONE-AUDIT.md](v1.1-MILESTONE-AUDIT.md) — 16/16 requirements, 6/6 integration links and 6/6 scoped flows; no functional blockers. Verification debt and remote-sync hold remain.

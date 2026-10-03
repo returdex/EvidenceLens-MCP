@@ -31,7 +31,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-- Milestone audit pending; all 16 phase requirements verified.
+- Milestone audited with verification debt; all 16 requirements satisfied. Review debt before the separate completion workflow.
 
 ### Deferred
 
@@ -59,7 +59,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit remains pending. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
+Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration, real document editing/rendering and broader build/runtime checks from milestone initialization remain unverified.
 
 ## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 
@@ -109,4 +109,4 @@ Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-
 After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 verification*
+*Last updated: 2026-10-04 after v1.1 milestone audit*

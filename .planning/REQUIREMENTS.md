@@ -84,7 +84,7 @@ Policy information is evidence to assess, not tool authorization. A course-polic
 | REV-02 | Phase 15 | Complete |
 | REV-03 | Phase 15 | Complete |
 
-**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 16 verified in Phases 12-15; 0 pending phase requirements. Milestone audit remains pending.
+**Coverage:** 16 requirements; 16 mapped; 0 unmapped. 16 verified in Phases 12-15; 0 pending phase requirements. Milestone audit complete: 16/16 satisfied; verification debt recorded in v1.1-MILESTONE-AUDIT.md.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 verification*
+*Last updated: 2026-10-04 after v1.1 milestone audit*

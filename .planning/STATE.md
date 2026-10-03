@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: milestone_audit_pending
-stopped_at: Phase 15 verified; milestone audit pending
-last_updated: "2026-10-03T13:00:33.476351+00:00"
-last_activity: 2026-10-03 -- Phase 15 verified; milestone audit pending
+status: milestone_audited_tech_debt
+stopped_at: v1.1 audit complete; verification debt decision pending
+last_updated: "2026-10-03T16:04:54.131779+00:00"
+last_activity: 2026-10-04 -- v1.1 audit complete; verification debt decision pending
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-03)
+See: `.planning/PROJECT.md` (updated 2026-10-04)
 
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
-**Current focus:** v1.1 milestone audit
+**Current focus:** v1.1 audit complete — verification debt review
 
 **Version:** 0.2.4 (development; no release published)
 **Release policy:** See `DEVELOPMENT.md`; milestone changes increment `y`, completed features/fixes increment `z`, and `x` requires explicit human confirmation.
@@ -31,14 +31,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
 Phase: 15 (Current-Version Recheck and Workflow Acceptance) — COMPLETE
 Plan: 2 of 2 complete
-Status: All phases verified; milestone audit pending
-Last activity: 2026-10-03 -- Phase 15 verified; version 0.2.4
+Status: Milestone audited — tech_debt; no functional blockers
+Last activity: 2026-10-04 -- v1.1 audit complete; version 0.2.4 unchanged
 
 - Phase 12 verified: 2/2 plans, 5/5 requirements, 12 boundary tests and 7 inline trials/13 collection steps. Historical proof preserved.
 - Phase 13 verified: 2/2 plans, 3/3 requirements, 8/8 decisions; seven inline cases and nine collection steps. Historical semantic proof preserved.
 - Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 decisions; eight inline cases and 17 collection steps. Historical semantic proof preserved.
 - Phase 15 verified: 2/2 plans, 3/3 requirements, 9/9 decisions, 4/4 success criteria; six inline semantic groups/all variants, 18 collection steps, 12/12 boundary tests, 9/17 prior collection regressions. Standard inline review clean, no independent evaluator claimed.
-- Milestone phase-level progress: 4/4 phases, 8/8 plans, 16/16 requirements; milestone audit has not run. No archive or publication.
+- Milestone phase-level progress: 4/4 phases, 8/8 plans, 16/16 requirements; audit complete with tech_debt (16/16 requirements, 6/6 integration links, 6/6 flows); no functional blockers. No archive or publication.
 - Development version: 0.2.4; 11 version paths pass exact bounded metadata substitution, package/lock/config match, dependencies unchanged. No tag or release published.
 - Prior phase paths retained because proof tooling references them; active scope is Phases 12-15.
 - Accepted v1.0 debt and exact-source paid proof limits remain unchanged.
@@ -403,13 +403,13 @@ None.
 
 ## Session Continuity
 
-- **Last session:** 2026-10-03
-- **Stopped at:** Phase 15 verified; milestone audit pending
-- **Resume file:** .planning/phases/15-current-version-recheck-and-workflow-acceptance/15-VERIFICATION.md
+- **Last session:** 2026-10-04
+- **Stopped at:** v1.1 audit complete; verification debt decision pending
+- **Resume file:** .planning/v1.1-MILESTONE-AUDIT.md
 
 ## Next Action
 
-Run `$gsd-audit-milestone` using the Phase 15 evaluation's 16-requirement handoff and all four phase verifications. Audit, archive and publication remain separate; do not automatically invoke them. Existing source exclusions, provider authorizations, accepted v1.0 debt and remote-sync hold remain in force. Automatic advancement is disabled.
+Review `.planning/v1.1-MILESTONE-AUDIT.md`: 16/16 requirements and all scoped connections/flows satisfied. Status tech_debt for four missing Nyquist validation documents, unavailable official Skill validator and earlier stalled broad build/runtime verification. Accept debt with `$gsd-complete-milestone v1.1`, or plan cleanup with `$gsd-plan-milestone-gaps`; no automatic advancement. Existing source exclusions, provider proof limits, inherited v1.0 debt and remote-sync hold remain in force. Audit did not archive, tag, publish or push.
 
 ---
-*Last updated: 2026-10-03 after Phase 15 verification*
+*Last updated: 2026-10-04 after v1.1 milestone audit*
