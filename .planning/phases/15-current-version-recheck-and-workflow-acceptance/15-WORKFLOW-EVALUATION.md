@@ -1,6 +1,6 @@
 ---
 phase: 15-current-version-recheck-and-workflow-acceptance
-status: in_progress
+status: passed
 evaluation: inline_synthetic
 requirements: [REV-01, REV-02, REV-03]
 ---
@@ -459,3 +459,52 @@ Request 2 (separate): “Now execute that recheck against the supplied W-J2.” 
 | E06 generation / separate review / no-prior preparation | Six-section portable output plus actual A2-only review; preparation demonstrated in E01 | PASS |
 
 No required semantic variant failed. No shared-rule repair was needed after these observations. Synthetic measured-value provenance remains explicitly limited, not “fixed” by inventing experiment evidence.
+
+## Targeted regressions and review
+
+- Boundary suite: `node --test tests/baseline/source-boundary.mjs`, exit 0, 12/12, 487 ms on final behavioral run.
+- stage-cases complete collector: exit 0, 9 steps, 2026-10-03T12:55:39.339Z.
+- template-disclosure-cases complete collector: exit 0, 17 steps. Initial external summary wrapper incorrectly expected `outputs`; actual schema is `steps`/`collectedAt`. The collector itself exited 0. Fixed wrapper and reran only this affected reporting check: 17 steps, sourceStringsUnchanged true, 2026-10-03T12:56:10.585Z. No product repair required.
+- Skill two-field stdlib frontmatter check and 39 relative links passed. PyYAML still absent; official validator not run. No installation and no full YAML validation claimed.
+- Current product Phase 15 deferral search returned no matches. `git diff --check` passed. Existing source helper and tests unchanged; runtime version-only normalization belongs to phase closeout.
+- Standard inline review: [15-REVIEW.md](15-REVIEW.md). Actual E01/E06 A2-only repair lists and E05 unknown-only bounded conclusion re-inspected; no retired repair remains active.
+
+## Requirement, decision and threat coverage
+
+| Requirement | Actual evidence |
+|---|---|
+| REV-01 | E01 four lifecycle states/action retirement; E02 stable IDs/real recurrence; E03/E04 access/identity/provenance limits |
+| REV-02 | E01 current action projection; E05 both four-category final reports and reported-vs-verified remote boundary |
+| REV-03 | E01 continuous preparation/baseline/first findings/official update/restoration/disclosure/recheck; E06 full prompt and separate execution; 18 real collection steps |
+
+| Decision | Evidence |
+|---|---|
+| D-01 | E01 actual identities/coverage; E03 failed and same-ID changed-content reads |
+| D-02 | E01 exact five F transitions and A2-only current repair |
+| D-03 | E02 rewrite, supported recurrence and no-prior variant |
+| D-04 | Both E05 category tables/conclusions, no remote pass |
+| D-05 | C-J changes R4 only, stable other R/P/F; E04 unsupported claim |
+| D-06 | E01 template restoration, contextual TODO, truthful disclosure and unchanged P1 |
+| D-07 | E03 alias denial/history skip; E04 prior record command denied; E06 permissions |
+| D-08 | E01 preparation without solution and connected outputs; E06 generation/execution |
+| D-09 | Existing collector reused; local Markdown rules; later audit boundary below |
+
+| Threat | Mitigation observed |
+|---|---|
+| T-15-01 | E01 partial Results unknown, E03 unavailable current and fresh same-ID hashes |
+| T-15-02 | E02 no difference-only recurrence; E04 sourced retirement only |
+| T-15-03 | E03/E04 callbacks and excluded records; E06 minimal allowed prior summaries |
+| T-15-04 | E01/E06 retired actions absent, E05 unknown-only not all-clear |
+| T-15-05 | E01 actual first emitted F ledger explicitly consumed by later recheck, full actual output distinct from oracles |
+| T-15-06 | E05 remote boundary, no install/provider/release claims; explicit audit handoff |
+
+## Milestone-audit handoff — 16 requirements
+
+| Requirements | Phase verification / current evidence | Freshness |
+|---|---|---|
+| CTX-01, CTX-02, CTX-03, POL-01, POL-02 | [12-VERIFICATION](../12-task-baseline-and-current-artifact-scope/12-VERIFICATION.md); current E01/E03/E04 | Historical phase proof plus current bounded source regression |
+| SKL-01, SKL-02, SKL-03 | [13-VERIFICATION](../13-reusable-skill-and-stage-prompts/13-VERIFICATION.md); current E01/E06 | Historical semantic suite; nine collector steps freshly rerun |
+| TPL-01, TPL-02, TPL-03, DIS-01, DIS-02 | [14-VERIFICATION](../14-template-and-disclosure-review/14-VERIFICATION.md); current E01/E05 | Historical eight-case semantic suite; 17 collector steps freshly rerun |
+| REV-01, REV-02, REV-03 | This actual report and [15-VERIFICATION](15-VERIFICATION.md) | Current six-group inline acceptance and 18 collection steps |
+
+All 16 have phase-level evidence; this table is an audit handoff, not an already-completed milestone audit. Next `$gsd-audit-milestone`. No automatic archive/release/tag/push. Existing remote-sync hold retained; no paid provider proof replay. Broad dependency build/testing previously stalled and is not passed evidence. No claims of global installation, automatic Codex/provider invocation, independent model robustness, real binary/visual document validation, document editing/signing, remote submission or universal host enforcement. Progress and policy compliance remain separate.
