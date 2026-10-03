@@ -28,6 +28,14 @@
 
 `selected` 只表示进入读取队列。检查成功还需 `items` 有对应 ID；`unavailable` 表示没有可用读取结果。文本哈希只标识提取后获准文本，不代表原始 PDF/DOCX 字节或整份文件。新哈希使依赖旧内容的判断需要重查，不使有效要求失效。未读当前稿时不以旧稿补位。
 
+### 按需：原模板身份
+
+- originalSourceId：[实际 S ID／unknown]；原始来源／发布者：[证据／unknown]；适用任务与版本：[证据／待澄清]
+- documentId：[宿主确认身份]；inspectionStatus／inspectedAt／hashKind／contentHash／inspectedParts／coverage：[复用上节字段，各自记录原模板的实际值]
+- 与当前工作副本的关系：[来源依据]；多原本冲突：[双方来源、适用性、待确认项]
+
+不要按文件名把工作副本当原本；原文不可读不推断其内容，提取文本哈希不代表原文件字节。差异类别和恢复交接见[模板检查](template-disclosure.md)。
+
 ## 4. 要求账本
 
 | R ID | 类型 | 内容 | 来源与精确定位 | 状态 | 影响任务／待验证 |
