@@ -410,6 +410,7 @@ describe("proof chain certifier", () => {
 
   it("rehearses a complete committed passed synchronization and final audit offline", async () => {
     const repoRoot = process.cwd();
+    const currentRequirements = await readFile(join(repoRoot, ".planning/REQUIREMENTS.md"), "utf8");
     const root = await mkdtemp(join(tmpdir(), "evidencelens-passed-rehearsal-"));
     const checkout = join(root, "repo");
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
@@ -422,6 +423,10 @@ describe("proof chain certifier", () => {
       // transaction already present in the repository being cloned.
       await rm(join(checkout, phasePath, "10-170-SYNC-CLAIM.json"), { force: true });
       await rm(join(checkout, phasePath, "10-170-SYNC-JOURNAL.json"), { force: true });
+      // This synthetic v1.0 rehearsal needs its own PROV-01 state. Later
+      // milestones legitimately replace the real project's requirements.
+      await writeFile(join(checkout, ".planning/REQUIREMENTS.md"),
+        "- [ ] **PROV-01**: synthetic credentialed proof requirement\n| PROV-01 | Phase 10 | Gap: credentialed Docker MCP proof |\n");
       const reviewedCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: checkout, encoding: "utf8" }).trim();
       const manifest = await createNonPlanningManifest({ repoDir: checkout, reviewedCommit });
       const manifestByPath = new Map(manifest.entries.map((entry) => [entry.path, entry.sha256]));
@@ -473,6 +478,7 @@ describe("proof chain certifier", () => {
       expect(finalAudit).toMatchObject({ status: 0, stderr: "" });
       expect(finalAudit.stdout).toMatch(/"cardinality":11/u);
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readFile(join(repoRoot, ".planning/REQUIREMENTS.md"), "utf8")).toBe(currentRequirements);
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
