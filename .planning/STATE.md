@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Assignment Prompt Adaptation and Staged Review
-status: ready_to_plan
-stopped_at: Phase 14 verified; Phase 15 ready to plan
-last_updated: "2026-10-03T01:47:02.004782Z"
-last_activity: 2026-10-03 -- Phase 14 execution and verification complete
+status: ready_to_execute
+stopped_at: Phase 15 planned; ready to execute 15-01
+last_updated: "2026-10-03T12:37:10.128644Z"
+last_activity: 2026-10-03 -- Phase 15 planning complete
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 6
+  total_plans: 8
   completed_plans: 6
   percent: 75
 ---
@@ -29,13 +29,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-03)
 ## Current Position
 
 Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
-Phase: 15 (Current-Version Recheck and Workflow Acceptance) — READY TO PLAN
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-03 -- Phase 14 execution and verification complete
+Phase: 15 (Current-Version Recheck and Workflow Acceptance) — READY TO EXECUTE
+Plan: 0 of 2
+Status: Ready to execute
+Last activity: 2026-10-03 -- Phase 15 planning complete
 
-- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 3/4; all 6 currently planned plans are executed.
+- Phase 13 complete: 2/2 plans, 3/3 requirements, 8/8 inherited decisions and 4/4 success criteria verified. Seven inline semantic cases, nine real source-collection steps and 12/12 boundary regression checks passed; review is clean. Milestone phase progress is 3/4; 6 of 8 planned plans are executed.
 - Phase 14 verified: 2/2 plans, 5/5 requirements, 9/9 inherited decisions; 8 inline semantic cases with variants, 17 collector steps, 12/12 boundary tests and prior 9-step stage regression passed. Template/restoration handoff, contextual residue and truthful disclosure checks implemented; inline review clean.
+- Phase 15 planning: 2 plans / 2 dependent waves, 3/3 requirements and 9/9 inherited decisions covered; inline checker and structure gates passed. Six synthetic case groups/variants are planned, not executed.
 - Requirements: 13 of 16 complete (CTX-01/02/03, POL-01/02, SKL-01/02/03, TPL-01/02/03, DIS-01/02). Phase 15 current-version findings retirement and full workflow acceptance remain pending.
 - Phase 12 verification: 2/2 plans, 12/12 stdlib boundary tests, 7/7 inline workflow trials (13 collection steps), CLI examples and version metadata consistency passed. No independent model evaluation or broad runtime regression claimed.
 - Development version: 0.2.3; no tag or release published.
@@ -403,12 +404,12 @@ None.
 ## Session Continuity
 
 - **Last session:** 2026-10-03
-- **Stopped at:** Phase 14 verified; Phase 15 ready to plan
-- **Resume file:** .planning/phases/14-template-and-disclosure-review/14-VERIFICATION.md
+- **Stopped at:** Phase 15 planned; ready to execute 15-01
+- **Resume file:** .planning/phases/15-current-version-recheck-and-workflow-acceptance/15-01-PLAN.md
 
 ## Next Action
 
-Run `$gsd-plan-phase 15` for current-version finding classification/retirement and complete workflow acceptance. Template/restoration/disclosure checks are now implemented and verified within the documented synthetic scope. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
+Run `$gsd-execute-phase 15` using the verified plans for current-version finding classification/retirement and complete workflow acceptance. Successful phase acceptance should route to milestone audit; it does not automatically archive or publish the milestone. Template/restoration/disclosure checks are now implemented and verified within the documented synthetic scope. Reuse the implemented Skill and Phase 12 source gate. Existing access exclusions, provider authorizations and remote-sync hold remain in force. Automatic advancement is disabled.
 
 ---
-*Last updated: 2026-10-03 after Phase 14 execution and verification*
+*Last updated: 2026-10-03 after Phase 15 planning*

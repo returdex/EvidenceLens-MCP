@@ -102,14 +102,21 @@ Plans:
 2. Regression reminders cite current evidence and an affected requirement; ordinary changes alone do not trigger warnings.
 3. Final conclusions distinguish mandatory defects, rubric gaps, optional improvements and unknowns, and do not equate local readiness with remote submission.
 4. Documented synthetic end-to-end cases cover preparation, incremental updates, template-restoration handoff and recheck without private coursework or paid provider calls.
-**Plans**: TBD.
+**Plan count**: 2; ready to execute.
+
+Plans:
+**Wave 1**
+- [ ] 15-01-PLAN.md — Current-version finding transitions, action retirement and bounded final-report routing.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 15-02-PLAN.md — Connected synthetic workflow, recheck variants, observed repairs and milestone-audit handoff.
 
 ## Progress
 
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 3/4 | 6/6 planned so far | 13/16 | Phase 15 ready to plan | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 3/4 | 6/8 | 13/16 | Phase 15 ready to execute | — |
 
 ## Deferred Work
 
@@ -127,4 +134,4 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-03 after Phase 14 execution and verification*
+*Last updated: 2026-10-03 after Phase 15 planning*
