@@ -1,0 +1,2 @@
+# Developer-only dependency for the installed official Skill validator.
+PyYAML==6.0.3
