@@ -1,7 +1,7 @@
 # Phase 16: Verification Tooling and Offline Runtime Recovery — Context
 
 **Gathered:** 2026-10-04
-**Status:** Planning complete — ready to execute two dependent plans
+**Status:** Executed and verified — 2/2 plans complete
 **Source:** User confirmed the two-phase proposal after the v1.1 tech-debt audit.
 
 ## Boundary
@@ -22,7 +22,7 @@ Close TD-V / VAL-01; TD-B / VAL-02. Depends on Phase 15. Follow the phase goal, 
 
 ## Handoff
 
-First obtain official validator and local build/offline-test evidence, then pass actual environment/results/limitations to Phase 17. Broad commands are planned, not executed by creation of this phase.
+Official validator/control, fresh build, 795-test full offline suite and separate 12-test baseline have passed. See 16-VALIDATION.md and 16-RUNTIME-EVIDENCE.md for actual outcomes, failed attempts and host limits. Phase 17 can now plan its four retrospective records and re-audit; no automatic execution. Product version remains 0.2.4.
 
 ## Planning gate resolution
 
