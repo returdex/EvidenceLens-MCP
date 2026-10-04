@@ -81,3 +81,7 @@ The independent Codex feature passed a fresh build, the six affected version/pub
 ## Actual-home startup repair (product 0.3.5)
 
 [Startup repair evidence](codex-startup-repair.md) records reproduction of ambient agents/cache permission errors and the sealed per-run CODEX_HOME fix. Fresh build, 194/194 Node checks and 118/118 affected Vitest checks pass. Actual Codex login metadata stayed unchanged; a real-home network-denied launch reached thread.started/turn.started. The prepared real synthetic model smoke remains awaiting explicit authorization; no coursework was replayed.
+
+## Authorized smoke and HOME isolation repair (product 0.3.6)
+
+The one explicitly authorized real synthetic smoke on 0.3.5 failed with permission-class stderr; its immutable failure receipt is retained and no retry occurred. Offline investigation reproduced original HOME/.agents/skills discovery. Review HOME and CODEX_HOME are now both sealed, and the production launcher wiring is pinned. Fresh build, Node 195/195 (9.575 s) and six affected Vitest files 118/118 (4.05 s) passed. Post-0.3.6 real inference remains NOT_RUN. See [full evidence](codex-startup-repair.md).

@@ -48,8 +48,8 @@ export function toolAttempt(stdout,stderr) {
  if(stderr.includes('codex_core::tools::router'))return true;
  return /"type"\s*:\s*"(?:todo_list|file_change|command_execution|mcp_tool_call|tool_call|web_search|agent_tool_call|image_view)"/.test(stdout);
 }
-export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),toolAttempt.toString(),JSON.stringify(DISABLED_FEATURES),JSON.stringify(MODEL_RESULT_SCHEMA),DYLD_SHA256].join('\n'));}
-const CONTRACT_SHA256='4d3c2134f857f156471d9b408815d7c13ab525f2c84a09f49d3094ecb4ee766a';
+export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),JSON.stringify(DISABLED_FEATURES),JSON.stringify(MODEL_RESULT_SCHEMA),DYLD_SHA256].join('\n'));}
+const CONTRACT_SHA256='9f5a980e3514e194497acb08e2e456fdf3911f562e1115b6ccdd17865bcc92ff';
 async function regular(p,{max=1024*1024,privateOnly=false}={}){
  const s=await fs.lstat(p);
  if(!s.isFile()||s.isSymbolicLink()||s.uid!==process.getuid()||s.nlink!==1||s.mode&0o022||privateOnly&&s.mode&0o077||s.size>max)codexFail('unsafe_path');
@@ -121,7 +121,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   if(/not logged in|logged out/i.test(status.output))codexFail('login_required');
   if(status.exitCode!==0||!/^Logged in using ChatGPT$/m.test(status.output))codexFail('isolation_unverified');
   const reviewHome=await createReviewHome({control,auth,installationText});
-  const reviewEnv=Object.freeze({...env,CODEX_HOME:reviewHome.codexHome});
+  const reviewEnv=Object.freeze({...env,HOME:reviewHome.codexHome,CODEX_HOME:reviewHome.codexHome});
   const policy=isolationPolicy({binary,scratch,control,auth,installation:reviewHome.installation,network:true});
   const policyPath=join(control,'policy.sb');await fs.writeFile(policyPath,policy,{flag:'wx',mode:0o400});await fs.chmod(control,0o500);
   const args=Object.freeze(['-f',policyPath,binary,...isolatedArgs({schema,scratch})]);

@@ -33,7 +33,7 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -46,6 +46,7 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  const authText=JSON.stringify({auth_mode:'chatgpt',OPENAI_API_KEY:null,tokens:{id_token:token,access_token:token,refresh_token:authSentinel,account_id:'synthetic-account'},last_refresh:new Date().toISOString()});
  await writeFile(auth,authText,{mode:0o600});
  const ambient='AMBIENT_SYNTHETIC_SENTINEL_20';
+ if(globalSkills){await mkdir(home+'/.agents/skills/ambient',{recursive:true});await writeFile(home+'/.agents/skills/ambient/SKILL.md',ambient);}
  await mkdir(codexHome+'/skills');await mkdir(codexHome+'/skills/injected');await writeFile(codexHome+'/skills/injected/SKILL.md',ambient);await mkdir(codexHome+'/memories');await writeFile(codexHome+'/memories/MEMORY.md',ambient);await mkdir(scratch+'/.codex');await writeFile(scratch+'/.codex/config.toml','model_instructions_file=\"'+home+'/AGENTS.md\"');await writeFile(scratch+'/AGENTS.md',ambient);
  await writeFile(home+'/AGENTS.md',ambient);await writeFile(codexHome+'/AGENTS.md',ambient);
  await writeFile(codexHome+'/config.toml','model_instructions_file="'+home+'/AGENTS.md"\n');
@@ -79,7 +80,7 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  const reviewHome=isolatedHome?await createReviewHome({control,auth,installationText:installationId}):{codexHome,installation:codexHome+'/installation_id'};
  const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?reviewHome.installation:undefined,extraRead:[reviewHome.installation]});
  try {
-  const env={HOME:home,CODEX_HOME:reviewHome.codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
+  const env={HOME:isolatedHome&&isolateUserHome?reviewHome.codexHome:home,CODEX_HOME:reviewHome.codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
   const child=useRunner?{outcome:await (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess({executable:'/usr/bin/sandbox-exec',args:['-p',policy,binary,...args],env,cwd:scratch},Buffer.from('SYNTHETIC PROTOCOL FIXTURE ONLY'),{timeoutMs:15000})}:await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env,cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
   return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,installationUnchanged:(await readFile(codexHome+'/installation_id','utf8'))===installationId,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
  }finally{server.closeAllConnections();await new Promise(r=>server.close(r));if(isolatedHome)await chmod(reviewHome.codexHome,0o700);await rm(base,{recursive:true,force:true});}

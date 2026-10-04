@@ -7,7 +7,7 @@ import {createReviewHome,isolationPolicy,createIsolatedLaunch} from '../../skill
 import {executableIdentity} from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 
 for(const [name,entries] of Object.entries({agents:{homeDirectories:['agents']},cache:{homeEntries:['models_cache.json']}}))test('actual CLI reproduces denied ambient '+name+' and sealed home fixes it',async()=>{
- const old=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,isolatedHome:false,...entries});
+ const old=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,isolatedHome:false,globalSkills:false,...entries});
  assert.equal(old.outcome.status,'failed');assert.equal(old.outcome.diagnostics.trigger,'unexpected_stderr');assert.equal(old.outcome.diagnostics.reportedErrorCategory,'permission');
  if(name==='agents'){assert.equal(old.requests.length,0);assert.equal(old.outcome.diagnostics.threadObserved,false);}
  const fixed=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,homeDirectories:['agents'],homeEntries:['models_cache.json']});
@@ -32,10 +32,17 @@ for(const name of ['view_image','apply_patch'])test('forced '+name+' cannot leak
 test('actual installed home crosses startup into a turn with network explicitly denied',async()=>{
  const launch=await createIsolatedLaunch({executableReceipt:{...await executableIdentity('/opt/homebrew/bin/codex'),version:'0.141.0'},runId:randomUUID()});
  try{
-  assert.ok(launch.env.CODEX_HOME.startsWith(launch.root+'/control/'));assert.ok((await fs.lstat(launch.env.CODEX_HOME+'/auth.json')).isSymbolicLink());
+  assert.ok(launch.env.CODEX_HOME.startsWith(launch.root+'/control/'));assert.equal(launch.env.HOME,launch.env.CODEX_HOME);assert.ok((await fs.lstat(launch.env.CODEX_HOME+'/auth.json')).isSymbolicLink());
   const raw=await fs.readFile(launch.args[1],'utf8');assert.ok(!raw.includes('(literal '+JSON.stringify(process.env.HOME+'/.codex/installation_id')+')'));
   const policy=raw.replace('(allow network-outbound)','');assert.ok(!policy.includes('network-outbound'));
   const r=await runChild('/usr/bin/sandbox-exec',['-p',policy,...launch.args.slice(2)],{env:launch.env,cwd:launch.cwd,input:'SYNTHETIC STARTUP ONLY. No coursework.',timeoutMs:4000});
-  const events=r.stdout.split('\n').filter(Boolean).map(x=>JSON.parse(x));assert.ok(events.some(x=>x.type==='thread.started'));assert.ok(events.some(x=>x.type==='turn.started'));assert.ok(!r.stderr.includes('\nError: Operation not permitted'));assert.notEqual(r.exitCode,0);
+  const events=r.stdout.split('\n').filter(Boolean).map(x=>JSON.parse(x));assert.ok(events.some(x=>x.type==='thread.started'));assert.ok(events.some(x=>x.type==='turn.started'));assert.ok(!r.stderr.includes('\nError: Operation not permitted'));assert.ok(!r.stderr.includes('failed to read skills dir '));assert.notEqual(r.exitCode,0);
  }finally{assert.equal(await launch.cleanup(),true);}
+});
+
+test('existing HOME/.agents/skills is rejected with old HOME wiring and absent from isolated requests',async()=>{
+ const old=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,isolateUserHome:false});
+ assert.equal(old.outcome.status,'failed');assert.equal(old.outcome.diagnostics.trigger,'unexpected_stderr');assert.equal(old.outcome.diagnostics.reportedErrorCategory,'permission');
+ const fixed=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true});
+ assert.equal(fixed.outcome.status,'candidate',JSON.stringify(fixed.outcome));assert.equal(fixed.requests.length,1);assert.equal(fixed.authUnchanged,true);assert.equal(fixed.installationUnchanged,true);assert.ok(!JSON.stringify(fixed.requests).includes(fixed.ambient));
 });

@@ -86,3 +86,7 @@ User-requested compatible repair advances the baseline to product 0.3.4 and exec
 ## 2026-10-05 startup repair amendment
 
 Current baseline is 0.3.5 after actual-home startup permission repair, with a sealed per-run CODEX_HOME and existing-auth read alias. Future Plan 06 targets 0.3.6. All six plan output baselines are reconciled; diagnostic schema compatibility, task counts and dependencies are unchanged. Startup regression fixtures cover both ambient agents and model cache. The separately proposed one-run synthetic live smoke, if authorized, is not the two-run handoff/recheck acceptance and cannot close RUN-05.
+
+## 2026-10-05 authorized smoke / HOME repair amendment
+
+One explicitly authorized real smoke failed with permission-class stderr; its approval is consumed and was not reused. Offline reproduction found the original HOME/.agents/skills scan left by CODEX_HOME-only isolation. Baseline is now 0.3.6 after both variables are isolated and production wiring is included in the isolation digest. Plan 06 targets 0.3.7; no phase requirement or plan is closed by this repair or failed smoke.

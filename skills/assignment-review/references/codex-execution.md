@@ -24,7 +24,7 @@
 
 ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 auth_mode_unsupported，未知状态是 uncertain。需要登录时由用户直接使用 Codex 管理；本项目不调用 login/logout，不读取 auth.json/keychain，不转存凭据。缺失可执行文件先安装/恢复 Codex；不兼容版本等待验证，不自动升级或降级。
 
-子进程保留 HOME，审阅用 CODEX_HOME 指向本次受保护控制目录中的独立目录；另有固定 PATH、LANG、明确的私有 TMPDIR 和递归标记 EVIDENCELENS_CHILD=1。API 密钥、代理、provider 地址、父线程标识和 shell 初始化变量不继承。已有递归标记在任何启动前拒绝。测试通过库参数注入合成可执行文件；生产命令不得开放测试替身或任意 argv。
+审阅子进程的 HOME 和 CODEX_HOME 都指向本次受保护控制目录中的独立目录；另有固定 PATH、LANG、明确的私有 TMPDIR 和递归标记 EVIDENCELENS_CHILD=1。API 密钥、代理、provider 地址、父线程标识和 shell 初始化变量不继承。已有递归标记在任何启动前拒绝。测试通过库参数注入合成可执行文件；生产命令不得开放测试替身或任意 argv。
 
 可执行文件自身禁止 group/world 写；受信所有者的父目录禁止 world 写（root 所有 sticky 临时目录例外），允许当前宿主 Homebrew 使用的组写 Caskroom 目录。安装管理者/本机管理员属受信边界；执行前仍需重新校验已认证二进制摘要。
 
@@ -72,3 +72,10 @@ SIGINT/SIGTERM 转成当前自有运行的取消信号：TERM 后最多 2 秒发
 独立 CODEX_HOME 避免这些环境发现，同时保持原登录文件和原 installation_id 不变。目录设为 0500，位于只读 control 中，认证只有链接；没有复制、打印或修改凭据。临时 installation_id 副本保留原值并随运行删除。登录预检仍使用原目录的独立无网络策略。运行时工具拒绝、外层 OS 隔离、结构/来源验证、失败不重发和真实推理授权边界保持有效。新隔离合约摘要包括独立目录构造器；旧故障和旧回执保留。
 
 实际宿主断网测试已经越过该启动错误，出现 thread.started/turn.started；这只证明启动路径恢复，不能作为真实模型返回结果的证据。真实验收状态见项目修复记录。
+
+
+## HOME 补充隔离（0.3.6）
+
+0.3.5 的单次获准真实合成测试仍因 permission / unexpected_stderr 失败，未得到有效审阅结果；没有自动重试。断网诊断进一步定位到原 HOME/.agents/skills 的隐式扫描，原 CODEX_HOME 隔离未覆盖这一入口。审阅进程现将 HOME 与 CODEX_HOME 一同指向本次私有目录，登录预检仍使用原环境。新夹具明确创建全局 .agents/skills，并保留旧 HOME 会失败的负控制；不扩大 stderr 忽略范围。隔离合约摘要也覆盖实际生产启动器函数，防止只锁定目录构造器却遗漏环境变量接线。
+
+本地正负用例及实际宿主断网启动已验证；0.3.6 尚无新的获准真实推理成功回执，不能宣称完整审阅已恢复。原认证仍只通过只读别名由 Codex 自行使用，没有复制或改写。
