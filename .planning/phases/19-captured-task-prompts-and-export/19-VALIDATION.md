@@ -14,8 +14,8 @@ Voluntary task map under research=false; no new RESEARCH/Validation Architecture
 |---|---|---|---|---|
 | 19-01-01 | 1 | PRM-01/03/05 | contract.mjs strict schema/hash/limits/state transitions | passed (see plan summary) |
 | 19-01-02 | 1 | PRM-01/03/05 | store.mjs real filesystem identity/ordering/failure guards | passed (see plan summary) |
-| 19-02-01 | 2 | PRM-01/02/03/04 | cli.mjs actual subprocess and callback dispatch/raw-export byte equality | pending |
-| 19-02-02 | 2 | PRM-03/05 | retention.mjs dry run/tombstone/interruption/scope preservation | pending |
+| 19-02-01 | 2 | PRM-01/02/03/04 | cli.mjs actual subprocess and callback dispatch/raw-export byte equality | passed (see plan summary) |
+| 19-02-02 | 2 | PRM-03/05 | retention.mjs dry run/tombstone/interruption/scope preservation | passed (see plan summary) |
 | 19-03-01 | 3 | PRM-01/02/03/04/05 | shared route inspection; existing gate regression; actual host deferred to 04-02 | pending |
 | 19-03-02 | 3 | PRM-02/04/05 | installed-helper external cwd/missing-dependency tests + guide | pending |
 | 19-04-01 | 4 | PRM-01/02/03/04/05 | lifecycle.mjs concurrency, process faults, stale receipts and source changes | pending |
