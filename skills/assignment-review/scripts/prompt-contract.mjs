@@ -42,6 +42,7 @@ export function validateSnapshot(input) {
  if(!['preparation','in_progress','final'].includes(v.stage)||!['artifact_only','process'].includes(v.reviewMode)||!(v.currentSourceId===null||id(v.currentSourceId))||!timestamp(v.capturedAt))fail('corrupt_record');
  text(v.promptText,LIMITS.prompt); if(!hash(v.promptSha256)||v.promptSha256!==sha256(v.promptText))fail('corrupt_record');
  v.materials=array(v.materials,100,material); if(new Set(v.materials.map(m=>m.sourceId)).size!==v.materials.length)fail('corrupt_record');
+ if(v.currentSourceId!==null&&!v.materials.some(m=>m.sourceId===v.currentSourceId&&m.role==='solution'))fail('corrupt_record');
  v.limitations=array(v.limitations,100,x=>text(x));
  if(Buffer.byteLength(JSON.stringify(v))>LIMITS.snapshot)fail('store_limit');
  return v;
@@ -52,6 +53,7 @@ export function validateLifecycle(input) {
  if(!['preparing','captured','dispatched',...TERMINAL].includes(v.status)||v.executionKind!=='host_skill'||!timestamp(v.createdAt)||!timestamp(v.updatedAt)||!(v.errorCode===null||CODES.includes(v.errorCode))||!(v.promptSha256===null||hash(v.promptSha256)))fail('corrupt_record');
  if(['captured','dispatched','succeeded'].includes(v.status)&&v.promptSha256===null)fail('corrupt_record');
  if(v.status==='preparing'&&v.promptSha256!==null)fail('corrupt_record');
+ if(['preparing','captured','dispatched','succeeded'].includes(v.status)&&v.errorCode!==null)fail('corrupt_record');
  return v;
 }
 export function transition(input,status,{errorCode=null,promptSha256=input.promptSha256}={}) {
