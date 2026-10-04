@@ -16,7 +16,7 @@ import { createServer } from 'node:http';
 import { executableIdentity } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 import { MODEL_RESULT_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
 export const PINNED_BINARY_SHA256='51f848c212ee24e8da923a7175813a74c113d47e01f0d40f1fea46b12644c363';
-import { isolationPolicy,isolatedArgs,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
+import { isolationPolicy,isolatedArgs,createReviewHome,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
 export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,supervise=false}={}) {
  return new Promise((resolve,reject)=>{
   const child=spawn(executable,args,{env,cwd,detached:true,stdio:['pipe','pipe','pipe']});
@@ -33,7 +33,7 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={}}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -49,6 +49,8 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  await mkdir(codexHome+'/skills');await mkdir(codexHome+'/skills/injected');await writeFile(codexHome+'/skills/injected/SKILL.md',ambient);await mkdir(codexHome+'/memories');await writeFile(codexHome+'/memories/MEMORY.md',ambient);await mkdir(scratch+'/.codex');await writeFile(scratch+'/.codex/config.toml','model_instructions_file=\"'+home+'/AGENTS.md\"');await writeFile(scratch+'/AGENTS.md',ambient);
  await writeFile(home+'/AGENTS.md',ambient);await writeFile(codexHome+'/AGENTS.md',ambient);
  await writeFile(codexHome+'/config.toml','model_instructions_file="'+home+'/AGENTS.md"\n');
+ for(const entry of homeDirectories){if(!/^[A-Za-z0-9_.-]+$/.test(entry))throw Error('Invalid synthetic directory');await mkdir(codexHome+'/'+entry,{mode:0o700});if(entry==='agents')await writeFile(codexHome+'/agents/injected.toml','description="AGENT_PRIVATE_SENTINEL"\ndeveloper_instructions="AGENT_PRIVATE_SENTINEL"\n');}
+ for(const entry of homeEntries){if(!/^[A-Za-z0-9_.-]+$/.test(entry))throw Error('Invalid synthetic entry');await writeFile(codexHome+'/'+entry,'SYNTHETIC_PRIVATE_STATE',{mode:0o600});}
  const installationId=randomUUID();await writeFile(codexHome+'/installation_id',installationId,{mode:0o600});
  const outside=base+'/outside.txt';await writeFile(outside,'OUTSIDE_SYNTHETIC_SENTINEL_20');
  const schema=control+'/schema.json';await writeFile(schema,JSON.stringify(MODEL_RESULT_SCHEMA),{mode:0o400});
@@ -64,7 +66,7 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
    sse(res,'response.created',{response:{id:'resp_fixture',object:'response',status:'in_progress',output:[]}});
    if(mode==='truncated'){res.end();return;}
    if(mode==='failed'){sse(res,'response.failed',{response:{id:'resp_fixture',status:'failed',error:{code:'server_error',message:'synthetic failure'}}});res.end();return;}
-   const item=tool&&requests.length===1?tool({base,home,codexHome,scratch,auth,outside}):{type:'message',id:'msg_fixture',role:'assistant',status:'completed',content:[{type:'output_text',text:JSON.stringify(result),annotations:[]}]};
+   const item=tool&&requests.length===1?tool({base,home,codexHome,scratch,auth,outside,reviewHome:reviewHome.codexHome}):{type:'message',id:'msg_fixture',role:'assistant',status:'completed',content:[{type:'output_text',text:JSON.stringify(result),annotations:[]}]};
    sse(res,'response.output_item.added',{output_index:0,item});
    sse(res,'response.output_item.done',{output_index:0,item});
    sse(res,'response.completed',{response:{id:'resp_fixture',status:'completed',output:[item],usage:{input_tokens:10,output_tokens:10,total_tokens:20}}});res.end();
@@ -74,12 +76,13 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  const args=isolatedArgs({schema,scratch});args.pop();
  const config={'model_providers.evidencelens_bounded.base_url':`http://127.0.0.1:${port}/fixture`,chatgpt_base_url:`http://127.0.0.1:${port}/backend-api/`,...configOverrides};
  for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));args.push('-');
- const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?codexHome+'/installation_id':undefined,extraRead:[codexHome+'/installation_id']});
+ const reviewHome=isolatedHome?await createReviewHome({control,auth,installationText:installationId}):{codexHome,installation:codexHome+'/installation_id'};
+ const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?reviewHome.installation:undefined,extraRead:[reviewHome.installation]});
  try {
-  const env={HOME:home,CODEX_HOME:codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
+  const env={HOME:home,CODEX_HOME:reviewHome.codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
   const child=useRunner?{outcome:await (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess({executable:'/usr/bin/sandbox-exec',args:['-p',policy,binary,...args],env,cwd:scratch},Buffer.from('SYNTHETIC PROTOCOL FIXTURE ONLY'),{timeoutMs:15000})}:await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env,cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
   return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,installationUnchanged:(await readFile(codexHome+'/installation_id','utf8'))===installationId,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
- }finally{server.closeAllConnections();await new Promise(r=>server.close(r));await rm(base,{recursive:true,force:true});}
+ }finally{server.closeAllConnections();await new Promise(r=>server.close(r));if(isolatedHome)await chmod(reviewHome.codexHome,0o700);await rm(base,{recursive:true,force:true});}
 }
 
 // Trusted library adapter fixture; this is never a production CLI option.

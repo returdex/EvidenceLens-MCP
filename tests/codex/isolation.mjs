@@ -30,7 +30,7 @@ test('native sandbox profile negative observation remains uncertified',async t=>
 });
 
 test('historical read-only metadata policy rejects startup before dispatch',async t=>{
- const r=await protocolFixture();
+ const r=await protocolFixture('success',{isolatedHome:false});
  assert.equal(r.timedOut,false);assert.equal(r.authUnchanged,true);assert.equal(r.requests.length,0);
  assert.ok(r.stderr.includes('failed to initialize in-process app-server client'));
  t.diagnostic('Strict profile template SHA256 '+r.policySha256+'; startup rejected before any model request.');

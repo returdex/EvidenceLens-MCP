@@ -82,3 +82,7 @@ All new implementation tests are pending. Real account inference, actual effecti
 ## 2026-10-05 diagnostics repair amendment
 
 User-requested compatible repair advances the baseline to product 0.3.4 and execution v1/v2 readers; v2 stores safe diagnostic enums and observed exit facts. Historical v1 receipts and the model/snapshot protocols remain unchanged. D-06/D-09 and Plans 01/02/06 are reconciled; all six plan outputs now reference baseline 0.3.4 and Plan 06 targets 0.3.5. Preserve the diagnostics in future metrics/handoff work and reuse read-only inspection safeguards. No change to requirement coverage, dependencies, 13 task count, real-inference gate or the 0/6 execution status. The planning PASS above predates this compatible amendment.
+
+## 2026-10-05 startup repair amendment
+
+Current baseline is 0.3.5 after actual-home startup permission repair, with a sealed per-run CODEX_HOME and existing-auth read alias. Future Plan 06 targets 0.3.6. All six plan output baselines are reconciled; diagnostic schema compatibility, task counts and dependencies are unchanged. Startup regression fixtures cover both ambient agents and model cache. The separately proposed one-run synthetic live smoke, if authorized, is not the two-run handoff/recheck acceptance and cannot close RUN-05.

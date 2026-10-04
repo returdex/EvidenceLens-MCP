@@ -14,7 +14,7 @@ describe("project configuration", () => {
     const packageJson = await readJson("package.json");
 
     expect(packageJson.name).toBe("evidencelens-mcp");
-    expect(packageJson.version).toBe("0.3.4");
+    expect(packageJson.version).toBe("0.3.5");
     expect(packageJson.type).toBe("module");
     expect(packageJson.scripts).toMatchObject({
       dev: "tsx src/server.ts",

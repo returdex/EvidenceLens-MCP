@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
-last_updated: "2026-10-04T17:38:27.948Z"
-last_activity: 2026-10-05 — compatible Codex diagnostic repair; Phase 21 remains ready
+last_updated: "2026-10-04T17:54:10.740Z"
+last_activity: 2026-10-05 — Codex actual-home startup repair; Phase 21 remains ready
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — compatible Codex diagnostic repair; Phase 21 remains ready
+Last activity: 2026-10-05 — Codex actual-home startup repair; Phase 21 remains ready
 
 ## Accepted Coverage Debt
 
@@ -53,12 +53,18 @@ User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/researc
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
-Current product 0.3.4, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real ChatGPT inference/model availability and usage/handoff acceptance are NOT_RUN; the historical uncertain startup is not successful inference evidence; semantic automation remains partial. Local host readiness is not remote inference evidence.
+Current product 0.3.5, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real ChatGPT inference/model availability and usage/handoff acceptance are NOT_RUN; the historical uncertain startup is not successful inference evidence; semantic automation remains partial. Local host readiness is not remote inference evidence.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.4, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or live provider replay performed.
+Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.5, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or live provider replay performed.
 
 ## Compatible repair — 2026-10-05
 
 User-requested failure diagnostics fix, product 0.3.4: bounded diagnostic fields, observed terminal/exit preservation, truthful cleanup on supervisor exceptions and read-only explicit-run inspection; old v1 records remain unchanged. See [repair evidence](../docs/codex-diagnostics-repair.md). The A4 failed attempt cannot establish its original cause; no coursework replay or live inference occurred during this repair. Phase 21 stays 0/6 and RUN-01–05 pending; its next accepted patch is 0.3.5.
+
+## Startup permission repair — 2026-10-05
+
+Product 0.3.5: actual Codex home agents discovery reproduced the user's permission failure before thread.started; denied model cache reads reproduced a second ambient-state failure. A sealed per-run CODEX_HOME now contains only a read alias to the original auth file and a private installation_id copy. Existing auth/config/installation files are unchanged; original installation writes are no longer allowed. Actual-host network-denied startup crosses thread.started/turn.started; full loopback and boundary suites pass. See [startup evidence](../docs/codex-startup-repair.md).
+
+A concrete one-run synthetic real inference check was prepared and requested through the async user question; approval has not yet been received and no real dispatch has occurred. Source/template hashes and the dry-run script are in the repair record. This optional smoke cannot close Phase 21 RUN-05's separate two-run handoff/recheck acceptance. Phase 21 remains 0/6; its next accepted patch is now 0.3.6, superseding prior next-patch notes.

@@ -35,13 +35,21 @@ export function isolatedArgs({schema,scratch}) {
  for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));
  for(const feature of DISABLED_FEATURES)args.push('--disable',feature);args.push('-');return args;
 }
+// A sealed per-run home avoids automatic discovery of ambient agent configs/cache.
+// Auth bytes remain in Codex's original file; the adapter creates only a read alias.
+export async function createReviewHome({control,auth,installationText}) {
+ const codexHome=join(control,'codex-home');await fs.mkdir(codexHome,{mode:0o700});
+ await fs.symlink(auth,join(codexHome,'auth.json'));
+ const installation=join(codexHome,'installation_id');await fs.writeFile(installation,installationText,{flag:'wx',mode:0o600});
+ await fs.chmod(codexHome,0o500);return {codexHome,installation};
+}
 // Called on the complete bounded stream as well as incrementally (chunk splits cannot hide markers).
 export function toolAttempt(stdout,stderr) {
  if(stderr.includes('codex_core::tools::router'))return true;
  return /"type"\s*:\s*"(?:todo_list|file_change|command_execution|mcp_tool_call|tool_call|web_search|agent_tool_call|image_view)"/.test(stdout);
 }
-export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),toolAttempt.toString(),JSON.stringify(DISABLED_FEATURES),JSON.stringify(MODEL_RESULT_SCHEMA),DYLD_SHA256].join('\n'));}
-const CONTRACT_SHA256='8d6dbef7b9edec3c7089a34c6b22f652dccb0894ff202b335f429df05c7f7009';
+export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),toolAttempt.toString(),JSON.stringify(DISABLED_FEATURES),JSON.stringify(MODEL_RESULT_SCHEMA),DYLD_SHA256].join('\n'));}
+const CONTRACT_SHA256='4d3c2134f857f156471d9b408815d7c13ab525f2c84a09f49d3094ecb4ee766a';
 async function regular(p,{max=1024*1024,privateOnly=false}={}){
  const s=await fs.lstat(p);
  if(!s.isFile()||s.isSymbolicLink()||s.uid!==process.getuid()||s.nlink!==1||s.mode&0o022||privateOnly&&s.mode&0o077||s.size>max)codexFail('unsafe_path');
@@ -82,7 +90,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   const s=await fs.lstat(root);if(s.ino!==rootStat.ino||s.isSymbolicLink()||s.uid!==process.getuid())codexFail('uncertain');
   const unchanged=await metadataText(installation).then(t=>t===installationText).catch(()=>false);
   const authAfter=await regular(auth,{privateOnly:true}).catch(()=>null);const authSame=authAfter&&authAfter.ino===authStat.ino&&authAfter.mtimeMs===authStat.mtimeMs&&authAfter.size===authStat.size;
-  await fs.chmod(control,0o700).catch(e=>{if(e.code!=="ENOENT")throw e;});await fs.rm(root,{recursive:true,force:false});cleaned=true;if(!unchanged||!authSame)codexFail('uncertain');return true;
+  await fs.chmod(join(control,'codex-home'),0o700).catch(e=>{if(e.code!=="ENOENT")throw e;});await fs.chmod(control,0o700).catch(e=>{if(e.code!=="ENOENT")throw e;});await fs.rm(root,{recursive:true,force:false});cleaned=true;if(!unchanged||!authSame)codexFail('uncertain');return true;
  };
  try {
   if(canonicalRoots.some(p=>overlap(p,root)))codexFail('unsafe_path');
@@ -112,10 +120,12 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   if(/API key|api_key/i.test(status.output))codexFail('auth_mode_unsupported');
   if(/not logged in|logged out/i.test(status.output))codexFail('login_required');
   if(status.exitCode!==0||!/^Logged in using ChatGPT$/m.test(status.output))codexFail('isolation_unverified');
-  const policy=isolationPolicy({binary,scratch,control,auth,installation,network:true});
+  const reviewHome=await createReviewHome({control,auth,installationText});
+  const reviewEnv=Object.freeze({...env,CODEX_HOME:reviewHome.codexHome});
+  const policy=isolationPolicy({binary,scratch,control,auth,installation:reviewHome.installation,network:true});
   const policyPath=join(control,'policy.sb');await fs.writeFile(policyPath,policy,{flag:'wx',mode:0o400});await fs.chmod(control,0o500);
   const args=Object.freeze(['-f',policyPath,binary,...isolatedArgs({schema,scratch})]);
-  const launch=Object.freeze({executable:'/usr/bin/sandbox-exec',args,env,cwd:scratch,root,runId,binaryVersion:'0.141.0',binarySha256:BINARY_SHA256,policySha256:sha256(policy),contractSha256:CONTRACT_SHA256,cleanup});
+  const launch=Object.freeze({executable:'/usr/bin/sandbox-exec',args,env:reviewEnv,cwd:scratch,root,runId,binaryVersion:'0.141.0',binarySha256:BINARY_SHA256,policySha256:sha256(policy),contractSha256:CONTRACT_SHA256,cleanup});
   certified.add(launch);return launch;
  }catch(e){if(e.cleanupComplete===false){e.scratchRoot=root;throw e;}try{await cleanup();}catch{const error=new Error('uncertain');error.code='uncertain';error.cleanupComplete=cleaned;error.scratchRoot=root;throw error;}throw e;}
 }
