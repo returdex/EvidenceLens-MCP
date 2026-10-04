@@ -7,12 +7,12 @@ wave_0_complete: true
 created: 2026-10-04
 updated: 2026-10-04
 record_complete: true
-phase_verification: pending
+phase_verification: passed
 ---
 
 # Phase 17 — Actual validation record
 
-**Six task records complete; phase goal verification pending.** Automated structure/source checks pass within their actual scope; semantic evidence interpretation remains manual. `nyquist_compliant:false` is intentional, including after truthful record obligations are fulfilled. No full automation claim follows from report existence.
+**Six task records complete; phase goal verification passed 4/4.** Automated structure/source checks pass within their actual scope; semantic evidence interpretation remains manual. `nyquist_compliant:false` is intentional, including after truthful record obligations are fulfilled. No full automation claim follows from report existence.
 
 Source at record creation `1cd7622f9e197c219436265e71063254964d1d17`; phase initial source `a8045344c906ae59b89247954dc79a3deebdbc13`. Date 2026-10-04 Australia/Melbourne; exact UTC start/elapsed/exit values below. Commands run at repository root using inspected temporary owned-process supervisor (30s metadata, 60s collectors). No paid/external-provider/Docker-runtime/remote CI. [Durable full source/output evidence](17-RETROSPECTIVE-EVIDENCE.md), [current audit](../../v1.1-MILESTONE-REAUDIT.md), [plan check](17-PLAN-CHECK.md).
 
@@ -25,7 +25,7 @@ Source at record creation `1cd7622f9e197c219436265e71063254964d1d17`; phase init
 | 17-02-01 | VAL-05 | template-collector; phase14-record-check: 17 steps; sourceStringsUnchanged; exact five-task record; all exit 0 | C01–C08 template authority, contextual residue, truthful disclosure; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
 | 17-02-02 | VAL-06 | recheck-collector; phase15-record-check: 18 outputs; same-ID/new-content hashes and immutable sources; four-task record; all exit 0 | E01–E06 actual first ledger to A2-only repair, E05 unknowns and E06 separate review; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
 | 17-03-01 | VAL-03, VAL-04, VAL-05, VAL-06 | audit-structure; audit-integrity: 22 exact requirement rows, six debts, six I and F rows; 71 original hashes preserved; all exit 0 | Three-source mapping; current caller/callee and actual flow outcomes; four partial debts retained; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
-| 17-03-02 | VAL-03, VAL-04, VAL-05, VAL-06 | task6-integrity exit 0: 19 documents, 13 YAML frontmatters, 74 relative links, exact 17 original tasks and 22 requirement rows, 71 unchanged hashes; git diff --check | Checklist and active audit pointers synchronized; phase verification honestly pending, final reconciliation required after verifier | record verified; mixed automated/manual, PARTIAL |
+| 17-03-02 | VAL-03, VAL-04, VAL-05, VAL-06 | task6-integrity exit 0: 19 documents, 13 YAML frontmatters, 74 relative links, exact 17 original tasks and 22 requirement rows, 71 unchanged hashes; git diff --check | Checklist and active audit pointers synchronized; actual verifier passed; audit/tracking reconciliation completed after verifier | record verified; mixed automated/manual, PARTIAL |
 
 ## Exact command outcomes
 
@@ -61,6 +61,10 @@ Four new records cover all **17 original tasks (4+4+5+4)** and all 16 original f
 
 The audit maps all 22 approved requirements plus six original debt IDs. TD-V/TD-B closed by source-bound Phase 16 evidence; missing-document components of TD-12/13/14/15 resolved, manual semantic coverage still partial. Inherited v1.0 debt remains unchanged. No live paid proof, real binary/visual artifact, course compliance, global Skill discovery or remote submission proof is implied.
 
-All six task outcomes recorded; final Phase 17 SUMMARY, review, schema/completeness gates and goal verification remain pending here. Phase completion requires final reconciliation of audit/frontmatter/body and active tracking using actual outcomes; no circular self-acceptance from file presence.
+All six task outcomes recorded; three summaries complete, code-review empty-source scope handled, schema/completeness gates passed, actual phase goal verifier passed 4/4. Current audit/frontmatter/body and tracking were reconciled after verification; no circular acceptance from file presence. Post-verification integrity results are appended to the verifier and shared evidence.
 
 Task 6 exact check: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`, UTC `2026-10-04T06:43:25.220250+00:00`, cap 30s, elapsed 0.183s, exit 0, no timeout/owned group. Structural check is distinct from manual evidence review.
+
+## Final sign-off — 2026-10-04
+
+Actual goal verifier passed 4/4; post-verification reconciliation completed. Final integrity: 21 documents / 15 YAML / 85 links, 71 preserved hashes; final accounting: six verified phases, 13 completed plans, 22 three-source requirements and six actual current task rows. Both successful checks exit 0 with no timeout/owned group; exact timings and retained accounting false-positive are in the verifier/evidence. Earlier first-snapshot timeout remains recorded. All required record checks pass; automated semantic coverage remains PARTIAL/false.

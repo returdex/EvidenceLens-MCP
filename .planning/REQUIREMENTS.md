@@ -103,7 +103,7 @@ Re-audit after closure work; missing artifacts becoming present does not by itse
 | VAL-05 | Phase 17 | Complete |
 | VAL-06 | Phase 17 | Complete |
 
-**Coverage:** 22 requirements; 22 mapped; 0 unmapped; 22 records/requirements complete. VAL-03–06 are supported by complete task-mapped records and Plan 17-01/02 summaries; Phase 17 goal verification and final audit reconciliation are pending. Original semantic automation remains PARTIAL. Current audit: [re-audit](v1.1-MILESTONE-REAUDIT.md); [original snapshot](v1.1-MILESTONE-AUDIT.md) preserved.
+**Coverage:** 22 requirements; 22 mapped; 0 unmapped; 22 records/requirements complete. VAL-03–06 are supported by complete task-mapped records, all three Phase 17 summaries and passed 4/4 Phase 17 goal verification; expanded audit reconciled. Original semantic automation remains PARTIAL. Current audit: [re-audit](v1.1-MILESTONE-REAUDIT.md); [original snapshot](v1.1-MILESTONE-AUDIT.md) preserved.
 
 ---
-*Last updated: 2026-10-04 after Phase 17 task acceptance; phase verification pending*
+*Last updated: 2026-10-04 after Phase 17 verification and audit reconciliation*

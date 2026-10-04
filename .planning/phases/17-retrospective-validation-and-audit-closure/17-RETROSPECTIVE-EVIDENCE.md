@@ -3530,3 +3530,175 @@ Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`
   "semantic_pass_claim": "none; manual review separate"
 }
 ```
+
+## phase-completeness
+
+Command: `gsd-sdk query verify.phase-completeness 17`; start `2026-10-04T06:44:16.823873+00:00`; cap 30s; elapsed 0.288s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "complete": true,
+  "phase": "17",
+  "plan_count": 3,
+  "summary_count": 3,
+  "incomplete_plans": [],
+  "orphan_summaries": [],
+  "errors": [],
+  "warnings": []
+}
+```
+
+## schema-drift
+
+Command: `gsd-sdk query verify.schema-drift 17`; start `2026-10-04T06:44:16.823874+00:00`; cap 30s; elapsed 0.289s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "drift_detected": false,
+  "blocking": false,
+  "schema_files": [],
+  "orms": [],
+  "unpushed_orms": [],
+  "message": "",
+  "skipped": false
+}
+```
+
+## review-scope
+
+Command: `git diff --stat a8045344c906ae59b89247954dc79a3deebdbc13`; start `2026-10-04T06:44:16.823895+00:00`; cap 30s; elapsed 0.073s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+.planning/PROJECT.md                               |    8 +-
+ .planning/REQUIREMENTS.md                          |   20 +-
+ .planning/ROADMAP.md                               |   16 +-
+ .planning/STATE.md                                 |   30 +-
+ .../12-VALIDATION.md                               |   53 +
+ .../13-VALIDATION.md                               |   53 +
+ .../14-VALIDATION.md                               |   55 +
+ .../15-VALIDATION.md                               |   52 +
+ .../17-01-SUMMARY.md                               |   52 +
+ .../17-02-SUMMARY.md                               |   52 +
+ .../17-03-SUMMARY.md                               |   52 +
+ .../17-RETROSPECTIVE-EVIDENCE.md                   | 3532 ++++++++++++++++++++
+ .../17-VALIDATION.md                               |   83 +-
+ .planning/v1.1-MILESTONE-REAUDIT.md                |  159 +
+ 14 files changed, 4140 insertions(+), 77 deletions(-)
+```
+
+## review-file-selection
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python -`; start `2026-10-04T06:44:50.970790+00:00`; cap 30s; elapsed 0.073s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "phase_found": true,
+  "enabled": true,
+  "depth": "standard",
+  "summary_paths": 11,
+  "source_review_files": [],
+  "result": "No source files changed. Code-review workflow skips empty scope; no REVIEW.md fabricated. Documentation/evidence review remains part of phase verification."
+}
+```
+
+## pre-verifier-inspection
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python -`; start `2026-10-04T06:45:31.792746+00:00`; cap 30s; elapsed 0.178s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "checked_and_complete_requirements": 22,
+  "phase17_summary_requirements": 4,
+  "phase17_actual_task_rows": 6,
+  "task_commits": "all present",
+  "changed_paths": [
+    ".planning/PROJECT.md",
+    ".planning/REQUIREMENTS.md",
+    ".planning/ROADMAP.md",
+    ".planning/STATE.md",
+    ".planning/phases/12-task-baseline-and-current-artifact-scope/12-VALIDATION.md",
+    ".planning/phases/13-reusable-skill-and-stage-prompts/13-VALIDATION.md",
+    ".planning/phases/14-template-and-disclosure-review/14-VALIDATION.md",
+    ".planning/phases/15-current-version-recheck-and-workflow-acceptance/15-VALIDATION.md",
+    ".planning/phases/17-retrospective-validation-and-audit-closure/17-01-SUMMARY.md",
+    ".planning/phases/17-retrospective-validation-and-audit-closure/17-02-SUMMARY.md",
+    ".planning/phases/17-retrospective-validation-and-audit-closure/17-03-SUMMARY.md",
+    ".planning/phases/17-retrospective-validation-and-audit-closure/17-RETROSPECTIVE-EVIDENCE.md",
+    ".planning/phases/17-retrospective-validation-and-audit-closure/17-VALIDATION.md",
+    ".planning/v1.1-MILESTONE-REAUDIT.md"
+  ],
+  "product_version": "0.2.4",
+  "review": "planning documents only; no source/TDD/UI changes",
+  "pending_phase17_todos": 0
+}
+```
+
+## complete-phase
+
+Command: `gsd-sdk query phase.complete 17`; start `2026-10-04T06:46:48.348215+00:00`; cap 30s; elapsed 0.23s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "completed_phase": "17",
+  "phase_name": "retrospective-validation-and-audit-closure",
+  "plans_executed": "3/3",
+  "next_phase": null,
+  "next_phase_name": null,
+  "is_last_phase": true,
+  "date": "2026-10-04",
+  "roadmap_updated": true,
+  "state_updated": true,
+  "requirements_updated": true,
+  "warnings": [],
+  "has_warnings": false
+}
+```
+
+## final-integrity
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`; start `2026-10-04T06:49:03.263979+00:00`; cap 30s; elapsed 0.358s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "preserved_hashes": 71,
+  "reused_build_and_offline_inputs": "identical",
+  "documents": 21,
+  "yaml_frontmatter": 15,
+  "relative_links": 85,
+  "original_task_maps": [
+    4,
+    4,
+    5,
+    4
+  ],
+  "requirement_rows": 22,
+  "historical_phase_summary_and_verification_sets": "12-16 matched",
+  "semantic_pass_claim": "none; manual review separate"
+}
+```
+
+## Retained final-accounting check failure
+
+Initial temporary accounting check at `2026-10-04T06:50:11.825481+00:00`, cap 30s, elapsed 0.182s, exit 1, no timeout or owned group, asserted against STATE.md. Diagnostic `rg` showed substring `12/13` matched the legitimate debt list TD-12/13/14/15 and Phase 12/13 plan description, not a stale progress count. Removed that unscoped substring assertion; retained exact YAML progress equality, roadmap milestone-row counts, six verifier/13 summary/22 requirement checks and explicit pending-status checks. This repairs the temporary check, not product code or an acceptance criterion.
+
+## final-accounting-corrected
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-final-accounting.py`; start `2026-10-04T06:50:30.813876+00:00`; cap 30s; elapsed 0.242s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "verified_phases": 6,
+  "completed_plans_and_summaries": 13,
+  "three_source_requirements": 22,
+  "phase17_goal": "4/4 passed",
+  "phase17_tasks": 6,
+  "original_mapped_tasks": 17,
+  "audit": "tech_debt",
+  "manual_coverage": "partial",
+  "automated_boundary_tests": 12,
+  "collector_steps": 57,
+  "version": "0.2.4",
+  "publication": "none",
+  "tracking": "frontmatter and current bodies reconciled"
+}
+```
