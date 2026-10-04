@@ -1,3 +1,4 @@
+import { validateDiagnostics } from './codex-diagnostics.mjs';
 import { fields,array,text,id,uuid,hash,sha256,decode,validateSnapshot } from './prompt-contract.mjs';
 
 export const CODEX_LIMITS=Object.freeze({sources:100,excerpts:100,findings:100,final:240*1024,envelope:256*1024,line:512*1024,output:2*1024*1024,preflightMs:10000,reviewMs:120000,graceMs:2000});
@@ -108,15 +109,18 @@ export function validateCodexResultShape(input){
 }
 
 export function validateExecutionRecord(input){
- const r=fields(input,['schemaVersion','runId','taskId','conversationId','attemptId','executionKind','promptSha256','binaryVersion','binarySha256','policySha256','status','errorCode','startedAt','finishedAt','elapsedMs','terminalObserved','cleanupComplete','resultSha256']);
- if(r.schemaVersion!==1||!uuid(r.runId)||!uuid(r.conversationId)||!uuid(r.attemptId)||!id(r.taskId)||r.executionKind!=='codex_exec'||!hash(r.promptSha256))codexFail('result_invalid');
+ const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;
+ const r=fields(input,['schemaVersion','runId','taskId','conversationId','attemptId','executionKind','promptSha256','binaryVersion','binarySha256','policySha256','status','errorCode','startedAt','finishedAt','elapsedMs','terminalObserved','cleanupComplete','resultSha256',...(version===2?['diagnostics']:[])]);
+ if(![1,2].includes(r.schemaVersion)||!uuid(r.runId)||!uuid(r.conversationId)||!uuid(r.attemptId)||!id(r.taskId)||r.executionKind!=='codex_exec'||!hash(r.promptSha256))codexFail('result_invalid');
  if(!['preparing','succeeded','failed','cancelled','uncertain'].includes(r.status)||!(r.errorCode===null||CODEX_CODES.includes(r.errorCode)))codexFail('result_invalid');
  for(const k of ['binarySha256','policySha256','resultSha256'])if(r[k]!==null&&!hash(r[k]))codexFail('result_invalid');
  if(r.binaryVersion!==null&&r.binaryVersion!=='0.141.0')codexFail('result_invalid');
  for(const k of ['startedAt','finishedAt'])if(r[k]!==null&&(typeof r[k]!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(r[k])||!Number.isFinite(Date.parse(r[k]))))codexFail('result_invalid');
  if(r.elapsedMs!==null&&(!Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<0)||typeof r.terminalObserved!=='boolean'||typeof r.cleanupComplete!=='boolean')codexFail('result_invalid');
  if(r.status==='succeeded'&&(!r.terminalObserved||!r.cleanupComplete||r.resultSha256===null||r.errorCode!==null||r.binarySha256===null||r.policySha256===null))codexFail('result_invalid');
- if(r.status!=='succeeded'&&r.resultSha256!==null)codexFail('result_invalid');return r;
+ if(r.status!=='succeeded'&&r.resultSha256!==null)codexFail('result_invalid');
+ if(r.schemaVersion===2)r.diagnostics=validateDiagnostics(r.diagnostics);else if('diagnostics' in r)codexFail('result_invalid');
+ return r;
 }
 export function validateResultEnvelope(input){
  const r=fields(input,['schemaVersion','runId','taskId','conversationId','promptSha256','modelResponse','limitations','resultSha256']);

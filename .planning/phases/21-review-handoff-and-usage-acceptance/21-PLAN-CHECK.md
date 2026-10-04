@@ -78,3 +78,7 @@ Final diff validation was scoped to the changed Phase 21/state/roadmap/project p
 ## Remaining execution evidence
 
 All new implementation tests are pending. Real account inference, actual effective model availability and host semantic outcomes remain NOT_RUN; existing installation alone is not command-invocation evidence. Plan 05 owns the prepared, authorized two-run acceptance. RR-01–08 and FM-01–06 remain non-blocking. Missing Claude originals and full A1.3 semantic replay do not block execution of this phase.
+
+## 2026-10-05 diagnostics repair amendment
+
+User-requested compatible repair advances the baseline to product 0.3.4 and execution v1/v2 readers; v2 stores safe diagnostic enums and observed exit facts. Historical v1 receipts and the model/snapshot protocols remain unchanged. D-06/D-09 and Plans 01/02/06 are reconciled; all six plan outputs now reference baseline 0.3.4 and Plan 06 targets 0.3.5. Preserve the diagnostics in future metrics/handoff work and reuse read-only inspection safeguards. No change to requirement coverage, dependencies, 13 task count, real-inference gate or the 0/6 execution status. The planning PASS above predates this compatible amendment.

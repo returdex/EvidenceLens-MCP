@@ -2,7 +2,7 @@
 import {realpath} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
-import {captureRun} from './prompt-store.mjs';
+import {captureRun,diagnoseCodexRun} from './prompt-store.mjs';
 import {sha256,uuid,id,fields,array,text,decode,LIMITS,fail,safeError} from './prompt-contract.mjs';
 import {renderEvidenceCapsule,parseEvidenceCapsule} from './codex-contract.mjs';
 import {preflightCodex} from './codex-preflight.mjs';
@@ -24,8 +24,8 @@ async function readInput(){const chunks=[];let n=0;for await(const c of process.
 export async function main(args){
  const abort=new AbortController(),cancel=()=>abort.abort();let runId;
  try{
-  const [action,...rest]=args;if(rest.length||!['preflight','capture','run'].includes(action))fail('unsupported');
-  const raw=await readInput(),common=['taskId','conversationId','evidenceRoots'],specific={preflight:[],capture:['runId','snapshot','capsule','admitted'],run:['runId']};
+  const [action,...rest]=args;if(rest.length||!['preflight','capture','run','diagnose'].includes(action))fail('unsupported');
+  const raw=await readInput(),common=['taskId','conversationId','evidenceRoots'],specific={preflight:[],capture:['runId','snapshot','capsule','admitted'],run:['runId'],diagnose:['runId']};
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>![...common,...specific[action]].includes(k)))fail('corrupt_record');
   const v=fields(raw,Object.keys(raw));runId=v.runId;
   let result;
@@ -35,6 +35,7 @@ export async function main(args){
    if(!uuid(conversationId)||v.conversationId!==undefined&&v.conversationId!==conversationId||!id(v.taskId)||!uuid(v.runId))fail('identity_required');
    const scope={conversationId,taskId:v.taskId,evidenceRoots:v.evidenceRoots===undefined?[]:array(v.evidenceRoots,100,x=>text(x))};
    if(action==='capture')result=await captureCodexPrompt(scope,v.runId,{snapshot:v.snapshot,capsule:v.capsule,admitted:v.admitted});
+   else if(action==='diagnose')result=await diagnoseCodexRun(scope,v.runId);
    else {process.on('SIGINT',cancel);process.on('SIGTERM',cancel);result=await runCapturedCodex(scope,v.runId,{signal:abort.signal});}
   }
   process.stdout.write(JSON.stringify(result)+'\n');if(result.ok===false||action==='run'&&result.status!=='succeeded')process.exitCode=1;

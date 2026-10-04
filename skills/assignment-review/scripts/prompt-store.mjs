@@ -1,3 +1,4 @@
+import { newDiagnostics } from './codex-diagnostics.mjs';
 import fs from 'node:fs/promises';
 import { validateBoundCodexResult } from './codex-result.mjs';
 import { validateExecutionRecord,validateResultEnvelope } from './codex-contract.mjs';
@@ -193,7 +194,7 @@ function validateScratch(input){const v=fields(input,['schemaVersion','runId','t
 export async function claimCodexRun(scope,runId){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
  if(l.executionKind!=='codex_exec'||l.status!=='captured')fail('unsupported');if(await execution(c,t,l))fail('busy');
- const v=await snapshot(c,t,l),e=validateExecutionRecord({schemaVersion:1,runId,taskId:l.taskId,conversationId:l.conversationId,attemptId:randomUUID(),executionKind:'codex_exec',promptSha256:l.promptSha256,binaryVersion:null,binarySha256:null,policySha256:null,status:'preparing',errorCode:null,startedAt:now(),finishedAt:null,elapsedMs:null,terminalObserved:false,cleanupComplete:false,resultSha256:null});
+ const v=await snapshot(c,t,l),e=validateExecutionRecord({schemaVersion:2,diagnostics:newDiagnostics(),runId,taskId:l.taskId,conversationId:l.conversationId,attemptId:randomUUID(),executionKind:'codex_exec',promptSha256:l.promptSha256,binaryVersion:null,binarySha256:null,policySha256:null,status:'preparing',errorCode:null,startedAt:now(),finishedAt:null,elapsedMs:null,terminalObserved:false,cleanupComplete:false,resultSha256:null});
  tx.dirty();await writeExclusive(recordPath(c,t,runId,'execution'),e);await tx.publish();return {snapshot:v,execution:e};
 });}
 export async function recordCodexScratch(scope,runId,attemptId,root){return transaction(scope,false,async tx=>{
@@ -210,11 +211,21 @@ export async function completeCodexRun(scope,runId,{execution:input,result=null,
   tx.dirty();await writeExclusive(recordPath(c,t,runId,'result'),r);await boundary(c,'after_result');
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');
- if(signal?.aborted&&e.cleanupComplete){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.resultSha256=null;}
+ if(signal?.aborted&&e.cleanupComplete){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.resultSha256=null;if(e.schemaVersion===2&&!e.diagnostics.trigger)e.diagnostics={...e.diagnostics,stage:'publication',trigger:'aborted'};}
  const next=transition(l,e.status,{errorCode:e.errorCode});tx.dirty();await replace(recordPath(c,t,runId,'execution'),e);await boundary(c,'after_execution');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {...receipt(next),execution:e,...(result?{result}:{} )};
 });}
 export async function readCodexResult(scope,runId){
  const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);
  if(l.status!=='succeeded'||e?.status!=='succeeded')fail('uncertain');const r=validateResultEnvelope(await read(recordPath(c,t,runId,'result')));
  if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||r.resultSha256!==e.resultSha256)fail('corrupt_record');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');return {metadata:receipt(l),execution:e,result:r};
+}
+
+// Read-only, explicit-run inspection: no prompt, result, source or process access.
+export async function diagnoseCodexRun(scope,runId){
+ const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind!=='codex_exec')fail('unsupported');const e=await execution(c,t,l);
+ if(e&&(e.status==='preparing'?!['captured','dispatched'].includes(l.status):e.status!==l.status))fail('corrupt_record');
+ const diagnosticAvailability=!e?'not_started':e.schemaVersion===1?'not_recorded':e.status==='preparing'?'pending':'recorded';
+ await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
+ return {metadata:receipt(l),execution:e,diagnosticAvailability};
 }

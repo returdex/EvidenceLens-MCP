@@ -73,3 +73,7 @@ When testing a historical proof-sync flow, provide its matching synthetic requir
 The independent Codex feature passed a fresh build, the six affected version/public-contract/runtime files (118/118), and Codex/prompt/command/source-boundary Node suites (157/157). Each batch was capped at 120 seconds with sanitized child environments. Dependency versions and analyzerVersion remain unchanged. This scoped run does not renew the historical 795-test/provider proof.
 
 [Phase 20 runtime evidence](../.planning/phases/20-bounded-independent-codex-execution/20-RUNTIME-EVIDENCE.md) records commands, timestamps, durations, exit codes and hashes. [Host acceptance](../.planning/phases/20-bounded-independent-codex-execution/20-HOST-ACCEPTANCE.md) separates actual OS/CLI/login status from synthetic model responses. Real ChatGPT inference and usage/handoff acceptance remain Phase 21 NOT_RUN.
+
+## Compatible Codex diagnostics repair (product 0.3.4)
+
+[Repair evidence](codex-diagnostics-repair.md) records bounded failure diagnostics and legacy receipt compatibility. Fresh build and affected Vitest 118/118 passed; Codex/prompt/command regression 173/173 passed, followed by final changed-boundary 80/80 (including 30 diagnostic cases) and source-boundary 12/12. Actual CLI failure checks use loopback synthetic responses only. Existing private failed receipts are not replayed or relabeled; real inference acceptance remains pending in Phase 21.
