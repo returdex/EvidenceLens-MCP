@@ -76,3 +76,22 @@ test('CLI rejects missing/relative target, unknown and repeated flags', () => {
     assert.equal(r.status, 1); assert.match(r.stderr, /Usage:/);
   }
 });
+
+
+test('post-create identity failure reports retained link as unverified, never merely planned', async t => {
+  const { target } = await fixture(t);
+  const original = fs.lstat.bind(fs);
+  const destination = join(target, 'assignment-review');
+  const mock = t.mock.method(fs, 'lstat', async (...args) => {
+    const value = await original(...args);
+    if (args[0] === destination && value.isSymbolicLink()) {
+      throw Object.assign(new Error('synthetic identity read failure'), { code: 'EIO' });
+    }
+    return value;
+  });
+  const result = await installSkills(target, { apply: true }); mock.mock.restore();
+  assert.equal(result.ok, false); assert.equal(result.error, 'EIO');
+  assert.equal(result.entries[0].status, 'rollback_unverified');
+  assert.ok((await original(destination)).isSymbolicLink());
+  assert.deepEqual(await fs.readdir(target), ['assignment-review']);
+});

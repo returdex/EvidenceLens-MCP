@@ -54,14 +54,16 @@ export async function installSkills(targetRoot, { apply = false, sourceRoot = de
     for (const entry of entries.filter(e => e.status === 'planned')) {
       await checkParents(targetRoot);
       await fs.symlink(entry.source, entry.destination, 'dir'); // EEXIST never overwrites a concurrent entry.
-      const identity = await fs.lstat(entry.destination);
-      created.push({ entry, identity });
+      const owned = { entry, identity: null };
+      created.push(owned);
       entry.status = 'created';
+      owned.identity = await fs.lstat(entry.destination);
     }
     return { ...report, ok: true };
   } catch (error) {
     report.error = error.code || 'INSTALL_FAILED';
     for (const { entry, identity } of created.reverse()) {
+      if (!identity) { entry.status = 'rollback_unverified'; continue; }
       try {
         await checkParents(targetRoot);
         const current = await fs.lstat(entry.destination);
