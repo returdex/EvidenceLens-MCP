@@ -41,12 +41,12 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–20 are complete (16/21 requirements); Phase 21 is ready for `$gsd-plan-phase 21`.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–20 are complete (16/21 requirements); Phase 21 has six checked plans and is ready for `$gsd-execute-phase 21`.
 
 - [ ] Authorized real Codex inference and concise result handoff in the work conversation, building on the completed Phase 20 adapter.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
 
-2026-10-05 user-directed refinement: [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md) adds complete-finding handoff and truthful status presentation within RUN-01/02/05. The stage remains ready to plan; no runtime change is claimed.
+2026-10-05 user-directed refinement: [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md) adds complete-finding handoff and truthful status presentation within RUN-01/02/05. The stage is now planned (six sequential plans, 13 tasks); no runtime change is claimed.
 
 ### Deferred
 

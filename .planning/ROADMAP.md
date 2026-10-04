@@ -136,9 +136,40 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 3. 调用记录含状态和耗时；可得模型及 token 值有来源/范围，缺值不填零、不推算账单。
 4. 完整流程有合成负例、目标宿主发现和获授权真实 Codex 运行证据；缺任何一层就明确保留验收缺口。
 
-**Plans**: TBD — created by `$gsd-plan-phase 21`.
+**Plans**: 0/6 complete; six sequential plans / 13 tasks checked in [21-PLAN-CHECK.md](phases/21-review-handoff-and-usage-acceptance/21-PLAN-CHECK.md).
 
-**Planning revision (2026-10-05):** Read [21-PLANNING-INPUT](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md). H-01–04 refine RUN-01/02/05: preserve access to every validated finding in concise handoff, separate execution success from band/submission claims, distinguish deferred action from resolved findings, and test those boundaries with source-bound synthetic results. Larger semantic-review changes remain in the [non-blocking future memo](notes/2026-10-05-review-quality-future.md); completed phases have [revision reminders](REVIEW-REVISIONS.md) without reopening their status. Phase 21 remains unplanned and has no new dependency.
+**Planning revision (2026-10-05):** Read [21-PLANNING-INPUT](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md). H-01–04 refine RUN-01/02/05: preserve access to every validated finding in concise handoff, separate execution success from band/submission claims, distinguish deferred action from resolved findings, and test those boundaries with source-bound synthetic results. Larger semantic-review changes remain in the [non-blocking future memo](notes/2026-10-05-review-quality-future.md); completed phases have [revision reminders](REVIEW-REVISIONS.md) without reopening their status. Phase 21 is planned and ready to execute, with no new phase dependency.
+
+**Wave 1**
+
+- [ ] 21-01-PLAN.md — Terminal usage and private metrics retention.
+
+**Wave 2** *(depends on Wave 1)*
+
+- [ ] 21-02-PLAN.md — Coherent run inspection and complete-finding handoff.
+
+**Wave 3** *(depends on Wave 2)*
+
+- [ ] 21-03-PLAN.md — Host assessment binding and current-action recheck.
+
+**Wave 4** *(depends on Wave 3)*
+
+- [ ] 21-04-PLAN.md — Installed helper and four-stage command wiring.
+
+**Wave 5** *(depends on Wave 4)*
+
+- [ ] 21-05-PLAN.md — Synthetic, installed-host and authorized real acceptance.
+
+**Wave 6** *(depends on Wave 5)*
+
+- [ ] 21-06-PLAN.md — Accepted feature patch and scoped verification.
+
+**Cross-cutting constraints:**
+
+- Preserve immutable prompt/model/result contracts; bind optional local sidecars and show missing metadata truthfully.
+- Complete finding IDs remain accessible; no automatic grade/submission claims or resolved state from deferral.
+- No automatic real resend, auth mutation, new chat or private case transmission; actual acceptance is distinct from synthetic proof.
+- RR/FM reminders remain non-blocking. No implementation or product patch is claimed by planning.
 
 ## Progress
 
@@ -147,7 +178,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
 | 20. Bounded Independent Codex Execution | 6/6 | Complete | 2026-10-05 |
-| 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
+| 21. Review Handoff and Usage Acceptance | 0/6 | Ready to execute | — |
 
 ## Coverage and Research
 
