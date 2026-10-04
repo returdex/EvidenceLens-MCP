@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-11 (shipped 2026-09-24)
-- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-17 (Phases 12-16 verified; Phase 17 retrospective closure ready to plan; development version 0.2.4)
+- 🚧 **v1.1 Assignment Prompt Adaptation and Staged Review** — Phases 12-17 (Phases 12-16 verified; Phase 17 retrospective closure planned; development version 0.2.4)
 
 ## Phases
 
@@ -148,14 +148,26 @@ Plans:
 3. Nyquist fields reflect actual coverage. Manual-only or unavailable checks remain visible and cannot become `nyquist_compliant: true` merely because files now exist. Residual debt is retained for explicit disposition.
 4. The expanded milestone is re-audited against original 16 functional requirements plus 6 approved validation requirements; TD-V/TD-B closure is checked against Phase 16, all six debt IDs are reconciled, and any remaining gaps stay open. Validation for Phases 16/17 is planned alongside their execution to avoid recreating missing-document debt.
 **Task groups**: 3 — reconstruct four task/evidence maps; run meaningful checks and complete validation records; re-audit and synchronize final status.
-**Plan count**: TBD; not planned or executed. Plan after Phase 16's actual outcomes.
+**Plan count**: 3; planned and checked 2026-10-04, not executed.
+
+Plans:
+**Wave 1**
+- [ ] 17-01-PLAN.md — Phase 12/13 task-mapped retrospective validation and source-bound checks.
+
+**Wave 2** *(depends on Wave 1 evidence)*
+- [ ] 17-02-PLAN.md — Phase 14/15 template/disclosure and current-version validation records.
+
+**Wave 3** *(depends on Waves 1–2 acceptance)*
+- [ ] 17-03-PLAN.md — Expanded 22-requirement/six-debt re-audit, Phase 17 validation and truthful state handoff.
+
+**Cross-cutting constraints:** D-01 scoped six-debt closure; D-02 reuse meaningful tests; D-03 explicit automated/manual/unknown coverage; D-04 bounded offline checks and immutable historical evidence; D-05 actual validation and post-verification reconciliation; D-06 version 0.2.4, remote hold and no publication/auto-advance.
 
 ## Progress
 
 | Milestone | Phases | Plans | Requirements | Status | Shipped |
 |-----------|--------|-------|--------------|--------|---------|
 | v1.0 MVP | 11/11 | 39/39 | 20/20 | Complete | 2026-09-24 |
-| v1.1 Assignment Prompt Adaptation and Staged Review | 5/6 | 10/10 known; Phase 17 TBD | 18/22 | Phase 17 ready to plan | — |
+| v1.1 Assignment Prompt Adaptation and Staged Review | 5/6 | 10/13 | 18/22 | Phase 17 planned; ready to execute | — |
 
 ## Deferred Work
 
@@ -173,8 +185,8 @@ Plans:
 - `0.2.0` is the development version for this milestone, not a published release or a completion claim.
 
 ---
-*Last updated: 2026-10-04 after Phase 16 execution and verification*
+*Last updated: 2026-10-04 after Phase 17 planning*
 
 Audit: [v1.1-MILESTONE-AUDIT.md](v1.1-MILESTONE-AUDIT.md) — 16/16 requirements, 6/6 integration links and 6/6 scoped flows; no functional blockers. Verification debt and remote-sync hold remain.
 
-The audit remains a historical 16-requirement snapshot. Phase 16 provides actual closure evidence for TD-V and TD-B; Phase 17 will reconcile these in the re-audit. Phase 17 remains unplanned; its four document debts remain open.
+The audit remains a historical 16-requirement snapshot. Phase 16 provides actual closure evidence for TD-V and TD-B; Phase 17 will reconcile these in the re-audit. Phase 17 has three verified plans; its four record obligations remain pending execution.
