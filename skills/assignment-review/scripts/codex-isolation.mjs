@@ -68,10 +68,10 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
  if(!home.startsWith('/')||!codexHome.startsWith('/')||codexHome!==resolve(codexHome))codexFail('unsafe_path');
  const auth=join(codexHome,'auth.json'),installation=join(codexHome,'installation_id');
  await ownedParents(auth);const authStat=await regular(auth,{privateOnly:true}).catch(e=>{if(e.code==='ENOENT')codexFail('auth_mode_unsupported');throw e;});const installationText=await metadataText(installation).catch(e=>{if(e.code==='ENOENT')codexFail('isolation_unverified');throw e;});
- const protectedRoots=[process.cwd(),...evidenceRoots,stateRoot??join(homedir(),'.local','state','evidencelens')];
+ const protectedRoots=[process.cwd(),...evidenceRoots,stateRoot??join(homedir(),'.local','state','evidencelens')],canonicalRoots=[];
  for(const root of protectedRoots){
   if(typeof root!=='string'||!root.startsWith('/'))codexFail('unsafe_path');
-  const path=await fs.realpath(root).catch(()=>resolve(root));
+  const path=await fs.realpath(root).catch(e=>{if(e.code==='ENOENT')return resolve(root);throw e;});canonicalRoots.push(path);
   if(['/System/Library','/System/Volumes/Preboot/Cryptexes','/usr/lib','/usr/share/zoneinfo','/dev',codexHome,dirname(binary)].some(p=>overlap(path,p)))codexFail('unsafe_path');
  }
  const root=await fs.mkdtemp('/private/tmp/evidencelens-codex-');await fs.chmod(root,0o700);const rootStat=await fs.lstat(root);
@@ -85,7 +85,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   await fs.chmod(control,0o700).catch(e=>{if(e.code!=="ENOENT")throw e;});await fs.rm(root,{recursive:true,force:false});cleaned=true;if(!unchanged||!authSame)codexFail('uncertain');return true;
  };
  try {
-  if(protectedRoots.some(p=>overlap(resolve(p),root)))codexFail('unsafe_path');
+  if(canonicalRoots.some(p=>overlap(p,root)))codexFail('unsafe_path');
   await fs.mkdir(scratch,{mode:0o700});await fs.mkdir(control,{mode:0o700});
   const schema=join(control,'schema.json');await fs.writeFile(schema,JSON.stringify(MODEL_RESULT_SCHEMA),{flag:'wx',mode:0o400});
   const env=Object.freeze(childEnvironment(process.env,scratch));
@@ -94,6 +94,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   const checkPolicy=isolationPolicy({binary:'/bin/sh',scratch,control,auth,extraRead:['/bin/cat','/usr/bin/touch']});
   const check=await boundedProbe('/usr/bin/sandbox-exec',['-p',checkPolicy,'/bin/sh','-c','/bin/cat "$1" >/dev/null || exit 1; if /bin/cat "$2" >/dev/null 2>&1; then exit 2; fi; if /usr/bin/touch "$2" 2>/dev/null; then exit 3; fi; echo verified','probe',approved,denied],{env,cwd:scratch,timeoutMs:remaining()});
   await fs.unlink(approved);await fs.unlink(denied);
+  if(!check.cleanupComplete){const e=new Error('uncertain');e.code='uncertain';e.cleanupComplete=false;throw e;}
   if(check.exitCode!==0||check.code||check.output.trim()!=='verified')codexFail('isolation_unverified');
   // Status-only config reads never become capabilities of the review process.
   const configFiles=[];const config=join(codexHome,'config.toml');
@@ -106,7 +107,8 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   }catch(e){if(e.code!=='ENOENT')throw e;}
   const statusPolicy=isolationPolicy({binary,scratch,control,auth,configFiles});
   const status=await boundedProbe('/usr/bin/sandbox-exec',['-p',statusPolicy,binary,'login','status'],{env,cwd:scratch,timeoutMs:remaining()});
-  if(status.code||!status.cleanupComplete)codexFail(status.code??'uncertain');
+  if(!status.cleanupComplete){const e=new Error('uncertain');e.code='uncertain';e.cleanupComplete=false;throw e;}
+  if(status.code)codexFail(status.code);
   if(/API key|api_key/i.test(status.output))codexFail('auth_mode_unsupported');
   if(/not logged in|logged out/i.test(status.output))codexFail('login_required');
   if(status.exitCode!==0||!/^Logged in using ChatGPT$/m.test(status.output))codexFail('isolation_unverified');
@@ -115,5 +117,5 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   const args=Object.freeze(['-f',policyPath,binary,...isolatedArgs({schema,scratch})]);
   const launch=Object.freeze({executable:'/usr/bin/sandbox-exec',args,env,cwd:scratch,root,runId,binaryVersion:'0.141.0',binarySha256:BINARY_SHA256,policySha256:sha256(policy),contractSha256:CONTRACT_SHA256,cleanup});
   certified.add(launch);return launch;
- }catch(e){try{await cleanup();}catch{const error=new Error('uncertain');error.code='uncertain';error.cleanupComplete=cleaned;error.scratchRoot=root;throw error;}throw e;}
+ }catch(e){if(e.cleanupComplete===false){e.scratchRoot=root;throw e;}try{await cleanup();}catch{const error=new Error('uncertain');error.code='uncertain';error.cleanupComplete=cleaned;error.scratchRoot=root;throw error;}throw e;}
 }

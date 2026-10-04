@@ -1,6 +1,6 @@
-# Codex 独立审阅协议（Phase 20 实施中）
+# Codex 独立审阅协议（Phase 20）
 
-独立执行已接入四个阶段入口，正在进行 Phase 20 验收。已通过真实 CLI 的本地合成协议检查；真实 ChatGPT 推理仍未运行，不能把预检或合成结果称为真实审阅。
+独立执行已接入四个阶段入口，已通过 Phase 20 的本地控制与目标宿主验收。已通过真实 CLI 的本地合成协议检查；真实 ChatGPT 推理仍未运行，不能把预检或合成结果称为真实审阅。
 
 ## 证据与原文
 
@@ -20,7 +20,7 @@
 
 ## 只读预检
 
-`preflightCodex` 仅调用实际可执行文件的 `--version`、`exec --help`、`login status`，总预检期限 10 秒，输出限 64 KiB，超时收回自有进程组。核对规范绝对路径、所有者/父目录权限、可执行文件 SHA-256；当前兼容候选是 macOS arm64 / Codex 0.141.0。返回 `executionReady=false`：隔离认证尚未实现，预检成功也不授权派发。
+`preflightCodex` 仅调用实际可执行文件的 `--version`、`exec --help`、`login status`，总预检期限 10 秒，输出限 64 KiB，超时收回自有进程组。核对规范绝对路径、所有者/父目录权限、可执行文件 SHA-256；当前已验证范围是 macOS arm64 / Codex 0.141.0。基础函数返回 `executionReady=false`，因为它只检查可执行文件与登录；安装后的 `codex-review.mjs preflight` 还验证隔离策略和清理，全部通过才返回 `executionReady=true`。预检不会派发审阅。
 
 ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 auth_mode_unsupported，未知状态是 uncertain。需要登录时由用户直接使用 Codex 管理；本项目不调用 login/logout，不读取 auth.json/keychain，不转存凭据。缺失可执行文件先安装/恢复 Codex；不兼容版本等待验证，不自动升级或降级。
 
@@ -34,7 +34,7 @@ ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 au
 
 审阅进程通过 stdin 接收提示词；仅能读取运行库、私有控制/临时目录和 Codex 自有认证文件。现有非凭据 `installation_id` 允许所需的文件数据/模式操作，结束时核对内容未变；不允许创建该文件、写父目录或修改认证/配置。登录状态使用独立的无网络策略，仅额外允许 Codex 读取配置文件及直接的 agent TOML 配置；这些读取权限不进入审阅进程。
 
-四个内置工具仍存在。文件工具受到外层 OS 拒绝；任何 JSONL 工具/计划事件或 stderr tools-router 诊断均拒绝该审阅。进程中止前可能已有内部后续请求，必须标记不确定，不能声称远端撤回成功。全局/项目指令、skills 和 memory 的合成注入标记已验证不进入请求。当前启动器通过本地协议验收；独立审阅的存储与结果验证仍在实施。
+四个内置工具仍存在。文件工具受到外层 OS 拒绝；任何 JSONL 工具/计划事件或 stderr tools-router 诊断均拒绝该审阅。进程中止前可能已有内部后续请求，必须标记不确定，不能声称远端撤回成功。全局/项目指令、skills 和 memory 的合成注入标记已验证不进入请求。当前启动器、独立运行记录及本地结果验证已通过合成验收；真实远端推理仍待 Phase 21 验证。
 
 ## 安装后的调用
 

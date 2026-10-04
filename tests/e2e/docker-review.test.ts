@@ -137,7 +137,7 @@ describe("Docker fixture review E2E contract", () => {
     globalThis.fetch = (() => { throw new Error("offline E2E must not access the network"); }) as typeof fetch;
     const root = realpathSync(".");
     const filesystemPolicy = createFilesystemPolicy([{ id: "course", path: root }], { realpathSync, statSync, accessSync });
-    const server = new McpServer({ name: "evidencelens", version: "0.3.2" });
+    const server = new McpServer({ name: "evidencelens", version: "0.3.3" });
     registerReviewTool(server, {
       filesystemPolicy,
       filesystemReadAdapter: fixtureReadAdapter(root),
@@ -151,7 +151,7 @@ describe("Docker fixture review E2E contract", () => {
           capabilities: {},
           clientInfo: { name: "docker-review-e2e", version: "0.1.0" }
         });
-        expect(initialized).toMatchObject({ serverInfo: { name: "evidencelens", version: "0.3.2" } });
+        expect(initialized).toMatchObject({ serverInfo: { name: "evidencelens", version: "0.3.3" } });
 
         const listed = await request("tools/list") as { tools: Array<{ name: string; annotations?: Record<string, unknown> }> };
         expect(listed.tools.map((tool) => tool.name)).toEqual(["review_evidence"]);

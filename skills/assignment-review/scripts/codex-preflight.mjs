@@ -33,7 +33,7 @@ export async function executableIdentity(candidate){
 // Own a process group. Never accept a PID or shell command from caller data.
 export function boundedProbe(executable,args,{env,cwd,timeoutMs=10000,maxBytes=64*1024}={}) {
  return new Promise(resolve=>{
-  let child,bytes=0,chunks=[],code=null,closed=false,settled=false,killTimer,finishTimer;
+  let child,bytes=0,chunks=[],code=null,settled=false,killTimer,finishTimer;
   const signal=s=>{try{if(child?.pid)process.kill(-child.pid,s);}catch{}};
   const done=(exitCode,cleanupComplete)=>{
    if(settled)return;settled=true;clearTimeout(timer);clearTimeout(killTimer);clearTimeout(finishTimer);
@@ -42,14 +42,18 @@ export function boundedProbe(executable,args,{env,cwd,timeoutMs=10000,maxBytes=6
   const stop=reason=>{
    if(code)return;code=reason;chunks=[];signal('SIGTERM');
    killTimer=setTimeout(()=>{signal('SIGKILL');},CODEX_LIMITS.graceMs);
-   finishTimer=setTimeout(()=>done(null,closed),CODEX_LIMITS.graceMs*2);
+   finishTimer=setTimeout(()=>{signal('SIGKILL');child?.stdout.destroy();child?.stderr.destroy();done(null,false);},CODEX_LIMITS.graceMs*2);
   };
   const timer=setTimeout(()=>stop('timed_out'),Math.max(1,Math.min(timeoutMs,10000)));
   try{
    child=spawn(executable,args,{env,cwd,shell:false,detached:true,stdio:['ignore','pipe','pipe']});
    for(const stream of [child.stdout,child.stderr])stream.on('data',chunk=>{bytes+=chunk.length;if(bytes>maxBytes)stop('output_limit');else if(!code)chunks.push(chunk);});
    child.once('error',()=>{code='codex_missing';done(null,true);});
-   child.once('close',exitCode=>{closed=true;signal('SIGKILL');done(exitCode,true);});
+   child.once('close',async exitCode=>{
+    signal('SIGKILL');let gone=false;const until=Date.now()+CODEX_LIMITS.graceMs;
+    do{try{process.kill(-child.pid,0);}catch(e){if(e.code==='ESRCH'){gone=true;break;}}await new Promise(r=>setTimeout(r,25));}while(Date.now()<until);
+    if(!gone&&!code)code='uncertain';done(exitCode,gone);
+   });
   }catch{code='codex_missing';done(null,true);}
  });
 }

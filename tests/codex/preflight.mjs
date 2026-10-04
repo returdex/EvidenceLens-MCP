@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp,writeFile,chmod,rm } from 'node:fs/promises';
-import { preflightCodex,childEnvironment } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
+import { preflightCodex,childEnvironment,boundedProbe } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 async function fake(script,fn){const root=await mkdtemp('/private/tmp/el20-preflight-');await chmod(root,0o700);const exe=root+'/codex';await writeFile(exe,'#!/bin/sh\n'+script,{mode:0o700});try{await fn(exe,root);}finally{await rm(root,{recursive:true,force:true});}}
 const help='--json --output-schema --ephemeral --ignore-user-config --ignore-rules --strict-config --skip-git-repo-check';
 const script=status=>`case "$1" in --version) echo 'codex-cli 0.141.0';; exec) echo '${help}';; login) echo '${status}';; *) exit 99;; esac`;
@@ -16,3 +16,9 @@ test('oversize output stops process without leaking text',()=>fake('while true; 
 test('child environment excludes credentials, proxies and parent identity',()=>{const env=childEnvironment({HOME:'/home/user',CODEX_HOME:'/home/user/codex',OPENAI_API_KEY:'secret',CODEX_THREAD_ID:'parent',HTTPS_PROXY:'secret',SHELL:'/bin/zsh'},'/private/tmp/scratch');assert.deepEqual(Object.keys(env).sort(),['CODEX_HOME','EVIDENCELENS_CHILD','HOME','LANG','PATH','TMPDIR']);assert.equal(env.EVIDENCELENS_CHILD,'1');assert.equal(env.OPENAI_API_KEY,undefined);});
 
 test('trusted owner group-writable Homebrew-style ancestor is supported; public writable is rejected',()=>fake(script('Logged in using ChatGPT'),async(exe,root)=>{await chmod(root,0o770);assert.equal((await preflightCodex(options(exe))).ok,true);await chmod(root,0o777);assert.equal((await preflightCodex(options(exe))).code,'unsafe_path');}));
+
+test('preflight confirms descendants with closed stdio are gone before clean receipt',async()=>{
+ const code=`import {spawn} from 'node:child_process';const c=spawn(process.execPath,['-e','setInterval(()=>{},100)'],{stdio:'ignore'});process.stdout.write(String(c.pid));c.unref();`;
+ const r=await boundedProbe(process.execPath,['--input-type=module','-e',code],{env:{PATH:'/usr/bin:/bin'},timeoutMs:2000});
+ assert.equal(r.cleanupComplete,true);assert.equal(r.code,null);const pid=Number(r.output);assert.ok(pid>0);assert.throws(()=>process.kill(pid,0),{code:'ESRCH'});
+});

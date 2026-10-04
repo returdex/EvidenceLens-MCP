@@ -1,6 +1,6 @@
 # Captured task prompt records (schemaVersion 1)
 
-The installed Node stdlib helpers capture a task-facing prompt before review. They do not record hidden instructions, reasoning, credentials, raw chat history, results or provider events. No model/transport is built into these helpers. Host composition must use the existing source gate. Recognition of common credential strings is a limited rejection check, not exhaustive secret detection.
+The installed Node stdlib snapshot helpers capture a task-facing prompt before review. Snapshots do not record hidden instructions, reasoning, credentials, raw chat history, results or provider events. The separate Codex adapter owns transport and stores only validated results and minimal execution receipts in sidecars (see the schema v2 section below); original schema v1 snapshots remain unchanged. Host composition must use the existing source gate. Recognition of common credential strings is a limited rejection check, not exhaustive secret detection.
 
 ## Contract
 

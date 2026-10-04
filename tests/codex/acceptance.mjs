@@ -29,7 +29,7 @@ test('excluded physical aliases are denied before read; unread current never sel
 });
 test('required runtime roots and temporary evidence overlap rejected before production dispatch',async()=>{
  const {createIsolatedLaunch}=await import('../../skills/assignment-review/scripts/codex-isolation.mjs');const {executableIdentity}=await import('../../skills/assignment-review/scripts/codex-preflight.mjs');const {randomUUID}=await import('node:crypto');const receipt={...await executableIdentity('/opt/homebrew/bin/codex'),version:'0.141.0'};
- for(const root of ['/usr/lib','/private/tmp'])await assert.rejects(createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID(),evidenceRoots:[root]}),{code:'unsafe_path'});
+ for(const root of ['/usr/lib','/private/tmp','/tmp'])await assert.rejects(createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID(),evidenceRoots:[root]}),{code:'unsafe_path'});
 });
 for(const name of ['shell','mcp__synthetic__read','browser','spawn_agent','el-check'])test('actual CLI rejects forced unadvertised '+name+' capability',async()=>{
  const r=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,tool:()=>({type:'function_call',id:'fc',call_id:'call',name,arguments:'{}'})});assert.notEqual(r.outcome.status,'candidate');assert.equal(r.outcome.cleanupComplete,true);assert.equal(r.authUnchanged,true);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
@@ -40,5 +40,10 @@ test('unread current coverage cannot be repaired by an old source',()=>{
 test('launch cleanup failure remains uncertain and deletion busy with owned journal',async t=>{
  const x=await capturedFlow(t),root=await fs.mkdtemp('/private/tmp/evidencelens-codex-');t.after(()=>fs.rm(root,{recursive:true,force:true}));
  x.adapter.createLaunch=async()=>{const e=new Error('uncertain');Object.assign(e,{code:'uncertain',cleanupComplete:false,scratchRoot:root});throw e;};
+ const r=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(r.status,'uncertain');assert.equal(r.execution.cleanupComplete,false);assert.equal(x.calls(),0);await assert.rejects(store.forgetTask(x.scope,{apply:true}),{code:'busy'});
+});
+
+test('preflight cleanup uncertainty survives into terminal receipt and blocks deletion',async t=>{
+ const x=await capturedFlow(t);x.adapter.preflight=async()=>({ok:false,code:'timed_out',cleanupComplete:false});
  const r=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(r.status,'uncertain');assert.equal(r.execution.cleanupComplete,false);assert.equal(x.calls(),0);await assert.rejects(store.forgetTask(x.scope,{apply:true}),{code:'busy'});
 });
