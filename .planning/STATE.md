@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: executing
-last_updated: "2026-10-04T11:09:37.398Z"
-last_activity: 2026-10-04 -- Phase 18 execution started
+status: awaiting_user
+last_updated: "2026-10-04T11:23:54.136396+00:00"
+last_activity: 2026-10-04 — Phase 18 installed; awaiting actual host trial
 progress:
   total_phases: 4
   completed_phases: 0
@@ -17,14 +17,14 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 execution; four plans checked, v1.2 research/requirements/roadmap approved.
+See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 host acceptance; six commands implemented and installed, two plans complete, third at checkpoint.
 
 ## Current Position
 
 Phase: 18 (Discoverable Stage Commands) — EXECUTING
-Plan: 3 of 4
-Status: Executing Phase 18
-Last activity: 2026-10-04 -- Phase 18 execution started
+Plan: 3 of 4 — Tasks 1–2 complete; Task 3 host checkpoint
+Status: Awaiting user — cross-project host verification
+Last activity: 2026-10-04 — Six commands installed; 21 automated tests and ten manual cases passed
 
 ## Accepted Coverage Debt
 
@@ -40,7 +40,9 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Run `$gsd-execute-phase 18` for Discoverable Stage Commands. Four plans / four waves / nine tasks cover all five CMD requirements and six context decisions. See [plan check](phases/18-discoverable-stage-commands/18-PLAN-CHECK.md). Plan 03 includes actual host discovery/invocation in another assignment project after automatic preparation; installation alone is not that proof. Product version remains 0.3.0 during planning. See [initialization record](v1.2-INITIALIZATION.md) for the prior affected-suite startup timeout; Plan 04 requires current affected offline results, not historical passing counts.
+Await the requested authorization to create a dedicated FIT5032 acceptance chat and send six synthetic test prompts, or the user's manual host observations. See [ready host trial](phases/18-discoverable-stage-commands/18-HOST-EVIDENCE.md) and [continuation](phases/18-discoverable-stage-commands/.continue-here.md). Native UI automation is disallowed for Codex. No other chat has been created/messaged. Installation alone does not prove native discovery.
+
+Plans 01–02 complete; Plan 03 two tasks complete, host task pending; Plan 04 not started. After actual host acceptance, continue `$gsd-execute-phase 18` through patch version/regression/code review/phase verification. Product stays 0.3.0 until Plan 04. Preserve prior initialization timeout and all historical proof.
 
 ## Session Continuity
 
