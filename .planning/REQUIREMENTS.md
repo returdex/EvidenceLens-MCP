@@ -44,7 +44,11 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 - [ ] **RUN-04**: 用户看到的 token 数据保留事件来源与统计范围，不重复累计缓存/推理子项，也不以账号额度变化推算单次用量或金额。
 - [ ] **RUN-05**: 用户可按文档完成安装→阶段检查→提示词导出→修改后复查的完整流程；验收区分合成测试、目标宿主发现和获授权的真实 Codex 运行证据。
 
+**2026-10-05 当前工作修订（用户授权）：** RUN-01 的简洁回传须可定位完整有效发现（含低级别项），保留 findingId、证据及覆盖限制；运行成功不自动等于最高档或已提交。RUN-02 的暂不处理属于行动处置，不等于已解决。RUN-05 增补上述回传/状态的合成负例，仍沿用既有来源绑定和真实运行验收。具体 H-01–04 见 [Phase 21 修订输入](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md)。这是现有要求的验收细化，需求数仍为 21；完整档位契约及模型语义评估另列[非阻塞未来备忘](notes/2026-10-05-review-quality-future.md)，不作为本阶段新增完成门槛。
+
 ## Future Requirements
+
+- Review-quality proposals are recorded in the [non-blocking project memo](notes/2026-10-05-review-quality-future.md); not yet promoted to milestone requirements.
 
 - **REVW-05:** Codex/DeepSeek multi-provider result comparison and disagreement surfacing.
 - **REVW-06:** Incremental evidence indexing and cache reuse.
@@ -92,4 +96,4 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 
 **Coverage:** 21 requirements; 21 mapped exactly once; 0 unmapped. Mapping approved on 2026-10-04.
 
-*Last updated: 2026-10-05 after Phase 20 verification.*
+*Last updated: 2026-10-05 after Phase 20 verification and user-directed Phase 21 planning refinements.*

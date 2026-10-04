@@ -138,6 +138,8 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Plans**: TBD — created by `$gsd-plan-phase 21`.
 
+**Planning revision (2026-10-05):** Read [21-PLANNING-INPUT](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md). H-01–04 refine RUN-01/02/05: preserve access to every validated finding in concise handoff, separate execution success from band/submission claims, distinguish deferred action from resolved findings, and test those boundaries with source-bound synthetic results. Larger semantic-review changes remain in the [non-blocking future memo](notes/2026-10-05-review-quality-future.md); completed phases have [revision reminders](REVIEW-REVISIONS.md) without reopening their status. Phase 21 remains unplanned and has no new dependency.
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |

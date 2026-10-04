@@ -46,7 +46,11 @@ Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap
 - [ ] Authorized real Codex inference and concise result handoff in the work conversation, building on the completed Phase 20 adapter.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
 
+2026-10-05 user-directed refinement: [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md) adds complete-finding handoff and truthful status presentation within RUN-01/02/05. The stage remains ready to plan; no runtime change is claimed.
+
 ### Deferred
+
+- Review quality and A1.3 real-case follow-ups: [future memo](notes/2026-10-05-review-quality-future.md), all non-blocking. Completed components have [pending revision reminders](REVIEW-REVISIONS.md); these do not reopen completed phases.
 
 - Multi-provider comparison and disagreement surfacing (`REVW-05`).
 - Incremental evidence indexing and cache reuse (`REVW-06`).
@@ -122,4 +126,4 @@ After each phase, move verified requirements to Validated with phase references,
 </details>
 
 ---
-*Last updated: 2026-10-05 after Phase 20 completion*
+*Last updated: 2026-10-05 after Phase 20 completion and non-blocking review-quality triage*

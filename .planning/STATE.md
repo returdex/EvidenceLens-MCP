@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_plan
-last_updated: "2026-10-04T16:21:32.760809+00:00"
-last_activity: 2026-10-05 — Phase 20 complete; product 0.3.3; Phase 21 ready to plan
+last_updated: "2026-10-04T16:58:22+00:00"
+last_activity: 2026-10-05 — Phase 21 planning refinements recorded; completed-work revisions and future notes are non-blocking
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-05 — Phase 20 completion verified
+Last activity: 2026-10-05 — Phase 21 planning refinements recorded; no implementation started
 
 ## Accepted Coverage Debt
 
@@ -32,7 +32,14 @@ Last activity: 2026-10-05 — Phase 20 completion verified
 - Phase 17 audit interpretation remains manual; no independent evaluator claim.
 - TD-V/TD-B closed with actual source-bound evidence; intermittent I/O root cause unknown and original dependency backup preserved.
 - Inherited v1.0 Nyquist gaps outside Phase 09 and WR-01/WR-02 warnings unchanged. Historical paid proof is not renewed.
-- Open-artifact audit: 0 open items, 0 scan errors; no additional deferred open artifact.
+- Historical open-artifact audit at Phase 20 completion: 0 open items, 0 scan errors. New 2026-10-05 improvement records are listed separately below; the historical audit is not a current reminder count.
+
+## Non-blocking Revision Records
+
+- [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md): H-01–04 refine current RUN-01/02/05 handoff and recheck acceptance. No PLAN or runtime implementation yet.
+- [Completed-work reminders](REVIEW-REVISIONS.md): RR-01–08 are 待修订 / non-blocking, revisited when their module or related planning work is touched. Completed phase status and historical proofs remain intact.
+- [Future project memo](notes/2026-10-05-review-quality-future.md): FM-01–06 are deferred proposals, not new phase requirements or dependencies. Claude originals and broader semantic evaluation are not prerequisites for continuing Phase 21.
+- These are project records, not scheduled notifications. Current progress remains 3/4 phases and 16/21 requirements complete; existing safety and authorized live-inference acceptance remain applicable.
 
 ## Previous Milestone Publication
 
@@ -40,9 +47,9 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-New research input (2026-10-05): [FIT5032 A1.3 review failure](../docs/research/fit5032-a13-review-failure.md) and a sanitized regression case now document feature-to-band overclaim, finding loss, rubric version drift and contradictory CRUD evidence. Phase 21 planning should consider lossless finding handoff; a separate explicit scope decision is needed for the larger review-quality contract. Existing phase completion remains technical acceptance, not demonstrated semantic review quality. Claude original transcript and new live case evaluation are still unavailable / NOT_RUN. No roadmap requirement or product version changed by this research.
+User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/research/fit5032-a13-review-failure.md) now feeds H-01–04 into Phase 21 planning. Broader review-quality work is memoized and completed components carry non-blocking revision reminders. Existing phase completion remains technical acceptance, not demonstrated semantic review quality. Claude original transcript and new live case evaluation remain unavailable / NOT_RUN. Requirement IDs/count and product version are unchanged.
 
-`$gsd-plan-phase 21` — plan concise review handoff, current-version updates, truthful model/token usage and authorized real inference acceptance. No automatic next-phase execution.
+`$gsd-plan-phase 21` — read 21-PLANNING-INPUT.md, then plan concise complete-finding handoff, current-version updates, truthful model/token usage and authorized real inference acceptance. RR/FM records do not block planning. No automatic next-phase execution.
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
