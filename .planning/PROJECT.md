@@ -35,7 +35,12 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-No next milestone defined. All v1.1 requirements are archived and validated within their documented scope. Use `$gsd-new-milestone` for fresh requirements; retain deferred candidates below.
+Milestone v1.2 scope was confirmed in conversation on 2026-10-04; detailed requirements and roadmap await their review gate.
+
+- [ ] Discoverable fixed commands for preparation, in-progress review, final review, recheck and help.
+- [ ] `$el-prompt` exports the actual latest task prompt for this conversation/task after a stage command; no stage guessing or reconstructed prompt.
+- [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.
+- [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
 
 ### Deferred
 
@@ -43,7 +48,7 @@ No next milestone defined. All v1.1 requirements are archived and validated with
 - Incremental evidence indexing and cache reuse (`REVW-06`).
 - General server-side policy configuration beyond this milestone's Skill workflow (`REVW-07`, partially addressed by v1.1).
 - Optional authenticated multi-user access and audit log storage (`SAFE-05`).
-- Automatic Codex invocation and cross-model usage/comparison statistics.
+- Cross-model comparison and aggregate usage/cost analytics; basic Codex run records are active v1.2 scope.
 
 ### Out of Scope
 
@@ -53,15 +58,27 @@ No next milestone defined. All v1.1 requirements are archived and validated with
 - A polished end-user UI — MCP clients remain the interaction surface.
 - Foundation-model training or fine-tuning — providers remain replaceable integrations.
 
-## Current State
+## Delivered Baseline
 
-Milestone **v1.1 complete, archived and published 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Product version **0.2.4**, [published on GitHub](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) after the user explicitly lifted the remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
+Milestone **v1.1 complete, archived and published 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Published product **0.2.4**, [published on GitHub](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) after the user explicitly lifted the remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
 
 Source-bound evidence includes Phase 16 official validator/control, successful build and 43-file/795-test offline pass, plus Phase 17 12 boundary tests and 57 actual collector steps. Semantic language judgments and audit interpretation remain manual; TD-12/13/14/15 coverage debt is accepted for closure, alongside inherited v1.0 debt. Historical host I/O root cause is unknown, preserved dependencies remain recoverable. Archival compatibility verification is recorded in the completion record. No real-coursework, installed discovery, universal host isolation or remote submission claim.
 
-## Next Milestone Goals
+## Current Milestone: v1.2 快捷指令与 Codex 独立审阅
 
-Not yet committed. Previously discussed candidates include automatic Codex review invocation separated from work conversations, comparison/statistics, and the deferred features above. Define scope and fresh requirements before implementation; next phase number is 18. Product minor version changes when that new milestone is opened, not during this archival step.
+**Goal:** Use fixed stage commands to run a bounded independent review, return concise evidence-backed findings to the work conversation, and export the exact task prompt from that run on request.
+
+**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. These are planned interfaces, not installed capabilities. Stage commands choose the workflow; prompt export reads the recorded run. Explicit current artifact and user focus remain authoritative.
+
+**Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
+
+**Version:** Planning milestone v1.2; development product 0.3.0 per DEVELOPMENT.md minor-on-milestone policy. Last published product is v0.2.4. No v0.3.0 Release or new functionality is claimed at initialization. Phase numbering continues at 18.
+
+**Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
+
+**Evidence and retention:** Reuse the existing source selector and permission boundaries. Store task-facing prompts and minimal receipts locally in an explicit non-Git state location. Do not store internal reasoning, credentials, raw unrelated chats or excluded evidence. Missing records are unknown, not zero or no-use.
+
+**Acceptance:** Verify command selection and cross-project installation on the target host, immutable prompt export, isolated context/evidence, terminal-state handling, source-bound results and available usage. A local login status is not an actual inference acceptance result.
 
 ## Context
 
@@ -89,6 +106,10 @@ At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18
 | Preserve historical paths, paid proof and report bytes | Archives and source-bound evidence retained |
 | Distinguish milestone v1.1 from product 0.2.4 and remote publication | User lifted history hold; main and both tags published, product v0.2.4 Release verified |
 
+## Evolution
+
+After each phase, move verified requirements to Validated with phase references, retain invalidation reasons and new decisions, and check the product description against actual implementation. At each milestone boundary, review scope and deferred features, retain historical evidence, and update current context and version status.
+
 <details>
 <summary>Previous project context and decisions</summary>
 
@@ -97,4 +118,4 @@ At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18
 </details>
 
 ---
-*Last updated: 2026-10-04 after v1.1 completion and product v0.2.4 publication*
+*Last updated: 2026-10-04 after v1.2 initialization and research selection*

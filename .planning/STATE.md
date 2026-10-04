@@ -1,32 +1,30 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Assignment Prompt Adaptation and Staged Review
-status: milestone_complete
-stopped_at: v1.1 archived and product v0.2.4 published; ready for next milestone
-last_updated: "2026-10-04"
-last_activity: 2026-10-04 -- v1.1 archival and verified v0.2.4 GitHub publication
+milestone: v1.2
+milestone_name: 快捷指令与 Codex 独立审阅
+status: planning
+last_updated: "2026-10-04T09:13:42.392Z"
+last_activity: 2026-10-04
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: prepare next milestone.
+See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: v1.2 requirements and roadmap approval; research completed.
 
 ## Current Position
 
-Milestone: v1.1 complete, archived and published; 6/6 phases, 13/13 plans, 28 tasks, 22/22 requirements.
-Product version: 0.2.4; no major or minor bump at archival.
-Tags: v1.1 milestone and v0.2.4 product both published at closure commit 4409ffb.
-
-[Completion record](milestones/v1.1-COMPLETION.md), [roadmap](milestones/v1.1-ROADMAP.md), [requirements](milestones/v1.1-REQUIREMENTS.md). Prior full state/decisions preserved in [state archive](milestones/v1.1-STATE.md). Phases remain at original paths.
+Phase: Not started (requirements and roadmap awaiting approval)
+Plan: —
+Status: Requirements and roadmap awaiting approval
+Last activity: 2026-10-04 — Milestone v1.2 started
 
 ## Accepted Coverage Debt
 
@@ -36,14 +34,14 @@ Tags: v1.1 milestone and v0.2.4 product both published at closure commit 4409ffb
 - Inherited v1.0 Nyquist gaps outside Phase 09 and WR-01/WR-02 warnings unchanged. Historical paid proof is not renewed.
 - Open-artifact audit: 0 open items, 0 scan errors; no additional deferred open artifact.
 
-## Publication
+## Previous Milestone Publication
 
-The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote main was fast-forwarded from d78a115 to closure commit 4409ffb (799 commits, including 737 pre-v1.1 commits); both tags were verified at that same commit. [Product v0.2.4](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) was published at 2026-10-04T07:19:24Z (not draft). Publication receipt documentation follows the release commit on main. No product version bump or new runtime acceptance is implied.
+The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote main was fast-forwarded from d78a115 to closure commit 4409ffb (799 commits, including 737 pre-v1.1 commits); both tags were verified at that same commit. [Product v0.2.4](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) was published at 2026-10-04T07:19:24Z (not draft). Publication receipt documentation follows the release commit on main. This historical publication remains product v0.2.4; v1.2 development starts at 0.3.0 without a new release.
 
 ## Next Action
 
-`$gsd-new-milestone` creates fresh requirements and continues at Phase 18. Scope and next product minor are not yet set. Automatic Codex invocation/statistics remains a candidate from prior discussion, not an active requirement.
+Research is complete. Review [21 proposed requirements](REQUIREMENTS.md) and [Phases 18–21](ROADMAP.md); approval is pending before final roadmap/requirements commits and Phase 18 planning. Milestone scope and command semantics are already confirmed. See [initialization record](v1.2-INITIALIZATION.md) for source/version checks and the affected-suite startup timeout.
 
 ## Session Continuity
 
-Last session: 2026-10-04. Resume from [completion record](milestones/v1.1-COMPLETION.md) for release status or start the next milestone. No functional development blocker remains; remote publication is complete.
+Last session: 2026-10-04. v1.2 initialized through SDK `state.milestone-switch`; product development version 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.

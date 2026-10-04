@@ -1,6 +1,6 @@
 # Project Milestones: EvidenceLens MCP
 
-## v1.1 Assignment Prompt Adaptation and Staged Review (Completed and published: 2026-10-04)
+## v1.1 Assignment Prompt Adaptation and Staged Review (Shipped: 2026-10-04)
 
 **Delivered:** One repository Skill for sourced preparation, stage review, template/disclosure checks and current-version recheck, with bounded verification evidence.
 
@@ -23,7 +23,7 @@
 
 **Archives:** [roadmap](milestones/v1.1-ROADMAP.md), [requirements](milestones/v1.1-REQUIREMENTS.md), [completion and release status](milestones/v1.1-COMPLETION.md).
 
-**Next:** `$gsd-new-milestone`; scope not yet approved. Publication is complete after explicit user authorization.
+**Next:** v1.2 initialization began 2026-10-04; detailed requirements/roadmap review is pending. Publication of v1.1 is complete after explicit user authorization.
 
 ---
 
