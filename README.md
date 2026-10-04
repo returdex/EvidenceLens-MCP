@@ -2,6 +2,10 @@
 
 EvidenceLens MCP is a TypeScript Model Context Protocol server for read-only evidence review. The single `review_evidence` tool accepts four distinct required course roles plus optional evidence, normalizes inline and explicitly configured filesystem sources, and returns schema-validated findings with typed provenance. Deterministic rules remain independently retained alongside an optional DeepSeek second opinion.
 
+## Assignment review commands
+
+Use `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck` and `$el-prompt` through the [installation and command guide](docs/review-commands.md). Stage commands share the existing assignment-review Skill; help and export do not start a review. Prompt capture/export and independent Codex execution remain later-phase work. Installation tests and real host discovery are reported separately.
+
 ## Local Development
 
 ```bash
