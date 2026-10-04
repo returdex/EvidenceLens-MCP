@@ -33,7 +33,7 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,configOverrides={}}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={}}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -76,7 +76,8 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));args.push('-');
  const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?codexHome+'/installation_id':undefined,extraRead:[codexHome+'/installation_id']});
  try {
-  const child=await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env:{HOME:home,CODEX_HOME:codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'},cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
+  const env={HOME:home,CODEX_HOME:codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
+  const child=useRunner?{outcome:await (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess({executable:'/usr/bin/sandbox-exec',args:['-p',policy,binary,...args],env,cwd:scratch},Buffer.from('SYNTHETIC PROTOCOL FIXTURE ONLY'),{timeoutMs:15000})}:await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env,cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
   return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,installationUnchanged:(await readFile(codexHome+'/installation_id','utf8'))===installationId,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
  }finally{server.closeAllConnections();await new Promise(r=>server.close(r));await rm(base,{recursive:true,force:true});}
 }

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { validateExecutionRecord,validateResultEnvelope } from './codex-contract.mjs';
 import { constants as C } from 'node:fs';
 import { dirname, join, resolve, isAbsolute, sep } from 'node:path';
 import { homedir } from 'node:os';
@@ -95,14 +96,15 @@ async function transaction(scope,create,fn){
   throw e;
  }
 }
-export async function beginRun(scope){
+export async function beginRun(scope,{executionKind="host_skill"}={}){
+ if(!["host_skill","codex_exec"].includes(executionKind))fail("corrupt_record");
  const runId=randomUUID();let taskId=scope?.taskId;
  try{return await transaction(scope,true,async tx=>{
   const {c,index}=tx;let t=taskFor(index,taskId);
   if(!t){if(index.tasks.length>=LIMITS.tasks)fail('store_limit');taskId??='T-'+randomUUID();t={taskId,generation:randomUUID(),sequence:0,latest:null,deleted:false,runs:[]};index.tasks.push(t);}else taskId=t.taskId;
   if(t.deleted){if(t.runs.length)fail('deleted');t.deleted=false;t.generation=randomUUID();t.sequence=0;}
   if(t.runs.length>=LIMITS.runs)fail('store_limit');
-  const l=validateLifecycle({schemaVersion:1,runId,taskId,conversationId:scope.conversationId,sequence:t.sequence+1,status:'preparing',executionKind:'host_skill',createdAt:now(),updatedAt:now(),errorCode:null,promptSha256:null});
+  const l=validateLifecycle({schemaVersion:executionKind==='codex_exec'?2:1,runId,taskId,conversationId:scope.conversationId,sequence:t.sequence+1,status:'preparing',executionKind,createdAt:now(),updatedAt:now(),errorCode:null,promptSha256:null});
   await boundary(c,'before_state');tx.dirty();await dirs(taskDir(c,t),true,c.root);await writeExclusive(recordPath(c,t,runId,'state'),l);await boundary(c,'after_state');
   t.sequence=l.sequence;t.latest=runId;t.runs.push({runId,sequence:l.sequence});await tx.publish();return receipt(l);
  });}catch(e){return {ok:false,...safeError(e),runId,...(id(taskId)?{taskId}:{}),...(uuid(scope?.conversationId)?{conversationId:scope.conversationId}:{})};}
@@ -117,12 +119,14 @@ export async function captureRun(scope,runId,input){
   const next=transition(l,'captured',{promptSha256:v.promptSha256});await boundary(c,'before_snapshot');tx.dirty();await writeExclusive(p,v);await boundary(c,'after_snapshot');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return receipt(next);
  });
 }
-export async function readForDispatch(scope,runId){return transaction(scope,false,async tx=>{
+export async function readForDispatch(scope,runId,{attemptId}={}){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind==='codex_exec'){const e=await execution(c,t,l);if(!e||e.attemptId!==attemptId||e.status!=='preparing')fail('busy');}
  if(l.status!=='captured')fail('uncertain');const v=await snapshot(c,t,l),next=transition(l,'dispatched');tx.dirty();await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {promptText:v.promptText,metadata:{...receipt(next),stage:v.stage,currentSourceId:v.currentSourceId,materials:v.materials,limitations:v.limitations}};
 });}
 export async function finishRun(scope,runId,outcome){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind==='codex_exec'&&(outcome.status==='succeeded'||await execution(c,t,l)))fail('unsupported');
  const next=transition(l,outcome.status,{errorCode:outcome.errorCode??null});
  if(JSON.stringify(l)!==JSON.stringify(next)){tx.dirty();await replace(recordPath(c,t,runId,'state'),next);await tx.publish();}return receipt(next);
 });}
@@ -137,10 +141,10 @@ export async function exportLatest(scope,{expectedRunId}={}){
 }
 async function deletionPreview(c,t){
  await dirs(taskDir(c,t),false,c.root);
- const recognized=new Set(t.runs.flatMap(r=>[r.runId+'.state.json',r.runId+'.snapshot.json']));
+ const recognized=new Set(t.runs.flatMap(r=>[r.runId+'.state.json',r.runId+'.snapshot.json',r.runId+'.execution.json',r.runId+'.result.json',r.runId+'.scratch.json']));
  let preservedUnknownCount=0,count=0;
  const d=await fs.opendir(taskDir(c,t));
- for await(const e of d){if(++count>LIMITS.runs*2+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ for await(const e of d){if(++count>LIMITS.runs*5+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
  return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
 }
 export async function forgetTask(scope,{apply=false}={}){
@@ -149,6 +153,8 @@ export async function forgetTask(scope,{apply=false}={}){
  return transaction(scope,false,async tx=>{
   const {c,index}=tx,t=taskFor(index,scope.taskId);if(!t)fail('no_record');
   const preview=await deletionPreview(c,t);
+  if(!t.deleted)for(const r of t.runs){const l=await state(c,t,r.runId);if(l.executionKind==='codex_exec'){const e=await execution(c,t,l);if(l.status==='dispatched'||e?.status==='preparing'||e&&!e.cleanupComplete)fail('busy');}}
+
   t.deleted=true;tx.dirty();await tx.publish();await boundary(c,'after_tombstone');
   const remaining=[];
   for(const r of t.runs){
@@ -156,6 +162,12 @@ export async function forgetTask(scope,{apply=false}={}){
     const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
     const lraw=await read(lp),sraw=await read(sp);
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
+    for(const kind of ['execution','result','scratch']){
+     const p=recordPath(c,t,r.runId,kind),v=await read(p);if(!v)continue;
+     if(!lraw||lraw.executionKind!=='codex_exec'||v.runId!==r.runId||v.taskId!==t.taskId||v.conversationId!==scope.conversationId)fail('corrupt_record');
+     if(kind==='execution')validateExecutionRecord(v);else if(kind==='result')validateResultEnvelope(v);else validateScratch(v);
+     await fs.unlink(p);
+    }
     if(sraw){const v=validateSnapshot(sraw);if(!lraw||v.runId!==r.runId||v.sequence!==r.sequence||v.taskId!==t.taskId||v.conversationId!==scope.conversationId||v.promptSha256!==lraw.promptSha256)fail('corrupt_record');await fs.unlink(sp);await boundary(c,'after_delete_snapshot');}
     if(lraw)await fs.unlink(lp);
    }catch{remaining.push(r);}
@@ -171,4 +183,35 @@ export async function statusTask(scope){
  if(!t)fail('no_record');
  const result=t.deleted?{taskId:t.taskId,status:'deleted'}:receipt(await state(c,t,t.latest));
  await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');return result;
+}
+
+async function execution(c,t,l){const v=await read(recordPath(c,t,l.runId,'execution'));if(!v)return null;const r=validateExecutionRecord(v);if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k]))fail('corrupt_record');return r;}
+function validateScratch(input){const v=fields(input,['schemaVersion','runId','taskId','conversationId','attemptId','root']);if(v.schemaVersion!==1||!uuid(v.runId)||!uuid(v.conversationId)||!uuid(v.attemptId)||!id(v.taskId)||typeof v.root!=='string'||!/^\/private\/tmp\/evidencelens-codex-[A-Za-z0-9]+$/.test(v.root))fail('corrupt_record');return v;}
+// Internal runner ownership, claimed before preflight. No lock is held during process execution.
+export async function claimCodexRun(scope,runId){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind!=='codex_exec'||l.status!=='captured')fail('unsupported');if(await execution(c,t,l))fail('busy');
+ const v=await snapshot(c,t,l),e=validateExecutionRecord({schemaVersion:1,runId,taskId:l.taskId,conversationId:l.conversationId,attemptId:randomUUID(),executionKind:'codex_exec',promptSha256:l.promptSha256,binaryVersion:null,binarySha256:null,policySha256:null,status:'preparing',errorCode:null,startedAt:now(),finishedAt:null,elapsedMs:null,terminalObserved:false,cleanupComplete:false,resultSha256:null});
+ tx.dirty();await writeExclusive(recordPath(c,t,runId,'execution'),e);await tx.publish();return {snapshot:v,execution:e};
+});}
+export async function recordCodexScratch(scope,runId,attemptId,root){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);if(!e||e.attemptId!==attemptId||e.status!=='preparing')fail('busy');
+ const v=validateScratch({schemaVersion:1,runId,taskId:l.taskId,conversationId:l.conversationId,attemptId,root});tx.dirty();await writeExclusive(recordPath(c,t,runId,'scratch'),v);await tx.publish();
+});}
+export async function completeCodexRun(scope,runId,{execution:input,result=null,signal}){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),old=await execution(c,t,l),e=validateExecutionRecord(input);
+ if(!old||old.status!=='preparing'||['attemptId','runId','taskId','conversationId','promptSha256','startedAt'].some(k=>e[k]!==old[k])||e.status==='preparing')fail('uncertain');
+ if(e.status==='succeeded'){
+  if(l.status!=='dispatched')fail('uncertain');const r=validateResultEnvelope(result);
+  if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||r.resultSha256!==e.resultSha256)fail('corrupt_record');
+  tx.dirty();await writeExclusive(recordPath(c,t,runId,'result'),r);await boundary(c,'after_result');
+ }else if(result!==null)fail('corrupt_record');
+ await boundary(c,'before_terminal_commit');
+ if(signal?.aborted&&e.cleanupComplete){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.resultSha256=null;}
+ const next=transition(l,e.status,{errorCode:e.errorCode});tx.dirty();await replace(recordPath(c,t,runId,'execution'),e);await boundary(c,'after_execution');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {...receipt(next),execution:e,...(result?{result}:{} )};
+});}
+export async function readCodexResult(scope,runId){
+ const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);
+ if(l.status!=='succeeded'||e?.status!=='succeeded')fail('uncertain');const r=validateResultEnvelope(await read(recordPath(c,t,runId,'result')));
+ if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||r.resultSha256!==e.resultSha256)fail('corrupt_record');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');return {metadata:receipt(l),execution:e,result:r};
 }

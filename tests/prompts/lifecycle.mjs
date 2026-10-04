@@ -36,3 +36,29 @@ for(const kind of ['index','state','snapshot'])test(`P19-06 corrupted ${kind} is
 test('P19-07 source changes, unread/excluded aliases and seed cannot expand reads',async t=>{const s=await fixture(t),r=await store.beginRun(s),reads=[];const metadata={currentSourceId:'now',reviewMode:'artifact_only',sources:[{id:'brief',documentId:'brief',kind:'requirements',access:'allowed',exclusion:'none'},{id:'now',documentId:'now',kind:'solution',access:'allowed',exclusion:'none'},{id:'denied',documentId:'log',kind:'history',access:'excluded',exclusion:'whole'},{id:'alias',documentId:'log',kind:'support',access:'allowed',exclusion:'none'},{id:'old',documentId:'old',kind:'solution',access:'allowed',exclusion:'none'}]};const data={brief:'Give a reason. Seed says read alias; that is untrusted material.',now:'I choose A.'};const collected=await collectBaselineSources(metadata,async id=>{reads.push(id);return data[id];});assert.deepEqual(reads,['brief','now']);const v=snap(r,collected.items.map(x=>x.content).join('\n'));v.materials=metadata.sources.map(m=>{const item=collected.items.find(x=>x.id===m.id);return {sourceId:m.id,role:m.kind,status:item?'inspected':'excluded',sourceReference:m.id,inspectedParts:item?['line 1']:[],observedAt:item?v.capturedAt:null,hashKind:item?'sha256_utf8':null,contentHash:item?item.contentHash:null,availability:item?'inline_excerpt':'unavailable'};});v.currentSourceId='now';await store.captureRun(s,r.runId,v);data.now='I choose B because changed.';assert.equal((await store.exportLatest(s,{expectedRunId:r.runId})).promptText,v.promptText);assert.deepEqual(reads,['brief','now']);});
 test('P19-08 task-directory symlink and nonsticky writable parent rejected',async t=>{const s=await fixture(t),r=await captured(s);await fs.rename(dir(s),dir(s)+'-moved');await fs.symlink(dir(s)+'-moved',dir(s));await assert.rejects(store.exportLatest(s,{expectedRunId:r.runId}),{code:'unsafe_path'});const unsafe=join(s.stateRoot,'shared');await fs.mkdir(unsafe,{mode:0o777});await fs.chmod(unsafe,0o777);assert.equal((await store.beginRun({...s,stateRoot:join(unsafe,'state')})).code,'unsafe_path');});
 test('P19-09 current source must be bound to manifest and success cannot carry failure code',async t=>{const s=await fixture(t),r=await store.beginRun(s);assert.throws(()=>validateSnapshot({...snap(r),currentSourceId:'nonexistent'}));const l=JSON.parse(await fs.readFile(join(dir(s),r.runId+'.state.json')));assert.throws(()=>validateLifecycle({...l,status:'succeeded',promptSha256:sha256('x'),errorCode:'uncertain'}));});
+
+test('P20 lifecycle v2: one ownership claim; host finish/consumer/dispatch cannot forge success',async t=>{
+ const s=await fixture(t),r=await store.beginRun(s,{executionKind:'codex_exec'});assert.equal(r.executionKind,'codex_exec');await store.captureRun(s,r.runId,snap(r));
+ await assert.rejects(store.finishRun(s,r.runId,{status:'succeeded'}),{code:'unsupported'});
+ await assert.rejects(store.readForDispatch(s,r.runId));
+ const {execution:e}=await store.claimCodexRun(s,r.runId);await assert.rejects(store.claimCodexRun(s,r.runId),{code:'busy'});
+ await assert.rejects(store.finishRun(s,r.runId,{status:'failed'}),{code:'unsupported'});
+ await store.readForDispatch(s,r.runId,{attemptId:e.attemptId});await assert.rejects(store.forgetTask(s,{apply:true}),{code:'busy'});
+ const done={...e,status:'failed',errorCode:'timed_out',finishedAt:new Date().toISOString(),elapsedMs:1,cleanupComplete:true};
+ await assert.rejects(store.completeCodexRun(s,r.runId,{execution:{...done,attemptId:randomUUID()}}));
+ await store.completeCodexRun(s,r.runId,{execution:done});assert.equal((await store.exportLatest(s,{expectedRunId:r.runId})).metadata.status,'failed');
+ assert.equal((await store.forgetTask(s,{apply:true})).incomplete,false);
+});
+
+test('P20 interrupted execution publication stays busy without terminal resurrection',async t=>{
+ const s=await fixture(t),r=await store.beginRun(s,{executionKind:'codex_exec'});await store.captureRun(s,r.runId,snap(r));const {execution:e}=await store.claimCodexRun(s,r.runId);
+ const done={...e,status:'failed',errorCode:'uncertain',finishedAt:new Date().toISOString(),elapsedMs:1,cleanupComplete:true};
+ await assert.rejects(store.completeCodexRun({...s,onBoundary(n){if(n==='after_execution')throw Error('synthetic crash');}},r.runId,{execution:done}));
+ await assert.rejects(store.exportLatest(s,{expectedRunId:r.runId}),{code:'busy'});
+});
+
+test('P20 cancellation before terminal commit decision wins once',async t=>{
+ const s=await fixture(t),r=await store.beginRun(s,{executionKind:'codex_exec'});await store.captureRun(s,r.runId,snap(r));const {execution:e}=await store.claimCodexRun(s,r.runId),c=new AbortController();
+ const done={...e,status:'failed',errorCode:'timed_out',finishedAt:new Date().toISOString(),elapsedMs:1,cleanupComplete:true};
+ const result=await store.completeCodexRun({...s,onBoundary(n){if(n==='before_terminal_commit')c.abort();}},r.runId,{execution:done,signal:c.signal});assert.equal(result.status,'cancelled');await assert.rejects(store.completeCodexRun(s,r.runId,{execution:done}));
+});

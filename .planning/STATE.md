@@ -9,7 +9,7 @@ progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 15
-  completed_plans: 11
+  completed_plans: 12
   percent: 50
 ---
 
@@ -22,7 +22,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 ## Current Position
 
 Phase: 20 (Bounded Independent Codex Execution) — EXECUTING
-Plan: 2/6 complete; executing 20-03
+Plan: 3/6 complete; executing 20-04
 Status: Executing Phase 20 after approved R1 repair
 Last activity: 2026-10-05 — Plan 02 actual binary/OS probes recorded
 
@@ -40,9 +40,9 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Continue 20-03 lifecycle and process supervision. User approved R1; Plan 02 now passes 45 combined actual/synthetic tests. Shared fixed policy/argv/tool detection, real status-only login probe and sealed descriptor validated. No inference or stage dispatch yet. Historical failed gate evidence retained in 20-ISOLATION-EVIDENCE.md. Do not request R1 approval again. Product 0.3.2; no CDX requirement marked complete.
+Continue 20-04 local result binding and installed routing. Plan 03 ownership/lifecycle/supervisor complete; production result success still withheld until binding. User approved R1; Plan 02 now passes 45 combined actual/synthetic tests. Shared fixed policy/argv/tool detection, real status-only login probe and sealed descriptor validated. No inference or stage dispatch yet. Historical failed gate evidence retained in 20-ISOLATION-EVIDENCE.md. Do not request R1 approval again. Product 0.3.2; no CDX requirement marked complete.
 
-Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 11/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
+Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 12/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
 
 ## Session Continuity
 

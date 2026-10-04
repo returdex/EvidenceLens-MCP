@@ -25,7 +25,7 @@ export async function main(args){
   const raw=await input();
   if(!raw||typeof raw!=='object'||Array.isArray(raw))fail('corrupt_record');
   const common=['taskId','conversationId','evidenceRoots'];
-  const keys={begin:[],capture:['runId','snapshot'],dispatch:['runId'],finish:['runId','status','errorCode'],export:['expectedRunId'],status:[],'forget-task':[]};
+  const keys={begin:['executionKind'],capture:['runId','snapshot'],dispatch:['runId'],finish:['runId','status','errorCode'],export:['expectedRunId'],status:[],'forget-task':[]};
   if(Object.keys(raw).some(k=>![...common,...keys[action]].includes(k)))fail('corrupt_record');
   const v=fields(raw,Object.keys(raw));
   const conversationId=process.env.CODEX_THREAD_ID;
@@ -36,7 +36,7 @@ export async function main(args){
   if(v.runId!==undefined&&!uuid(v.runId)||v.expectedRunId!==undefined&&!uuid(v.expectedRunId))fail('identity_required');
   runId=v.runId??v.expectedRunId;
   let result;
-  if(action==='begin')result=await beginRun(scope);
+  if(action==='begin')result=await beginRun(scope,{executionKind:v.executionKind??'host_skill'});
   else if(action==='capture')result=await captureRun(scope,runId,v.snapshot);
   else if(action==='dispatch'){result=await readForDispatch(scope,runId);dispatchStarted=true;}
   else if(action==='finish'){if(!TERMINAL.includes(v.status))fail('corrupt_record');result=await finishRun(scope,runId,{status:v.status,errorCode:v.errorCode??null});}

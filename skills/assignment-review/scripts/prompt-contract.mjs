@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-export const CODES = Object.freeze(['identity_required','no_record','latest_mismatch','corrupt_record','busy','uncertain','deleted','store_limit','unsafe_path','storage_unavailable','unsupported']);
+export const CODES = Object.freeze(['identity_required','no_record','latest_mismatch','corrupt_record','busy','uncertain','deleted','store_limit','unsafe_path','storage_unavailable','unsupported','codex_missing','codex_incompatible','login_required','auth_mode_unsupported','isolation_unverified','recursive_call','protocol_invalid','output_limit','timed_out','result_invalid','source_mismatch']);
 export const LIMITS = Object.freeze({prompt:256*1024,snapshot:1024*1024,stdin:2*1024*1024,tasks:100,runs:1000});
 export const fail = code => { const e = new Error(code); e.code=code; throw e; };
 export const safeError = e => ({code:CODES.includes(e?.code) ? e.code : 'storage_unavailable'});
@@ -28,7 +28,7 @@ export function array(value,max,validate) {
 }
 export function decode(bytes) { try { return new TextDecoder('utf-8',{fatal:true}).decode(bytes); } catch { fail('corrupt_record'); } }
 const timestamp = value => typeof value==='string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value) && !Number.isNaN(Date.parse(value));
-function identity(v) { if(v.schemaVersion!==1||!uuid(v.runId)||!uuid(v.conversationId)||!id(v.taskId)||!Number.isSafeInteger(v.sequence)||v.sequence<1)fail('corrupt_record'); }
+function identity(v,version=1) { if(v.schemaVersion!==version||!uuid(v.runId)||!uuid(v.conversationId)||!id(v.taskId)||!Number.isSafeInteger(v.sequence)||v.sequence<1)fail('corrupt_record'); }
 function material(input) {
  const m=fields(input,['sourceId','role','status','sourceReference','inspectedParts','observedAt','hashKind','contentHash','availability']);
  if(!id(m.sourceId)||!['requirements','rubric','teacher_guidance','template','solution','support','history'].includes(m.role)||!['inspected','unavailable','excluded','not_provided'].includes(m.status)||!['inline_excerpt','requires_reread','unavailable'].includes(m.availability))fail('corrupt_record');
@@ -50,8 +50,8 @@ export function validateSnapshot(input) {
 }
 export const TERMINAL = ['succeeded','failed','cancelled','uncertain'];
 export function validateLifecycle(input) {
- const v=fields(input,['schemaVersion','runId','taskId','conversationId','sequence','status','executionKind','createdAt','updatedAt','errorCode','promptSha256']); identity(v);
- if(!['preparing','captured','dispatched',...TERMINAL].includes(v.status)||v.executionKind!=='host_skill'||!timestamp(v.createdAt)||!timestamp(v.updatedAt)||!(v.errorCode===null||CODES.includes(v.errorCode))||!(v.promptSha256===null||hash(v.promptSha256)))fail('corrupt_record');
+ const v=fields(input,['schemaVersion','runId','taskId','conversationId','sequence','status','executionKind','createdAt','updatedAt','errorCode','promptSha256']); identity(v,v.executionKind==='codex_exec'?2:1);
+ if(!['preparing','captured','dispatched',...TERMINAL].includes(v.status)||!['host_skill','codex_exec'].includes(v.executionKind)||!timestamp(v.createdAt)||!timestamp(v.updatedAt)||!(v.errorCode===null||CODES.includes(v.errorCode))||!(v.promptSha256===null||hash(v.promptSha256)))fail('corrupt_record');
  if(['captured','dispatched','succeeded'].includes(v.status)&&v.promptSha256===null)fail('corrupt_record');
  if(v.status==='preparing'&&v.promptSha256!==null)fail('corrupt_record');
  if(['preparing','captured','dispatched','succeeded'].includes(v.status)&&v.errorCode!==null)fail('corrupt_record');

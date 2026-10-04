@@ -106,3 +106,22 @@ export function validateCodexResultShape(input){
   return r;
  }catch{codexFail('result_invalid');}
 }
+
+export function validateExecutionRecord(input){
+ const r=fields(input,['schemaVersion','runId','taskId','conversationId','attemptId','executionKind','promptSha256','binaryVersion','binarySha256','policySha256','status','errorCode','startedAt','finishedAt','elapsedMs','terminalObserved','cleanupComplete','resultSha256']);
+ if(r.schemaVersion!==1||!uuid(r.runId)||!uuid(r.conversationId)||!uuid(r.attemptId)||!id(r.taskId)||r.executionKind!=='codex_exec'||!hash(r.promptSha256))codexFail('result_invalid');
+ if(!['preparing','succeeded','failed','cancelled','uncertain'].includes(r.status)||!(r.errorCode===null||CODEX_CODES.includes(r.errorCode)))codexFail('result_invalid');
+ for(const k of ['binarySha256','policySha256','resultSha256'])if(r[k]!==null&&!hash(r[k]))codexFail('result_invalid');
+ if(r.binaryVersion!==null&&r.binaryVersion!=='0.141.0')codexFail('result_invalid');
+ for(const k of ['startedAt','finishedAt'])if(r[k]!==null&&(typeof r[k]!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(r[k])||!Number.isFinite(Date.parse(r[k]))))codexFail('result_invalid');
+ if(r.elapsedMs!==null&&(!Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<0)||typeof r.terminalObserved!=='boolean'||typeof r.cleanupComplete!=='boolean')codexFail('result_invalid');
+ if(r.status==='succeeded'&&(!r.terminalObserved||!r.cleanupComplete||r.resultSha256===null||r.errorCode!==null||r.binarySha256===null||r.policySha256===null))codexFail('result_invalid');
+ if(r.status!=='succeeded'&&r.resultSha256!==null)codexFail('result_invalid');return r;
+}
+export function validateResultEnvelope(input){
+ const r=fields(input,['schemaVersion','runId','taskId','conversationId','promptSha256','modelResponse','limitations','resultSha256']);
+ if(r.schemaVersion!==1||!uuid(r.runId)||!uuid(r.conversationId)||!id(r.taskId)||!hash(r.promptSha256)||!hash(r.resultSha256))codexFail('result_invalid');
+ r.modelResponse=validateCodexResultShape(r.modelResponse);r.limitations=array(r.limitations,300,x=>text(x));
+ const {resultSha256,...body}=r;
+ if(sha256(JSON.stringify(body))!==resultSha256||r.modelResponse.runId!==r.runId||r.modelResponse.taskId!==r.taskId||Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.envelope)codexFail('result_invalid');return r;
+}
