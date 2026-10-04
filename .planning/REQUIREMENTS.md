@@ -48,10 +48,10 @@ Added 2026-10-04 after user confirmation of Phases 16-17. These six verification
 
 - [x] **VAL-01**: Official assignment-review Skill validation completes successfully in a reproducible environment with interpreter/dependency and command evidence (TD-V; Phase 16).
 - [x] **VAL-02**: The stalled local build/test path is diagnosed and current build plus provider-disabled offline tests complete with reproducible, source-bound results; actual failures/skips remain visible (TD-B; Phase 16).
-- [ ] **VAL-03**: Phase 12 has a task/requirement-mapped `12-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-12; Phase 17).
-- [ ] **VAL-04**: Phase 13 has a task/requirement-mapped `13-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-13; Phase 17).
-- [ ] **VAL-05**: Phase 14 has a task/requirement-mapped `14-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-14; Phase 17).
-- [ ] **VAL-06**: Phase 15 has a task/requirement-mapped `15-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-15; Phase 17).
+- [x] **VAL-03**: Phase 12 has a task/requirement-mapped `12-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-12; Phase 17).
+- [x] **VAL-04**: Phase 13 has a task/requirement-mapped `13-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-13; Phase 17).
+- [x] **VAL-05**: Phase 14 has a task/requirement-mapped `14-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-14; Phase 17).
+- [x] **VAL-06**: Phase 15 has a task/requirement-mapped `15-VALIDATION.md` with actual checks and truthful automated/manual coverage and Nyquist status (TD-15; Phase 17).
 
 Re-audit after closure work; missing artifacts becoming present does not by itself prove complete automated coverage. Any remaining manual-only or failed checks stay explicit. Accepted v1.0 debt is not silently expanded into this cleanup scope.
 
@@ -98,12 +98,12 @@ Re-audit after closure work; missing artifacts becoming present does not by itse
 | REV-03 | Phase 15 | Complete |
 | VAL-01 | Phase 16 | Complete |
 | VAL-02 | Phase 16 | Complete |
-| VAL-03 | Phase 17 | Pending |
-| VAL-04 | Phase 17 | Pending |
-| VAL-05 | Phase 17 | Pending |
-| VAL-06 | Phase 17 | Pending |
+| VAL-03 | Phase 17 | Complete |
+| VAL-04 | Phase 17 | Complete |
+| VAL-05 | Phase 17 | Complete |
+| VAL-06 | Phase 17 | Complete |
 
-**Coverage:** 22 requirements; 22 mapped; 0 unmapped. Original 16 functional requirements remain verified in Phases 12-15; VAL-01/02 are complete (18/22 overall); 4 approved audit-closure requirements remain Pending in Phase 17. The prior 16/16 audit remains historical evidence, not acceptance of these new closure obligations.
+**Coverage:** 22 requirements; 22 mapped; 0 unmapped; 22 records/requirements complete. VAL-03–06 are supported by complete task-mapped records and Plan 17-01/02 summaries; Phase 17 goal verification and final audit reconciliation are pending. Original semantic automation remains PARTIAL. Current audit: [re-audit](v1.1-MILESTONE-REAUDIT.md); [original snapshot](v1.1-MILESTONE-AUDIT.md) preserved.
 
 ---
-*Last updated: 2026-10-04 after Phase 16 execution and verification*
+*Last updated: 2026-10-04 after Phase 17 task acceptance; phase verification pending*

@@ -3507,3 +3507,26 @@ Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`
   "semantic_pass_claim": "none; manual review separate"
 }
 ```
+
+## task6-integrity
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`; start `2026-10-04T06:43:25.220250+00:00`; cap 30s; elapsed 0.183s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "preserved_hashes": 71,
+  "reused_build_and_offline_inputs": "identical",
+  "documents": 19,
+  "yaml_frontmatter": 13,
+  "relative_links": 74,
+  "original_task_maps": [
+    4,
+    4,
+    5,
+    4
+  ],
+  "requirement_rows": 22,
+  "historical_phase_summary_and_verification_sets": "12-16 matched",
+  "semantic_pass_claim": "none; manual review separate"
+}
+```
