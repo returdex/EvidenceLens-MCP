@@ -13,8 +13,8 @@ tech-stack:
   added: []
   patterns: [Separate automated collection from manual semantic review]
 key-files:
-  created: ["12-VALIDATION.md", "13-VALIDATION.md", "17-RETROSPECTIVE-EVIDENCE.md"]
-  modified: [17-RETROSPECTIVE-EVIDENCE.md]
+  created: [".planning/phases/12-task-baseline-and-current-artifact-scope/12-VALIDATION.md", ".planning/phases/13-reusable-skill-and-stage-prompts/13-VALIDATION.md", ".planning/phases/17-retrospective-validation-and-audit-closure/17-RETROSPECTIVE-EVIDENCE.md"]
+  modified: [.planning/phases/17-retrospective-validation-and-audit-closure/17-RETROSPECTIVE-EVIDENCE.md]
 key-decisions:
   - Preserve original reports and paid-proof scope
   - Complete record obligations without claiming full automated semantic coverage
