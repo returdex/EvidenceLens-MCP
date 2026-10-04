@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { resolve } from 'node:path';
+import { realpath } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { beginRun,captureRun,readForDispatch,finishRun,exportLatest,forgetTask,statusTask } from './prompt-store.mjs';
 import { fail,safeError,uuid,id,decode,fields,array,text,LIMITS,TERMINAL } from './prompt-contract.mjs';
@@ -53,4 +53,5 @@ export async function main(args){
   await output(process.stderr,JSON.stringify({...safeError(e),...(uuid(runId)?{runId}:{})})+'\n').catch(()=>{});process.exitCode=1;
  }
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)await main(process.argv.slice(2));
+const entry=process.argv[1] ? await realpath(process.argv[1]).catch(()=>null) : null;
+if(entry&&import.meta.url===pathToFileURL(entry).href)await main(process.argv.slice(2));

@@ -1,6 +1,6 @@
 # EvidenceLens 快捷检查命令
 
-六个命令复用 `assignment-review`。当前阶段检查由正在使用的 Codex 宿主执行；独立 Codex 运行器在 Phase 20。提示词捕获／原文导出在 Phase 19，当前 `$el-prompt` 会如实说明不可用。
+六个命令复用 `assignment-review`。当前阶段检查由正在使用的 Codex 宿主执行；独立 Codex 运行器在 Phase 20。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
 
 安装后供命令读取的权威路由／帮助是[共享命令表](../skills/assignment-review/references/command-entrypoints.md)。本页补充安装与操作说明。
 
@@ -45,9 +45,24 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 | `$el-check` | 指定当前稿与可用要求 | 过程检查矩阵和最小修正。`$el-check 当前稿 current-v1，重点检查选择理由` |
 | `$el-final` | 当前交付材料与可用要求 | final 收尾检查、修正交接与待核验项。`$el-final 当前稿 current-v2，仅检查文字内容` |
 | `$el-recheck` | 新当前稿；旧发现可选 | 本次检查、F 状态及 A 行动退役／保留。`$el-recheck 当前稿 current-v2，复核 F18-1` |
-| `$el-prompt` | 当前尚无捕获实现 | 明确没有已捕获原文，不生成新提示词、不检查作业。`$el-prompt` |
+| `$el-prompt` | 同一任务的最近尝试回执和捕获记录 | 返回原文及独立状态／材料限制；无记录明确不可用。`$el-prompt 任务 T19` |
 
 指定当前稿不可读时报告 unknown，不改查旧稿；final 不因缺稿改变阶段。缺教师说明、rubric、原模板会留下具体覆盖缺口，不虚构内容。复查缺少旧账本仍能检查当前稿，历史比较标不可用。原模板与源注释保留；检查给出修改交接，不自动修改、签字或提交。帮助／导出不读取作业、不触发 review。
+
+## 检查后导出
+
+在同一任务／对话先用 `$el-check`（或 prepare/final/recheck），再用 `$el-prompt`。四个阶段指令会先登记尝试、筛选来源、组装并保存提示词，读取保存原文执行，结束时返回 taskId/runId/hash/status。首个未指定 taskId 的任务会得到 T-UUID；只有一个任务时可沿用，有多个时需明确指定。保存最近一次尝试回执，包括失败的 begin；不要用旧成功替代它。
+
+- 无记录：no_record；缺身份／丢失最新回执：identity_required；最新不符：latest_mismatch。
+- 最新运行失败但已捕获：导出该次原文，明确 failed；未捕获／中断：uncertain；损坏：corrupt_record。不会重建提示词或回退旧成功。
+- 重复导出和随后修改来源不会改变原文。导出不再检查作业或调用 provider。
+- 可复制原文与阶段、当前稿、材料清单／覆盖、状态和跨对话限制分开。只有路径或 hash 不会把文件带到另一对话；对方仍需获准材料或明确重读。
+
+精确字节使用已安装 `assignment-review/scripts/prompt-records.mjs export --format=raw`：通过 JSON stdin 提供 taskId 和最新 expectedRunId，stdout 是原文且不添换行，stderr 是单独元数据。聊天渲染可能影响复制，raw 输出为准。JSON 格式分别提供 promptText/metadata。helper 路径相对安装目录，跨项目 cwd 可运行；不把提示词插入 shell、argv 或日志，临时载荷用 Git 外 0600 文件或 stdin。
+
+默认记录位于 `~/.local/state/evidencelens`，0700 目录／0600 文件，按对话和任务隔离；可显式设置绝对 EVIDENCELENS_STATE_ROOT，不能与 Git／当前项目／已知作业根重叠。没有自动到期或清理；`status` 可查看元数据。`forget-task` 搭配精确 taskId 默认预览，用户要求删除时再用 `--apply`。先写删除标记再移除本任务已验证记录，保留其他任务及未知文件；incomplete 表示未完整删除，备份不在保证内。
+
+记录和恢复的完整字段、限制与调用方式见[安装协议](../skills/assignment-review/references/prompt-records.md)。缺 CODEX_THREAD_ID、Node 或助手时明确不可用，不造身份；锁中断不按 PID/年龄自动清理，也不重试派发。宿主报告的 succeeded 仅表示本次工作完成；独立 Codex 执行与用量尚待后续阶段。
 
 ## 更新、冲突与移除
 

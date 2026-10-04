@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, readdir, symlink, unlink, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, symlink, unlink, rm, mkdir, chmod, cp } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,7 +37,7 @@ async function inspect(root) {
     await visit(path);
   }
   assert.equal(descriptions.size, 6);
-  await readFile(join(root, 'assignment-review/scripts/baseline-sources.mjs'));
+  for (const name of ['baseline-sources','prompt-contract','prompt-store','prompt-records']) await readFile(join(root, `assignment-review/scripts/${name}.mjs`));
 }
 test('six distinct entry manifests have a complete local reference graph', () => inspect(source));
 test('installed sibling symlinks work outside the checkout; missing shared dependency fails', async () => {
@@ -46,4 +48,22 @@ test('installed sibling symlinks work outside the checkout; missing shared depen
     await unlink(join(root, 'assignment-review'));
     await assert.rejects(inspect(root), { code: 'ENOENT' });
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('installed prompt CLI executes through sibling link from external Unicode cwd; missing helper fails', async () => {
+  const root = await mkdtemp('/private/tmp/el-installed-');
+  try {
+    await chmod(root, 0o700);
+    const install=join(root,'skills 中文'), project=join(root,'course space');
+    await mkdir(install,{mode:0o700}); await mkdir(project,{mode:0o700});
+    await symlink(join(source,'assignment-review'),join(install,'assignment-review'),'dir');
+    const helper=join(install,'assignment-review/scripts/prompt-records.mjs');
+    const env={PATH:process.env.PATH,CODEX_THREAD_ID:randomUUID(),EVIDENCELENS_STATE_ROOT:join(root,'state')};
+    const run=()=>spawnSync(process.execPath,[helper,'begin'],{env,cwd:project,input:'{}',encoding:'utf8',timeout:10000});
+    const actual=run(); assert.equal(actual.status,0,actual.stderr); assert.equal(JSON.parse(actual.stdout).ok,true);
+    // Copy only our test package before removing a dependency; never mutate the installed source.
+    await unlink(join(install,'assignment-review')); await cp(join(source,'assignment-review'),join(install,'assignment-review'),{recursive:true});
+    await unlink(join(install,'assignment-review/scripts/prompt-contract.mjs'));
+    assert.notEqual(run().status,0);
+  } finally { await rm(root,{recursive:true,force:true}); }
 });
