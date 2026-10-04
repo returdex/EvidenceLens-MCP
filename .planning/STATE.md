@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: ready_to_plan
-last_updated: "2026-10-04T14:39:43.744002+00:00"
-last_activity: 2026-10-05 — Phase 19 complete; Phase 20 ready to plan
+status: ready_to_execute
+last_updated: "2026-10-04T15:03:41.793Z"
+last_activity: 2026-10-05 — Phase 20 planned; 6 plans ready to execute
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 9
+  total_plans: 15
   completed_plans: 9
   percent: 50
 ---
@@ -17,14 +17,14 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: plan Phase 20 independent Codex execution. Phase 19 complete at product 0.3.2.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute Phase 20 independent Codex execution. Phase 19 complete at product 0.3.2.
 
 ## Current Position
 
 Phase: 20
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-05 — Phase 19 verified and completed
+Plan: 0/6 complete (12 tasks planned)
+Status: Ready to execute
+Last activity: 2026-10-05 — Phase 20 planned; ready to execute
 
 ## Accepted Coverage Debt
 
@@ -40,10 +40,12 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Run `$gsd-plan-phase 20` for Bounded Independent Codex Execution. Phase 19: 5/5 plans, 10/10 tasks, PRM-01–05 complete and 3/3 goal criteria passed. Four stage commands capture before review; `$el-prompt` exports the actual scoped snapshot with separate status/material limits. Current-host synthetic flow and failure/deletion acceptance passed.
+Run `$gsd-execute-phase 20`. Six sequential plans / 12 tasks cover CDX-01–06 and D-01–09; inline plan check and SDK structure/decision gates passed. Planning only: implementation and full production isolation acceptance have not run. Product remains 0.3.2.
 
-Product 0.3.2: fresh build, 118 affected runtime tests, 51 Node tests and seven official Skill validations passed. No release/tag. Progress is 2/4 milestone phases (50%); all 9 currently defined plans complete. Phases 20–21 remain TBD. Phase 19 semantic evaluation is manual (nyquist_compliant=false); independent Codex execution and usage reporting are not implemented. Native slash aliases, GUI selector and other hosts remain unverified.
+Fresh planning observations: Codex 0.141.0 reports ChatGPT login. Native `codex sandbox -P` synthetic read/write denial probe failed; direct Seatbelt small negative control passed. Invocation-local Codex-auth descriptor with zero configured retries was accepted; synthetic ChatGPT-mode HTTP-500 fixture observed one model POST. Four built-in tools remain after feature disabling. Plan 02 must prove the full outer policy, forced-tool negatives, auth status and other error paths before command enablement. No real inference, auth read/copy/mutation or new chat in this planning turn.
+
+Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 9/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 19 completed via SDK `phase.complete` with zero warnings; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 20 planning completed inline; SDK planned-phase plus explicit plan-count reconciliation; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.

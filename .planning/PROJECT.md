@@ -39,7 +39,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–19 are complete; next: plan Phase 20 independent Codex execution.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–19 are complete; Phase 20 has six checked execution plans (12 tasks), ready for `$gsd-execute-phase 20`.
 
 - [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
@@ -120,4 +120,4 @@ After each phase, move verified requirements to Validated with phase references,
 </details>
 
 ---
-*Last updated: 2026-10-05 after Phase 18 completion*
+*Last updated: 2026-10-05 after Phase 20 planning*

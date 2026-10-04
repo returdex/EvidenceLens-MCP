@@ -91,7 +91,39 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 3. 失败、取消、超时和结果不确定都有终态及进程清理，无自动再次发送。
 4. 成功需运行终态、输出结构和本地来源绑定共同支持；伪造来源或部分结果不能冒充通过。
 
-**Plans**: TBD — created by `$gsd-plan-phase 20`.
+**Plans**: 0/6 complete; planning checked in [20-PLAN-CHECK.md](phases/20-bounded-independent-codex-execution/20-PLAN-CHECK.md). 12 tasks, six sequential waves.
+
+**Wave 1**
+
+- [ ] 20-01-PLAN.md — Evidence capsule, structured contract and truthful Codex preflight.
+
+**Wave 2** *(depends on Wave 1)*
+
+- [ ] 20-02-PLAN.md — Actual binary compatibility and macOS whole-process isolation.
+
+**Wave 3** *(depends on Wave 2)*
+
+- [ ] 20-03-PLAN.md — Compatible lifecycle, once-only dispatch and bounded cancellation.
+
+**Wave 4** *(depends on Wave 3)*
+
+- [ ] 20-04-PLAN.md — Local result binding and four-stage installed command wiring.
+
+**Wave 5** *(depends on Wave 4)*
+
+- [ ] 20-05-PLAN.md — Adversarial protocol and actual target-host acceptance.
+
+**Wave 6** *(depends on Wave 5)*
+
+- [ ] 20-06-PLAN.md — Accepted feature patch and fresh scoped regression closure.
+
+**Cross-cutting constraints:**
+
+- Only certified isolated execution consumes the captured prompt; no automatic retry or source-scope expansion.
+- Existing login remains Codex-owned; production never copies credentials or chooses an API-key route.
+- Native sandbox probe did not enforce expected boundaries on this host. Full outer Seatbelt/tool/auth/retry proof is required before command enablement.
+- Synthetic protocol/real host checks remain separate from Phase 21 authorized real inference and usage acceptance.
+
 
 ### Phase 21: Review Handoff and Usage Acceptance
 
@@ -112,12 +144,12 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 |---|---|---|---|
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
-| 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
+| 20. Bounded Independent Codex Execution | 0/6 | Planned — ready to execute | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
 
 ## Coverage and Research
 
-21/21 requirements mapped exactly once; no dropped functional requirement. [Requirements](REQUIREMENTS.md) and [research summary](research/SUMMARY.md) contain scope and source evidence. Phase 20 requires deeper invocation/auth/sandbox design before implementation; Phase 19 resolves storage/identity semantics. New live validation is bounded and requires its applicable authorization; historical paid proof is not replayed.
+21/21 requirements mapped exactly once; no dropped functional requirement. [Requirements](REQUIREMENTS.md) and [research summary](research/SUMMARY.md) contain scope and source evidence. Phase 20 targeted research and checked plans now define invocation/auth/sandbox design and the required compatibility gate; Phase 19 resolves storage/identity semantics. New live validation is bounded and requires its applicable authorization; historical paid proof is not replayed.
 
 ## Deferred Work
 
