@@ -16,8 +16,8 @@ Execution started: Plan 01 structural and official metadata checks passed; remai
 |---|---|---|---|---|
 | 18-01-01 | 1 | CMD-02/04/05 | Diff + route contract review; see 18-01-SUMMARY | passed |
 | 18-01-02 | 1 | CMD-01/02/03/05 | Node 14/14 and official 7 positives + negative control; see 18-01-SUMMARY | passed |
-| 18-02-01 | 2 | CMD-01 | Real temporary filesystem install/dry-run/collision tests | pending |
-| 18-02-02 | 2 | CMD-03/05 | Six command guide/examples + structural tests | pending |
+| 18-02-01 | 2 | CMD-01 | Real temp filesystem 6 behavioral + 2 structural tests; 18-02-SUMMARY | passed |
+| 18-02-02 | 2 | CMD-03/05 | Guide/examples checked; 8/8 tests rerun; 18-02-SUMMARY | passed |
 | 18-03-01 | 3 | CMD-02/04/05 | C18-01–10 actual inline outputs, map-only collection, manual semantic judgment | pending |
 | 18-03-02 | 3 | CMD-01/03 | Real seven-link install after clean preflight, source/target identity record | pending |
 | 18-03-03 | 3 | CMD-01/02/03/05 | Actual six-command discovery/invocation in another assignment project | pending |
