@@ -8,7 +8,7 @@
 
 ## Approval State
 
-The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Ready to plan Phase 18; no phase implementation is complete. Original phase directories and audit/proof snapshots remain in place.
+The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 has four checked execution plans; no phase implementation is complete. Original phase directories and audit/proof snapshots remain in place.
 
 ## Phases
 
@@ -29,7 +29,24 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 2. 四个阶段调用选择准确，用户当前稿和重点被保留；帮助与导出不会触发审阅。
 3. 缺材料场景继续有依据的工作并明确未知项，既有基线/模板/披露/复查规则保持一致。
 
-**Plans**: TBD — created by `$gsd-plan-phase 18`.
+**Plans**: 4 plans, checked and ready to execute.
+
+**Wave 1**
+
+- [ ] 18-01-PLAN.md — Six entry Skills and shared command routing.
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 18-02-PLAN.md — Safe local installation and accurate command help.
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 18-03-PLAN.md — Synthetic behavior and actual cross-project host acceptance.
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 18-04-PLAN.md — Completed feature patch and affected offline regression verification.
+
+**Cross-cutting constraints:**
+
+- Users retain current-artifact and evidence boundaries; help/export never dispatch review.
 
 ### Phase 19: Captured Task Prompts and Export
 
@@ -73,7 +90,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
-| 18. Discoverable Stage Commands | 0/TBD | Not started | — |
+| 18. Discoverable Stage Commands | 0/4 | Planned | — |
 | 19. Captured Task Prompts and Export | 0/TBD | Not started | — |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
