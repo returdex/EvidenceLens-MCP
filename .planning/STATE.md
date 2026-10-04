@@ -17,7 +17,7 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute Phase 19 prompt capture/export. Phase 18 complete at product 0.3.1.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute Phase 19 prompt capture/export. Phase 18 complete at product 0.3.1; Phase 19 accepted feature patch 0.3.2 is under final regression.
 
 ## Current Position
 
@@ -46,4 +46,4 @@ Progress percent is 1/4 milestone phases (25%); 4/9 defined plans are complete (
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 19 planning recorded via SDK `state.planned-phase`; Phase 18 completed via SDK `phase.complete`; current development product 0.3.1. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 19 planning recorded via SDK `state.planned-phase`; Phase 18 completed via SDK `phase.complete`; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
