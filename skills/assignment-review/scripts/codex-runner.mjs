@@ -1,3 +1,4 @@
+import { validateBoundCodexResult } from './codex-result.mjs';
 import { spawn } from 'node:child_process';
 import { CODEX_LIMITS,codexFail,codexError,parseEvidenceCapsule } from './codex-contract.mjs';
 import { decode } from './prompt-contract.mjs';
@@ -74,7 +75,10 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
   }catch{reason='codex_missing';done(null,true);}
  });
 }
-export async function runCapturedCodex(scope,runId,{signal}={}){
+const productionAdapter=Object.freeze({preflight:preflightCodex,createLaunch:createIsolatedLaunch,assertLaunch:assertCertifiedLaunch,supervise:superviseCodexProcess});
+export const runCapturedCodex=(scope,runId,options={})=>executeCapturedWithAdapter(scope,runId,options,productionAdapter);
+// Trusted in-process test seam. Production CLI never accepts adapters or launch overrides.
+export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter=productionAdapter){
  let owned,launch,execution,result=null,outcome,dispatch=false;
  const started=Date.now();
  try {
@@ -82,20 +86,20 @@ export async function runCapturedCodex(scope,runId,{signal}={}){
   if(signal?.aborted){outcome={status:'cancelled',code:null,terminalObserved:false,cleanupComplete:true};}
   else {
    parseEvidenceCapsule(owned.snapshot);
-   const preflight=await preflightCodex();if(!preflight.ok)codexFail(preflight.code);
-   launch=await createIsolatedLaunch({executableReceipt:preflight,runId,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});assertCertifiedLaunch(launch);
+   const preflight=await adapter.preflight();if(!preflight.ok)codexFail(preflight.code);
+   launch=await adapter.createLaunch({executableReceipt:preflight,runId,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});adapter.assertLaunch(launch);
    await recordCodexScratch(scope,runId,execution.attemptId,launch.root);
    if(signal?.aborted)outcome={status:'cancelled',code:null,terminalObserved:false,cleanupComplete:true};
    else {
     const saved=await readForDispatch(scope,runId,{attemptId:execution.attemptId});dispatch=true;
-    outcome=await superviseCodexProcess(launch,Buffer.from(saved.promptText,'utf8'),{signal});
-    // Plan 04 supplies strict local source binding; no production success before that gate.
-    if(outcome.status==='candidate')outcome={...outcome,status:'failed',code:'result_invalid',candidate:null};
+    outcome=await adapter.supervise(launch,Buffer.from(saved.promptText,'utf8'),{signal});
+    if(outcome.status==='candidate'){result=validateBoundCodexResult(owned.snapshot,outcome.candidate);outcome={...outcome,status:'succeeded',candidate:null};}
    }
   }
  }catch(e){if(!owned)return {ok:false,runId,...codexError(e)};outcome={status:dispatch?'uncertain':'failed',code:codexError(e).code,terminalObserved:false,cleanupComplete:true};}
  if(launch){try{await launch.cleanup();}catch{outcome={...outcome,status:'uncertain',code:'uncertain',cleanupComplete:false};}}
  if(signal?.aborted&&outcome.cleanupComplete){outcome={...outcome,status:'cancelled',code:null};result=null;}
+ if(outcome.status!=='succeeded')result=null;
  const receipt={...execution,...(launch?{binaryVersion:launch.binaryVersion,binarySha256:launch.binarySha256,policySha256:launch.policySha256}:{}),status:outcome.status,errorCode:outcome.code,finishedAt:new Date().toISOString(),elapsedMs:Date.now()-started,terminalObserved:outcome.terminalObserved,cleanupComplete:outcome.cleanupComplete,resultSha256:result?.resultSha256??null};
  try{return await completeCodexRun(scope,runId,{execution:receipt,result,signal});}catch(e){return {ok:false,runId,code:codexError(e).code};}
 }

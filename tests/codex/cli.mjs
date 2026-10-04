@@ -1,0 +1,19 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
+import {fixture} from './helpers.mjs';import {sha256} from '../../skills/assignment-review/scripts/prompt-contract.mjs';
+const scripts=fileURLToPath(new URL('../../skills/assignment-review/scripts/',import.meta.url));
+async function setup(t){const root=await fs.mkdtemp('/private/tmp/el20-cli-');await fs.chmod(root,0o700);t.after(()=>fs.rm(root,{recursive:true,force:true}));await fs.mkdir(root+'/course 中文');await fs.symlink(scripts,root+'/installed');const f=fixture();const env={PATH:'/usr/bin:/bin',CODEX_THREAD_ID:f.snapshot.conversationId,EVIDENCELENS_STATE_ROOT:root+'/state',HOME:root};const call=(helper,action,input)=>spawnSync(process.execPath,[root+'/installed/'+helper+'.mjs',action],{cwd:root+'/course 中文',env,input:JSON.stringify(input),encoding:'utf8',timeout:15000});return{root,f,call};}
+test('installed capture -> failed run -> export retains exact captured bytes, no source reread',async t=>{
+ const {f,call}=await setup(t);const b=call('prompt-records','begin',{taskId:'T20',executionKind:'codex_exec'});assert.equal(b.status,0,b.stderr);const receipt=JSON.parse(b.stdout);
+ for(const o of [f.snapshot,f.capsule]){o.runId=receipt.runId;o.taskId=receipt.taskId;o.conversationId=receipt.conversationId;}f.snapshot.sequence=receipt.sequence;
+ const c=call('codex-review','capture',{taskId:receipt.taskId,runId:receipt.runId,snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted});assert.equal(c.status,0,c.stderr);
+ const ex=()=>call('prompt-records','export',{taskId:receipt.taskId,expectedRunId:receipt.runId});const before=JSON.parse(ex().stdout);f.admitted[0].text='MUTATED AFTER CAPTURE';
+ const r=call('codex-review','run',{taskId:receipt.taskId,runId:receipt.runId});assert.equal(r.status,1);assert.equal(JSON.parse(r.stdout).execution.errorCode,'codex_missing');const after=JSON.parse(ex().stdout);assert.equal(after.promptText,before.promptText);assert.equal(after.metadata.promptSha256,sha256(before.promptText));assert.equal(after.metadata.status,'failed');
+ assert.equal(call('codex-review','run',{taskId:receipt.taskId,runId:receipt.runId,provider:'fixture'}).status,1);
+});
+test('capture rejects altered admitted source and CLI rejects endpoint/executable switches',async t=>{const {f,call}=await setup(t);const receipt=JSON.parse(call('prompt-records','begin',{taskId:'T20',executionKind:'codex_exec'}).stdout);for(const o of [f.snapshot,f.capsule])o.runId=receipt.runId;f.admitted[0].text='changed';const r=call('codex-review','capture',{taskId:'T20',runId:receipt.runId,snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted});assert.equal(r.status,1);for(const key of ['executable','base_url','model','adapter'])assert.equal(call('codex-review','preflight',{[key]:'DO-NOT-ECHO'}).status,1);});
+
+test('trusted adapter: captured stdin -> terminal -> local binding -> result -> exact export',async t=>{
+ const {capturedFlow}=await import('./helpers.mjs');const {executeCapturedWithAdapter}=await import('../../skills/assignment-review/scripts/codex-runner.mjs');const store=await import('../../skills/assignment-review/scripts/prompt-store.mjs');const x=await capturedFlow(t);
+ x.f.admitted[0].text='mid-run source change';const r=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(r.status,'succeeded',JSON.stringify(r));assert.equal(x.calls(),1);assert.equal((await store.readCodexResult(x.scope,x.receipt.runId)).result.resultSha256,r.result.resultSha256);assert.equal((await store.exportLatest(x.scope,{expectedRunId:x.receipt.runId})).promptText,x.exported.promptText);
+ const retry=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(retry.ok,false);assert.equal(x.calls(),1);
+});

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { validateBoundCodexResult } from './codex-result.mjs';
 import { validateExecutionRecord,validateResultEnvelope } from './codex-contract.mjs';
 import { constants as C } from 'node:fs';
 import { dirname, join, resolve, isAbsolute, sep } from 'node:path';
@@ -109,10 +110,11 @@ export async function beginRun(scope,{executionKind="host_skill"}={}){
   t.sequence=l.sequence;t.latest=runId;t.runs.push({runId,sequence:l.sequence});await tx.publish();return receipt(l);
  });}catch(e){return {ok:false,...safeError(e),runId,...(id(taskId)?{taskId}:{}),...(uuid(scope?.conversationId)?{conversationId:scope.conversationId}:{})};}
 }
-export async function captureRun(scope,runId,input){
+export async function captureRun(scope,runId,input,{executionKind}={}){
  const v=validateSnapshot(input);if(v.runId!==runId||v.conversationId!==scope.conversationId||v.taskId!==scope.taskId)fail('latest_mismatch');
  return transaction(scope,false,async tx=>{
   const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+  if(executionKind!==undefined&&l.executionKind!==executionKind)fail('unsupported');
   if(v.sequence!==l.sequence)fail('corrupt_record');
   const p=recordPath(c,t,runId,'snapshot'),existing=await read(p);
   if(existing){if(JSON.stringify(validateSnapshot(existing))!==JSON.stringify(v))fail('uncertain');if(l.status==='captured'&&l.promptSha256===v.promptSha256)return receipt(l);fail('uncertain');}
@@ -204,6 +206,7 @@ export async function completeCodexRun(scope,runId,{execution:input,result=null,
  if(e.status==='succeeded'){
   if(l.status!=='dispatched')fail('uncertain');const r=validateResultEnvelope(result);
   if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||r.resultSha256!==e.resultSha256)fail('corrupt_record');
+  const bound=validateBoundCodexResult(await snapshot(c,t,l),r.modelResponse);if(JSON.stringify(bound)!==JSON.stringify(r))fail('corrupt_record');
   tx.dirty();await writeExclusive(recordPath(c,t,runId,'result'),r);await boundary(c,'after_result');
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');

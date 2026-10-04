@@ -8,7 +8,7 @@ created: 2026-10-05
 ---
 # Phase 20 — Validation Strategy
 
-Execution in progress. Plans 01–03 complete after approved R1 repair; 45 combined checks pass. Historical failed compatibility evidence retained.
+Execution in progress. Plans 01–04 complete after approved R1 repair; 45 combined checks pass. Historical failed compatibility evidence retained.
 
 ## Test Infrastructure and Sampling
 
@@ -27,8 +27,8 @@ Phase: `node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs t
 | 20-02-02 | 02/2 | CDX-02, CDX-04, CDX-05 | T-20-03, T-20-04 | node --test tests/codex/isolation.mjs tests/codex/preflight.mjs tests/codex/protocol-host.mjs (120 s cap) | Created | PASS — sealed launch and separate actual login status; 45 combined tests |
 | 20-03-01 | 03/3 | CDX-03, CDX-05 | T-20-05, T-20-06 | node --test tests/prompts/contract.mjs tests/prompts/store.mjs tests/prompts/lifecycle.mjs tests/prompts/retention.mjs tests/prompts/cli.mjs | Implemented | PASS — legacy and v2 ownership/publication/cancellation checks |
 | 20-03-02 | 03/3 | CDX-03, CDX-05 | T-20-05, T-20-06 | node --test tests/codex/runner.mjs tests/prompts/lifecycle.mjs tests/prompts/retention.mjs (120 s outer cap) | Implemented | PASS — process limits/reap and actual CLI supervisor |
-| 20-04-01 | 04/4 | CDX-03, CDX-04, CDX-06 | T-20-07, T-20-08 | node --test tests/codex/result.mjs tests/codex/runner.mjs tests/codex/contract.mjs | Mixed existing/new | pending |
-| 20-04-02 | 04/4 | CDX-03, CDX-04, CDX-06 | T-20-07, T-20-08 | node --test tests/codex/cli.mjs tests/commands/*.mjs tests/prompts/*.mjs tests/baseline/source-boundary.mjs (120 s cap) | Mixed existing/new | pending |
+| 20-04-01 | 04/4 | CDX-03, CDX-04, CDX-06 | T-20-07, T-20-08 | node --test tests/codex/result.mjs tests/codex/runner.mjs tests/codex/contract.mjs | Implemented | PASS — exact source/quote/coverage binding |
+| 20-04-02 | 04/4 | CDX-03, CDX-04, CDX-06 | T-20-07, T-20-08 | node --test tests/codex/cli.mjs tests/commands/*.mjs tests/prompts/*.mjs tests/baseline/source-boundary.mjs (120 s cap) | Implemented | PASS — 91 combined tests and 3 CLI flow tests |
 | 20-05-01 | 05/5 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-09, T-20-10 | node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/source-boundary.mjs (bounded batches <=120 s) | Mixed existing/new | pending |
 | 20-05-02 | 05/5 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-09, T-20-10 | Read-only installed codex preflight; node --test tests/codex/acceptance.mjs tests/codex/protocol-host.mjs tests/codex/isolation.mjs; official quick_validate.py for seven Skills plus known invalid negative control; git diff --check | Mixed existing/new | pending |
 | 20-06-01 | 06/6 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-11 | Parsed product metadata equality; lock comparison allows root product version fields only; git diff --check | Existing metadata | pending |

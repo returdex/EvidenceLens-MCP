@@ -81,3 +81,28 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
   return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,installationUnchanged:(await readFile(codexHome+'/installation_id','utf8'))===installationId,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
  }finally{server.closeAllConnections();await new Promise(r=>server.close(r));await rm(base,{recursive:true,force:true});}
 }
+
+// Trusted library adapter fixture; this is never a production CLI option.
+export async function capturedFlow(t,{stage='in_progress',current=true}={}){
+ const fs=await import('node:fs/promises');const store=await import('../../skills/assignment-review/scripts/prompt-store.mjs');const {captureCodexPrompt}=await import('../../skills/assignment-review/scripts/codex-review.mjs');
+ const root=await fs.mkdtemp('/private/tmp/el20-flow-');await fs.chmod(root,0o700);t.after(()=>fs.rm(root,{recursive:true,force:true}));
+ const f=fixture(),scope={stateRoot:root+'/state',taskId:f.snapshot.taskId,conversationId:f.snapshot.conversationId};
+ const receipt=await store.beginRun(scope,{executionKind:'codex_exec'});
+ for(const value of [f.snapshot,f.capsule,f.result]){value.runId=receipt.runId;value.stage=stage;if(!current)value.currentSourceId=null;}
+ f.snapshot.sequence=receipt.sequence;
+ if(!current){f.snapshot.materials=[];f.capsule.sources=[];f.admitted=[];f.result.coverage=[];f.result.findings=[];}
+ await captureCodexPrompt(scope,receipt.runId,{snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted});
+ const exported=await store.exportLatest(scope,{expectedRunId:receipt.runId});let calls=0;
+ const adapter={
+  preflight:async()=>({ok:true}),assertLaunch:()=>{},
+  createLaunch:async()=>{
+   const scratch=await fs.mkdtemp('/private/tmp/evidencelens-codex-');await fs.chmod(scratch,0o700);
+   const result=f.result;
+   const rows=[{type:'thread.started',thread_id:'synthetic'},{type:'turn.started'},{type:'item.completed',item:{type:'reasoning',text:'PRIVATE_REASONING_SENTINEL'}},{type:'item.completed',item:{type:'agent_message',text:JSON.stringify(result)}},{type:'turn.completed'}];
+   const code=`import fs from 'node:fs/promises';import {createHash} from 'node:crypto';let parts=[];for await(const b of process.stdin)parts.push(b);await fs.writeFile(${JSON.stringify(scratch+'/stdin.sha')},createHash('sha256').update(Buffer.concat(parts)).digest('hex'));process.stdout.write(${JSON.stringify(rows.map(x=>JSON.stringify(x)).join('\n')+'\n')});`;
+   return {executable:process.execPath,args:['--input-type=module','-e',code],env:{PATH:'/usr/bin:/bin',CODEX_HOME:scratch},cwd:scratch,root:scratch,binaryVersion:'0.141.0',binarySha256:PINNED_BINARY_SHA256,policySha256:'0'.repeat(64),cleanup:async()=>{const h=await fs.readFile(scratch+'/stdin.sha','utf8').catch(()=>null);if(h!==null&&h!==exported.metadata.promptSha256)throw Error('stdin mismatch');await fs.rm(scratch,{recursive:true,force:true});return true;}};
+  },
+  supervise:async(...args)=>{calls++;return (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess(...args);}
+ };
+ return {root,scope,receipt,exported,f,adapter,calls:()=>calls};
+}

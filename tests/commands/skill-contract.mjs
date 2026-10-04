@@ -37,7 +37,7 @@ async function inspect(root) {
     await visit(path);
   }
   assert.equal(descriptions.size, 6);
-  for (const name of ['baseline-sources','prompt-contract','prompt-store','prompt-records']) await readFile(join(root, `assignment-review/scripts/${name}.mjs`));
+  for (const name of ['baseline-sources','prompt-contract','prompt-store','prompt-records','codex-contract','codex-preflight','codex-isolation','codex-runner','codex-result','codex-review']) await readFile(join(root, `assignment-review/scripts/${name}.mjs`));
 }
 test('six distinct entry manifests have a complete local reference graph', () => inspect(source));
 test('installed sibling symlinks work outside the checkout; missing shared dependency fails', async () => {
@@ -67,3 +67,5 @@ test('installed prompt CLI executes through sibling link from external Unicode c
     assert.notEqual(run().status,0);
   } finally { await rm(root,{recursive:true,force:true}); }
 });
+
+test('four stages share independent capture/run while help/export retain read-only routes',async()=>{const text=await readFile(join(source,'assignment-review/references/command-entrypoints.md'),'utf8');assert.match(text,/executionKind="codex_exec"/);assert.match(text,/codex-review\.mjs/);assert.match(text,/不自动重发/);assert.match(text,/不重新生成/);assert.match(text,/先固定阶段/);});

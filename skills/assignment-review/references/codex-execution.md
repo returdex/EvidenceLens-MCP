@@ -1,6 +1,6 @@
 # Codex 独立审阅协议（Phase 20 实施中）
 
-当前仅新增证据协议和预检基础；独立执行尚未启用，不能把预检或合成结果称为真实审阅。
+独立执行已接入四个阶段入口，正在进行 Phase 20 验收。已通过真实 CLI 的本地合成协议检查；真实 ChatGPT 推理仍未运行，不能把预检或合成结果称为真实审阅。
 
 ## 证据与原文
 
@@ -35,3 +35,15 @@ ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 au
 审阅进程通过 stdin 接收提示词；仅能读取运行库、私有控制/临时目录和 Codex 自有认证文件。现有非凭据 `installation_id` 允许所需的文件数据/模式操作，结束时核对内容未变；不允许创建该文件、写父目录或修改认证/配置。登录状态使用独立的无网络策略，仅额外允许 Codex 读取配置文件及直接的 agent TOML 配置；这些读取权限不进入审阅进程。
 
 四个内置工具仍存在。文件工具受到外层 OS 拒绝；任何 JSONL 工具/计划事件或 stderr tools-router 诊断均拒绝该审阅。进程中止前可能已有内部后续请求，必须标记不确定，不能声称远端撤回成功。全局/项目指令、skills 和 memory 的合成注入标记已验证不进入请求。当前启动器通过本地协议验收；独立审阅的存储与结果验证仍在实施。
+
+## 安装后的调用
+
+从 assignment-review 的安装目录定位 `scripts/codex-review.mjs`，支持 preflight/capture/run，均仅接受 stdin JSON。preflight 输入 `{}`，只做版本、登录及隔离检查，不推理。先用 prompt-records.mjs begin 的 `executionKind:"codex_exec"` 保存回执，再由父助手筛选材料和组装六节正文。
+
+- capture 输入 `{taskId,runId,snapshot,capsule,admitted}`；snapshot 的 promptText 为六节正文、promptSha256 对应该正文，身份/sequence 来自 begin。capsule 见上文；admitted 为已获准 `{sourceId,text}` 数组。助手校验并追加唯一证据区块，保存最终原文及哈希。
+- run 输入 `{taskId,runId,evidenceRoots?}`；只运行同一已捕获尝试，返回状态、执行回执和经过本地校验的 result。无可覆盖的可执行文件、模型、endpoint、配置或测试参数。CODEX_THREAD_ID 决定宿主身份，不读取历史聊天。
+- export 继续使用 prompt-records.mjs export；不会预检或启动 Codex。帮助仅阅读命令表，也不启动进程。
+
+SIGINT/SIGTERM 转成当前自有运行的取消信号：TERM 后最多 2 秒发送 KILL，再有界确认进程组消失并清理临时目录。无法确认清理为 uncertain。失败/取消后不自动重试；用户明确再次请求时 begin 新 run，保留失败记录。已发送的远端请求可能消耗用量，取消不承诺撤回。
+
+来源校验要求 coverage 覆盖每个登记材料；排除/未读不能升级为 covered，引用只能落在已捕获摘录的 UTF-8 区间且原文完全一致。结果哈希和 promptSha256 由本地生成。没有任何发现也不能消除本地保存的覆盖限制；匹配引用不证明语义推理准确。

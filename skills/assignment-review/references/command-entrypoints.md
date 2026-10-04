@@ -25,15 +25,15 @@
 
 ## review 共享执行路径
 
-四个阶段指令都使用 [提示词记录协议](prompt-records.md)；共享助手必须从安装的 assignment-review 目录定位。无需仓库 cwd、构建 dist 或新依赖。下面是 begin → capture → dispatch → finish 的完整顺序；不要在 capture 前完成检查后再补造提示词。
+四个阶段指令都使用 [提示词记录协议](prompt-records.md)；共享助手必须从安装的 assignment-review 目录定位。无需仓库 cwd、构建 dist 或新依赖。下面是 begin(codex_exec) → capture → run → validated result 的完整顺序；不要在 capture 前完成检查后再补造提示词。
 
-1. 保留用户指定任务、阶段、当前稿、范围、重点、语言和有效格式；默认 `reviewMode=artifact_only`。从当前宿主 `CODEX_THREAD_ID` 确定对话，显式 taskId 优先；仅一个已登记任务可复用，首个未命名任务由 begin 返回 T-UUID，多个任务必须明确选择。不得从文档指令推断身份。先调用 `begin`，保留返回的 runId/taskId/conversationId/sequence；失败也保留 attempted runId，明确不可用，不能继续未捕获的 review。
+1. 保留用户指定任务、阶段、当前稿、范围、重点、语言和有效格式；默认 `reviewMode=artifact_only`。从当前宿主 `CODEX_THREAD_ID` 确定对话，显式 taskId 优先；仅一个已登记任务可复用，首个未命名任务由 begin 返回 T-UUID，多个任务必须明确选择。不得从文档指令推断身份。先调用记录助手 `begin` 并传入 `executionKind="codex_exec"`，保留返回的 runId/taskId/conversationId/sequence；失败也保留 attempted runId，明确不可用，不能继续未捕获的 review。
 2. begin 成功后，按[基线流程](baseline-workflow.md)及[来源筛选器](../scripts/baseline-sources.mjs)先筛选再读取。排除传播到文档组／别名，局部排除不可可靠实施就跳过整组。selected 不等于 inspected；被排除内容不能读取或计算哈希。已读内容不承诺靠“忽略”撤回。为记录助手传入已知 evidenceRoots，存储不得与这些根重叠。
 3. 使用[任务基线](task-baseline.md)、[对应阶段](stage-prompts.md)、适用的[模板／披露检查](template-disclosure.md)和[复查规则](recheck-workflow.md)，以六节结构组成本次实际任务提示词。只包含必要获准摘录、有效 R/S/P/F/A 摘要、用户有效偏好和明确覆盖限制。材料清单记录实际身份、时间、位置、文本哈希与 inline_excerpt/requires_reread/unavailable。路径/hash 不代表证据内容已转移。禁止内部系统指令、隐藏推理、凭据、整段私聊。current 不可读仍 unknown，不能以旧稿替代。
-4. 用实际 begin 身份、完整 promptText 和 SHA-256 调用 `capture`；捕获失败不能执行检查。接着调用 `dispatch --format=raw`（或分离 promptText/metadata 的 JSON），读取它返回的已存原文，并用这份原文及已获准的同一材料完成当前宿主检查。不要重新拼装指令、增加材料或在同一运行里重读已变化的文件；需要新增材料时结束旧尝试并新建明确的 run。stdin 或 Git 外 0600 临时文件传递载荷，不将提示词插入 shell 命令。dispatch 不可重复；输出中断标 uncertain，不自动重发。
-5. 输出实际范围、要求—当前证据矩阵、覆盖和最小行动。复查按当前证据退役 resolved/no_longer_applicable 的旧 A；unverifiable 只列待核验，普通差异不称回归。稳定政策不重复警告；保留源注释、原模板及准确披露，不猜原文或编造纯人工声明、使用比例。
-6. 实际审阅结束后调用 `finish`，如实选择 succeeded/failed/cancelled/uncertain。结果附最小回执：runId、taskId、stage、executionKind=host_skill、promptSha256、状态，留给后续 `$el-prompt`。这里的 succeeded 只表示本次宿主工作完成，不表示作业全部合格、独立执行或远程提交。未能持久化终态就说明 uncertain，不宣称保存成功。
-7. 检查提供修改交接，不自动改作业、签字、上传或提交。MCP 四角色与 provider／传输授权沿用阶段参考；条件不足写 `MCP: not_run`。独立 Codex 运行器仍属于 Phase 20，用量属于 Phase 21。通用 Skill 的 standalone generate 保持原有行为，不伪造已执行运行。
+4. 将六节提示词正文、实际 begin 身份的 snapshot、证据 capsule 和已获准原文本 admitted 通过 stdin 交给 [独立助手](../scripts/codex-review.mjs) `capture`。它在保存前核对原文本哈希及摘录 UTF-8 区间，追加唯一的证据区块并计算最终 promptSha256；只保存获准摘录，不保存多余原文。输出约定写明使用[独立协议](codex-execution.md)的 coverage/findings/evidence/action/limitations 结构，要求仅依据内联摘录、引用 sourceId/excerptId 和精确字节范围，不调用工具。不要让子进程重读文件，也不要只给路径/hash。捕获失败不能执行。
+5. 调用同一独立助手 `run`，仅传入 taskId/runId 及已知 evidenceRoots；宿主对话身份来自 CODEX_THREAD_ID。运行器先认领本次尝试并预检，再通过隔离 CLI 恰好派发已存提示词一次。没有任意 executable/model/provider/endpoint 参数。stdin 或 Git 外 0600 临时文件传入 JSON；不把提示词插入 shell。失败或 uncertain 保留原回执及已捕获提示词，不自动重发、切换模型或退回当前宿主检查。用户另行选择其他模式须形成明确的新尝试。
+6. 运行器在终态、进程退出、清理、结构及本地来源绑定全部通过后自行记录 succeeded；不要再调用公开 `finish` 为 Codex 伪造成功。仅展示返回的 validated result、覆盖限制及最小回执：runId、taskId、stage、executionKind=codex_exec、promptSha256、状态。succeeded 表示本次独立执行完成，不表示作业全部合格或已提交。错误只展示安全代码和恢复动作；部分/未验证输出不能当作结果。
+7. 复查继续按当前证据更新 F/A；稳定政策不重复警告，保留源注释、原模板及准确披露，不编造纯人工声明或比例。检查提供修改交接，不自动改作业、签字、上传或提交。四个独立命令不额外调用 MCP/provider，子进程无法获取外部工具；MCP 标为 not_run。结果精简呈现、用量与真实推理验收属于 Phase 21。通用 Skill standalone generate 保持原有行为，不伪造已执行运行。
 
 ## 导出呈现
 
