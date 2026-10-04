@@ -33,7 +33,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 1**
 
-- [ ] 18-01-PLAN.md — Six entry Skills and shared command routing.
+- [x] 18-01-PLAN.md — Six entry Skills and shared command routing.
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [ ] 18-02-PLAN.md — Safe local installation and accurate command help.
@@ -90,7 +90,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
-| 18. Discoverable Stage Commands | 0/4 | Planned | — |
+| 18. Discoverable Stage Commands | 1/4 | In progress | — |
 | 19. Captured Task Prompts and Export | 0/TBD | Not started | — |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |

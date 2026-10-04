@@ -1,21 +1,21 @@
 ---
 phase: 18
 slug: discoverable-stage-commands
-status: draft
+status: in_progress
 nyquist_compliant: false
 wave_0_complete: false
 created: 2026-10-04
 ---
 # Phase 18 — Validation strategy
 
-Planning artifact only: no implementation, installation, semantic trial, host invocation or runtime regression has run in this phase. Existing milestone research is reused; research=false means formal Nyquist research gating is not applicable. Keep this task map anyway; manually judged language behavior cannot be labeled automatic coverage.
+Execution started: Plan 01 structural and official metadata checks passed; remaining outcomes are tracked below. No real host invocation or runtime regression is claimed. Existing milestone research is reused; research=false means formal Nyquist research gating is not applicable. Keep this task map anyway; manually judged language behavior cannot be labeled automatic coverage.
 
 ## Task map
 
 | Task | Wave | Requirement | Planned verification | Status |
 |---|---|---|---|---|
-| 18-01-01 | 1 | CMD-02/04/05 | Diff + route contract review; task 02 adds structural tests | pending |
-| 18-01-02 | 1 | CMD-01/02/03/05 | Node Skill contract/boundary suite; official positive + negative metadata validator | pending |
+| 18-01-01 | 1 | CMD-02/04/05 | Diff + route contract review; see 18-01-SUMMARY | passed |
+| 18-01-02 | 1 | CMD-01/02/03/05 | Node 14/14 and official 7 positives + negative control; see 18-01-SUMMARY | passed |
 | 18-02-01 | 2 | CMD-01 | Real temporary filesystem install/dry-run/collision tests | pending |
 | 18-02-02 | 2 | CMD-03/05 | Six command guide/examples + structural tests | pending |
 | 18-03-01 | 3 | CMD-02/04/05 | C18-01–10 actual inline outputs, map-only collection, manual semantic judgment | pending |
@@ -35,6 +35,6 @@ Planning artifact only: no implementation, installation, semantic trial, host in
 
 ## Coverage and sign-off
 
-Separate four proof levels: structural/official metadata, filesystem/source boundary, manual semantic output review, actual installed-host discovery/invocation. Record repository/source identity, command/exit/time, actual outputs and redaction for each. All current rows pending. No full Nyquist sign-off, CMD completion, platform-general claim or independent-model proof from planning.
+Separate four proof levels: structural/official metadata, filesystem/source boundary, manual semantic output review, actual installed-host discovery/invocation. Record repository/source identity, command/exit/time, actual outputs and redaction for each. Only rows with actual outcome evidence are updated. No full Nyquist sign-off, CMD completion, platform-general claim or independent-model proof from planning.
 
 Threats T-18-01–09 are mapped to explicit plan tasks and negative cases. Preserve all original Phase 01–17 and milestone audit/proof files. No private coursework, credentials or unbounded host inventory in committed evidence.
