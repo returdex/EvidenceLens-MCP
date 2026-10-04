@@ -25,3 +25,19 @@ Private 0700 directories/0600 files, owner/no-follow checks, hashed path compone
 An interrupted write leaves a lock/dirty marker: report busy/uncertain, never scan old runs to repair latest. No PID/age-based automatic lock removal. Recovery requires an explicit request, exact inspected lock identity and proof no writer is active; if that cannot be established, preserve the state. Prefer preserving the failed task and starting a separately identified task/root after diagnosis; do not relabel older data as the latest attempt.
 
 Retention is manual, without automatic expiry or pruning. Deletion/recovery CLI usage is documented with the implementation. Backup/cloud copies are outside local deletion guarantees. Keep all actual prompts and temporary transport files outside Git.
+
+## Installed CLI
+
+Resolve the helper from this Skill's installed directory: `node <assignment-review>/scripts/prompt-records.mjs ACTION`. Run from the user's project cwd. All inputs are bounded JSON via stdin; never put prompt text in argv, shell interpolation or an environment variable. A private temporary input file must be outside Git with mode 0600. Actual records use the default root or an explicitly chosen EVIDENCELENS_STATE_ROOT. CODEX_THREAD_ID must exist and be UUID-shaped; a supplied conversationId must match. This host capability is observed, not promised for every host.
+
+Actions and JSON keys (all accept optional taskId/evidenceRoots; evidenceRoots are known authorized assignment roots, not files to read):
+
+- `begin`: `{ "taskId": "T-example" }` (taskId optional only when there is zero/one registered task). Save its receipt even on ok=false; never continue review on failure. First unlabelled begin allocates T-UUID; multiple tasks require explicit selection.
+- `capture`: `{ "taskId": "T-example", "runId": "receipt UUID", "snapshot": {...complete schema...} }`. Fill conversationId, runId, taskId and sequence from the actual begin receipt; do not invent them.
+- `dispatch --format=raw`: `{ "taskId": "T-example", "runId": "receipt UUID" }`. Writes exact saved UTF-8 to stdout, separate metadata JSON to stderr. Marks dispatched before output and never permits a second dispatch of the same run. Use these returned instructions for the review. JSON format instead separates promptText and metadata in one object.
+- `finish`: `{ "taskId": "T-example", "runId": "receipt UUID", "status": "succeeded" }`. Only succeeded/failed/cancelled/uncertain; optional errorCode is one of the safe codes. Do not mark success until the host review actually finishes.
+- `export --format=raw` or `export --format=json`: `{ "taskId": "T-example", "expectedRunId": "latest attempted UUID" }`. Raw stdout has no appended newline, metadata is on stderr. Never discard a failed attempt's ID to export an older success. Rendered chat text may not preserve exact bytes; the helper's raw output is authoritative.
+- `status`: `{ "taskId": "T-example" }` returns lifecycle metadata only. It does not reconstruct the host's lost attempt receipt or authorize using an older snapshot.
+- `forget-task` / `forget-task --apply`: exact taskId required; dry run is default. See retention section.
+
+Library `consumeCaptured(scope,runId,consumer)` delivers the saved UTF-8 Buffer once, marks dispatched before delivery, finishes succeeded after consumer return or failed/uncertain after rejection, and never retries. It ships no real model consumer. Export does not call this function, a source reader, network, subprocess or model. Dispatch stdout failure is uncertain; do not resend automatically.

@@ -135,3 +135,11 @@ export async function exportLatest(scope,{expectedRunId}={}){
  return {promptText:v.promptText,metadata:{...receipt(l),stage:v.stage,reviewMode:v.reviewMode,currentSourceId:v.currentSourceId,capturedAt:v.capturedAt,materials:v.materials,limitations:v.limitations}};
 }
 export async function forgetTask(){fail('unsupported');}
+
+// Diagnostic metadata only; it never grants a missing latest-attempt receipt.
+export async function statusTask(scope){
+ const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId);
+ if(!t)fail('no_record');
+ const result=t.deleted?{taskId:t.taskId,status:'deleted'}:receipt(await state(c,t,t.latest));
+ await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');return result;
+}
