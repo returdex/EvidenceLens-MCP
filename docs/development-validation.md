@@ -1,6 +1,6 @@
 # Local development validation
 
-Run from the repository root. Current development product version is 0.3.1. These checks establish local metadata/build/offline behavior; they do not renew paid-provider proof, certify another host, install the Skill globally or prove its language semantics.
+Run from the repository root. Current development product version is 0.3.2. These checks establish local metadata/build/offline behavior; they do not renew paid-provider proof, certify another host, install the Skill globally or prove its language semantics.
 
 ## Official Skill validator
 

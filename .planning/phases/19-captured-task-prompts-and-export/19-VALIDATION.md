@@ -1,14 +1,14 @@
 ---
 phase: 19
 slug: captured-task-prompts-and-export
-status: planned
+status: complete
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-10-05
 ---
 # Phase 19 — Validation strategy
 
-Voluntary task map under research=false; no new RESEARCH/Validation Architecture or automatic Nyquist acceptance is asserted. All checks below are planned, not executed. Reuse milestone architecture/pitfalls; final semantic judgment remains manual. No current runtime result is claimed from Phase 18's 118/21 counts.
+Voluntary task map under research=false; no new RESEARCH/Validation Architecture or automatic Nyquist acceptance is asserted. All ten task rows are completed below; actual runtime evidence is recorded in 19-RUNTIME-EVIDENCE.md. Reuse milestone architecture/pitfalls; final semantic judgment remains manual. Fresh final counts are 118 affected runtime tests and 51 Node tests; Phase 18 historical results are not reused.
 
 | Task | Wave | Requirements | Check | Status |
 |---|---|---|---|---|
@@ -32,3 +32,7 @@ Required run sequence at closure: fresh npm run build; npm test -- tests/smoke/p
 ## Evidence boundaries
 
 Synthetic temporary state only for development acceptance; save only sanitized fixture receipts/hashes/read lists in Git. Test exact UTF-8 prompt bytes, not only strings/keyword presence. Host current-chat trials validate installed helper use and manually judged review outputs, not independent Codex invocation or universal read isolation. Never create/message another chat or replay paid proof as an automatic test. Actual trial data and working helpers precede any necessary human handoff.
+
+## Actual completion
+
+Fresh build, six runtime files (118 tests), Node prompt/command/source suites (51 tests), seven official Skill validations and the negative control passed. Actual installed current-host synthetic four-stage/export flow passed with identical hashes and no old-success fallback; deletion observed. All fixtures are synthetic. Nyquist remains false because semantic evaluation is manual; wave_0_complete means the planned test files now exist, not that all semantics are automated. No new formal RESEARCH/Nyquist acceptance is asserted.
