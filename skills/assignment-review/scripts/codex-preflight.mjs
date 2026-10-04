@@ -16,7 +16,7 @@ export async function executableIdentity(candidate){
  try{path=await realpath(candidate);}catch(error){if(['ENOENT','ENOTDIR'].includes(error.code))codexFail('codex_missing');codexFail('unsafe_path');}
  for(let parent=dirname(path);;parent=dirname(parent)){
   const s=await lstat(parent),trusted=[0,process.getuid()].includes(s.uid);
-  if(!s.isDirectory()||s.isSymbolicLink()||!trusted||s.mode&0o022&&!(s.uid===0&&s.mode&0o1000))codexFail('unsafe_path');
+  if(!s.isDirectory()||s.isSymbolicLink()||!trusted||s.mode&0o002&&!(s.uid===0&&s.mode&0o1000))codexFail('unsafe_path');
   if(parent===dirname(parent))break;
  }
  const handle=await open(path,C.O_RDONLY|C.O_NOFOLLOW);

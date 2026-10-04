@@ -25,3 +25,5 @@
 ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 auth_mode_unsupported，未知状态是 uncertain。需要登录时由用户直接使用 Codex 管理；本项目不调用 login/logout，不读取 auth.json/keychain，不转存凭据。缺失可执行文件先安装/恢复 Codex；不兼容版本等待验证，不自动升级或降级。
 
 子进程只继承 HOME、CODEX_HOME、固定 PATH、LANG、明确的私有 TMPDIR 和递归标记 EVIDENCELENS_CHILD=1。API 密钥、代理、provider 地址、父线程标识和 shell 初始化变量不继承。已有递归标记在任何启动前拒绝。测试通过库参数注入合成可执行文件；生产命令不得开放测试替身或任意 argv。
+
+可执行文件自身禁止 group/world 写；受信所有者的父目录禁止 world 写（root 所有 sticky 临时目录例外），允许当前宿主 Homebrew 使用的组写 Caskroom 目录。安装管理者/本机管理员属受信边界；执行前仍需重新校验已认证二进制摘要。
