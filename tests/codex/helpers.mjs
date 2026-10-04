@@ -16,36 +16,24 @@ import { createServer } from 'node:http';
 import { executableIdentity } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 import { MODEL_RESULT_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
 export const PINNED_BINARY_SHA256='51f848c212ee24e8da923a7175813a74c113d47e01f0d40f1fea46b12644c363';
-export const DISABLED_FEATURES=['shell_tool','unified_exec','shell_snapshot','multi_agent','apps','plugins','hooks','memories','browser_use','browser_use_external','computer_use','in_app_browser','image_generation','goals','workspace_dependencies','skill_mcp_dependency_install','tool_suggest'];
-export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000}={}) {
+import { isolationPolicy,isolatedArgs,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
+export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,supervise=false}={}) {
  return new Promise((resolve,reject)=>{
   const child=spawn(executable,args,{env,cwd,detached:true,stdio:['pipe','pipe','pipe']});
-  let stdout='',stderr='',timedOut=false,overflow=false;
+  let stdout='',stderr='',timedOut=false,overflow=false,rejected=false;
   const kill=()=>{try{process.kill(-child.pid,'SIGKILL');}catch{}};
   const timer=setTimeout(()=>{timedOut=true;kill();},timeoutMs);
-  child.stdout.on('data',b=>{stdout+=b;if(stdout.length+stderr.length>2*1024*1024){overflow=true;kill();}});
-  child.stderr.on('data',b=>{stderr+=b;if(stdout.length+stderr.length>2*1024*1024){overflow=true;kill();}});
+  child.stdout.on('data',b=>{stdout+=b;if(supervise&&toolAttempt(stdout,stderr)){rejected=true;kill();}if(stdout.length+stderr.length>2*1024*1024){overflow=true;kill();}});
+  child.stderr.on('data',b=>{stderr+=b;if(supervise&&toolAttempt(stdout,stderr)){rejected=true;kill();}if(stdout.length+stderr.length>2*1024*1024){overflow=true;kill();}});
   child.stdin.on('error',()=>{});child.stdin.end(input);
   child.once('error',e=>{clearTimeout(timer);reject(e);});
-  child.once('close',(exitCode,signal)=>{clearTimeout(timer);kill();resolve({exitCode,signal,stdout,stderr,timedOut,overflow});});
+  child.once('close',(exitCode,signal)=>{clearTimeout(timer);kill();resolve({exitCode,signal,stdout,stderr,timedOut,overflow,rejected});});
  });
 }
-export function candidatePolicy({binary,scratch,auth,control,extraRead=[]}) {
- const q=JSON.stringify;
- return `(version 1)
-(deny default)
-(import "dyld-support.sb")
-(allow file-test-existence)
-(allow process-exec process-fork)
-(allow signal (target self))
-(allow sysctl-read mach-lookup)
-(allow file-read-metadata)
-(allow file-read* (subpath "/System/Library") (subpath "/usr/lib") (subpath "/usr/share/zoneinfo") (subpath "/dev") (literal ${q(binary)}) (literal ${q(auth)}) (literal ${q(auth.replace(/auth\.json$/,'installation_id'))}) (subpath ${q(control)}) (subpath ${q(scratch)}) ${extraRead.map(p=>`(literal ${q(p)})`).join(' ')})
-(allow file-write* (subpath ${q(scratch)}) (literal "/dev/null"))
-(allow network-outbound (remote ip "localhost:*"))
-`;
+export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
+ return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,configOverrides={}}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,configOverrides={}}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -58,9 +46,10 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  const authText=JSON.stringify({auth_mode:'chatgpt',OPENAI_API_KEY:null,tokens:{id_token:token,access_token:token,refresh_token:authSentinel,account_id:'synthetic-account'},last_refresh:new Date().toISOString()});
  await writeFile(auth,authText,{mode:0o600});
  const ambient='AMBIENT_SYNTHETIC_SENTINEL_20';
+ await mkdir(codexHome+'/skills');await mkdir(codexHome+'/skills/injected');await writeFile(codexHome+'/skills/injected/SKILL.md',ambient);await mkdir(codexHome+'/memories');await writeFile(codexHome+'/memories/MEMORY.md',ambient);await mkdir(scratch+'/.codex');await writeFile(scratch+'/.codex/config.toml','model_instructions_file=\"'+home+'/AGENTS.md\"');await writeFile(scratch+'/AGENTS.md',ambient);
  await writeFile(home+'/AGENTS.md',ambient);await writeFile(codexHome+'/AGENTS.md',ambient);
  await writeFile(codexHome+'/config.toml','model_instructions_file="'+home+'/AGENTS.md"\n');
- await writeFile(codexHome+'/installation_id',randomUUID(),{mode:0o600});
+ const installationId=randomUUID();await writeFile(codexHome+'/installation_id',installationId,{mode:0o600});
  const outside=base+'/outside.txt';await writeFile(outside,'OUTSIDE_SYNTHETIC_SENTINEL_20');
  const schema=control+'/schema.json';await writeFile(schema,JSON.stringify(MODEL_RESULT_SCHEMA),{mode:0o400});
  const {result}=fixture();const requests=[];
@@ -82,14 +71,12 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
   });
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;
- const config={approval_policy:'never',model_provider:'evidencelens_bounded','model_providers.evidencelens_bounded.name':'EvidenceLens bounded Codex','model_providers.evidencelens_bounded.requires_openai_auth':true,'model_providers.evidencelens_bounded.request_max_retries':0,'model_providers.evidencelens_bounded.stream_max_retries':0,'model_providers.evidencelens_bounded.base_url':`http://127.0.0.1:${port}/fixture`,chatgpt_base_url:`http://127.0.0.1:${port}/backend-api/`,web_search:'disabled',project_doc_max_bytes:0,'history.persistence':'none',forced_login_method:'chatgpt','analytics.enabled':false,log_dir:scratch+'/log',sqlite_home:scratch+'/sqlite',...configOverrides};
- const args=['exec','--ignore-user-config','--ignore-rules','--strict-config','--ephemeral','--skip-git-repo-check','--json','--output-schema',schema,'--color','never','-C',scratch,'-m','gpt-5.4'];
- for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));
- for(const f of DISABLED_FEATURES)args.push('--disable',f);args.push('-');
- // A test-only exception to diagnose the startup failure, never production certification.
- const policy=candidatePolicy({binary,scratch,auth,control})+(permitInstallationMetadata?'\n(allow file-write* (literal '+JSON.stringify(codexHome+'/installation_id')+'))':'');
+ const args=isolatedArgs({schema,scratch});args.pop();
+ const config={'model_providers.evidencelens_bounded.base_url':`http://127.0.0.1:${port}/fixture`,chatgpt_base_url:`http://127.0.0.1:${port}/backend-api/`,...configOverrides};
+ for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));args.push('-');
+ const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?codexHome+'/installation_id':undefined,extraRead:[codexHome+'/installation_id']});
  try {
-  const child=await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env:{HOME:home,CODEX_HOME:codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'},cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY'});
-  return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
+  const child=await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env:{HOME:home,CODEX_HOME:codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'},cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
+  return {...child,requests,result,policySha256:sha256(policy.replaceAll(base,'<fixture-root>')),authSentinel,ambient,installationUnchanged:(await readFile(codexHome+'/installation_id','utf8'))===installationId,authUnchanged:(await readFile(auth,'utf8'))===authText,outsideUnchanged:(await readFile(outside,'utf8'))==='OUTSIDE_SYNTHETIC_SENTINEL_20'};
  }finally{server.closeAllConnections();await new Promise(r=>server.close(r));await rm(base,{recursive:true,force:true});}
 }

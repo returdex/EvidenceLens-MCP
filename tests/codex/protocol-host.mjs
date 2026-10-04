@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { protocolFixture } from './helpers.mjs';
 const diagnostic={permitInstallationMetadata:true};
 const events=r=>r.stdout.trim().split('\n').filter(Boolean).map(JSON.parse);
-const usable=r=>{assert.equal(r.timedOut,false);assert.equal(r.overflow,false);assert.equal(r.authUnchanged,true);assert.equal(r.outsideUnchanged,true);};
+const usable=r=>{assert.equal(r.timedOut,false);assert.equal(r.overflow,false);assert.equal(r.authUnchanged,true);assert.equal(r.installationUnchanged,true);assert.equal(r.outsideUnchanged,true);};
 
 test('diagnostic metadata exception: actual binary completes synthetic schema output with fixed tools and no ambient context',async t=>{
  const r=await protocolFixture('success',diagnostic);usable(r);assert.equal(r.exitCode,0);assert.equal(r.requests.length,1);
@@ -24,4 +24,9 @@ for(const name of ['view_image','apply_patch','request_user_input','update_plan'
  if(name==='update_plan')assert.ok(events(r).some(x=>x.item?.type==='todo_list'));
  else {assert.ok(r.stderr.includes('codex_core::tools::router'));assert.ok(!events(r).some(x=>['tool_call','file_change','command_execution'].includes(x.item?.type)));}
  t.diagnostic('No supervisor used: two internal requests; '+name+' JSONL visibility '+(name==='update_plan'?'todo_list':'absent; stderr error only')+'. This does not pass runtime abort acceptance.');
+});
+
+for(const name of ['view_image','apply_patch','request_user_input','update_plan'])test('revised supervision aborts '+name+' with no disclosure',async()=>{
+ const r=await protocolFixture('success',{...diagnostic,supervise:true,tool:({auth,outside})=>name==='apply_patch'?{type:'custom_tool_call',id:'ct_1',call_id:'call_fixture',name,input:'*** Begin Patch\n*** Delete File: '+outside+'\n*** End Patch'}:{type:'function_call',id:'fc_1',call_id:'call_fixture',name,arguments:JSON.stringify(name==='view_image'?{path:auth}:name==='update_plan'?{plan:[{step:'synthetic',status:'in_progress'}]}:{questions:[{id:'q',header:'Test',question:'synthetic?',options:[{label:'A',description:'A'},{label:'B',description:'B'}]}]})}});
+ usable(r);assert.equal(r.rejected,true);assert.notEqual(r.exitCode,0);assert.ok(r.requests.length>=1&&r.requests.length<=2);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });

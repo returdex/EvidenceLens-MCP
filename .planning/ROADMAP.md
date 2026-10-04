@@ -91,7 +91,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 3. 失败、取消、超时和结果不确定都有终态及进程清理，无自动再次发送。
 4. 成功需运行终态、输出结构和本地来源绑定共同支持；伪造来源或部分结果不能冒充通过。
 
-**Plans**: 1/6 complete; Plan 02 compatibility gate failed ([evidence](phases/20-bounded-independent-codex-execution/20-ISOLATION-EVIDENCE.md)); planning checked in [20-PLAN-CHECK.md](phases/20-bounded-independent-codex-execution/20-PLAN-CHECK.md). 12 tasks, six sequential waves.
+**Plans**: 2/6 complete; Plan 02 R1 compatibility gate passed ([evidence](phases/20-bounded-independent-codex-execution/20-ISOLATION-EVIDENCE.md)); planning checked in [20-PLAN-CHECK.md](phases/20-bounded-independent-codex-execution/20-PLAN-CHECK.md). 12 tasks, six sequential waves.
 
 **Wave 1**
 
@@ -99,7 +99,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 2** *(depends on Wave 1)*
 
-- [ ] 20-02-PLAN.md — Actual binary compatibility and macOS whole-process isolation.
+- [x] 20-02-PLAN.md — Actual binary compatibility and macOS whole-process isolation.
 
 **Wave 3** *(depends on Wave 2)*
 
@@ -144,7 +144,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 |---|---|---|---|
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
-| 20. Bounded Independent Codex Execution | 1/6 | Blocked: isolation compatibility | — |
+| 20. Bounded Independent Codex Execution | 2/6 | In progress | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
 
 ## Coverage and Research

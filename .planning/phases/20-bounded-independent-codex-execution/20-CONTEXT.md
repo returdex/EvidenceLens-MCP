@@ -44,3 +44,12 @@ Inline researcher/planner/checker under the skill adapter; no subagents. Targete
 ## Resolved transport/tool detail
 
 Use an invocation-local `evidencelens_bounded` descriptor with Codex-owned ChatGPT auth, zero configured request/stream retries and no production endpoint/token/key override. The name does not denote a second billable provider. The actual allowed native tool inventory is update_plan/request_user_input/apply_patch/view_image; all external execution surfaces are disabled. Outer OS enforcement protects reads/writes before any unexpected tool event is rejected by the supervisor. Unknown inventory or unproven file/disclosure boundary blocks dispatch. One logical dispatch is the invariant; do not equate it with a guarantee of one HTTP request in every unexpected internal tool scenario, or promise remote cancellation rollback.
+
+## Approved execution revision R1 (2026-10-05)
+
+The user answered 可以 to retaining the CLI and revising minimum permissions/tool detection. This authorizes the concrete narrow repair; do not ask for the same approval again. Existing no-inference, no credential copying or mutation, no broad HOME/CODEX_HOME access, no fallback and no automatic retry constraints remain.
+
+- Exec may allow file-write-data/file-write-mode on the fixed existing noncredential CODEX_HOME/installation_id only. Require regular owned single-link file, bounded UUID contents, original content unchanged after execution; no parent directory write, creation, deletion, config or auth write allowance.
+- Login status uses a separate no-network policy. Allow Codex itself to read its config.toml plus regular owned immediate agents/*.toml files required by the current config loader. EvidenceLens enumerates/checks metadata only, never reads their contents. These permissions are absent from review launches. Unsupported external configuration dependencies remain a truthful incompatibility.
+- Tool detection covers JSONL todo/tool items and stderr tool-router diagnostics; unknown diagnostic paths reject rather than silently succeed. Prove forced native calls abort with OS denial already in effect. Internal continuation races remain uncertain.
+- Preserve original failed gate evidence; revised positive acceptance must pass before completing Plan 02. This approval is not compatibility acceptance.

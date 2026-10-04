@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: blocked
+status: executing
 last_updated: "2026-10-04T15:29:42.582859+00:00"
 last_activity: 2026-10-05 — Phase 20 Plan 02 isolation compatibility gate failed
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 15
-  completed_plans: 10
+  completed_plans: 11
   percent: 50
 ---
 
@@ -21,9 +21,9 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 
 ## Current Position
 
-Phase: 20 (Bounded Independent Codex Execution) — BLOCKED AT PLAN 02
-Plan: 1/6 complete; 20-02 incomplete, compatibility gate failed
-Status: Blocked on selected launcher policy compatibility
+Phase: 20 (Bounded Independent Codex Execution) — EXECUTING
+Plan: 2/6 complete; executing 20-03
+Status: Executing Phase 20 after approved R1 repair
 Last activity: 2026-10-05 — Plan 02 actual binary/OS probes recorded
 
 ## Accepted Coverage Debt
@@ -40,11 +40,10 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Resolve Plan 02 policy design using [20-ISOLATION-EVIDENCE.md](phases/20-bounded-independent-codex-execution/20-ISOLATION-EVIDENCE.md) and the phase .continue-here.md. Current gate: 40 tests, 39 pass, 1 intentional unmet acceptance failure, zero skips; no production launcher enabled. Strict CLI startup requires original installation_id writable access; bounded actual login status also fails on denied config read. Neither is evidence of expired credentials. Diagnostic synthetic exact-file exception permits positive structured completion and one request on each injected transport failure. Some forced native calls are absent from JSONL and internally continue, requiring additional stderr-aware abort proof. This is a concrete design decision, not a request to retry login or accept weakened isolation.
+Continue 20-03 lifecycle and process supervision. User approved R1; Plan 02 now passes 45 combined actual/synthetic tests. Shared fixed policy/argv/tool detection, real status-only login probe and sealed descriptor validated. No inference or stage dispatch yet. Historical failed gate evidence retained in 20-ISOLATION-EVIDENCE.md. Do not request R1 approval again. Product 0.3.2; no CDX requirement marked complete.
 
-Plan 01 contract/preflight remains complete. Plans 03–06 are unstarted; no 20-02 SUMMARY exists, no CDX requirement complete, product remains 0.3.2. No live inference, original credential read/copy/mutation, new chat or historical proof replay. See evidence for exact actual/synthetic boundaries and proposed narrow revision.
-Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 10/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
+Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 11/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 20 execution completed Plan 01; Plan 02 failed actual compatibility gate; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 20 execution completed Plan 01; Plan 02 passed after approved R1 repair; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
