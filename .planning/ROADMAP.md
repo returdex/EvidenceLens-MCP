@@ -4,17 +4,17 @@
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) — Phases 1–11, historical completed milestone.
 - ✅ [v1.1 Assignment Prompt Adaptation and Staged Review](milestones/v1.1-ROADMAP.md) — Phases 12–17, product v0.2.4 published.
-- ◆ **v1.2 快捷指令与 Codex 独立审阅** — Phases 18–21; development product 0.3.2, not released.
+- ◆ **v1.2 快捷指令与 Codex 独立审阅** — Phases 18–21; development product 0.3.3, not released.
 
 ## Approval State
 
-The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 completed all four plans and CMD-01–05 on 2026-10-05; six installed commands and corrected help were accepted in a dedicated FIT5032 synthetic chat. Phase 19 completed PRM-01–05 and its five plans on 2026-10-05, including actual installed-host synthetic capture/export acceptance. Original phase directories and audit/proof snapshots remain in place.
+The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 completed all four plans and CMD-01–05 on 2026-10-05; six installed commands and corrected help were accepted in a dedicated FIT5032 synthetic chat. Phase 19 completed PRM-01–05 and its five plans on 2026-10-05, including actual installed-host synthetic capture/export acceptance. Phase 20 completed six plans and CDX-01–06 on 2026-10-05 with actual OS/CLI/login controls and synthetic protocol outcomes; live inference remains Phase 21. Original phase directories and audit/proof snapshots remain in place.
 
 ## Phases
 
 - [x] **Phase 18: Discoverable Stage Commands** — 命令入口与安装。 (completed 2026-10-05)
 - [x] **Phase 19: Captured Task Prompts and Export** — 提示词记录与导出。 (completed 2026-10-05)
-- [ ] **Phase 20: Bounded Independent Codex Execution** — Codex 独立执行。
+- [x] **Phase 20: Bounded Independent Codex Execution** — Codex 独立执行。 (completed 2026-10-05)
 - [ ] **Phase 21: Review Handoff and Usage Acceptance** — 结果回传与用量验收。
 
 ## Phase Details
@@ -91,7 +91,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 3. 失败、取消、超时和结果不确定都有终态及进程清理，无自动再次发送。
 4. 成功需运行终态、输出结构和本地来源绑定共同支持；伪造来源或部分结果不能冒充通过。
 
-**Plans**: 5/6 complete; Plan 02 R1 compatibility gate passed ([evidence](phases/20-bounded-independent-codex-execution/20-ISOLATION-EVIDENCE.md)); planning checked in [20-PLAN-CHECK.md](phases/20-bounded-independent-codex-execution/20-PLAN-CHECK.md). 12 tasks, six sequential waves.
+**Plans**: 6/6 complete; 4/4 goal criteria and CDX-01–06 verified in [20-VERIFICATION.md](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md). Plan 02 R1 compatibility gate passed ([evidence](phases/20-bounded-independent-codex-execution/20-ISOLATION-EVIDENCE.md)); planning checked in [20-PLAN-CHECK.md](phases/20-bounded-independent-codex-execution/20-PLAN-CHECK.md). 12 tasks, six sequential waves.
 
 **Wave 1**
 
@@ -115,13 +115,13 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 6** *(depends on Wave 5)*
 
-- [ ] 20-06-PLAN.md — Accepted feature patch and fresh scoped regression closure.
+- [x] 20-06-PLAN.md — Accepted feature patch and fresh scoped regression closure.
 
 **Cross-cutting constraints:**
 
 - Only certified isolated execution consumes the captured prompt; no automatic retry or source-scope expansion.
 - Existing login remains Codex-owned; production never copies credentials or chooses an API-key route.
-- Native sandbox probe did not enforce expected boundaries on this host. Full outer Seatbelt/tool/auth/retry proof is required before command enablement.
+- Native sandbox probe did not enforce expected boundaries on this host. Approved R1 outer Seatbelt/tool/auth/retry controls passed before command enablement.
 - Synthetic protocol/real host checks remain separate from Phase 21 authorized real inference and usage acceptance.
 
 
@@ -144,7 +144,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 |---|---|---|---|
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
-| 20. Bounded Independent Codex Execution | 5/6 | In progress | — |
+| 20. Bounded Independent Codex Execution | 6/6 | Complete | 2026-10-05 |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
 
 ## Coverage and Research

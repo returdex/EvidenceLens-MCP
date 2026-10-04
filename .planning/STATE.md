@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: executing
-last_updated: "2026-10-04T15:29:42.582859+00:00"
-last_activity: 2026-10-05 — Phase 20 Plan 02 isolation compatibility gate failed
+status: ready_to_plan
+last_updated: "2026-10-04T16:21:32.760809+00:00"
+last_activity: 2026-10-05 — Phase 20 complete; product 0.3.3; Phase 21 ready to plan
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 15
-  completed_plans: 14
-  percent: 50
+  completed_plans: 15
+  percent: 75
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute Phase 20 independent Codex execution. Phase 19 complete at product 0.3.2.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: plan Phase 21 review handoff and usage acceptance. Phase 20 complete at product 0.3.3.
 
 ## Current Position
 
-Phase: 20 (Bounded Independent Codex Execution) — EXECUTING
-Plan: 5/6 complete; executing 20-06
-Status: Executing Phase 20 after approved R1 repair
-Last activity: 2026-10-05 — Plan 02 actual binary/OS probes recorded
+Phase: 21 (Review Handoff and Usage Acceptance)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-05 — Phase 20 completion verified
 
 ## Accepted Coverage Debt
 
@@ -40,10 +40,12 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Continue 20-06 accepted feature patch and fresh targeted regression. Plan 05 passed adversarial/current-host acceptance; installed preflight reports readiness, no actual inference. User approved R1; Plan 02 now passes 45 combined actual/synthetic tests. Shared fixed policy/argv/tool detection, real status-only login probe and sealed descriptor validated. No inference or stage dispatch yet. Historical failed gate evidence retained in 20-ISOLATION-EVIDENCE.md. Do not request R1 approval again. Product 0.3.2; no CDX requirement marked complete.
+`$gsd-plan-phase 21` — plan concise review handoff, current-version updates, truthful model/token usage and authorized real inference acceptance. No automatic next-phase execution.
 
-Phase 19 remains complete: 5/5 plans, 10/10 tasks, PRM-01–05, 3/3 goal criteria. Its fresh build, 118 affected tests, 51 Node tests and seven official Skill validations are historical Phase 19 evidence, not Phase 20 test results. Progress remains 2/4 phases (50%), 14/15 defined plans complete; Phase 21 remains unplanned. Semantic automation remains partial; actual ChatGPT inference, usage and final handoff acceptance belong to Phase 21.
+Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
+
+Current product 0.3.3, no Release/tag. Milestone progress: 3/4 phases (75%), 15/15 currently defined plans; Phase 21 unplanned. 16/21 requirements complete, RUN-01–05 pending. Real ChatGPT inference/model availability and usage/handoff acceptance are NOT_RUN; semantic automation remains partial. Local host readiness is not remote inference evidence.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 20 execution completed Plan 01; Plan 02 passed after approved R1 repair; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.3, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or live provider replay performed.

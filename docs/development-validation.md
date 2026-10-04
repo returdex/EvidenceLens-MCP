@@ -67,3 +67,9 @@ Compare the paths with all tracked `tests/**/*.test.ts` except the one live-prov
 Fresh primary build passed. After exact-lock recovery and correcting a synthetic legacy-proof test fixture, the unchanged default `npm test` passed all 43 files / 795 tests in 8.452s, zero failures/skips. The separate boundary suite passed 12/12. No permanent worker override or relaxed timeout is required by the final result. Earlier 300s build, startup and I/O timeouts remain in the evidence; their underlying OS/storage cause was not established.
 
 When testing a historical proof-sync flow, provide its matching synthetic requirement state in the temporary checkout. The current milestone's requirements are not a v1.0 fixture. Keep production stale-state guards and real planning documents intact.
+
+## Phase 20 scoped acceptance (product 0.3.3)
+
+The independent Codex feature passed a fresh build, the six affected version/public-contract/runtime files (118/118), and Codex/prompt/command/source-boundary Node suites (157/157). Each batch was capped at 120 seconds with sanitized child environments. Dependency versions and analyzerVersion remain unchanged. This scoped run does not renew the historical 795-test/provider proof.
+
+[Phase 20 runtime evidence](../.planning/phases/20-bounded-independent-codex-execution/20-RUNTIME-EVIDENCE.md) records commands, timestamps, durations, exit codes and hashes. [Host acceptance](../.planning/phases/20-bounded-independent-codex-execution/20-HOST-ACCEPTANCE.md) separates actual OS/CLI/login status from synthetic model responses. Real ChatGPT inference and usage/handoff acceptance remain Phase 21 NOT_RUN.

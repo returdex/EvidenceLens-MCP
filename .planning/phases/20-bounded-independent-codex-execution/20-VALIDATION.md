@@ -1,14 +1,14 @@
 ---
 phase: 20
 slug: bounded-independent-codex-execution
-status: executing
+status: passed
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-10-05
 ---
 # Phase 20 — Validation Strategy
 
-Execution in progress. Plans 01–05 complete after approved R1 repair; 45 combined checks pass. Historical failed compatibility evidence retained.
+Execution complete: six plans / twelve tasks, four goal criteria and six CDX requirements verified. Final fresh build, 118 affected Vitest tests and 157 Node tests pass. Historical failed compatibility evidence retained; actual inference remains Phase 21 NOT_RUN. See 20-RUNTIME-EVIDENCE.md and 20-VERIFICATION.md.
 
 ## Test Infrastructure and Sampling
 
@@ -31,8 +31,8 @@ Phase: `node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs t
 | 20-04-02 | 04/4 | CDX-03, CDX-04, CDX-06 | T-20-07, T-20-08 | node --test tests/codex/cli.mjs tests/commands/*.mjs tests/prompts/*.mjs tests/baseline/source-boundary.mjs (120 s cap) | Implemented | PASS — 91 combined tests and 3 CLI flow tests |
 | 20-05-01 | 05/5 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-09, T-20-10 | node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/source-boundary.mjs (bounded batches <=120 s) | Implemented | PASS — 154 combined; installed four-stage acceptance 16/16 |
 | 20-05-02 | 05/5 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-09, T-20-10 | Read-only installed codex preflight; node --test tests/codex/acceptance.mjs tests/codex/protocol-host.mjs tests/codex/isolation.mjs; official quick_validate.py for seven Skills plus known invalid negative control; git diff --check | Implemented | PASS — actual installed preflight, seven official validators + negative |
-| 20-06-01 | 06/6 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-11 | Parsed product metadata equality; lock comparison allows root product version fields only; git diff --check | Existing metadata | pending |
-| 20-06-02 | 06/6 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-11 | Fresh npm run build; npm test -- tests/smoke/project-config.test.ts tests/contract/review-tool.test.ts tests/contract/public-contract-docs.test.ts tests/contract/fit5032-fixture.test.ts tests/contract/review-provider.test.ts tests/e2e/docker-review.test.ts; node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/source-boundary.mjs; git diff --check (bounded batches) | Existing metadata | pending |
+| 20-06-01 | 06/6 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-11 | Parsed product metadata equality; lock comparison allows root product version fields only; git diff --check | Existing metadata | PASS — one 0.3.3 patch; fresh required gates in runtime evidence |
+| 20-06-02 | 06/6 | CDX-01, CDX-02, CDX-03, CDX-04, CDX-05, CDX-06 | T-20-11 | Fresh npm run build; npm test -- tests/smoke/project-config.test.ts tests/contract/review-tool.test.ts tests/contract/public-contract-docs.test.ts tests/contract/fit5032-fixture.test.ts tests/contract/review-provider.test.ts tests/e2e/docker-review.test.ts; node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/source-boundary.mjs; git diff --check (bounded batches) | Existing metadata | PASS — one 0.3.3 patch; fresh required gates in runtime evidence |
 
 ## Wave 0 Requirements
 
@@ -46,7 +46,7 @@ Phase: `node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs t
 ## Required Positive and Negative Gates
 
 1. Capture: exact prompt/capsule/stdin/export hash; old v1 snapshots intact; source reads remain parent-gated.
-2. Isolation: actual pinned binary/OS, allowed control read plus denied outside/excluded/write/recursive/tool/context sentinels. Planning native -P probe FAILED; direct Seatbelt small probe passed but full production policy remains pending.
+2. Isolation: actual pinned binary/OS, allowed control read plus denied outside/excluded/write/recursive/tool/context sentinels. Planning native -P probe FAILED; approved R1 whole-process Seatbelt policy passed actual pinned CLI positive/negative gates, including canonical temporary aliases.
 3. Authentication: actual status category under outer policy, no credential inspection/copy/mutation/API fallback. Status does not prove remote inference freshness.
 4. Execution: valid fixture response and one request; HTTP/stream failures never resend; timeout/cancel reaps group; unknown transmission/cleanup uncertain.
 5. Validation: terminal+exit+strict schema+local evidence binding; forged/missing/partial results fail, unavailable coverage remains visible.
@@ -66,8 +66,8 @@ Phase: `node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs t
 - [x] 12 tasks have automated verification or explicit host/tool checks.
 - [x] New test files have owning creation tasks and no three consecutive unverified tasks.
 - [x] Target-host compatibility is an execution gate, not a planning success claim.
-- [ ] All execution outcomes populated with source-bound evidence.
-- [ ] Phase goal independently checked inline after execution; no subagent claim.
+- [x] All execution outcomes populated with source-bound evidence.
+- [x] Phase goal checked separately inline after execution; no independent evaluator/subagent claim.
 - [ ] Semantic automation complete (not assumed; nyquist_compliant=false).
 
-**Approval:** Planning validation strategy; execution acceptance pending.
+**Approval:** Scoped Phase 20 local implementation/host acceptance passed 2026-10-05. Manual semantic coverage remains PARTIAL; no inference claim.

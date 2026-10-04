@@ -2,12 +2,12 @@
 
 **Defined:** 2026-10-04
 **Milestone:** 快捷指令与 Codex 独立审阅
-**Status:** Approved on 2026-10-04; CMD-01–05 completed in Phase 18 and PRM-01–05 completed in Phase 19 on 2026-10-05.
+**Status:** Approved on 2026-10-04; CMD-01–05, PRM-01–05 and CDX-01–06 completed in Phases 18–20 on 2026-10-05. RUN-01–05 remain pending.
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence.
 
 ## v1.2 Requirements
 
-The user confirmed the milestone direction and revised command semantics. Five command requirements are complete; sixteen prompt/runner/handoff requirements remain pending. These requirements define user outcomes; runner selection and record layout are resolved during phase planning.
+The user confirmed the milestone direction and revised command semantics. Sixteen command/prompt/runner requirements are complete; five handoff/usage acceptance requirements remain pending. These requirements define user outcomes; runner selection and record layout are resolved during phase planning.
 
 ### 命令入口与安装
 
@@ -27,12 +27,14 @@ The user confirmed the milestone direction and revised command semantics. Five c
 
 ### Codex 独立执行
 
-- [ ] **CDX-01**: 用户可检查本机 Codex 可执行文件、兼容版本与登录状态；缺失或失效时得到可操作提示，检查不虚报已运行。
-- [ ] **CDX-02**: 用户可复用已有 Codex ChatGPT 登录执行审阅；身份认证由 Codex 管理，项目不复制凭据、不自动登录/登出或切换为付费 API 路径。
-- [ ] **CDX-03**: 用户通过阶段指令发起独立 Codex 执行上下文，使用已捕获的任务提示词和获准证据，避免向作业对话灌入完整过程事件。
-- [ ] **CDX-04**: 用户指定的排除与读取范围在独立执行中得到实际约束：禁止未授权材料读取、作业写入和继承工具绕过，并阻止递归调用本检查流程。
-- [ ] **CDX-05**: 用户可终止运行，并获得有界超时、失败、取消或结果不确定状态；相关子进程被收回，不自动重试、切换模型或重新发起请求。
-- [ ] **CDX-06**: 用户只有在终态成功且结果结构与来源引用通过本地校验后才得到有效审阅结果；部分输出、伪造来源和无效结构被明确标为失败或待核验。
+- [x] **CDX-01**: 用户可检查本机 Codex 可执行文件、兼容版本与登录状态；缺失或失效时得到可操作提示，检查不虚报已运行。
+- [x] **CDX-02**: 用户可复用已有 Codex ChatGPT 登录执行审阅；身份认证由 Codex 管理，项目不复制凭据、不自动登录/登出或切换为付费 API 路径。
+- [x] **CDX-03**: 用户通过阶段指令发起独立 Codex 执行上下文，使用已捕获的任务提示词和获准证据，避免向作业对话灌入完整过程事件。
+- [x] **CDX-04**: 用户指定的排除与读取范围在独立执行中得到实际约束：禁止未授权材料读取、作业写入和继承工具绕过，并阻止递归调用本检查流程。
+- [x] **CDX-05**: 用户可终止运行，并获得有界超时、失败、取消或结果不确定状态；相关子进程被收回，不自动重试、切换模型或重新发起请求。
+- [x] **CDX-06**: 用户只有在终态成功且结果结构与来源引用通过本地校验后才得到有效审阅结果；部分输出、伪造来源和无效结构被明确标为失败或待核验。
+
+Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/login status and positive synthetic protocol outcomes. CDX-02 does not claim a completed real ChatGPT inference; that remote acceptance is explicitly retained under Phase 21 RUN-05.
 
 ### 结果回传、用量与验收
 
@@ -76,12 +78,12 @@ The user confirmed the milestone direction and revised command semantics. Five c
 | PRM-03 | Phase 19 | Complete |
 | PRM-04 | Phase 19 | Complete |
 | PRM-05 | Phase 19 | Complete |
-| CDX-01 | Phase 20 | Pending |
-| CDX-02 | Phase 20 | Pending |
-| CDX-03 | Phase 20 | Pending |
-| CDX-04 | Phase 20 | Pending |
-| CDX-05 | Phase 20 | Pending |
-| CDX-06 | Phase 20 | Pending |
+| CDX-01 | Phase 20 | Complete |
+| CDX-02 | Phase 20 | Complete |
+| CDX-03 | Phase 20 | Complete |
+| CDX-04 | Phase 20 | Complete |
+| CDX-05 | Phase 20 | Complete |
+| CDX-06 | Phase 20 | Complete |
 | RUN-01 | Phase 21 | Pending |
 | RUN-02 | Phase 21 | Pending |
 | RUN-03 | Phase 21 | Pending |
@@ -90,4 +92,4 @@ The user confirmed the milestone direction and revised command semantics. Five c
 
 **Coverage:** 21 requirements; 21 mapped exactly once; 0 unmapped. Mapping approved on 2026-10-04.
 
-*Last updated: 2026-10-05 after Phase 18 verification.*
+*Last updated: 2026-10-05 after Phase 20 verification.*

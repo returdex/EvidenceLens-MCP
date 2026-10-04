@@ -4,7 +4,7 @@
 
 EvidenceLens MCP combines a controlled, read-only multimodal second-review service with one shared assignment-review Skill and six installed command entry Skills. The Skill adapts prompts to sourced requirements, supports preparation/progress/final reviews, checks template structure and truthful disclosure, and updates findings against the designated current artifact.
 
-The existing service offers deterministic offline review and a replaceable DeepSeek provider path. Historical Linux/Docker/paid proof remains bound to its original certified source. The new Skill does not automatically call Codex, edit documents, sign declarations or submit work.
+The existing service offers deterministic offline review and a replaceable DeepSeek provider path. Historical Linux/Docker/paid proof remains bound to its original certified source. The four stage commands now dispatch captured prompts through a bounded independent Codex adapter on the verified macOS host. They do not edit documents, sign declarations or submit work; real inference acceptance remains Phase 21.
 
 ## Core Value
 
@@ -37,11 +37,13 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Immutable task/conversation-scoped pre-review capture, exact `$el-prompt` export, truthful latest/failure states and private retention/deletion — Phase 19 (`PRM-01` to `PRM-05`), product 0.3.2; four actual current-host synthetic stage flows, fresh build/118 affected tests/51 Node tests.
 
+- ✓ Bounded independent Codex adapter, Codex-owned login, actual pinned macOS isolation, once-only dispatch and locally validated source-bound results — Phase 20 (`CDX-01` to `CDX-06`), product 0.3.3; fresh build/118 affected tests/157 Node tests. Real ChatGPT inference remains Phase 21 NOT_RUN.
+
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–19 are complete; Phase 20 has six checked execution plans (12 tasks), ready for `$gsd-execute-phase 20`.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–20 are complete (16/21 requirements); Phase 21 is ready for `$gsd-plan-phase 21`.
 
-- [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.
+- [ ] Authorized real Codex inference and concise result handoff in the work conversation, building on the completed Phase 20 adapter.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
 
 ### Deferred
@@ -70,11 +72,11 @@ Source-bound evidence includes Phase 16 official validator/control, successful b
 
 **Goal:** Use fixed stage commands to run a bounded independent review, return concise evidence-backed findings to the work conversation, and export the exact task prompt from that run on request.
 
-**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands capture their actual task-facing prompt before current-host review; prompt export reads the latest attempted run for the same task/conversation, with separate status and material limits. Phase 19 acceptance used the current installed host and synthetic materials. Explicit current artifact and user focus remain authoritative.
+**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands capture their actual task-facing prompt before independent execution; prompt export reads the latest attempted run for the same task/conversation, with separate status and material limits. Phase 19 acceptance used the current installed host and synthetic materials. Explicit current artifact and user focus remain authoritative.
 
 **Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
 
-**Version:** Planning milestone v1.2; development product 0.3.2 after the accepted capture/export feature patch. Last published product is v0.2.4. No v0.3.2 Release/tag is created by phase completion. Phase numbering continues at 18.
+**Version:** Planning milestone v1.2; development product 0.3.3 after the accepted independent execution feature patch. Last published product is v0.2.4. No v0.3.3 Release/tag is created by phase completion. Phase numbering continues at 18.
 
 **Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
 
@@ -102,7 +104,7 @@ At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18
 | Separate continued authorized assistance from policy permission/compliance | Validated in sourced baseline and stage cases |
 | Preserve template authority, legitimate comments and truthful centralized disclosure | Validated with source-backed handoffs; no automatic signing/editing |
 | Default to actual current artifact and retire supported resolved findings | Validated with connected recheck cases; unknowns remain explicit |
-| One Skill and existing gate; no new editor/provider platform | Delivered; automatic Codex integration remains future scope |
+| One Skill and existing gate; no new editor/provider platform | Delivered; bounded Codex integration added in Phase 20, live acceptance remains Phase 21 |
 | Pin isolated developer validator prerequisite and preserve exact-lock dependencies | Official tooling and offline acceptance recovered; I/O root cause unknown |
 | Separate record completion from automated semantic coverage | 22/22 requirements accepted with honest partial Nyquist fields |
 | Preserve historical paths, paid proof and report bytes | Archives and source-bound evidence retained |
@@ -120,4 +122,4 @@ After each phase, move verified requirements to Validated with phase references,
 </details>
 
 ---
-*Last updated: 2026-10-05 after Phase 20 planning*
+*Last updated: 2026-10-05 after Phase 20 completion*
