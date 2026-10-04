@@ -23,7 +23,7 @@
 
 **Archives:** [roadmap](milestones/v1.1-ROADMAP.md), [requirements](milestones/v1.1-REQUIREMENTS.md), [completion and release status](milestones/v1.1-COMPLETION.md).
 
-**Next:** v1.2 initialization began 2026-10-04; detailed requirements/roadmap review is pending. Publication of v1.1 is complete after explicit user authorization.
+**Next:** v1.2 requirements and Phase 18–21 roadmap approved 2026-10-04; Phase 18 is ready for planning. Publication of v1.1 is complete after explicit user authorization.
 
 ---
 

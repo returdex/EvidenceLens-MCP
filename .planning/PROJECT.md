@@ -35,7 +35,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-Milestone v1.2 scope was confirmed in conversation on 2026-10-04; detailed requirements and roadmap await their review gate.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Next: plan Phase 18.
 
 - [ ] Discoverable fixed commands for preparation, in-progress review, final review, recheck and help.
 - [ ] `$el-prompt` exports the actual latest task prompt for this conversation/task after a stage command; no stage guessing or reconstructed prompt.
@@ -118,4 +118,4 @@ After each phase, move verified requirements to Validated with phase references,
 </details>
 
 ---
-*Last updated: 2026-10-04 after v1.2 initialization and research selection*
+*Last updated: 2026-10-04 after v1.2 requirements and roadmap approval*

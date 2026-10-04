@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: planning
-last_updated: "2026-10-04T09:13:42.392Z"
+last_updated: "2026-10-04T09:27:37.901709+00:00"
 last_activity: 2026-10-04
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,14 +17,14 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: v1.2 requirements and roadmap approval; research completed.
+See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 planning; v1.2 research, requirements and roadmap approved.
 
 ## Current Position
 
-Phase: Not started (requirements and roadmap awaiting approval)
+Phase: 18 — Discoverable Stage Commands (1 of 4 in v1.2)
 Plan: —
-Status: Requirements and roadmap awaiting approval
-Last activity: 2026-10-04 — Milestone v1.2 started
+Status: Ready to plan
+Last activity: 2026-10-04 — Requirements and roadmap approved; ready to plan Phase 18
 
 ## Accepted Coverage Debt
 
@@ -40,7 +40,7 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Research is complete. Review [21 proposed requirements](REQUIREMENTS.md) and [Phases 18–21](ROADMAP.md); approval is pending before final roadmap/requirements commits and Phase 18 planning. Milestone scope and command semantics are already confirmed. See [initialization record](v1.2-INITIALIZATION.md) for source/version checks and the affected-suite startup timeout.
+Run `$gsd-plan-phase 18` for Discoverable Stage Commands. [21 requirements](REQUIREMENTS.md) and [Phases 18–21](ROADMAP.md) are approved. See [initialization record](v1.2-INITIALIZATION.md) for source/version checks and the affected-suite startup timeout; that unverified regression attempt remains a follow-up, not a passing result.
 
 ## Session Continuity
 
