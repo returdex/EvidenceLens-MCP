@@ -28,7 +28,7 @@ test('excluded physical aliases are denied before read; unread current never sel
  const reads=[];const r=await collectBaselineSources(input,async id=>{reads.push(id);if(id==='current')throw Error('unreadable');return id==='brief'?'Explain a reason':fs.readFile(root+'/'+id,'utf8');});assert.deepEqual(reads,['brief','current']);assert.equal(r.items.some(x=>x.id==='old'),false);
 });
 test('required runtime roots and temporary evidence overlap rejected before production dispatch',async()=>{
- const {createIsolatedLaunch}=await import('../../skills/assignment-review/scripts/codex-isolation.mjs');const {executableIdentity}=await import('../../skills/assignment-review/scripts/codex-preflight.mjs');const {randomUUID}=await import('node:crypto');const receipt={...await executableIdentity('/opt/homebrew/bin/codex'),version:'0.141.0'};
+ const {createIsolatedLaunch}=await import('../../skills/assignment-review/scripts/codex-isolation.mjs');const {executableIdentity}=await import('../../skills/assignment-review/scripts/codex-preflight.mjs');const {randomUUID}=await import('node:crypto');const receipt={...await executableIdentity('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'),version:'0.160.0'};
  for(const root of ['/usr/lib','/private/tmp','/tmp'])await assert.rejects(createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID(),evidenceRoots:[root]}),{code:'unsafe_path'});
 });
 for(const name of ['shell','mcp__synthetic__read','browser','spawn_agent','el-check'])test('actual CLI rejects forced unadvertised '+name+' capability',async()=>{

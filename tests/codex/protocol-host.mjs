@@ -5,9 +5,9 @@ const diagnostic={permitInstallationMetadata:true};
 const events=r=>r.stdout.trim().split('\n').filter(Boolean).map(JSON.parse);
 const usable=r=>{assert.equal(r.timedOut,false);assert.equal(r.overflow,false);assert.equal(r.authUnchanged,true);assert.equal(r.installationUnchanged,true);assert.equal(r.outsideUnchanged,true);};
 
-test('diagnostic metadata exception: actual binary completes synthetic schema output with fixed tools and no ambient context',async t=>{
+test('diagnostic metadata exception: actual binary completes synthetic schema output without offered tools or ambient context',async t=>{
  const r=await protocolFixture('success',diagnostic);usable(r);assert.equal(r.exitCode,0);assert.equal(r.requests.length,1);
- assert.deepEqual(r.requests[0].body.tools.map(x=>x.name??x.type).sort(),['apply_patch','request_user_input','update_plan','view_image']);
+ assert.equal(r.requests[0].body.tools,undefined);assert.equal(r.requests[0].body.model,'gpt-6.1-sol');assert.equal(r.requests[0].body.reasoning.effort,'low');
  assert.ok(!JSON.stringify(r.requests).includes(r.ambient));assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
  assert.deepEqual(JSON.parse(events(r).find(x=>x.item?.type==='agent_message').item.text),r.result);
  assert.equal(events(r).at(-1).type,'turn.completed');
@@ -21,9 +21,8 @@ for(const name of ['view_image','apply_patch','request_user_input','update_plan'
  usable(r);assert.equal(r.requests.length,2);assert.equal(r.exitCode,0);
  const outputs=r.requests[1].body.input.filter(x=>x.type.endsWith('_output'));assert.equal(outputs.length,1);
  assert.ok(!JSON.stringify(outputs).includes(r.authSentinel));assert.ok(!JSON.stringify(outputs).includes('OUTSIDE_SYNTHETIC_SENTINEL_20'));
- if(name==='update_plan')assert.ok(events(r).some(x=>x.item?.type==='todo_list'));
- else {assert.ok(r.stderr.includes('codex_core::tools::router'));assert.ok(!events(r).some(x=>['tool_call','file_change','command_execution'].includes(x.item?.type)));}
- t.diagnostic('No supervisor used: two internal requests; '+name+' JSONL visibility '+(name==='update_plan'?'todo_list':'absent; stderr error only')+'. This does not pass runtime abort acceptance.');
+ assert.ok(r.stderr.includes('codex_core::tools::router'));assert.ok(!events(r).some(x=>['tool_call','file_change','command_execution'].includes(x.item?.type)));
+ t.diagnostic('No supervisor used: two internal requests; '+name+' JSONL visibility absent; stderr error only. This does not pass runtime abort acceptance.');
 });
 
 for(const name of ['view_image','apply_patch','request_user_input','update_plan'])test('revised supervision aborts '+name+' with no disclosure',async()=>{

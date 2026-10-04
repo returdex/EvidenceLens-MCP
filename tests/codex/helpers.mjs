@@ -15,7 +15,7 @@ import { spawn,spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { executableIdentity } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 import { MODEL_RESULT_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
-export const PINNED_BINARY_SHA256='51f848c212ee24e8da923a7175813a74c113d47e01f0d40f1fea46b12644c363';
+export const PINNED_BINARY_SHA256='6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201';
 import { isolationPolicy,isolatedArgs,createReviewHome,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
 export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,supervise=false}={}) {
  return new Promise((resolve,reject)=>{
@@ -33,11 +33,11 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
- const binary=await realpath('/opt/homebrew/bin/codex');
+ const binary=await realpath('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex');
  const identity=await executableIdentity(binary);
  if(identity.binarySha256!==PINNED_BINARY_SHA256){await rm(base,{recursive:true,force:true});throw new Error('Pinned binary changed: gate must be reviewed');}
  const claims={'https://api.openai.com/auth':{chatgpt_account_id:'synthetic-account',chatgpt_plan_type:'plus',chatgpt_user_id:'synthetic-user'},email:'synthetic@example.invalid',exp:4102444800};
@@ -78,7 +78,8 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  const config={'model_providers.evidencelens_bounded.base_url':`http://127.0.0.1:${port}/fixture`,chatgpt_base_url:`http://127.0.0.1:${port}/backend-api/`,...configOverrides};
  for(const [key,value] of Object.entries(config))args.push('-c',key+'='+JSON.stringify(value));args.push('-');
  const reviewHome=isolatedHome?await createReviewHome({control,auth,installationText:installationId}):{codexHome,installation:codexHome+'/installation_id'};
- const policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?reviewHome.installation:undefined,extraRead:[reviewHome.installation]});
+ let policy=candidatePolicy({binary,scratch,auth,control,installation:permitInstallationMetadata?reviewHome.installation:undefined,extraRead:[reviewHome.installation]});
+ if(denyPreferencesSync)policy=policy.replace(/^\(allow ipc-posix-shm-read-data .*\n/m,'');
  try {
   const env={HOME:isolatedHome&&isolateUserHome?reviewHome.codexHome:home,CODEX_HOME:reviewHome.codexHome,PATH:'/usr/bin:/bin',TMPDIR:scratch,LANG:'en_US.UTF-8',EVIDENCELENS_CHILD:'1'};
   const child=useRunner?{outcome:await (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess({executable:'/usr/bin/sandbox-exec',args:['-p',policy,binary,...args],env,cwd:scratch},Buffer.from('SYNTHETIC PROTOCOL FIXTURE ONLY'),{timeoutMs:15000})}:await runChild('/usr/bin/sandbox-exec',['-p',policy,binary,...args],{env,cwd:scratch,input:'SYNTHETIC PROTOCOL FIXTURE ONLY',supervise});
@@ -109,7 +110,7 @@ export async function capturedFlow(t,{stage='in_progress',current=true,sourceId=
    const result=f.result;
    const rows=[{type:'thread.started',thread_id:'synthetic'},{type:'turn.started'},{type:'item.completed',item:{type:'reasoning',text:'PRIVATE_REASONING_SENTINEL'}},{type:'item.completed',item:{type:'agent_message',text:JSON.stringify(result)}},{type:'turn.completed'}];
    const code=`import fs from 'node:fs/promises';import {createHash} from 'node:crypto';let parts=[];for await(const b of process.stdin)parts.push(b);await fs.writeFile(${JSON.stringify(scratch+'/stdin.sha')},createHash('sha256').update(Buffer.concat(parts)).digest('hex'));process.stdout.write(${JSON.stringify(rows.map(x=>JSON.stringify(x)).join('\n')+'\n')});`;
-   return {executable:process.execPath,args:['--input-type=module','-e',code],env:{PATH:'/usr/bin:/bin',CODEX_HOME:scratch},cwd:scratch,root:scratch,binaryVersion:'0.141.0',binarySha256:PINNED_BINARY_SHA256,policySha256:'0'.repeat(64),cleanup:async()=>{const h=await fs.readFile(scratch+'/stdin.sha','utf8').catch(()=>null);if(h!==null&&h!==exported.metadata.promptSha256)throw Error('stdin mismatch');await fs.rm(scratch,{recursive:true,force:true});return true;}};
+   return {executable:process.execPath,args:['--input-type=module','-e',code],env:{PATH:'/usr/bin:/bin',CODEX_HOME:scratch},cwd:scratch,root:scratch,binaryVersion:'0.160.0',binarySha256:PINNED_BINARY_SHA256,policySha256:'0'.repeat(64),cleanup:async()=>{const h=await fs.readFile(scratch+'/stdin.sha','utf8').catch(()=>null);if(h!==null&&h!==exported.metadata.promptSha256)throw Error('stdin mismatch');await fs.rm(scratch,{recursive:true,force:true});return true;}};
   },
   supervise:async(...args)=>{calls++;return (await import('../../skills/assignment-review/scripts/codex-runner.mjs')).superviseCodexProcess(...args);}
  };

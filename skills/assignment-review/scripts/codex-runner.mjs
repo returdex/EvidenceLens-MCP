@@ -40,8 +40,8 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
     if(toolAttempt('',text))return stop('uncertain','tool_activity');
     // These startup diagnostics are proven consequences of denied global context/cache writes.
     if(/^WARNING: proceeding, even though we could not create PATH aliases: Operation not permitted \(os error 1\)$/.test(text))return;
-    if(/^\S+ ERROR codex_core_skills::manager: failed to install system skills: io error while create (?:skills root|system skills) dir: Operation not permitted \(os error 1\)$/.test(text))return;
-    if(/^\S+ ERROR codex_models_manager::cache: failed to write models cache: Operation not permitted \(os error 1\)$/.test(text))return;
+    if(/^\S+ ERROR (?:codex_core_skills::manager|codex_skills_extension::host_service): failed to install system skills: io error while create (?:skills root|system skills) dir: Operation not permitted \(os error 1\)$/.test(text))return;
+    if(/^\S+ ERROR codex_models_manager::(?:cache|manager): failed to write models cache: Operation not permitted \(os error 1\)$/.test(text))return;
     if(text.endsWith(' ERROR codex_core_skills::loader: failed to read skills dir '+launch.env.CODEX_HOME+'/skills: Operation not permitted (os error 1)')&&/^\S+ ERROR /.test(text))return;
     return stop('protocol_invalid','unexpected_stderr',{reportedErrorCategory:reportedErrorCategory(text)});
    }

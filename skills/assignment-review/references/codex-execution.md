@@ -20,7 +20,7 @@
 
 ## 只读预检
 
-`preflightCodex` 仅调用实际可执行文件的 `--version`、`exec --help`、`login status`，总预检期限 10 秒，输出限 64 KiB，超时收回自有进程组。核对规范绝对路径、所有者/父目录权限、可执行文件 SHA-256；当前已验证范围是 macOS arm64 / Codex 0.141.0。基础函数返回 `executionReady=false`，因为它只检查可执行文件与登录；安装后的 `codex-review.mjs preflight` 还验证隔离策略和清理，全部通过才返回 `executionReady=true`。预检不会派发审阅。
+`preflightCodex` 仅调用实际可执行文件的 `--version`、`exec --help`、`login status`，总预检期限 10 秒，输出限 64 KiB，超时收回自有进程组。核对规范绝对路径、所有者/父目录权限、可执行文件 SHA-256；当前已验证范围是 macOS arm64 / Codex 0.160.0。基础函数返回 `executionReady=false`，因为它只检查可执行文件与登录；安装后的 `codex-review.mjs preflight` 还验证隔离策略和清理，全部通过才返回 `executionReady=true`。预检不会派发审阅。
 
 ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 auth_mode_unsupported，未知状态是 uncertain。需要登录时由用户直接使用 Codex 管理；本项目不调用 login/logout，不读取 auth.json/keychain，不转存凭据。缺失可执行文件先安装/恢复 Codex；不兼容版本等待验证，不自动升级或降级。
 
@@ -30,7 +30,7 @@ ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 au
 
 ## 已验证的隔离启动器（R1）
 
-`codex-isolation.mjs` 在 macOS arm64 / Codex 0.141.0 上固定已验证的二进制和策略摘要。模型固定为 gpt-5.4；真实模型可用性和推理验收仍由 Phase 21 完成。启动前用合成文件检查 OS 允许读取与拒绝越界读取/写入，之后才生成不可伪造的进程内启动凭证。
+`codex-isolation.mjs` 在 macOS arm64 / Codex 0.160.0 上固定已验证的二进制和策略摘要。模型固定为 gpt-6.1-sol，推理强度 low；完整交接/复检/用量验收仍由 Phase 21 完成。启动前用合成文件检查 OS 允许读取与拒绝越界读取/写入，之后才生成不可伪造的进程内启动凭证。
 
 审阅进程通过 stdin 接收提示词；仅能读取运行库、私有控制/临时目录和 Codex 自有认证文件。从现有非凭据 `installation_id` 建立本次私有副本，仅该副本允许所需的文件数据/模式操作；原文件只校验元数据与内容未变，不授予写权限。审阅 CODEX_HOME 只含指向原 Codex `auth.json` 的只读链接及 installation_id 副本；不读取/复制认证正文，不允许修改原认证、替换链接或写入控制目录。全局 agents、config、models cache、skills 和 memory 不加入该目录。登录状态使用独立的无网络策略，仅额外允许 Codex 读取配置文件及直接的 agent TOML 配置；这些读取权限不进入审阅进程。
 
@@ -79,3 +79,10 @@ SIGINT/SIGTERM 转成当前自有运行的取消信号：TERM 后最多 2 秒发
 0.3.5 的单次获准真实合成测试仍因 permission / unexpected_stderr 失败，未得到有效审阅结果；没有自动重试。断网诊断进一步定位到原 HOME/.agents/skills 的隐式扫描，原 CODEX_HOME 隔离未覆盖这一入口。审阅进程现将 HOME 与 CODEX_HOME 一同指向本次私有目录，登录预检仍使用原环境。新夹具明确创建全局 .agents/skills，并保留旧 HOME 会失败的负控制；不扩大 stderr 忽略范围。隔离合约摘要也覆盖实际生产启动器函数，防止只锁定目录构造器却遗漏环境变量接线。
 
 本地正负用例及实际宿主断网启动已验证；0.3.6 尚无新的获准真实推理成功回执，不能宣称完整审阅已恢复。原认证仍只通过只读别名由 Codex 自行使用，没有复制或改写。
+
+
+## GPT-6 迁移（0.3.7）
+
+独立审阅固定使用桌面应用内的 CLI 0.160.0 实际二进制和 `gpt-6.1-sol` / low，由 `scripts/codex-profile.mjs` 集中定义；不再通过 PATH 选择旧版 CLI。预检、二进制摘要及隔离摘要均需匹配。旧版 0.141.0 的历史回执继续可读，不允许因此重放。
+
+新版启动需要 CFPreferences 两个精确共享内存名称的只读访问和 `com.openai.codex` 域的只读查询；无配置写入权限。模拟协议、边界和安装入口回归通过；一次真实合成检查已进入 turn，但因模型相关 stderr 返回 failed，尚无有效审阅结果。只读模型目录列出该型号，不能单凭该目录宣称真实审阅可用。失败诊断类别不等于已确定的根因，完整交接/复检/用量验收仍待 Phase 21。详见仓库 `docs/codex-startup-repair.md`。

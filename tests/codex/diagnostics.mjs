@@ -79,7 +79,7 @@ test('late cancellation preserves terminal facts at publication',async t=>{
 test('legacy receipt inspection does not rewrite records, read prompt or permit replay',async t=>{
  const x=await capturedFlow(t);await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);
  const dir=privateDir(x),path=dir+'/'+x.receipt.runId+'.execution.json',original=JSON.parse(await fs.readFile(path,'utf8'));
- assert.equal(original.schemaVersion,2);const {diagnostics,...legacy}=original;legacy.schemaVersion=1;validateExecutionRecord(legacy);
+ assert.equal(original.schemaVersion,2);const {diagnostics,...legacy}=original;legacy.schemaVersion=1;legacy.binaryVersion='0.141.0';validateExecutionRecord(legacy);assert.throws(()=>validateExecutionRecord({...legacy,binaryVersion:'0.999.0'}));
  assert.throws(()=>validateExecutionRecord({...legacy,diagnostics}));assert.throws(()=>validateExecutionRecord({...legacy,schemaVersion:2}));
  await fs.writeFile(path,JSON.stringify(legacy));await fs.unlink(dir+'/'+x.receipt.runId+'.snapshot.json');const before=await fs.readFile(path);
  const r=await store.diagnoseCodexRun(x.scope,x.receipt.runId);assert.equal(r.diagnosticAvailability,'not_recorded');assert.deepEqual(r.execution,legacy);assert.deepEqual(await fs.readFile(path),before);

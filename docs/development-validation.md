@@ -89,3 +89,8 @@ The one explicitly authorized real synthetic smoke on 0.3.5 failed with permissi
 ## 0.3.6 authorized real smoke — model catalog mismatch
 
 The second user-authorized one-shot smoke reached thread.started and failed on a CLI item error categorized model_unavailable, rather than permission stderr. No validated result, no retry, cleanup complete and exact export unchanged. Read-only model discovery in a fresh isolated home listed gpt-5.5 and hidden codex-auto-review, but not the pinned gpt-5.4. See [the dated result](codex-startup-repair.md). No code changed; 0.3.6 runtime test results above remain their original evidence. Switching the pin and another real call await explicit user authorization.
+
+
+## GPT-6 desktop CLI migration (product 0.3.7)
+
+User-directed model pin is gpt-6.1-sol / low with actual desktop CLI 0.160.0. Fresh build passed, Node regression 196/196 (11.251 s), six affected Vitest files 118/118 (2.47 s). Read-only installed preflight passed. One real synthetic attempt reached a turn but failed on model-related stderr; catalog visibility is confirmed, real success is not. See [migration and precise limits](codex-startup-repair.md). No automatic retry or A4 replay. Phase 21 remains pending.

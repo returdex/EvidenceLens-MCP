@@ -16,16 +16,16 @@ test('actual Seatbelt deny-default: allowed read, denied sibling/symlink/write',
  }finally{await rm(base,{recursive:true,force:true});}
 });
 
-test('native sandbox profile negative observation remains uncertified',async t=>{
+test('current native sandbox profile denies sibling reads and workspace writes',async t=>{
  const base=await mkdtemp('/private/tmp/el20-native-');await chmod(base,0o700);
  try {
   const home=base+'/home',work=base+'/work';await mkdir(home);await mkdir(work);
   await writeFile(work+'/inside','ALLOWED');await writeFile(base+'/outside','FORBIDDEN');
   const profile='permissions.el20.filesystem={":root"="deny",":minimal"="read",":tmpdir"="deny",":slash_tmp"="deny",'+JSON.stringify(work)+'="read"}';
   const code='for p in "$1/inside" "$2/outside"; do if /bin/cat "$p" >/dev/null 2>&1; then echo read-allowed; else echo read-denied; fi; done; if /usr/bin/touch "$1/new" 2>/dev/null; then echo write-allowed; else echo write-denied; fi';
-  const r=await runChild('/opt/homebrew/bin/codex',['sandbox','-c',profile,'-c','permissions.el20.network.enabled=false','-P','el20','-C',work,'/bin/sh','-c',code,'probe',work,base],{cwd:work,env:{HOME:home,CODEX_HOME:home,PATH:'/usr/bin:/bin',TMPDIR:base}});
-  assert.equal(r.timedOut,false);assert.equal(r.exitCode,0);assert.equal(r.stdout,'read-allowed\nread-allowed\nwrite-allowed\n');
-  t.diagnostic('Native profile isolation FAILED. This assertion preserves the observed defect; it is not certification.');
+  const r=await runChild('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex',['sandbox','-c',profile,'-c','permissions.el20.network.enabled=false','-P','el20','-C',work,'/bin/sh','-c',code,'probe',work,base],{cwd:work,env:{HOME:home,CODEX_HOME:home,PATH:'/usr/bin:/bin',TMPDIR:base}});
+  assert.equal(r.timedOut,false);assert.equal(r.exitCode,0);assert.equal(r.stdout,'read-allowed\nread-denied\nwrite-denied\n');
+  t.diagnostic('CLI 0.160.0 passes this native profile probe. Production still uses the separately certified explicit Seatbelt policy.');
  }finally{await rm(base,{recursive:true,force:true});}
 });
 
@@ -43,7 +43,7 @@ test('production launcher: separate status policy, sealed descriptor, original m
  const {createIsolatedLaunch,assertCertifiedLaunch,verifyIsolationContract}=await import('../../skills/assignment-review/scripts/codex-isolation.mjs');
  const {executableIdentity}=await import('../../skills/assignment-review/scripts/codex-preflight.mjs');
  const {randomUUID}=await import('node:crypto');
- const receipt={...await executableIdentity('/opt/homebrew/bin/codex'),version:'0.141.0'};
+ const receipt={...await executableIdentity('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'),version:'0.160.0'};
  await assert.rejects(verifyIsolationContract({...receipt,binarySha256:'0'.repeat(64)}));
  assert.throws(()=>assertCertifiedLaunch({}));
  const launch=await createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID()});

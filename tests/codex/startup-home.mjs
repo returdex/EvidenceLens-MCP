@@ -30,7 +30,7 @@ for(const name of ['view_image','apply_patch'])test('forced '+name+' cannot leak
  assert.notEqual(r.outcome.status,'candidate');assert.equal(r.outcome.cleanupComplete,true);assert.equal(r.authUnchanged,true);assert.equal(r.installationUnchanged,true);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });
 test('actual installed home crosses startup into a turn with network explicitly denied',async()=>{
- const launch=await createIsolatedLaunch({executableReceipt:{...await executableIdentity('/opt/homebrew/bin/codex'),version:'0.141.0'},runId:randomUUID()});
+ const launch=await createIsolatedLaunch({executableReceipt:{...await executableIdentity('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'),version:'0.160.0'},runId:randomUUID()});
  try{
   assert.ok(launch.env.CODEX_HOME.startsWith(launch.root+'/control/'));assert.equal(launch.env.HOME,launch.env.CODEX_HOME);assert.ok((await fs.lstat(launch.env.CODEX_HOME+'/auth.json')).isSymbolicLink());
   const raw=await fs.readFile(launch.args[1],'utf8');assert.ok(!raw.includes('(literal '+JSON.stringify(process.env.HOME+'/.codex/installation_id')+')'));
@@ -45,4 +45,13 @@ test('existing HOME/.agents/skills is rejected with old HOME wiring and absent f
  assert.equal(old.outcome.status,'failed');assert.equal(old.outcome.diagnostics.trigger,'unexpected_stderr');assert.equal(old.outcome.diagnostics.reportedErrorCategory,'permission');
  const fixed=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true});
  assert.equal(fixed.outcome.status,'candidate',JSON.stringify(fixed.outcome));assert.equal(fixed.requests.length,1);assert.equal(fixed.authUnchanged,true);assert.equal(fixed.installationUnchanged,true);assert.ok(!JSON.stringify(fixed.requests).includes(fixed.ambient));
+});
+
+test('CLI 0.160 managed preference sync requires only bounded read-only IPC',async()=>{
+ const denied=await protocolFixture('success',{permitInstallationMetadata:true,denyPreferencesSync:true});
+ assert.equal(denied.exitCode,1);assert.equal(denied.requests.length,0);assert.ok(denied.stderr.includes('Failed to synchronize managed preferences'));
+ const fixed=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true});
+ assert.equal(fixed.outcome.status,'candidate');assert.equal(fixed.requests.length,1);assert.equal(fixed.authUnchanged,true);assert.equal(fixed.outsideUnchanged,true);
+ const policy=isolationPolicy({binary:'/bin/sh',scratch:'/synthetic/scratch',control:'/synthetic/control'});
+ assert.ok(!policy.includes('user-preference-write'));assert.ok(!policy.includes('ipc-posix-shm-write'));assert.ok(!policy.includes('ipc-posix-shm*'));
 });

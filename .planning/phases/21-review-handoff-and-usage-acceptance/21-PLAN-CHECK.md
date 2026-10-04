@@ -90,3 +90,6 @@ Current baseline is 0.3.5 after actual-home startup permission repair, with a se
 ## 2026-10-05 authorized smoke / HOME repair amendment
 
 One explicitly authorized real smoke failed with permission-class stderr; its approval is consumed and was not reused. Offline reproduction found the original HOME/.agents/skills scan left by CODEX_HOME-only isolation. Baseline is now 0.3.6 after both variables are isolated and production wiring is included in the isolation digest. Plan 06 targets 0.3.7; no phase requirement or plan is closed by this repair or failed smoke.
+
+
+2026-10-05 GPT-6 amendment: user explicitly selected the GPT-6 family. Current baseline is product 0.3.7 with desktop CLI 0.160.0 / gpt-6.1-sol (low), recertified local isolation and preserved legacy receipts. One same-source live smoke reached a turn but failed on model-related stderr; catalog visibility does not establish usable inference. Plan 05 now requests this model and retains its independent two-run acceptance; Plan 06 targets 0.3.8. No requirement or plan was closed. Earlier baseline/proposed-model notes remain historical.

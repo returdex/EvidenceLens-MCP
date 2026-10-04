@@ -8,7 +8,7 @@ import {sha256,uuid} from '../../skills/assignment-review/scripts/prompt-contrac
 export const source='Submit one text file containing exactly READY.';
 export const prompt=`## 1. Task\nPerform a preparation review of this synthetic requirement. No draft exists.\n\n## 2. Sources\nUse only source R1 and excerpt E1 in the appended evidence capsule.\n\n## 3. Review\nDetermine whether the requirement is clear enough to start work. Do not invent rubric criteria.\n\n## 4. Output\nReturn only JSON matching the required output schema. Copy runId/taskId/stage/currentSourceId from the capsule. Cover source R1 with excerpt E1. Findings may be empty if no concrete problem is found. If quoting evidence, copy its exact text and UTF-8 byte offsets.\n\n## 5. Constraints\nDo not call tools, read files, run commands or access any external sources.\n\n## 6. Limitations\nThis is a synthetic startup smoke test, not a coursework assessment or submission.\n`;
 export async function main(args){
- if(args.length===0){console.log(JSON.stringify({mode:'dry-run',model:'gpt-5.4',maxRuns:1,source,sourceSha256:sha256(source),promptTemplate:prompt,promptTemplateSha256:sha256(prompt)}));return;}
+ if(args.length===0){console.log(JSON.stringify({mode:'dry-run',model:'gpt-6.1-sol',maxRuns:1,source,sourceSha256:sha256(source),promptTemplate:prompt,promptTemplateSha256:sha256(prompt)}));return;}
  if(args.length!==1||args[0]!=='--execute-authorized-once')throw Error('unsupported');
  if(!uuid(process.env.CODEX_THREAD_ID))throw Error('identity_required');
  const scope={taskId:'T-codex-startup-smoke',conversationId:process.env.CODEX_THREAD_ID};

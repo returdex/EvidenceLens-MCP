@@ -1,8 +1,9 @@
+import { CODEX_EXECUTABLE,CODEX_VERSION } from './codex-profile.mjs';
 import { spawn } from 'node:child_process';
 import { constants as C } from 'node:fs';
 import { realpath,lstat,open } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { dirname,isAbsolute,join,delimiter } from 'node:path';
+import { dirname,isAbsolute,join } from 'node:path';
 import { homedir } from 'node:os';
 import { CODEX_LIMITS,codexFail,codexError } from './codex-contract.mjs';
 
@@ -62,12 +63,7 @@ export async function preflightCodex({executable,environment=process.env,platfor
  try{
   if(environment.EVIDENCELENS_CHILD==='1')codexFail('recursive_call');
   if(platform!=='darwin'||arch!=='arm64')codexFail('unsupported');
-  if(!executable){
-   for(const path of (environment.PATH??'').split(delimiter).filter(isAbsolute)){
-    try{executable=(await realpath(join(path,'codex')));break;}catch{}
-   }
-   if(!executable)codexFail('codex_missing');
-  }
+  executable??=CODEX_EXECUTABLE;
   const binary=await executableIdentity(executable),env=childEnvironment(environment);
   const probe=async args=>{
    const remaining=Math.min(timeoutMs,10000)-(Date.now()-started);
@@ -76,7 +72,7 @@ export async function preflightCodex({executable,environment=process.env,platfor
   };
   const version=await probe(['--version']);
   if(version.code)return {ok:false,code:version.code,cleanupComplete:version.cleanupComplete};
-  if(version.exitCode!==0||!/^codex-cli 0\.141\.0\s*$/.test(version.output))codexFail('codex_incompatible');
+  if(version.exitCode!==0||version.output.trim()!=='codex-cli '+CODEX_VERSION)codexFail('codex_incompatible');
   const help=await probe(['exec','--help']);
   if(help.code)return {ok:false,code:help.code,cleanupComplete:help.cleanupComplete};
   if(help.exitCode!==0||['--json','--output-schema','--ephemeral','--ignore-user-config','--ignore-rules','--strict-config','--skip-git-repo-check'].some(flag=>!help.output.includes(flag)))codexFail('codex_incompatible');
@@ -85,6 +81,6 @@ export async function preflightCodex({executable,environment=process.env,platfor
   if(/\b(?:not logged in|logged out)\b/i.test(login.output))codexFail('login_required');
   if(/\b(?:API key|api_key)\b/i.test(login.output))codexFail('auth_mode_unsupported');
   if(login.exitCode!==0||login.output.trim()!=='Logged in using ChatGPT')codexFail('uncertain');
-  return {ok:true,...binary,version:'0.141.0',platform,arch,auth:'chatgpt',executionReady:false,elapsedMs:Date.now()-started};
+  return {ok:true,...binary,version:CODEX_VERSION,platform,arch,auth:'chatgpt',executionReady:false,elapsedMs:Date.now()-started};
  }catch(error){return {ok:false,...codexError(error)};}
 }

@@ -1,4 +1,4 @@
-# Codex actual-home startup repair — 0.3.5 / 0.3.6
+# Codex startup and model migration — 0.3.5 / 0.3.6 / 0.3.7
 
 Date: 2026-10-05, Australia/Melbourne.
 
@@ -79,3 +79,26 @@ The private sequence-2 receipt records failed/protocol_invalid with process/unex
 The earlier permission failure did not recur in this attempt. Afterward, read-only `codex debug models` was queried first normally and then in a newly created sealed production home, with no existing model cache and the original read-only auth alias. No exec/inference command was invoked by these catalog queries. Both outputs listed gpt-5.5 (visibility=list) and codex-auto-review (visibility=hide); neither listed the pinned gpt-5.4. This corroborates a pinned-model/catalog mismatch. A listed model is a candidate for a future test, not evidence of completed inference. Raw catalog instructions and credentials were not printed or persisted.
 
 Current version remains 0.3.6; no runtime code or model pin changed in this turn. The proposed next step is an explicitly authorized change of the fixed model to listed gpt-5.5, revalidation of the isolation contract and one new same-source synthetic live test. The current one-run approval is consumed. No automatic fallback was performed. Phase 21 RUN-05 and the two-run handoff/recheck acceptance remain pending.
+
+
+## User-directed GPT-6 migration — 0.3.7
+
+The user explicitly requested a GPT-6 model instead of the proposed GPT-5.5 change. The selected model is `gpt-6.1-sol`, reasoning effort `low`, consistent with the installed desktop configuration. The runner now selects the desktop CLI 0.160.0 Mach-O executable directly (not its shell wrapper or the older Homebrew executable); binary SHA-256 `6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201`. The immutable executable/model profile is included in the isolation digest, now `f356ee3c6904eccd7f2d33454298ad53ecfd9077bb8bd7721c42b5baa6038050`. An application update changes this pin and requires recertification. Existing execution receipts from CLI 0.141.0 remain readable and immutable.
+
+Local compatibility investigation found that CLI 0.160.0 synchronizes macOS managed preferences at startup. Denying its two CFPreferences read-only shared-memory channels reproduced the startup failure with zero loopback requests. The policy grants only read-data for `apple.cfprefs.daemonv1` and the current user's `apple.cfprefs.<uid>v1`, plus read-only access to preference domain `com.openai.codex`; no preference writes, shared-memory writes, broad application-directory reads or original-home reads were added. The [official loader implementation](https://github.com/openai/codex/blob/main/codex-rs/config/src/loader/macos.rs) documents the managed domain and synchronization; the actual binary tests establish compatibility. The stderr allowlist recognizes the exact new module names for already-tested denied system-skill/cache writes. Unknown stderr remains rejected.
+
+Actual binary loopback observations: the schema-output request supplies model `gpt-6.1-sol` and reasoning `low`, and offers no tools. Injected tool calls are still rejected, and authentication/outside-file sentinels remain unchanged. CLI 0.160.0 also passes the native sandbox sibling-read/write negative control that historically failed on 0.141.0; production retains its explicit Seatbelt boundary. Production preflight reports executionReady=true with the new model, without inference.
+
+### Real result — failed, not restored
+
+The user's model-change instruction continued the prepared model-change-and-one-smoke workflow. Exactly one same-source synthetic run was dispatched on 2026-10-05 at 05:28:41–05:28:42 Australia/Melbourne. It reached both thread.started and turn.started, then failed with protocol_invalid, process/unexpected_stderr and reportedErrorCategory=model_unavailable. Elapsed 1767 ms; terminalObserved=false; resultSha256=null; cleanupComplete=true; termination requested and process closed on SIGTERM. Captured prompt SHA-256 `e2f2054e4db37b4e377138bd462586a900ec82a8b92490249f2972595b6957ed`; exact prompt export remained unchanged. No A4 coursework was replayed and no automatic resend/model switch occurred.
+
+After failure, a read-only catalog query using the production isolated home and the same provider/feature configuration listed gpt-6.1-sol, gpt-6-astra, gpt-6-sol and gpt-6-luna. Bundled metadata also lists these models. Thus the earlier missing-catalog explanation alone does not establish the cause of this new failure. The receipt's category is a hint, not proof of account ineligibility or a provider rejection; raw stderr was not retained. Further diagnosis must distinguish model metadata warnings from actual remote errors. Remote usage remains unknown, not zero. The pin change is complete, but a successful real independent review is still unverified. Phase 21 stays 0/6 and RUN-01–05 pending; its next feature patch is 0.3.8.
+
+### Validation
+
+- Fresh `npm run build`: passed at 0.3.7.
+- Node Codex/prompt/command/source-boundary regression: 196/196, no failures/skips, 11.251 s; live smoke is dry-run under test discovery.
+- Six affected Vitest files: 118/118, 2.47 s.
+- New coverage includes denied CFPreferences synchronization before dispatch, request model/reasoning identity, absent tool catalog, CLI 0.141.0 historical receipt inspection, and current native sandbox behavior.
+- No release/tag; active milestone and non-blocking review-quality reminders are unchanged.
