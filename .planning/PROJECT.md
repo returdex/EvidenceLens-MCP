@@ -2,9 +2,9 @@
 
 ## What This Is
 
-EvidenceLens MCP is a shipped multimodal second-review service for Codex and other MCP clients. It gives an external model controlled, read-only access to local evidence—text, PDFs, images, screenshots, and tables—then returns structured, traceable findings about omissions, conflicts, and evidence quality.
+EvidenceLens MCP combines a controlled, read-only multimodal second-review service with one repository-managed assignment-review Skill. The Skill adapts prompts to sourced requirements, supports preparation/progress/final reviews, checks template structure and truthful disclosure, and updates findings against the designated current artifact.
 
-The service supports deterministic offline review and a replaceable DeepSeek provider path. Docker deployment, strict provenance, sanitized failures, and a no-follow Linux filesystem boundary are part of the verified v1.0 product contract.
+The existing service offers deterministic offline review and a replaceable DeepSeek provider path. Historical Linux/Docker/paid proof remains bound to its original certified source. The new Skill does not automatically call Codex, edit documents, sign declarations or submit work.
 
 ## Core Value
 
@@ -35,7 +35,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-- All 22 milestone requirements and 13 plans across six phases are locally verified. Residual manual coverage awaits explicit disposition; milestone archival/publication remain separate.
+No next milestone defined. All v1.1 requirements are archived and validated within their documented scope. Use `$gsd-new-milestone` for fresh requirements; retain deferred candidates below.
 
 ### Deferred
 
@@ -53,32 +53,19 @@ Produce trustworthy, independently checked findings grounded in controlled local
 - A polished end-user UI — MCP clients remain the interaction surface.
 - Foundation-model training or fine-tuning — providers remain replaceable integrations.
 
-## Context
-
-- v1.0 shipped on 2026-09-24 after 11 phases, 39 plans, and 79 tasks.
-- The implementation and validation surface contains 18,042 lines of TypeScript/JavaScript across `src/`, `scripts/`, and `tests/`.
-- Current evidence includes a 795-test offline regression run, focused Linux traversal checks, Docker stdio/mount smoke checks, and an authenticated one-request DeepSeek proof bound to the certified Phase 10 source.
-- Accepted debt is recorded in `milestones/v1.0-MILESTONE-AUDIT.md`: most phases lack Nyquist `VALIDATION.md`, two Phase 9 warnings remain, and the current-source provider path was verified offline rather than with a new paid request.
-- The v1.0 product baseline was `0.1.3`. Milestone v1.1 opens the `0.2.0` development line under DEVELOPMENT.md; this is not a published release or a claim that v1.1 features already exist.
-
 ## Current State
 
-Phases 12-15 verified: one repository Skill now covers sourced baselines, three stages, template/restoration handoff, contextual residue, truthful disclosure, current-version finding transitions and bounded final reports. Phase 15 passed six inline semantic groups/all variants, 18 actual collection steps, twelve boundary tests and prior 9/17-step collector regressions; standard inline review clean. All 16 phase requirements have evidence; milestone audit completed on 2026-10-04 with tech_debt: four missing Nyquist validation documents, unavailable official Skill validator and prior stalled broad build/runtime checks. No functional blocker was found. The user confirmed two closure phases (16 then 17) on 2026-10-04; Phase 16 is now complete: official Skill validation in an isolated pinned environment, a fresh successful 517.410s build, final default offline suite with 43 files/795 passes and zero failures/skips, and separate 12-test baseline. Exact-lock dependencies were recovered reversibly; a legacy test fixture now supplies synthetic v1.0 requirements in its temporary checkout. Earlier I/O stalls and failed attempts remain recorded; the filesystem delay's underlying cause is unknown. Phase 17 is verified: four task-mapped records, 3/3 plans, 4/4 success criteria and expanded 22/22 requirement re-audit. Six phases and 13 plans are locally complete. Missing-record components are resolved; manual semantic coverage remains partial. Current [re-audit](v1.1-MILESTONE-REAUDIT.md) preserves the [original snapshot](v1.1-MILESTONE-AUDIT.md). Development version 0.2.4; no new release, archive or remote sync. Global discovery/installation, automatic Codex/provider integration and real document editing/rendering remain outside this acceptance. Historical paid proof remains source-bound and unchanged.
+Milestone **v1.1 locally complete and archived 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Product version **0.2.4**, with GitHub publication pending the existing remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
 
-## Current Milestone: v1.1 Assignment Prompt Adaptation and Staged Review
+Source-bound evidence includes Phase 16 official validator/control, successful build and 43-file/795-test offline pass, plus Phase 17 12 boundary tests and 57 actual collector steps. Semantic language judgments and audit interpretation remain manual; TD-12/13/14/15 coverage debt is accepted for closure, alongside inherited v1.0 debt. Historical host I/O root cause is unknown, preserved dependencies remain recoverable. Archival compatibility verification is recorded in the completion record. No real-coursework, installed discovery, universal host isolation or remote submission claim.
 
-**Goal:** Turn a reusable user prompt and evolving assignment evidence into preparation, progress-review, and final-review workflows that advance work without losing source accuracy or overusing old versions.
+## Next Milestone Goals
 
-**Target features:**
-- One repository-managed Skill plus minimal reference templates and synthetic evaluation cases.
-- A current-artifact baseline with source provenance, incremental clarification handling, and explicit access exclusions.
-- Separate course-policy assessment from task progress: a course prohibition or unresolved policy does not by itself stop all user-authorized assistance, and continuing does not imply permission or compliance.
-- Original-template preservation, restoration handoff, contextual draft-residue checks, and truthful disclosure in the required place without redundant labels throughout the work.
-- Current-version findings, evidence-backed regression checks, and bounded final-review conclusions.
+Not yet committed. Previously discussed candidates include automatic Codex review invocation separated from work conversations, comparison/statistics, and the deferred features above. Define scope and fresh requirements before implementation; next phase number is 18. Product minor version changes when that new milestone is opened, not during this archival step.
 
-**Scope:** Phases 12–17; 16 completed functional requirements plus 6 approved verification-closure requirements. Keep MCP read-only. Use Skill-level planning when required review evidence is absent; do not fabricate a solution or teacher instruction to satisfy the existing four-role contract. Use existing host document tools for separately authorized corrections rather than adding an editing engine.
+## Context
 
-**Research:** Reuse the collected user workflow patterns; private course chats and coursework stay outside the public repository. No new ecosystem research or dependencies are required to define this milestone.
+At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18,314 TS/MJS lines. v1.1 changed 102 files across 59 commits through acceptance (mostly planning/evidence); final close adds documentation and a narrow archival-compatible test snapshot. No runtime dependency, role/schema or provider behavior change is introduced by closeout.
 
 ## Constraints
 
@@ -88,29 +75,26 @@ Phases 12-15 verified: one repository Skill now covers sourced baselines, three 
 - **Multimodality**: The evidence pipeline preserves visual context in addition to extracted text.
 - **Deployability**: Docker is a supported reproducible deployment path.
 
-## Key Decisions
+## Key Decisions and Outcomes
 
-Milestone v1.1 decisions confirmed through the planning conversation on 2026-10-03:
-- AI-assisted progress is the default; task execution status and policy compliance status must remain distinct.
-- Centralized disclosure must reflect known usage; no invented manual-only process or unsupported compliance claims.
-- The original template remains authoritative for restoration, while policy statements are preserved even if a working copy omits their display.
-- Current-version review is the default. Differences from an older version alone are not defects.
-- Prior phase directories remain in place because proof tooling references their paths; historical artifacts are not cleared during initialization.
+| Decision | Outcome |
+|---|---|
+| Keep independently traceable findings grounded in controlled evidence | Core value retained; MCP service remains reviewer/evidence layer |
+| Separate continued authorized assistance from policy permission/compliance | Validated in sourced baseline and stage cases |
+| Preserve template authority, legitimate comments and truthful centralized disclosure | Validated with source-backed handoffs; no automatic signing/editing |
+| Default to actual current artifact and retire supported resolved findings | Validated with connected recheck cases; unknowns remain explicit |
+| One Skill and existing gate; no new editor/provider platform | Delivered; automatic Codex integration remains future scope |
+| Pin isolated developer validator prerequisite and preserve exact-lock dependencies | Official tooling and offline acceptance recovered; I/O root cause unknown |
+| Separate record completion from automated semantic coverage | 22/22 requirements accepted with honest partial Nyquist fields |
+| Preserve historical paths, paid proof and report bytes | Archives and source-bound evidence retained |
+| Distinguish milestone v1.1 from product 0.2.4 and remote publication | Local tag/archival only until existing history hold is lifted |
 
+<details>
+<summary>Previous project context and decisions</summary>
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Treat EvidenceLens as an independent second reviewer | Keeps primary-agent reasoning and external evidence checking separate | ✓ Validated in v1.0 |
-| Make read-only, allowlisted access the default | Reduces accidental disclosure and mutation risk | ✓ Validated in v1.0 |
-| Use a model-provider adapter | Supports DeepSeek while preserving replacement options | ✓ Validated in v1.0 |
-| Make provenance part of the finding contract | Enables auditability, merging, comparison, and final checks | ✓ Validated in v1.0 |
-| Use MCP as the integration boundary | Gives compatible clients one stable service contract | ✓ Validated in v1.0 |
-| Separate paid provider proof from routine regression | Preserves exact evidence and prevents accidental cost or replay | ✓ Validated in v1.0 |
-| Bind live claims to exact source and immutable image identities | Keeps external evidence scoped to the code actually executed | ✓ Validated in v1.0 |
+[Complete pre-close PROJECT snapshot](milestones/v1.1-PROJECT.md), [state/decision history](milestones/v1.1-STATE.md), and [v1.0 milestone](milestones/v1.0-ROADMAP.md) remain available. Historical snapshots keep their original date and evidence scope.
 
-## Evolution
-
-After each phase, move verified requirements to Validated, update invalidated assumptions and record decisions. At milestone completion, review the core value, scope, constraints and actual shipped capabilities. Preserve historical evidence and separate development intent from verified results.
+</details>
 
 ---
-*Last updated: 2026-10-04 after Phase 17 verification and audit reconciliation*
+*Last updated: 2026-10-04 after v1.1 local milestone completion*

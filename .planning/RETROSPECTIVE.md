@@ -51,6 +51,53 @@
 
 ---
 
+## Milestone: v1.1 — Assignment Prompt Adaptation and Staged Review
+
+**Locally completed:** 2026-10-04; remote publication pending.
+**Phases:** 6 | **Plans:** 13 | **Tasks:** 28
+
+### What Was Built
+
+- One sourced assignment-review Skill spanning preparation, progress, final review and current-version recheck.
+- Template preservation, contextual residue and accurate disclosure correction handoffs.
+- Official validator recovery, source-bound offline acceptance and honest retrospective validation records.
+
+### What Worked
+
+- Existing callback gate and immutable synthetic sources made read/exclusion checks reproducible.
+- Actual output tables separated observed language judgments from deterministic collection assertions.
+- Explicit current F/A transitions kept resolved issues out of later repair lists.
+- Source hashes allowed unchanged build/runtime proof reuse without paid-provider replay.
+
+### What Was Inefficient
+
+- Intermittent filesystem delays required bounded diagnostic/recovery attempts; root cause remains unknown.
+- Missing original validation records required four retrospective maps.
+- SDK task counts and state/body fields needed manual reconciliation; complete-milestone's summary-pattern count was 3 while actual PLAN tasks total 28.
+- The legacy positive proof rehearsal assumed active requirements always exist, which conflicts with normal archival; its preservation snapshot now needs absent-file support.
+
+### Patterns Established
+
+- Record completeness and semantic automation are separate; retain PARTIAL rather than manufacture a classifier.
+- Preserve original audits/reports and publish a distinct current completion authority.
+- Archive before removing active requirements; phase evidence paths remain stable for proof tooling.
+- Separate local milestone tags from product versions and from actual remote publication.
+
+### Key Lessons
+
+1. Test fixtures should accept both present and archived planning state while preserving production stale-state guards.
+2. Counts should join real plans, completed summaries and requirement/verification sources.
+3. A changed hash or a partial excerpt cannot alone resolve a prior finding.
+4. Milestone-completion commands should not silently lift an existing hold on hundreds of unpublished commits.
+
+### Cost Observations
+
+- Model mix and session counts are unknown; no fabricated percentages.
+- No paid-provider request was made for validation/closure; local archival checks add no provider proof.
+- Timed-out and failed attempts remain in original evidence; successful checks are scoped to their commands/source/host.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -58,12 +105,14 @@
 | Milestone | Phases | Key Change |
 |-----------|--------|------------|
 | v1.0 | 11 | Added immutable proof authority, independent verification, and canonical re-audit closure |
+| v1.1 | 6 | Single Skill, current-evidence lifecycle and truthful retrospective coverage |
 
 ### Cumulative Quality
 
 | Milestone | Tests | Requirement Coverage | Open Artifact Audit |
 |-----------|-------|----------------------|---------------------|
 | v1.0 | 795-test offline suite plus focused E2E, Docker, and Linux checks | 20/20 | 0 open items |
+| v1.1 | 795-test offline suite; 12 boundary tests; 57 collector steps; manual language review | 22/22; manual automation partial | 0 open items |
 
 ### Top Lessons
 

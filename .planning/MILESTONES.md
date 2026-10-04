@@ -1,5 +1,32 @@
 # Project Milestones: EvidenceLens MCP
 
+## v1.1 Assignment Prompt Adaptation and Staged Review (Locally completed: 2026-10-04)
+
+**Delivered:** One repository Skill for sourced preparation, stage review, template/disclosure checks and current-version recheck, with bounded verification evidence.
+
+**Phases completed:** 12–17 (13 plans, 28 tasks); 22/22 requirements. Product 0.2.4; remote release pending existing history hold.
+
+**Key accomplishments:**
+
+- Source-backed task baselines, incremental clarifications and designated-current-artifact review with pre-read exclusions.
+- One repository Skill with portable preparation, in-progress and final prompts plus explicitly requested actual reviews.
+- Original-template comparison and restoration handoffs, contextual residue checks and truthful centralized AI-use disclosure.
+- Current-evidence finding lifecycle, retired actions, sourced recurrence and bounded final conclusions.
+- Reproducible official Skill validation, source-bound successful build and 795-test offline acceptance after bounded diagnosis.
+- Four retrospective validation records and a 22-requirement re-audit preserving manual semantic limits and historical evidence.
+
+**Stats:** 59 commits through accepted source 8c2d391; 102 changed files / 11,463 insertions / 53 deletions from pre-initialization base 572d253; 18,314 tracked TS/MJS lines across src/scripts/tests/Skill helper at acceptance. Most milestone additions are documentation/evidence. Timeline: 2026-10-03 → 2026-10-04 Australia/Melbourne; closing commits excluded from these source statistics.
+
+**Git range:** `6896371` → `8c2d391` (acceptance); local milestone tag `v1.1` identifies final closure. It is not product major version 1.1.
+
+**Known deferred items:** open-artifact audit 0; four TD-12/13/14/15 residual manual coverage entries accepted with Phase 17 manual audit limits. TD-V/TD-B closed; inherited v1.0 coverage/warnings retained. No dropped/unchecked requirements.
+
+**Archives:** [roadmap](milestones/v1.1-ROADMAP.md), [requirements](milestones/v1.1-REQUIREMENTS.md), [completion and release status](milestones/v1.1-COMPLETION.md).
+
+**Next:** `$gsd-new-milestone`; scope not yet approved. Remote publication requires lifting the existing history hold.
+
+---
+
 ## v1.0 MVP (Shipped: 2026-09-24)
 
 **Delivered:** A read-only MCP second-review service that normalizes text, PDF, image, screenshot, and table evidence; produces traceable deterministic or DeepSeek-backed findings; and runs through a hardened Docker boundary.
