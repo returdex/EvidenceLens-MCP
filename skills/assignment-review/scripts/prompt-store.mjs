@@ -131,7 +131,7 @@ export async function exportLatest(scope,{expectedRunId}={}){
  if(t?.deleted)fail('deleted');
  if(!t||!t.latest){if(expectedRunId)fail('latest_mismatch');fail('no_record');}
  if(t.deleted)fail('deleted');if(!uuid(expectedRunId))fail('identity_required');if(t.latest!==expectedRunId)fail('latest_mismatch');
- const l=await state(c,t,t.latest);if(l.promptSha256===null)fail('uncertain');const v=await snapshot(c,t,l);
+ const l=await state(c,t,t.latest);if(l.promptSha256===null){const e=new Error('uncertain');e.code='uncertain';e.status=l.status;throw e;}const v=await snapshot(c,t,l);
  await boundary(c,'export_read');await unlocked(c);const after=await loadIndex(c);if(JSON.stringify(after)!==JSON.stringify(index))fail('busy');
  return {promptText:v.promptText,metadata:{...receipt(l),stage:v.stage,reviewMode:v.reviewMode,currentSourceId:v.currentSourceId,capturedAt:v.capturedAt,materials:v.materials,limitations:v.limitations}};
 }

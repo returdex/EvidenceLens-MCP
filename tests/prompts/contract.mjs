@@ -27,3 +27,4 @@ test('lifecycle transitions allow failure before dispatch, never terminal resurr
  assert.deepEqual(transition(done,'succeeded'),done); assert.throws(()=>transition(done,'dispatched'));
  assert.equal(safeError(new Error('secret payload')).code,'storage_unavailable');
 });
+test('recognized credential-shaped identifiers are rejected',()=>{const s=base();assert.throws(()=>validateSnapshot({...s,taskId:'sk-'+'a'.repeat(35)}));});

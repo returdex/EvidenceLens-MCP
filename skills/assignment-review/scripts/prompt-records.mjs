@@ -34,7 +34,7 @@ export async function main(args){
   const evidenceRoots=v.evidenceRoots===undefined?[]:array(v.evidenceRoots,100,x=>text(x));
   scope={conversationId,taskId:v.taskId,evidenceRoots};
   if(v.runId!==undefined&&!uuid(v.runId)||v.expectedRunId!==undefined&&!uuid(v.expectedRunId))fail('identity_required');
-  runId=v.runId;
+  runId=v.runId??v.expectedRunId;
   let result;
   if(action==='begin')result=await beginRun(scope);
   else if(action==='capture')result=await captureRun(scope,runId,v.snapshot);
@@ -50,7 +50,7 @@ export async function main(args){
   if(result.ok===false)process.exitCode=1;
  }catch(e){
   if(dispatchStarted)await finishRun(scope,runId,{status:'uncertain',errorCode:'uncertain'}).catch(()=>{});
-  await output(process.stderr,JSON.stringify({...safeError(e),...(uuid(runId)?{runId}:{})})+'\n').catch(()=>{});process.exitCode=1;
+  await output(process.stderr,JSON.stringify({...safeError(e),...(uuid(runId)?{runId}:{}),...(['preparing','captured','dispatched',...TERMINAL].includes(e?.status)?{status:e.status}:{})})+'\n').catch(()=>{});process.exitCode=1;
  }
 }
 const entry=process.argv[1] ? await realpath(process.argv[1]).catch(()=>null) : null;

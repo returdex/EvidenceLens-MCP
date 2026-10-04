@@ -6,7 +6,8 @@ export const fail = code => { const e = new Error(code); e.code=code; throw e; }
 export const safeError = e => ({code:CODES.includes(e?.code) ? e.code : 'storage_unavailable'});
 export const sha256 = text => createHash('sha256').update(text).digest('hex');
 export const uuid = value => typeof value==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-export const id = value => typeof value==='string' && /^[A-Za-z][A-Za-z0-9_-]{0,79}$/.test(value);
+const CREDENTIAL = /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----|\bsk-[A-Za-z0-9_-]{20,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bAKIA[A-Z0-9]{16}\b/;
+export const id = value => typeof value==='string' && /^[A-Za-z][A-Za-z0-9_-]{0,79}$/.test(value) && !CREDENTIAL.test(value);
 export const hash = value => typeof value==='string' && /^[0-9a-f]{64}$/.test(value);
 export function fields(value, keys) {
   if (!value || typeof value!=='object' || Array.isArray(value) || ![Object.prototype,null].includes(Object.getPrototypeOf(value))) fail('corrupt_record');
@@ -18,7 +19,7 @@ export function fields(value, keys) {
 }
 export function text(value,max=8192) {
   if(typeof value!=='string' || Buffer.byteLength(value)>max || /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(value)) fail('corrupt_record');
-  if(/-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----|\bsk-[A-Za-z0-9_-]{20,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bAKIA[A-Z0-9]{16}\b/.test(value)) fail('corrupt_record');
+  if(CREDENTIAL.test(value)) fail('corrupt_record');
   return value;
 }
 export function array(value,max,validate) {
