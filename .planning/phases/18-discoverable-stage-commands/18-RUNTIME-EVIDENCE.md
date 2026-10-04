@@ -45,3 +45,35 @@ This closes current 0.3.0 startup/affected-test uncertainty but does not accept 
 | `dist/tools/review.js` | `797fa76776e646afd21d14f2bd3dbff2954d99a7af7db39934011b912e16ebd8` |
 
 After support-row documentation update: `el18-host-support-node`, UTC 2026-10-04T13:07:14.634128Z, cap 60s / 0.511s, exit 0; same 21/21 Node tests, zero failures/skips, no owned process group. No runtime/source version edits followed pre-patch hashes.
+
+## Final post-patch 0.3.1 acceptance — 2026-10-05 Australia/Melbourne
+
+| Run | UTC start | Cap / elapsed seconds | Exit | Result |
+|---|---|---|---|---|
+| el18-patch-build | 2026-10-04T13:13:24.771838+00:00 | 300.0 / 0.824 | 0 | fresh build |
+| el18-patch-affected | 2026-10-04T13:13:37.374552+00:00 | 120.0 / 2.798 | 0 | 6 files / 118 tests passed, 0 failures/skips |
+| el18-final-node | 2026-10-04T13:13:37.374609+00:00 | 60.0 / 0.715 | 0 | 21 tests passed, 0 failures/skips |
+
+Commands and isolation are unchanged from the pre-patch checks above. Fresh build preceded the affected suite, including actual dist/server.js process assertions. Same PDF fixture warnings; no real provider, container or visual-quality claim. This is targeted affected regression, not a full 795-test rerun. Prior failures and recovery records above remain historical.
+
+### Final source/build identities
+
+| File | SHA-256 |
+|---|---|
+| `VERSION` | `79e3f22ca37c7fdf4c29ae3648d6b008c3cb6547260a453409275470919dc674` |
+| `package.json` | `52b7be3c3bba97854e3416c4679b9169040ef2e5f23760b075c7c1afa978e11f` |
+| `package-lock.json` | `a96b7dab664299a8047fd19619c767616561cde0eeb11756b95da6da17ee1fac` |
+| `src/server.ts` | `167ba7f84093e170f60666af1e7f6147f3ea54ac2103380db73ea81a00930733` |
+| `src/tools/review.ts` | `99df6e794ba510f911879b2b809a8ae7a6c6bca9be44d67d1cd570421584e44d` |
+| `docs/mcp-contract.md` | `b5434dae1f05b6181b08d66d5e73ed9017b54b9aeed5c1065ef48fb0aab88936` |
+| `tests/smoke/project-config.test.ts` | `f51b7f3c595f15f561aa3651cf4da16b60585e9cb57792e5078e4c2be00d6e15` |
+| `tests/contract/review-tool.test.ts` | `3bec9d343d4d70ef3a145b332fee11e4c66de115117e436eaba40f4331f8fc9e` |
+| `tests/contract/public-contract-docs.test.ts` | `3f634ee2d4f2d3de47275f2ae3c0137a85cdb7bc324d517dc5af871e91174f06` |
+| `tests/contract/fit5032-fixture.test.ts` | `a3696687adff2ade800ab41014bc8eadd621e6d7ee8ce2bdba1b13552de415dd` |
+| `tests/contract/review-provider.test.ts` | `dc917ce7b495402c020f31597ff7605f84fc327fdc15255fe91dad9ff8719222` |
+| `tests/e2e/docker-review.test.ts` | `1ff9d9ba9cbe7c9e3ef99a38db46abc0f38c3d5baae49b84d7ded8ad53aa6eac` |
+| `tests/fixtures/reviews/deterministic-only-mcp-text.fixture.json` | `2fea5b62b18a1516981699ace9b7b95941c29f0d470af25e96cd2125e96be720` |
+| `dist/server.js` | `dbf695d8ae14684ef5d0681869d0cdf4f9bb25942a5a0653ff258a4c9fa1f930` |
+| `dist/tools/review.js` | `2a2fa5a3bba405bc30f1ae8d132938c3387a7b004f7625011e4c628ec0a0c526` |
+| `scripts/install-review-skills.mjs` | `2000e99ec4ab57ca56b100a64511ffd6d56d9cb37c3ba47f83fc68251ac64a6c` |
+| `skills/assignment-review/references/command-entrypoints.md` | `0b5e038601c93ab80f8b75a9a36edb19fef7212b38e9047bdc76d5451d5282f2` |
