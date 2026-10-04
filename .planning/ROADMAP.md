@@ -68,7 +68,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 - [x] 19-02-PLAN.md — Installed dispatch/export CLI and scoped retention/deletion.
 **Wave 3** *(requires Wave 2 completion)*
 
-- [ ] 19-03-PLAN.md — Four-stage capture wiring and actual el-prompt export entry.
+- [x] 19-03-PLAN.md — Four-stage capture wiring and actual el-prompt export entry.
 **Wave 4** *(requires Wave 3 completion)*
 
 - [ ] 19-04-PLAN.md — Fault/concurrency tests and installed current-host synthetic acceptance.
@@ -111,7 +111,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
-| 19. Captured Task Prompts and Export | 2/5 | In Progress|  |
+| 19. Captured Task Prompts and Export | 3/5 | In Progress|  |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
 
