@@ -1,9 +1,9 @@
 ---
 phase: 18-discoverable-stage-commands
-status: help_retest_pending
+status: passed
 installation: passed
 discovery: passed_host_catalog
-invocation: six_observed_help_examples_retest_pending
+invocation: passed
 ---
 # Phase 18 — Installed host evidence
 
@@ -35,7 +35,7 @@ The user subsequently authorized the dedicated FIT5032 chat and six synthetic te
 
 | Entry | Target-host catalog discovery | Actual synthetic invocation |
 |---|---|---|
-| el-help | observed | six actions/materials/support; missing examples found, rule corrected, retest pending |
+| el-help | observed | six actions/materials/support; missing examples repaired and authorized retest passed |
 | el-prepare | observed | preparation, no draft, R18-1 unknown and three planning actions |
 | el-check | observed | in_progress, current-v1, missing reason F18-1 / pending A18-1 |
 | el-final | observed | final retained, text-only gap, unknown rubric/visual/submission coverage |
@@ -58,3 +58,7 @@ In another assignment project's Codex chat, first inspect the Skill selector for
 6. `$el-prompt 任务 T18；只取同一对话中实际捕获的原文，无记录就明确说不可用；不要重新生成、运行检查或读取项目文件。`
 
 Expected observations: help lists six; prepare plans without solution; check/final find missing reason with correct stages; recheck resolves the actual prior finding and retires action; prompt says unavailable and starts no review. Capture actual output/failure per turn, not only an approved label. Record user-reported observation versus direct tool receipts separately. Only successful observed host/version rows may update shared help/documentation. No phase-complete claim yet.
+
+## Help correction accepted — 2026-10-05 Australia/Melbourne
+
+User explicitly continued after the one-message request. Retest turn `01a1070a-2323-7cd1-aac6-6e01884f0464` completed, 29.235s (UTC 2026-10-04T13:11:07Z–13:11:36Z). Direct receipt: [18-HELP-RETEST.json](18-HELP-RETEST.json). Its sole command reloaded el-help and shared command-entrypoints via cat, exit 0. Actual output contains all six commands and five columns (action/materials/output/examples), plus precise documented/observed/unverified support. No coursework, provider or write operations. The earlier help failure and pending statements above remain historical; this retest closes them. All six discovery/invocation rows now accepted. GUI selector/build/version/platform limitations remain unchanged.

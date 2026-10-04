@@ -63,7 +63,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 | 本包的 Skill 元数据与相对资源图 | 7 个官方正例与负控制已验证；见 [Plan 01](../.planning/phases/18-discoverable-stage-commands/18-01-SUMMARY.md) |
 | 临时目录中的安装、冲突、重复安装、回滚、外部 cwd | 9 项安装／结构测试通过（不含真实宿主调用） |
 | 本机用户根七个链接 | 已安装且复核 unchanged；见 [安装记录](../.planning/phases/18-discoverable-stage-commands/18-HOST-EVIDENCE.md) |
-| 当前桌面与另一个作业项目中实际发现／调用 | 已在 FIT5032 专用合成对话观察到六入口宿主清单与六次调用；帮助示例遗漏已修正规则，补测待授权；原生选择器 GUI 未观察 |
+| 当前桌面与另一个作业项目中实际发现／调用 | 已在 FIT5032 专用合成对话观察到六入口宿主清单与六次调用；帮助示例遗漏已修复并通过追加宿主补测；原生选择器 GUI 未观察 |
 | 任意原生 `/el-*` 别名、其他平台或宿主 | 未验证 |
 
 不能由上述安装测试推断课程许可、真实文件视觉检查、远程提交或独立 Codex 运行成功。

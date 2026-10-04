@@ -1,0 +1,14 @@
+{
+  "id": "01a1070a-2323-7cd1-aac6-6e01884f0464",
+  "status": "completed",
+  "startedAt": 1791119467,
+  "completedAt": 1791119496,
+  "durationMs": 29235,
+  "commands": [
+    {
+      "command": "/bin/zsh -lc 'cat <installed-skills>/el-help/SKILL.md <installed-skills>/assignment-review/references/command-entrypoints.md'",
+      "exit": 0
+    }
+  ],
+  "result": "已重新读取并执行 `$el-help`，完整帮助如下：\n\n| 命令 | 动作 | 最少材料 | 输出 | 调用示例 |\n|---|---|---|---|---|\n| `$el-help` | help：只说明用法 | 无需作业材料 | 本表与实际支持范围 | `$el-help` |\n| `$el-prepare` | review，preparation | 已知任务／要求；允许缺稿 | 要求、证据需求、工作顺序与缺口 | `$el-prepare 任务 T18，仅用附上的要求安排步骤` |\n| `$el-check` | review，in_progress | 指定当前稿与可用要求；不足明确报告 | 当前证据矩阵与最小下一步 | `$el-check 当前稿 current-v1，重点检查理由` |\n| `$el-final` | review，final | 当前交付材料与要求；不可读仍保持 final | 收尾矩阵、修正交接、待核验项 | `$el-final 当前稿 current-v2，只检查文字内容` |\n| `$el-recheck` | review，新版本复查 | 新当前稿；先前发现可缺 | 当前检查、F 状态及 A 行动退役／保留 | `$el-recheck 当前稿 current-v2，复核 F18-1` |\n| `$el-prompt` | export：只取已捕获原文 | 同一任务／对话的实际捕获记录 | 当前版本无捕获功能，明确 unavailable | `$el-prompt` |\n\n支持范围以本次读取的资源记录及本次观察为限：\n\n| 项目 | 证据／状态 |\n|---|---|\n| `$skill`、CLI/IDE `/skills`、Skill 根目录及符号链接 | 资源记录为 documented，依据其 2026-10-04 查阅的[官方文档](https://learn.chatgpt.com/docs/build-skills)；本次未联网复核 |\n| 六入口安装与共享路径 | 资源记录：7 项元数据及 21 项自动检查通过，七链接核对 unchanged；本次未重跑 |\n| 当前 macOS 桌面宿主六入口发现／调用 | 资源记录为已观察；精确构建版本未知，选择器 GUI 未观察 |\n| FIT5032 合成任务 T18 | 资源记录：阶段、复查和 unavailable 导出符合预期；本次帮助补测已输出完整五列六行表，包含全部示例 |\n| 原生 `/el-*` 别名及其他未测试宿主 | 未验证，不作支持承诺 |\n\n资源中的“宿主补测尚未运行”是读取时的记录；本次已完成帮助补测，未修改该文件。\n\n本次实际重新读取：\n\n- [el-help/SKILL.md](<installed-skills>/el-help/SKILL.md)\n- [command-entrypoints.md](<installed-skills>/assignment-review/references/command-entrypoints.md)\n\n未读取课程文件、项目历史或其他聊天，未执行作业审阅、修改文件、调用 MCP/provider、运行 `codex exec`，也未创建子代理或聊天。"
+}
