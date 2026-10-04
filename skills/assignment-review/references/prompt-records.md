@@ -41,3 +41,11 @@ Actions and JSON keys (all accept optional taskId/evidenceRoots; evidenceRoots a
 - `forget-task` / `forget-task --apply`: exact taskId required; dry run is default. See retention section.
 
 Library `consumeCaptured(scope,runId,consumer)` delivers the saved UTF-8 Buffer once, marks dispatched before delivery, finishes succeeded after consumer return or failed/uncertain after rejection, and never retries. It ships no real model consumer. Export does not call this function, a source reader, network, subprocess or model. Dispatch stdout failure is uncertain; do not resend automatically.
+
+## Retention and exact deletion
+
+Records remain indefinitely until explicit deletion or a reported disk limit. Inspect metadata with status; export only with the actual latest attempted receipt. There is no automatic expiry, pruning, repair or background process.
+
+Preview: send `{"taskId":"T-example"}` via stdin to `forget-task`. Apply the user's requested deletion with the same exact task and `forget-task --apply`. The helper serializes writers, publishes a deleted tombstone first, then removes only enumerated validated snapshot/lifecycle files. It preserves unrecognized files, foreign links and all other tasks. `incomplete:true` means some records were preserved; report this, never claim full erasure. A later explicit begin can start a new generation only when the known old records were removed. Repeat deletion is safe. Tombstones retain minimal scope/deleted state and sequence; local deletion cannot erase backups/cloud copies.
+
+For busy/uncertain after a crash: preserve the task directory and latest attempted runId. Inspect only the exact conversation lock (`SHA256(conversationId)/lock/owner.json`: lockId, pid, createdAt) and known record metadata. An age or absent PID alone is not proof of a safe transaction boundary. Recovery needs explicit authorization, the exact unchanged lock identity, and proof the owned writer has exited; validate whether the head and state committed together before changing anything. Do not unlock a partial transaction and scan for an older success. If consistency cannot be established, leave the old state unavailable and use a separately identified task/root after explaining the retained data. No automatic recovery command is provided.

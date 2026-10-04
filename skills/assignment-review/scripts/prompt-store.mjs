@@ -128,13 +128,42 @@ export async function finishRun(scope,runId,outcome){return transaction(scope,fa
 });}
 export async function exportLatest(scope,{expectedRunId}={}){
  const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId);
+ if(t?.deleted)fail('deleted');
  if(!t||!t.latest){if(expectedRunId)fail('latest_mismatch');fail('no_record');}
  if(t.deleted)fail('deleted');if(!uuid(expectedRunId))fail('identity_required');if(t.latest!==expectedRunId)fail('latest_mismatch');
  const l=await state(c,t,t.latest);if(l.promptSha256===null)fail('uncertain');const v=await snapshot(c,t,l);
  await boundary(c,'export_read');await unlocked(c);const after=await loadIndex(c);if(JSON.stringify(after)!==JSON.stringify(index))fail('busy');
  return {promptText:v.promptText,metadata:{...receipt(l),stage:v.stage,reviewMode:v.reviewMode,currentSourceId:v.currentSourceId,capturedAt:v.capturedAt,materials:v.materials,limitations:v.limitations}};
 }
-export async function forgetTask(){fail('unsupported');}
+async function deletionPreview(c,t){
+ await dirs(taskDir(c,t),false,c.root);
+ const recognized=new Set(t.runs.flatMap(r=>[r.runId+'.state.json',r.runId+'.snapshot.json']));
+ let preservedUnknownCount=0,count=0;
+ const d=await fs.opendir(taskDir(c,t));
+ for await(const e of d){if(++count>LIMITS.runs*2+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
+}
+export async function forgetTask(scope,{apply=false}={}){
+ if(!id(scope.taskId))fail('identity_required');
+ if(!apply){const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId);if(!t)fail('no_record');const result=await deletionPreview(c,t);await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');return result;}
+ return transaction(scope,false,async tx=>{
+  const {c,index}=tx,t=taskFor(index,scope.taskId);if(!t)fail('no_record');
+  const preview=await deletionPreview(c,t);
+  t.deleted=true;tx.dirty();await tx.publish();await boundary(c,'after_tombstone');
+  const remaining=[];
+  for(const r of t.runs){
+   try{
+    const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
+    const lraw=await read(lp),sraw=await read(sp);
+    if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
+    if(sraw){const v=validateSnapshot(sraw);if(!lraw||v.runId!==r.runId||v.sequence!==r.sequence||v.taskId!==t.taskId||v.conversationId!==scope.conversationId||v.promptSha256!==lraw.promptSha256)fail('corrupt_record');await fs.unlink(sp);await boundary(c,'after_delete_snapshot');}
+    if(lraw)await fs.unlink(lp);
+   }catch{remaining.push(r);}
+  }
+  await syncDir(taskDir(c,t));t.runs=remaining;t.latest=remaining.length?t.latest:null;await tx.publish();
+  return {...preview,mode:'apply',deleted:true,incomplete:remaining.length>0,remainingRuns:remaining.length};
+ });
+}
 
 // Diagnostic metadata only; it never grants a missing latest-attempt receipt.
 export async function statusTask(scope){
