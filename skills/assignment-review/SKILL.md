@@ -7,7 +7,7 @@ description: "Adapt an assignment prompt to sourced task materials, or perform a
 
 把用户的标准提示词和当前任务材料结合起来，生成适用的提示词；用户明确请求检查时，实际给出证据矩阵和最小下一步。保留语言、格式、重点等有效偏好，区分原始要求、用户转述与助手建议。
 
-六个快捷入口见[阶段命令](references/command-entrypoints.md)。入口已选定 review 时沿用其阶段，不触发下表的意图不明 generate 默认；帮助与导出在命令路由中直接结束。
+六个快捷入口见[阶段命令](references/command-entrypoints.md)。入口已选定 review 时沿用其阶段，不触发下表的意图不明 generate 默认；帮助与导出在命令路由中直接结束。四个阶段命令在实际审阅前遵循[捕获协议](references/prompt-records.md)：先 begin，再筛选材料／组装六节提示词，capture 后读取 dispatch 原文执行，最后 finish 并保留回执。单独 generate 不冒充已捕获或已执行的阶段运行。
 
 ## 选择意图与阶段
 
