@@ -1,9 +1,9 @@
 ---
 phase: 18-discoverable-stage-commands
-status: awaiting_host_verification
+status: help_retest_pending
 installation: passed
-discovery: pending
-invocation: pending
+discovery: passed_host_catalog
+invocation: six_observed_help_examples_retest_pending
 ---
 # Phase 18 — Installed host evidence
 
@@ -31,16 +31,20 @@ Executed 2026-10-04 on this macOS host from commit ac95f69. Explicit execute-pha
 
 Current interface: Codex desktop, exact build unknown. `cua.getApp("Codex")` returned “Computer Use is not allowed to use the app 'com.openai.codex' for safety reasons.” No screen or selector was inspected and no UI operation was attempted afterward. This tool restriction is not command failure evidence. Do not use alternative UI scripting to bypass it.
 
-No cross-project chat was created or messaged. A fresh separate acceptance chat requires explicit human authorization under the app tools. Otherwise the user can perform the host trial directly. No codex exec or paid-proof replay was used. Installation is filesystem evidence only.
+The user subsequently authorized the dedicated FIT5032 chat and six synthetic tests. Chat `01a106f9-f729-7af1-a6cf-cbb6b5840d0e` (local; title EvidenceLens 六命令合成验收) completed all six turns. Direct thread-tool receipts are in [18-HOST-RECEIPTS.json](18-HOST-RECEIPTS.json). Native selector GUI remains unobserved: discovery evidence is the actual host-provided available-Skills catalog, corroborated by this parent host's catalog, followed by loading those discovered entries. Exact desktop build is unknown; no native slash aliases or other platforms are claimed.
 
-| Entry | Target-host discovery | Another assignment project invocation |
+| Entry | Target-host catalog discovery | Actual synthetic invocation |
 |---|---|---|
-| el-help | pending | pending |
-| el-prepare | pending | pending |
-| el-check | pending | pending |
-| el-final | pending | pending |
-| el-recheck | pending | pending |
-| el-prompt | pending | pending |
+| el-help | observed | six actions/materials/support; missing examples found, rule corrected, retest pending |
+| el-prepare | observed | preparation, no draft, R18-1 unknown and three planning actions |
+| el-check | observed | in_progress, current-v1, missing reason F18-1 / pending A18-1 |
+| el-final | observed | final retained, text-only gap, unknown rubric/visual/submission coverage |
+| el-recheck | observed | explicit in_progress/current-v2, F18-1 resolved and A18-1 done/removed |
+| el-prompt | observed | unavailable, no reconstructed prompt or review |
+
+The six completed turns span UTC 2026-10-04T12:53:27Z–12:59:22Z. Inspecting all recorded tool commands confirms only `cat` reads under the installed Skill root. No course/project files, external chat history, provider requests or file mutations appear. Shared resources are reused within this synthetic conversation. The prepare turn's long shared-resource output was truncated in the read-thread receipt; command arguments and terminal exit remain visible. This is a bounded host trial, not an independent semantic evaluator or universal isolation proof.
+
+Rule-1 repair: help had omitted invocation examples even though the source table contains them. Strengthened help routing to require all six rows and five columns. Node installation/link/boundary suite rerun: 21/21, exit 0, 0.563s, UTC 13:00:03Z. Extra host recheck requires separate authorization because original authorization was six tests only. Stage tests are accepted; final help completeness awaits that check.
 
 ## Ready-to-run synthetic host trial
 
