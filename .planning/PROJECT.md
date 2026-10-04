@@ -37,7 +37,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phase 18 is complete; next: plan Phase 19.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phase 18 is complete. Phase 19 has five verified plans; next: execute Phase 19.
 
 - [ ] `$el-prompt` exports the actual latest task prompt for this conversation/task after a stage command; no stage guessing or reconstructed prompt.
 - [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.

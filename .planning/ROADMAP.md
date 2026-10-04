@@ -58,7 +58,27 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 2. 重复导出不调用模型；无记录、损坏、最新运行失败和并发任务有明确且不串用的行为。
 3. 原文与导出说明分离，跨对话材料缺口明确；本地存储、保留和删除说明可用且无敏感内容进入 Git。
 
-**Plans**: TBD — created by `$gsd-plan-phase 19`.
+**Plans**: 5 planned; structure, requirement and decision gates passed in 19-PLAN-CHECK.md.
+
+**Wave 1**
+
+- [ ] 19-01-PLAN.md — Strict prompt contract and private immutable run store.
+**Wave 2** *(requires Wave 1 completion)*
+
+- [ ] 19-02-PLAN.md — Installed dispatch/export CLI and scoped retention/deletion.
+**Wave 3** *(requires Wave 2 completion)*
+
+- [ ] 19-03-PLAN.md — Four-stage capture wiring and actual el-prompt export entry.
+**Wave 4** *(requires Wave 3 completion)*
+
+- [ ] 19-04-PLAN.md — Fault/concurrency tests and installed current-host synthetic acceptance.
+**Wave 5** *(requires Wave 4 completion)*
+
+- [ ] 19-05-PLAN.md — Accepted feature patch and fresh targeted regression closure.
+
+**Cross-cutting constraints:**
+
+- Only approved task-facing content is captured; exports never regenerate or fall back to an older run.
 
 ### Phase 20: Bounded Independent Codex Execution
 
@@ -91,7 +111,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
-| 19. Captured Task Prompts and Export | 0/TBD | Not started | — |
+| 19. Captured Task Prompts and Export | 0/5 | Planned | — |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
 
