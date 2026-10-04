@@ -2,28 +2,28 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: awaiting_user
+status: executing
 last_updated: "2026-10-04T13:06:00Z"
-last_activity: 2026-10-04 — Phase 18 six host tests observed; awaiting one help retest
+last_activity: 2026-10-04 — Phase 18 host acceptance complete; patch 0.3.1 verification
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 help-output retest; six commands discovered and invoked in FIT5032, two plans complete.
+See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 post-patch regression and verification; three plans complete.
 
 ## Current Position
 
 Phase: 18 (Discoverable Stage Commands) — EXECUTING
-Plan: 3 of 4 — Tasks 1–2 complete; Task 3 help retest checkpoint
-Status: Awaiting user — one additional help retest authorization
+Plan: 4 of 4 — Version synchronized; post-patch verification pending
+Status: Executing — post-patch regression
 Last activity: 2026-10-04 — Six host invocations; fresh build, 118 affected tests and 21 Node tests passed
 
 ## Accepted Coverage Debt
@@ -40,9 +40,7 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Await the pending one-message `$el-help` retest authorization in existing acceptance chat `01a106f9-f729-7af1-a6cf-cbb6b5840d0e`. User already authorized six initial tests; all completed and host catalog discovery observed. Initial help omitted examples; rule fixed, extra host retest not yet authorized. See [host evidence](phases/18-discoverable-stage-commands/18-HOST-EVIDENCE.md) and [continuation](phases/18-discoverable-stage-commands/.continue-here.md).
-
-Plans 01–02 complete; Plan 03 awaits only corrected help acceptance; Plan 04 not started. Fresh pre-patch 0.3.0 build and six-file/118-test regression plus 21 Node tests passed after existing dependencies materialized. No dependency version changed. After help acceptance continue patch 0.3.1, fresh affected regression and phase verification; no historical proof replay.
+Plan 03 accepted after authorized corrected help retest. Plan 04 executing: development product 0.3.1 synchronized; fresh post-patch build/affected regression and final verification pending. Six commands observed in the FIT5032 synthetic chat; no real coursework accessed. No release/tag.
 
 ## Session Continuity
 
