@@ -55,7 +55,7 @@ No next milestone defined. All v1.1 requirements are archived and validated with
 
 ## Current State
 
-Milestone **v1.1 locally complete and archived 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Product version **0.2.4**, with GitHub publication pending the existing remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
+Milestone **v1.1 complete, archived and published 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Product version **0.2.4**, [published on GitHub](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) after the user explicitly lifted the remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
 
 Source-bound evidence includes Phase 16 official validator/control, successful build and 43-file/795-test offline pass, plus Phase 17 12 boundary tests and 57 actual collector steps. Semantic language judgments and audit interpretation remain manual; TD-12/13/14/15 coverage debt is accepted for closure, alongside inherited v1.0 debt. Historical host I/O root cause is unknown, preserved dependencies remain recoverable. Archival compatibility verification is recorded in the completion record. No real-coursework, installed discovery, universal host isolation or remote submission claim.
 
@@ -87,7 +87,7 @@ At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18
 | Pin isolated developer validator prerequisite and preserve exact-lock dependencies | Official tooling and offline acceptance recovered; I/O root cause unknown |
 | Separate record completion from automated semantic coverage | 22/22 requirements accepted with honest partial Nyquist fields |
 | Preserve historical paths, paid proof and report bytes | Archives and source-bound evidence retained |
-| Distinguish milestone v1.1 from product 0.2.4 and remote publication | Local tag/archival only until existing history hold is lifted |
+| Distinguish milestone v1.1 from product 0.2.4 and remote publication | User lifted history hold; main and both tags published, product v0.2.4 Release verified |
 
 <details>
 <summary>Previous project context and decisions</summary>
@@ -97,4 +97,4 @@ At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18
 </details>
 
 ---
-*Last updated: 2026-10-04 after v1.1 local milestone completion*
+*Last updated: 2026-10-04 after v1.1 completion and product v0.2.4 publication*

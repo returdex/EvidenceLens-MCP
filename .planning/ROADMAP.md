@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) — Phases 1–11; completed 2026-09-24 (historical local record).
-- ✅ [v1.1 Assignment Prompt Adaptation and Staged Review](milestones/v1.1-ROADMAP.md) — Phases 12–17; 13 plans, 28 tasks, 22/22 requirements; locally archived 2026-10-04, product 0.2.4 publication pending.
+- ✅ [v1.1 Assignment Prompt Adaptation and Staged Review](milestones/v1.1-ROADMAP.md) — Phases 12–17; 13 plans, 28 tasks, 22/22 requirements; archived 2026-10-04, product [v0.2.4 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4).
 
 ## Next Milestone
 
@@ -20,4 +20,4 @@ Not yet defined. Run `$gsd-new-milestone` to create fresh requirements and conti
 
 ## Current authority
 
-[Completion record](milestones/v1.1-COMPLETION.md) distinguishes local archival, accepted coverage debt and pending publication. [Requirements](milestones/v1.1-REQUIREMENTS.md) are archived. Original phase directories and audits remain unchanged for evidence/proof references.
+[Completion record](milestones/v1.1-COMPLETION.md) records archival, accepted coverage debt and verified publication. [Requirements](milestones/v1.1-REQUIREMENTS.md) are archived. Original phase directories and audits remain unchanged for evidence/proof references.

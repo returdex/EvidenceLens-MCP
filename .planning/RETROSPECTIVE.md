@@ -53,7 +53,7 @@
 
 ## Milestone: v1.1 — Assignment Prompt Adaptation and Staged Review
 
-**Locally completed:** 2026-10-04; remote publication pending.
+**Completed and published:** 2026-10-04; product v0.2.4 Release verified after explicit user authorization to lift the history hold.
 **Phases:** 6 | **Plans:** 13 | **Tasks:** 28
 
 ### What Was Built
