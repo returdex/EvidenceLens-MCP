@@ -62,7 +62,8 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 | 官方文档中的 `$`、用户／项目根、目录符号链接 | documented：[Build skills](https://learn.chatgpt.com/docs/build-skills)，2026-10-04 |
 | 本包的 Skill 元数据与相对资源图 | 7 个官方正例与负控制已验证；见 [Plan 01](../.planning/phases/18-discoverable-stage-commands/18-01-SUMMARY.md) |
 | 临时目录中的安装、冲突、重复安装、回滚、外部 cwd | 8 项安装／结构测试通过（不含真实宿主调用） |
-| 当前桌面与另一个作业项目中实际发现／调用 | pending；执行计划 18-03 记录实际结果 |
+| 本机用户根七个链接 | 已安装且复核 unchanged；见 [安装记录](../.planning/phases/18-discoverable-stage-commands/18-HOST-EVIDENCE.md) |
+| 当前桌面与另一个作业项目中实际发现／调用 | pending；界面工具限制已记录，等待专用对话授权或人工观察 |
 | 任意原生 `/el-*` 别名、其他平台或宿主 | 未验证 |
 
 不能由上述安装测试推断课程许可、真实文件视觉检查、远程提交或独立 Codex 运行成功。
