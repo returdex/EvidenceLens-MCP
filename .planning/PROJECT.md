@@ -2,7 +2,7 @@
 
 ## What This Is
 
-EvidenceLens MCP combines a controlled, read-only multimodal second-review service with one repository-managed assignment-review Skill. The Skill adapts prompts to sourced requirements, supports preparation/progress/final reviews, checks template structure and truthful disclosure, and updates findings against the designated current artifact.
+EvidenceLens MCP combines a controlled, read-only multimodal second-review service with one shared assignment-review Skill and six installed command entry Skills. The Skill adapts prompts to sourced requirements, supports preparation/progress/final reviews, checks template structure and truthful disclosure, and updates findings against the designated current artifact.
 
 The existing service offers deterministic offline review and a replaceable DeepSeek provider path. Historical Linux/Docker/paid proof remains bound to its original certified source. The new Skill does not automatically call Codex, edit documents, sign declarations or submit work.
 
@@ -33,11 +33,12 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Task-mapped retrospective records for Phases 12–15 and expanded audit closure — Phase 17 (`VAL-03` to `VAL-06`); 4/4 criteria and 17 original task mappings verified. Manual semantic automation remains PARTIAL.
 
+- ✓ Six installed command entries, shared fixed-stage routing, conservative installation, complete help and actual cross-project synthetic host acceptance — Phase 18 (`CMD-01` to `CMD-05`); product 0.3.1, fresh build/118 affected tests/21 Node tests. Prompt capture remains unavailable until Phase 19.
+
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Next: plan Phase 18.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phase 18 is complete; next: plan Phase 19.
 
-- [ ] Discoverable fixed commands for preparation, in-progress review, final review, recheck and help.
 - [ ] `$el-prompt` exports the actual latest task prompt for this conversation/task after a stage command; no stage guessing or reconstructed prompt.
 - [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
@@ -68,11 +69,11 @@ Source-bound evidence includes Phase 16 official validator/control, successful b
 
 **Goal:** Use fixed stage commands to run a bounded independent review, return concise evidence-backed findings to the work conversation, and export the exact task prompt from that run on request.
 
-**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. These are planned interfaces, not installed capabilities. Stage commands choose the workflow; prompt export reads the recorded run. Explicit current artifact and user focus remain authoritative.
+**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands choose the shared workflow; prompt export currently reports unavailable and will read a recorded run after Phase 19. Explicit current artifact and user focus remain authoritative.
 
 **Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
 
-**Version:** Planning milestone v1.2; development product 0.3.0 per DEVELOPMENT.md minor-on-milestone policy. Last published product is v0.2.4. No v0.3.0 Release or new functionality is claimed at initialization. Phase numbering continues at 18.
+**Version:** Planning milestone v1.2; development product 0.3.1 after the first accepted command feature patch. Last published product is v0.2.4. No v0.3.1 Release/tag is created by phase completion. Phase numbering continues at 18.
 
 **Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
 
@@ -118,4 +119,4 @@ After each phase, move verified requirements to Validated with phase references,
 </details>
 
 ---
-*Last updated: 2026-10-04 after v1.2 requirements and roadmap approval*
+*Last updated: 2026-10-05 after Phase 18 completion*

@@ -4,15 +4,15 @@
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) — Phases 1–11, historical completed milestone.
 - ✅ [v1.1 Assignment Prompt Adaptation and Staged Review](milestones/v1.1-ROADMAP.md) — Phases 12–17, product v0.2.4 published.
-- ◆ **v1.2 快捷指令与 Codex 独立审阅** — Phases 18–21; development product 0.3.0, not released.
+- ◆ **v1.2 快捷指令与 Codex 独立审阅** — Phases 18–21; development product 0.3.1, not released.
 
 ## Approval State
 
-The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 has two completed plans; six commands are installed and were invoked in a dedicated FIT5032 synthetic chat; corrected help output awaits one additional host retest. Original phase directories and audit/proof snapshots remain in place.
+The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 completed all four plans and CMD-01–05 on 2026-10-05; six installed commands and corrected help were accepted in a dedicated FIT5032 synthetic chat. Original phase directories and audit/proof snapshots remain in place.
 
 ## Phases
 
-- [ ] **Phase 18: Discoverable Stage Commands** — 命令入口与安装。
+- [x] **Phase 18: Discoverable Stage Commands** — 命令入口与安装。 (completed 2026-10-05)
 - [ ] **Phase 19: Captured Task Prompts and Export** — 提示词记录与导出。
 - [ ] **Phase 20: Bounded Independent Codex Execution** — Codex 独立执行。
 - [ ] **Phase 21: Review Handoff and Usage Acceptance** — 结果回传与用量验收。
@@ -29,20 +29,20 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 2. 四个阶段调用选择准确，用户当前稿和重点被保留；帮助与导出不会触发审阅。
 3. 缺材料场景继续有依据的工作并明确未知项，既有基线/模板/披露/复查规则保持一致。
 
-**Plans**: 4 plans, checked and ready to execute.
+**Plans**: 4/4 complete; verified in 18-VERIFICATION.md.
 
 **Wave 1**
 
 - [x] 18-01-PLAN.md — Six entry Skills and shared command routing.
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** *(complete)*
 
 - [x] 18-02-PLAN.md — Safe local installation and accurate command help.
-**Wave 3** *(blocked on Wave 2 completion)*
+**Wave 3** *(complete)*
 
-- [ ] 18-03-PLAN.md — Synthetic behavior and actual cross-project host acceptance.
-**Wave 4** *(blocked on Wave 3 completion)*
+- [x] 18-03-PLAN.md — Synthetic behavior and actual cross-project host acceptance.
+**Wave 4** *(complete)*
 
-- [ ] 18-04-PLAN.md — Completed feature patch and affected offline regression verification.
+- [x] 18-04-PLAN.md — Completed feature patch and affected offline regression verification.
 
 **Cross-cutting constraints:**
 
@@ -90,7 +90,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
-| 18. Discoverable Stage Commands | 2/4 | Help retest checkpoint | — |
+| 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 0/TBD | Not started | — |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |

@@ -162,7 +162,7 @@ Judgment: PASS manually. Only affected requirement/finding/action changes; uncha
 
 ## Overall boundary
 
-Ten semantic cases manually pass their finite criteria. Collection checks establish read lists, exclusion, unavailable current, unchanged synthetic source maps and changed hashes. They do not establish automatic enforcement by every host/model. No native-host invocation has been observed; Plan 03 remains incomplete until its separate checkpoint. No mutation to historical phase evidence or private course files.
+Ten semantic cases manually pass their finite criteria. Collection checks establish read lists, exclusion, unavailable current, unchanged synthetic source maps and changed hashes. They do not establish automatic enforcement by every host/model. At this original manual-case checkpoint, no native-host invocation had been observed. Subsequent actual host acceptance and the corrected help retest are now recorded separately in 18-HOST-EVIDENCE.md; Plan 03 is complete. No mutation to historical phase evidence or private course files.
 
 ## Actual collector provenance
 

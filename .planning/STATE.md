@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: executing
-last_updated: "2026-10-04T13:06:00Z"
-last_activity: 2026-10-04 — Phase 18 host acceptance complete; patch 0.3.1 verification
+status: ready_to_plan
+last_updated: "2026-10-04T13:17:05.521521+00:00"
+last_activity: 2026-10-05 — Phase 18 complete; Phase 19 ready to plan
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 25
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-04. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 18 post-patch regression and verification; three plans complete.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Phase 19 prompt capture/export planning. Phase 18 complete at product 0.3.1.
 
 ## Current Position
 
-Phase: 18 (Discoverable Stage Commands) — EXECUTING
-Plan: 4 of 4 — Version synchronized; post-patch verification pending
-Status: Executing — post-patch regression
-Last activity: 2026-10-04 — Six host invocations; fresh build, 118 affected tests and 21 Node tests passed
+Phase: 19
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-05 — Phase 18 verified and completed
 
 ## Accepted Coverage Debt
 
@@ -40,8 +40,10 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Plan 03 accepted after authorized corrected help retest. Plan 04 executing: development product 0.3.1 synchronized; fresh post-patch build/affected regression and final verification pending. Six commands observed in the FIT5032 synthetic chat; no real coursework accessed. No release/tag.
+Run `$gsd-plan-phase 19` for Captured Task Prompts and Export. Phase 18: 4/4 plans, 9/9 tasks, CMD-01–05 complete, three goal criteria passed. Corrected help accepted in the authorized FIT5032 synthetic chat; no real coursework accessed. Product 0.3.1 has fresh build, 118 affected tests and 21 Node tests passing; no release/tag.
+
+Progress percent is 1/4 milestone phases (25%); four completed plans are the currently defined plans, while future phases remain TBD. Manual semantic automation remains partial (18-VALIDATION nyquist_compliant=false); GUI selector, native slash aliases and other hosts are unverified. `$el-prompt` currently returns unavailable until Phase 19 implements capture/export.
 
 ## Session Continuity
 
-Last session: 2026-10-04. v1.2 initialized through SDK `state.milestone-switch`; product development version 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 18 completed via SDK `phase.complete`; current development product 0.3.1. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.

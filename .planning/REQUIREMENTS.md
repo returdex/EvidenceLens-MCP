@@ -2,20 +2,20 @@
 
 **Defined:** 2026-10-04
 **Milestone:** 快捷指令与 Codex 独立审阅
-**Status:** Approved by the user on 2026-10-04; implementation pending.
+**Status:** Approved on 2026-10-04; CMD-01–05 completed in Phase 18 on 2026-10-05.
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence.
 
 ## v1.2 Requirements
 
-The user confirmed the milestone direction and revised command semantics. All items remain unimplemented. These requirements define user outcomes; runner selection and record layout are resolved during phase planning.
+The user confirmed the milestone direction and revised command semantics. Five command requirements are complete; sixteen prompt/runner/handoff requirements remain pending. These requirements define user outcomes; runner selection and record layout are resolved during phase planning.
 
 ### 命令入口与安装
 
-- [ ] **CMD-01**: 用户可以安装并在目标 Codex 宿主及另一个作业项目中发现六个命令入口：`$el-help`、`$el-prepare`、`$el-check`、`$el-final`、`$el-recheck`、`$el-prompt`。
-- [ ] **CMD-02**: 用户调用四个阶段指令时，分别执行准备分析、过程检查、最终检查或新版本复查；明确的当前稿、范围和检查重点优先，不再次猜测阶段。
-- [ ] **CMD-03**: 用户可通过 `$el-help` 查看每条指令的动作、所需材料、输出、调用示例及已验证的宿主支持范围。
-- [ ] **CMD-04**: 用户材料不足时获得具体缺口与可继续完成的工作；不会用旧稿替代当前稿、编造教师说明或把未执行的检查报告为成功。
-- [ ] **CMD-05**: 用户通过不同入口仍获得现有基线、模板、披露和复查规则的一致行为；入口共享规则，帮助及提示词导出不触发审阅。
+- [x] **CMD-01**: 用户可以安装并在目标 Codex 宿主及另一个作业项目中发现六个命令入口：`$el-help`、`$el-prepare`、`$el-check`、`$el-final`、`$el-recheck`、`$el-prompt`。
+- [x] **CMD-02**: 用户调用四个阶段指令时，分别执行准备分析、过程检查、最终检查或新版本复查；明确的当前稿、范围和检查重点优先，不再次猜测阶段。
+- [x] **CMD-03**: 用户可通过 `$el-help` 查看每条指令的动作、所需材料、输出、调用示例及已验证的宿主支持范围。
+- [x] **CMD-04**: 用户材料不足时获得具体缺口与可继续完成的工作；不会用旧稿替代当前稿、编造教师说明或把未执行的检查报告为成功。
+- [x] **CMD-05**: 用户通过不同入口仍获得现有基线、模板、披露和复查规则的一致行为；入口共享规则，帮助及提示词导出不触发审阅。
 
 ### 最近一次提示词的记录与导出
 
@@ -66,11 +66,11 @@ The user confirmed the milestone direction and revised command semantics. All it
 
 | Requirement | Phase | Status |
 |---|---|---|
-| CMD-01 | Phase 18 | Pending |
-| CMD-02 | Phase 18 | Pending |
-| CMD-03 | Phase 18 | Pending |
-| CMD-04 | Phase 18 | Pending |
-| CMD-05 | Phase 18 | Pending |
+| CMD-01 | Phase 18 | Complete |
+| CMD-02 | Phase 18 | Complete |
+| CMD-03 | Phase 18 | Complete |
+| CMD-04 | Phase 18 | Complete |
+| CMD-05 | Phase 18 | Complete |
 | PRM-01 | Phase 19 | Pending |
 | PRM-02 | Phase 19 | Pending |
 | PRM-03 | Phase 19 | Pending |
@@ -90,4 +90,4 @@ The user confirmed the milestone direction and revised command semantics. All it
 
 **Coverage:** 21 requirements; 21 mapped exactly once; 0 unmapped. Mapping approved on 2026-10-04.
 
-*Last updated: 2026-10-04 after explicit requirements and roadmap approval.*
+*Last updated: 2026-10-05 after Phase 18 verification.*
