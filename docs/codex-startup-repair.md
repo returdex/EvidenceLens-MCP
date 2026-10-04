@@ -68,3 +68,14 @@ The isolation digest now includes createIsolatedLaunch itself, so production env
 The single live authorization is consumed. This local repair does not authorize a further real request, and post-0.3.6 real inference has not run. Phase 21's two-run acceptance remains separate and pending; next accepted feature patch is 0.3.7. Earlier 0.3.5 startup evidence remains historical, not an end-to-end success claim.
 
 0.3.6 final validation: fresh build passed; Node Codex/prompt/command/source-boundary suites 195/195 with zero failures/skips (9.575 s); six affected Vitest files 118/118 (4.05 s). Scoped diff/secret/private-identity checks passed. No post-fix real dispatch occurred.
+
+
+## Second authorized smoke on 0.3.6 — model catalog mismatch
+
+On 2026-10-05 at 05:16:08–05:16:09 Australia/Melbourne, the user's next direct “允许” authorized one further run of the same reviewed synthetic source/template on 0.3.6. It was executed exactly once, without A4 content, automatic retry or model switch.
+
+The private sequence-2 receipt records failed/protocol_invalid with process/unexpected_event, eventType=item.completed, itemType=error and reportedErrorCategory=model_unavailable. It observed thread.started, but no turn.started or completion. elapsedMs=1044, cleanupComplete=true, resultSha256=null; the supervisor requested termination and observed SIGTERM. Exact export remained unchanged. Captured prompt SHA-256: `5c1e62a1eb148c75b0117e5e93974d184cbe968f4c95693f5d20b2124af23fb7`. This is not a successful review; remote token consumption is unknown.
+
+The earlier permission failure did not recur in this attempt. Afterward, read-only `codex debug models` was queried first normally and then in a newly created sealed production home, with no existing model cache and the original read-only auth alias. No exec/inference command was invoked by these catalog queries. Both outputs listed gpt-5.5 (visibility=list) and codex-auto-review (visibility=hide); neither listed the pinned gpt-5.4. This corroborates a pinned-model/catalog mismatch. A listed model is a candidate for a future test, not evidence of completed inference. Raw catalog instructions and credentials were not printed or persisted.
+
+Current version remains 0.3.6; no runtime code or model pin changed in this turn. The proposed next step is an explicitly authorized change of the fixed model to listed gpt-5.5, revalidation of the isolation contract and one new same-source synthetic live test. The current one-run approval is consumed. No automatic fallback was performed. Phase 21 RUN-05 and the two-run handoff/recheck acceptance remain pending.

@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
-last_updated: "2026-10-04T18:13:42.316Z"
-last_activity: 2026-10-05 — authorized smoke failed; HOME isolation fixed locally; Phase 21 remains ready
+last_updated: "2026-10-04T18:18:40.757Z"
+last_activity: 2026-10-05 — 0.3.6 live smoke reached model gate; pinned model absent from CLI catalog
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — authorized smoke failed; HOME isolation fixed locally; Phase 21 remains ready
+Last activity: 2026-10-05 — 0.3.6 live smoke reached model gate; pinned model absent from CLI catalog
 
 ## Accepted Coverage Debt
 
@@ -53,11 +53,11 @@ User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/researc
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
-Current product 0.3.6, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real ChatGPT inference/model availability and usage/handoff acceptance are NOT_RUN; the historical uncertain startup is not successful inference evidence; semantic automation remains partial. Local host readiness is not remote inference evidence.
+Current product 0.3.6, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Successful real ChatGPT inference and usage/handoff acceptance remain pending; authorized startup smokes failed, with the latest reaching the model gate; semantic automation remains partial. Local host readiness is not remote inference evidence.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.6, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or live provider replay performed.
+Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.6, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or coursework replay performed. Two separately authorized synthetic live attempts failed; neither counts as acceptance.
 
 ## Compatible repair — 2026-10-05
 
@@ -72,3 +72,10 @@ A concrete one-run synthetic real inference check was subsequently authorized by
 ## Authorized smoke and HOME repair — 2026-10-05
 
 The direct user reply “允许” authorized exactly one prepared synthetic run. It returned failed/protocol_invalid/unexpected_stderr/permission in 925 ms, with no terminal/result, cleanup complete and exact prompt export unchanged. No A4 material was sent; no remote usage is inferred as zero. Offline diagnosis identified original HOME/.agents/skills discovery still outside the sealed CODEX_HOME. Product 0.3.6 now seals both HOME/CODEX_HOME and binds production launcher wiring into the isolation digest. See the updated [startup evidence](../docs/codex-startup-repair.md). Local verification passed; post-0.3.6 real inference is NOT_RUN and needs new applicable authorization. Phase 21 remains 0/6; next accepted feature patch 0.3.7 supersedes prior next-patch notes.
+
+
+## 0.3.6 live smoke and model gate — 2026-10-05
+
+The user's second explicit “允许” authorized one further same-source synthetic run. It reached thread.started and failed before turn.started with item.completed/error, reportedErrorCategory=model_unavailable; no permission stderr was recorded. Duration 1044 ms, cleanup complete, result null, exact export unchanged. No retry or model switch. Safe receipt details are recorded in [startup evidence](../docs/codex-startup-repair.md).
+
+Read-only actual CLI model discovery, including a fresh sealed home without a model cache, lists gpt-5.5 and hidden codex-auto-review; gpt-5.4 is absent. Proposal: explicitly authorize changing the fixed review model to gpt-5.5, recertify its contract and run one further prepared synthetic check. This is not yet authorized or implemented. Version remains 0.3.6; next accepted compatible patch 0.3.7. Phase 21 is still 0/6 with RUN-01–05 pending; successful real review/export/recheck acceptance remains incomplete.
