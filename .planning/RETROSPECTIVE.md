@@ -74,7 +74,7 @@
 - Intermittent filesystem delays required bounded diagnostic/recovery attempts; root cause remains unknown.
 - Missing original validation records required four retrospective maps.
 - SDK task counts and state/body fields needed manual reconciliation; complete-milestone's summary-pattern count was 3 while actual PLAN tasks total 28.
-- The legacy positive proof rehearsal assumed active requirements always exist, which conflicts with normal archival; its preservation snapshot now needs absent-file support.
+- The legacy positive proof rehearsal assumed active requirements always exist, which conflicts with normal archival; its preservation snapshot was updated and all 81 affected tests passed.
 
 ### Patterns Established
 

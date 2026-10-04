@@ -410,7 +410,10 @@ describe("proof chain certifier", () => {
 
   it("rehearses a complete committed passed synchronization and final audit offline", async () => {
     const repoRoot = process.cwd();
-    const currentRequirements = await readFile(join(repoRoot, ".planning/REQUIREMENTS.md"), "utf8");
+    // Between milestones the active requirements are archived and absent.
+    const snapshotRequirements = () => readFile(join(repoRoot, ".planning/REQUIREMENTS.md"), "utf8")
+      .catch((error) => error?.code === "ENOENT" ? null : Promise.reject(error));
+    const currentRequirements = await snapshotRequirements();
     const root = await mkdtemp(join(tmpdir(), "evidencelens-passed-rehearsal-"));
     const checkout = join(root, "repo");
     const phasePath = ".planning/phases/10-fail-closed-provider-startup-and-credentialed-mcp-e2e";
@@ -478,7 +481,7 @@ describe("proof chain certifier", () => {
       expect(finalAudit).toMatchObject({ status: 0, stderr: "" });
       expect(finalAudit.stdout).toMatch(/"cardinality":11/u);
       await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
-      expect(await readFile(join(repoRoot, ".planning/REQUIREMENTS.md"), "utf8")).toBe(currentRequirements);
+      expect(await snapshotRequirements()).toBe(currentRequirements);
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 
