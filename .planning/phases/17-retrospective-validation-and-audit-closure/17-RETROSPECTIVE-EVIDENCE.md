@@ -3476,3 +3476,34 @@ Source: `skills/assignment-review/references/recheck-cases.md`; extracted block 
   ]
 }
 ```
+
+## audit-structure
+
+Command: `python3 -c from pathlib import Path; import re; s=Path(".planning/v1.1-MILESTONE-REAUDIT.md").read_text(); ids=re.findall(r"^\| ((?:CTX|POL|SKL|TPL|DIS|REV|VAL)-\d{2}) ",s,re.M); debts=re.findall(r"^\| (TD-(?:12|13|14|15|V|B)) \|",s,re.M); assert len(ids)==len(set(ids))==22; assert len(debts)==len(set(debts))==6; assert len(re.findall(r"^\| I[1-6]:",s,re.M))==6; assert len(re.findall(r"^\| F[1-6]:",s,re.M))==6; print("22 requirement rows, six debt rows, six integration links, six flows; Phase 17 explicitly provisional")`; start `2026-10-04T06:39:48.667920+00:00`; cap 30s; elapsed 0.04s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+22 requirement rows, six debt rows, six integration links, six flows; Phase 17 explicitly provisional
+```
+
+## audit-integrity
+
+Command: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py`; start `2026-10-04T06:40:47.839796+00:00`; cap 30s; elapsed 0.177s; exit 0; timeout:false; owned_group_remaining:false.
+
+```text
+{
+  "preserved_hashes": 71,
+  "reused_build_and_offline_inputs": "identical",
+  "documents": 19,
+  "yaml_frontmatter": 13,
+  "relative_links": 66,
+  "original_task_maps": [
+    4,
+    4,
+    5,
+    4
+  ],
+  "requirement_rows": 22,
+  "historical_phase_summary_and_verification_sets": "12-16 matched",
+  "semantic_pass_claim": "none; manual review separate"
+}
+```

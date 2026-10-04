@@ -1,61 +1,64 @@
 ---
 phase: 17
 slug: retrospective-validation-and-audit-closure
-status: draft
+status: partial
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-10-04
+updated: 2026-10-04
+record_complete: false
+phase_verification: pending
 ---
 
-# Phase 17 — Validation strategy
+# Phase 17 — Actual validation record
 
-Planning contract only. No listed runtime/collector checks have been executed in Phase 17 yet. Existing source/evidence inspection establishes available checks, not their future success. D-05 requires this artifact despite the generic research=false exemption.
+**Executing; five task outcomes recorded, Task 6 and phase verification pending.** Automated structure/source checks pass within their actual scope; semantic evidence interpretation remains manual. `nyquist_compliant:false` is intentional, including after truthful record obligations are fulfilled. No full automation claim follows from report existence.
 
-## Infrastructure and bounded sampling
+Source at record creation `1cd7622f9e197c219436265e71063254964d1d17`; phase initial source `a8045344c906ae59b89247954dc79a3deebdbc13`. Date 2026-10-04 Australia/Melbourne; exact UTC start/elapsed/exit values below. Commands run at repository root using inspected temporary owned-process supervisor (30s metadata, 60s collectors). No paid/external-provider/Docker-runtime/remote CI. [Durable full source/output evidence](17-RETROSPECTIVE-EVIDENCE.md), [current audit](../../v1.1-MILESTONE-REAUDIT.md), [plan check](17-PLAN-CHECK.md).
 
-Reuse Node's built-in test runner, existing collectors, local Markdown/link/hash assertions and the isolated Phase 16 YAML environment if still available. No new framework/dependency assumed. Quick check: `node --test tests/baseline/source-boundary.mjs`; document check: `git diff --check` plus concrete task/requirement/link assertions. Source blocks and output schemas are in [patterns](17-PATTERNS.md).
+## Actual six-task verification map
 
-Each plan runs its relevant collector blocks once. Reuse a prior successful baseline after hash equality; rerun only checks affected by a real change. Reuse Phase 16 full runtime proof after verifying compiler/runtime inputs are unchanged; do not rerun 795 tests for documentation edits alone. Source-affecting changes require bounded appropriate regression.
+| Task | Requirement | Actual commands / outcomes | Manual evidence review | Coverage / status |
+|---|---|---|---|---|
+| 17-01-01 | VAL-03 | baseline-unit; baseline-collector; verify-record12: 12 boundary tests and 13 collection steps; exact four-task record; all exit 0 | B01–B07 source/output review; trusted host limits; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
+| 17-01-02 | VAL-04 | stage-collector; verify-record13: 9 collection steps; exact four-task record; all exit 0 | S01–S07 six-section generation, separate review and MCP not_run; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
+| 17-02-01 | VAL-05 | template-collector; phase14-record-check: 17 steps; sourceStringsUnchanged; exact five-task record; all exit 0 | C01–C08 template authority, contextual residue, truthful disclosure; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
+| 17-02-02 | VAL-06 | recheck-collector; phase15-record-check: 18 outputs; same-ID/new-content hashes and immutable sources; four-task record; all exit 0 | E01–E06 actual first ledger to A2-only repair, E05 unknowns and E06 separate review; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
+| 17-03-01 | VAL-03, VAL-04, VAL-05, VAL-06 | audit-structure; audit-integrity: 22 exact requirement rows, six debts, six I and F rows; 71 original hashes preserved; all exit 0 | Three-source mapping; current caller/callee and actual flow outcomes; four partial debts retained; implementing assistant, retrospective historical-output inspection | record verified; mixed automated/manual, PARTIAL |
+| 17-03-02 | VAL-03, VAL-04, VAL-05, VAL-06 | Final YAML/links/ID/hash/count/diff check and post-summary completeness pending | Tracking consistency and post-verifier reconciliation pending | pending |
 
-30s metadata / 60s baseline or collector bounds with owned-group TERM/5s/KILL and reaping. These are limits, not predicted latency. If a read stalls, record it and diagnose before one justified larger attempt; no repeated blind install/run. No watch mode. Retain actual failures and skip counts. No provider, Docker runtime, remote CI or publication.
+## Exact command outcomes
 
-## Per-task verification map
+All successful rows below report timeout:false and owned_group_remaining:false. Collector callbacks for unreadable/excluded synthetic content are intentional assertions, not skipped tests. Twelve boundary tests have zero failures/skips.
 
-| Task | Wave | Requirement | Threat | Automated checks planned | Manual evidence review planned | Status |
-|---|---|---|---|---|---|---|
-| 17-01-01 | 1 | VAL-03 | T-17-01/02/03 | Node baseline; 13-step block; four-task/five-ID map and source hashes | B01–B07 actual outputs against sources/oracles | pending |
-| 17-01-02 | 1 | VAL-04 | T-17-01/02 | Nine-step block; four-task/three-ID map; Skill hash and links | S01–S07 prompt/review semantics; structural validator scope | pending |
-| 17-02-01 | 2 | VAL-05 | T-17-01/02/04 | 17-step block and original-string assertion; five-task/five-ID map | C01–C08 template, restoration, residue and disclosure decisions | pending |
-| 17-02-02 | 2 | VAL-06 | T-17-01/04 | 18-step block; four-task/three-ID map, identities and links | E01–E06 actual lifecycle, current actions and final conclusions | pending |
-| 17-03-01 | 3 | VAL-03/04/05/06 | T-17-01/05/06 | 22 unique IDs, six debt IDs, source-hash preservation and links | Three-source evidence, six connections and six flows, residual debt | pending |
-| 17-03-02 | 3 | VAL-03/04/05/06 | T-17-05/06 | Six current/17 original task rows; YAML/count/link/diff checks; post-summary completeness | Truthful statuses and post-verifier audit/state reconciliation | pending |
+| Label / exact argv | UTC start | Cap / elapsed seconds | Exit |
+|---|---|---|---|
+| baseline-unit: `node --test tests/baseline/source-boundary.mjs` | 2026-10-04T06:26:42.601800+00:00 | 60.0 / 0.508 | 0 |
+| baseline-collector: `sh /tmp/el17-evidence/baseline.sh` | 2026-10-04T06:26:59.822572+00:00 | 60.0 / 0.072 | 0 |
+| verify-record12: `sh -c test "$(rg -c "^\&#124; 12-[0-9]+-[0-9]+ " .planning/phases/12-task-baseline-and-current-artifact-scope/12-VALIDATION.md)" = 4 && git diff --check` | 2026-10-04T06:29:07.023075+00:00 | 30.0 / 0.073 | 0 |
+| stage-collector: `sh /tmp/el17-evidence/stages.sh` | 2026-10-04T06:29:24.665569+00:00 | 60.0 / 0.074 | 0 |
+| verify-record13: `sh -c test "$(rg -c "^\&#124; 13-[0-9]+-[0-9]+ " .planning/phases/13-reusable-skill-and-stage-prompts/13-VALIDATION.md)" = 4 && git diff --check` | 2026-10-04T06:29:58.509149+00:00 | 30.0 / 0.075 | 0 |
+| template-collector: `sh /tmp/el17-evidence/template.sh` | 2026-10-04T06:34:42.035412+00:00 | 60.0 / 0.073 | 0 |
+| phase14-record-check: `sh -c test "$(rg -c "^\&#124; 14-[0-9]{2}-[0-9]{2} " .planning/phases/14-template-and-disclosure-review/14-VALIDATION.md)" = 5 && git diff --check` | 2026-10-04T06:35:15.828983+00:00 | 30.0 / 0.072 | 0 |
+| recheck-collector: `sh /tmp/el17-evidence/recheck.sh` | 2026-10-04T06:35:37.185153+00:00 | 60.0 / 0.078 | 0 |
+| phase15-record-check: `sh -c test "$(rg -c "^\&#124; 15-[0-9]{2}-[0-9]{2} " .planning/phases/15-current-version-recheck-and-workflow-acceptance/15-VALIDATION.md)" = 4 && git diff --check` | 2026-10-04T06:36:27.333146+00:00 | 30.0 / 0.072 | 0 |
+| audit-structure: `python3 -c from pathlib import Path; import re; s=Path(".planning/v1.1-MILESTONE-REAUDIT.md").read_text(); ids=re.findall(r"^\&#124; ((?:CTX&#124;POL&#124;SKL&#124;TPL&#124;DIS&#124;REV&#124;VAL)-\d{2}) ",s,re.M); debts=re.findall(r"^\&#124; (TD-(?:12&#124;13&#124;14&#124;15&#124;V&#124;B)) \&#124;",s,re.M); assert len(ids)==len(set(ids))==22; assert len(debts)==len(set(debts))==6; assert len(re.findall(r"^\&#124; I[1-6]:",s,re.M))==6; assert len(re.findall(r"^\&#124; F[1-6]:",s,re.M))==6; print("22 requirement rows, six debt rows, six integration links, six flows; Phase 17 explicitly provisional")` | 2026-10-04T06:39:48.667920+00:00 | 30.0 / 0.04 | 0 |
+| audit-integrity: `/tmp/evidencelens-phase16-validator/bin/python /tmp/el17-integrity.py` | 2026-10-04T06:40:47.839796+00:00 | 30.0 / 0.177 | 0 |
 
-## Wave 0 prerequisites
+## Wave 0 and history preservation
 
-- [ ] Read actual existing tests and complete source blocks; inspect child side-effect paths.
-- [ ] Establish bounded local execution and current source identity; retain original audit/report hashes.
-- [ ] Verify Phase 16 reuse applies to unchanged relevant source and recorded host scope.
-- [ ] Use existing environment; any missing dependency or runtime limitation gets explicit evidence before repair.
+- [x] Existing boundary suite and complete four collector blocks inspected; source callbacks limited to immutable synthetic maps.
+- [x] Owned bounded processes, sanitized credential/config overrides without printing values; flags are not a network sandbox.
+- [x] All 71 initial source/report/audit hashes rechecked identical; original audit and Phase 12–16 PLAN/SUMMARY/VERIFICATION/evaluations unchanged.
+- [x] Phase 16 build/full offline acceptance reused after exact current build/runtime/test/Skill input equality. Official target/control reuse tied to unchanged script/Skill/pin.
+- [x] Existing pinned isolated Python available for full YAML parsing; no dependency installation or shipped report-testing framework.
 
-Existing infrastructure is sufficient for the planned deterministic checks. There are no invented MISSING-test stubs or dependency-install tasks.
+The first snapshot timed out at 30s, exit -15, no owned group remaining; instrumented per-file progress justified one 60s attempt, successful in 22.644s. Retained failure is not a pass. Root cause of intermittent storage delay remains unknown. SDK chain-reset key unsupported; config auto_advance=false/no active chain inspected, no auto-transition.
 
-## Manual-only verification
+## Coverage and manual sign-off
 
-| Behavior | Method and limit |
-|---|---|
-| Language/workflow correctness of B/S/C/E cases | Read actual output against admitted source and oracle; retain historical date/author, record new retrospective judgment separately. New inline trial only when an actual evidence gap warrants it. No independent model generalization claim. |
-| Evidence sufficiency and debt classification | Inspect actual commands, outputs, source scope and missing/manual coverage. File existence and metadata are not semantic proof. |
-| Complete records versus complete automated coverage | Four VAL obligations may be complete with PARTIAL Nyquist; retain residual debt and accurate sign-off, never force compliant=true. |
+Four new records cover all **17 original tasks (4+4+5+4)** and all 16 original functional IDs. Their B/S/C/E source-to-output judgments remain explicitly retrospective, attributed to original implementing-assistant trials on 2026-10-03; this phase did not run an independent model. Exact boundaries and collection are automatic, language correctness is manually reviewed and may not generalize. No new output trial was needed: actual original output existed and matched current scoped rules.
 
-## Sign-off criteria — execution pending
+The audit maps all 22 approved requirements plus six original debt IDs. TD-V/TD-B closed by source-bound Phase 16 evidence; missing-document components of TD-12/13/14/15 resolved, manual semantic coverage still partial. Inherited v1.0 debt remains unchanged. No live paid proof, real binary/visual artifact, course compliance, global Skill discovery or remote submission proof is implied.
 
-- [ ] All six task rows have actual outputs/source/time and explicit manual attribution.
-- [ ] Four original records cover 4/4/5/4 tasks and all 16 original requirement IDs.
-- [ ] Original evidence/audit bytes preserved; prior failures and limits stay visible.
-- [ ] Required checks complete or actual gaps block corresponding requirement claims.
-- [ ] Current audit accounts for 22 requirements/six debts and follows actual Phase 17 verification.
-- [ ] Report frontmatter/body and active tracking agree; no publication or automatic milestone completion.
-
-Set wave_0_complete only after prerequisites are demonstrated. Keep nyquist_compliant:false/status:partial if relevant manual-only behavior remains; document the exact reason. A complete honest validation deliverable is distinct from complete automated coverage.
-
-**Approval:** pending execution; plan-check acceptance is recorded separately in 17-PLAN-CHECK.md.
+Task 6, final Phase 17 SUMMARY, review, schema/completeness gates and goal verification remain pending here. Phase completion requires final reconciliation of audit/frontmatter/body and active tracking using actual outcomes; no circular self-acceptance from file presence.
