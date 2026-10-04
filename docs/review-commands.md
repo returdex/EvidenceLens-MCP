@@ -1,6 +1,6 @@
 # EvidenceLens 快捷检查命令
 
-六个命令复用 `assignment-review`。当前阶段检查由正在使用的 Codex 宿主执行；独立 Codex 运行器在 Phase 20。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
+六个命令复用 `assignment-review`。四个阶段检查通过隔离的独立 Codex CLI 执行，当前支持经验证的 macOS arm64 / Codex 0.141.0，并复用 Codex 自己的 ChatGPT 登录。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
 
 安装后供命令读取的权威路由／帮助是[共享命令表](../skills/assignment-review/references/command-entrypoints.md)。本页补充安装与操作说明。
 
@@ -51,7 +51,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 
 ## 检查后导出
 
-在同一任务／对话先用 `$el-check`（或 prepare/final/recheck），再用 `$el-prompt`。四个阶段指令会先登记尝试、筛选来源、组装并保存提示词，读取保存原文执行，结束时返回 taskId/runId/hash/status。首个未指定 taskId 的任务会得到 T-UUID；只有一个任务时可沿用，有多个时需明确指定。保存最近一次尝试回执，包括失败的 begin；不要用旧成功替代它。
+在同一任务／对话先用 `$el-check`（或 prepare/final/recheck），再用 `$el-prompt`。四个阶段指令会先登记尝试、筛选来源、组装并保存提示词，用保存原文独立执行，经结构和来源验证后返回 taskId/runId/hash/status。首个未指定 taskId 的任务会得到 T-UUID；只有一个任务时可沿用，有多个时需明确指定。保存最近一次尝试回执，包括失败的 begin；不要用旧成功替代它。
 
 - 无记录：no_record；缺身份／丢失最新回执：identity_required；最新不符：latest_mismatch。
 - 最新运行失败但已捕获：导出该次原文，明确 failed；未捕获／中断：uncertain；损坏：corrupt_record。不会重建提示词或回退旧成功。
@@ -62,7 +62,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 
 默认记录位于 `~/.local/state/evidencelens`，0700 目录／0600 文件，按对话和任务隔离；可显式设置绝对 EVIDENCELENS_STATE_ROOT，不能与 Git／当前项目／已知作业根重叠。没有自动到期或清理；`status` 可查看元数据。`forget-task` 搭配精确 taskId 默认预览，用户要求删除时再用 `--apply`。先写删除标记再移除本任务已验证记录，保留其他任务及未知文件；incomplete 表示未完整删除，备份不在保证内。
 
-记录和恢复的完整字段、限制与调用方式见[安装协议](../skills/assignment-review/references/prompt-records.md)。缺 CODEX_THREAD_ID、Node 或助手时明确不可用，不造身份；锁中断不按 PID/年龄自动清理，也不重试派发。宿主报告的 succeeded 仅表示本次工作完成；独立 Codex 执行与用量尚待后续阶段。
+记录和恢复的完整字段、限制与调用方式见[安装协议](../skills/assignment-review/references/prompt-records.md)。缺 CODEX_THREAD_ID、Node 或助手时明确不可用，不造身份；锁中断不按 PID/年龄自动清理，也不重试派发。codex_exec 的 succeeded 表示进程完成、终态及本地来源绑定通过，不代表作业合格或远程提交；真实 ChatGPT 推理、用量和精简交接仍待 Phase 21 验收。
 
 ## 更新、冲突与移除
 
@@ -82,3 +82,17 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 | 任意原生 `/el-*` 别名、其他平台或宿主 | 未验证 |
 
 不能由上述安装测试推断课程许可、真实文件视觉检查、远程提交或独立 Codex 运行成功。
+
+## 独立 Codex 执行与恢复
+
+调用细节见[隔离协议](../skills/assignment-review/references/codex-execution.md)及[合成场景](../skills/assignment-review/references/codex-cases.md)。支持固定验证版本/策略；其他版本或平台明确不可用，不自动升级、降级、切换模型或回退宿主审阅。原始作业不挂载给子进程；只有获准内联摘录通过 stdin 传入，登录凭据由 Codex 自己访问。
+
+- `codex_missing`：恢复/安装相应 CLI 后，由用户明确开始新尝试。
+- `login_required` / `auth_mode_unsupported`：由用户在 Codex 管理 ChatGPT 登录；API-key、未验证的凭据存储（包括无文件支持的 keychain）不自动接管。
+- `isolation_unverified`：版本、策略或配置依赖不满足已验证边界，保留提示词，等待兼容修复。
+- `timed_out` / cancelled / uncertain：不会自动重发。取消通过当前助手进程 SIGINT/SIGTERM 或内部 AbortSignal，不通过任意 PID。确认退出后清理自己的临时目录；无法确认则保留最小运行记录和临时目录路径记录，禁止自动删除/接管。
+- `source_mismatch` / `result_invalid`：模型输出没有通过本地校验，不能作为已完成结果展示。
+
+help/export 均不预检、不启动 Codex、不读取来源。失败但已捕获的尝试仍可导出原文。执行记录不保存原始事件、stderr 或推理；删除仍使用确切任务的 dry-run / --apply，运行中或清理未确认时返回 busy。
+
+当前证据区分：真实 CLI/OS + 本地协议服务已验证；真实登录状态只读预检已验证；实际 ChatGPT 模型推理 NOT_RUN。不能把本地服务的合成结果当作真实审阅。

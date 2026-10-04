@@ -87,7 +87,7 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
   else {
    parseEvidenceCapsule(owned.snapshot);
    const preflight=await adapter.preflight();if(!preflight.ok)codexFail(preflight.code);
-   launch=await adapter.createLaunch({executableReceipt:preflight,runId,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});adapter.assertLaunch(launch);
+   launch=await adapter.createLaunch({executableReceipt:preflight,runId,deadline:started+CODEX_LIMITS.preflightMs,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});adapter.assertLaunch(launch);
    await recordCodexScratch(scope,runId,execution.attemptId,launch.root);
    if(signal?.aborted)outcome={status:'cancelled',code:null,terminalObserved:false,cleanupComplete:true};
    else {
@@ -96,8 +96,8 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
     if(outcome.status==='candidate'){result=validateBoundCodexResult(owned.snapshot,outcome.candidate);outcome={...outcome,status:'succeeded',candidate:null};}
    }
   }
- }catch(e){if(!owned)return {ok:false,runId,...codexError(e)};outcome={status:dispatch?'uncertain':'failed',code:codexError(e).code,terminalObserved:false,cleanupComplete:true};}
- if(launch){try{await launch.cleanup();}catch{outcome={...outcome,status:'uncertain',code:'uncertain',cleanupComplete:false};}}
+ }catch(e){if(!owned)return {ok:false,runId,...codexError(e)};if(e.scratchRoot)await recordCodexScratch(scope,runId,execution.attemptId,e.scratchRoot).catch(()=>{});outcome={status:dispatch||e.cleanupComplete===false?'uncertain':'failed',code:codexError(e).code,terminalObserved:false,cleanupComplete:e.cleanupComplete!==false};}
+ if(launch&&outcome.cleanupComplete){try{await launch.cleanup();}catch{outcome={...outcome,status:'uncertain',code:'uncertain',cleanupComplete:false};}}
  if(signal?.aborted&&outcome.cleanupComplete){outcome={...outcome,status:'cancelled',code:null};result=null;}
  if(outcome.status!=='succeeded')result=null;
  const receipt={...execution,...(launch?{binaryVersion:launch.binaryVersion,binarySha256:launch.binarySha256,policySha256:launch.policySha256}:{}),status:outcome.status,errorCode:outcome.code,finishedAt:new Date().toISOString(),elapsedMs:Date.now()-started,terminalObserved:outcome.terminalObserved,cleanupComplete:outcome.cleanupComplete,resultSha256:result?.resultSha256??null};

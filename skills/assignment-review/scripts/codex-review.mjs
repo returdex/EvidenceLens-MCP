@@ -16,9 +16,9 @@ export async function captureCodexPrompt(scope,runId,input){
  return captureRun(scope,runId,snapshot,{executionKind:'codex_exec'});
 }
 export async function isolatedPreflight(){
- const receipt=await preflightCodex();if(!receipt.ok)return receipt;
- const launch=await createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID()});
- await launch.cleanup();return {...receipt,executionReady:true,policySha256:launch.policySha256,contractSha256:launch.contractSha256,model:'gpt-5.4',inference:'not_run'};
+ const started=Date.now(),deadline=started+10000;const receipt=await preflightCodex();if(!receipt.ok)return receipt;
+ const launch=await createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID(),deadline});
+ await launch.cleanup();return {...receipt,elapsedMs:Date.now()-started,executionReady:true,policySha256:launch.policySha256,contractSha256:launch.contractSha256,model:'gpt-5.4',inference:'not_run'};
 }
 async function readInput(){const chunks=[];let n=0;for await(const c of process.stdin){n+=c.length;if(n>LIMITS.stdin)fail('store_limit');chunks.push(c);}try{return JSON.parse(decode(Buffer.concat(chunks)));}catch{fail('corrupt_record');}}
 export async function main(args){

@@ -60,14 +60,16 @@ export async function verifyIsolationContract(receipt){
  if(receipt.version!=='0.141.0'||actual.binarySha256!==BINARY_SHA256||actual.binarySha256!==receipt.binarySha256)codexFail('isolation_unverified');return actual;
 }
 export function assertCertifiedLaunch(launch){if(!certified.has(launch))codexFail('isolation_unverified');}
-export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoots=[],stateRoot}={}){
+export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoots=[],stateRoot,deadline=Date.now()+10000}={}){
  if(process.env.EVIDENCELENS_CHILD==='1')codexFail('recursive_call');if(!uuid(runId))codexFail('unsafe_path');
+ const remaining=()=>{const ms=deadline-Date.now();if(ms<=0)codexFail('timed_out');return Math.min(ms,10000);};remaining();
  const {executable:binary}=await verifyIsolationContract(executableReceipt);
  const home=process.env.HOME??homedir(),codexHome=process.env.CODEX_HOME??join(home,'.codex');
  if(!home.startsWith('/')||!codexHome.startsWith('/')||codexHome!==resolve(codexHome))codexFail('unsafe_path');
  const auth=join(codexHome,'auth.json'),installation=join(codexHome,'installation_id');
- await ownedParents(auth);const authStat=await regular(auth,{privateOnly:true});const installationText=await metadataText(installation);
- for(const root of [process.cwd(),...evidenceRoots,...(stateRoot?[stateRoot]:[])]){
+ await ownedParents(auth);const authStat=await regular(auth,{privateOnly:true}).catch(e=>{if(e.code==='ENOENT')codexFail('auth_mode_unsupported');throw e;});const installationText=await metadataText(installation).catch(e=>{if(e.code==='ENOENT')codexFail('isolation_unverified');throw e;});
+ const protectedRoots=[process.cwd(),...evidenceRoots,stateRoot??join(homedir(),'.local','state','evidencelens')];
+ for(const root of protectedRoots){
   if(typeof root!=='string'||!root.startsWith('/'))codexFail('unsafe_path');
   const path=await fs.realpath(root).catch(()=>resolve(root));
   if(['/System/Library','/System/Volumes/Preboot/Cryptexes','/usr/lib','/usr/share/zoneinfo','/dev',codexHome,dirname(binary)].some(p=>overlap(path,p)))codexFail('unsafe_path');
@@ -83,13 +85,14 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   await fs.chmod(control,0o700).catch(e=>{if(e.code!=="ENOENT")throw e;});await fs.rm(root,{recursive:true,force:false});cleaned=true;if(!unchanged||!authSame)codexFail('uncertain');return true;
  };
  try {
+  if(protectedRoots.some(p=>overlap(resolve(p),root)))codexFail('unsafe_path');
   await fs.mkdir(scratch,{mode:0o700});await fs.mkdir(control,{mode:0o700});
   const schema=join(control,'schema.json');await fs.writeFile(schema,JSON.stringify(MODEL_RESULT_SCHEMA),{flag:'wx',mode:0o400});
   const env=Object.freeze(childEnvironment(process.env,scratch));
   // Cheap positive/negative OS check on every launch, before any captured prompt is consumed.
   const approved=join(control,'sentinel'),denied=join(root,'denied');await fs.writeFile(approved,'synthetic');await fs.writeFile(denied,'synthetic');
   const checkPolicy=isolationPolicy({binary:'/bin/sh',scratch,control,auth,extraRead:['/bin/cat','/usr/bin/touch']});
-  const check=await boundedProbe('/usr/bin/sandbox-exec',['-p',checkPolicy,'/bin/sh','-c','/bin/cat "$1" >/dev/null || exit 1; if /bin/cat "$2" >/dev/null 2>&1; then exit 2; fi; if /usr/bin/touch "$2" 2>/dev/null; then exit 3; fi; echo verified','probe',approved,denied],{env,cwd:scratch});
+  const check=await boundedProbe('/usr/bin/sandbox-exec',['-p',checkPolicy,'/bin/sh','-c','/bin/cat "$1" >/dev/null || exit 1; if /bin/cat "$2" >/dev/null 2>&1; then exit 2; fi; if /usr/bin/touch "$2" 2>/dev/null; then exit 3; fi; echo verified','probe',approved,denied],{env,cwd:scratch,timeoutMs:remaining()});
   await fs.unlink(approved);await fs.unlink(denied);
   if(check.exitCode!==0||check.code||check.output.trim()!=='verified')codexFail('isolation_unverified');
   // Status-only config reads never become capabilities of the review process.
@@ -102,7 +105,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
    for(const name of names.filter(n=>/^[A-Za-z0-9_-]+\.toml$/.test(n))){const p=join(agents,name);await regular(p);configFiles.push(p);}
   }catch(e){if(e.code!=='ENOENT')throw e;}
   const statusPolicy=isolationPolicy({binary,scratch,control,auth,configFiles});
-  const status=await boundedProbe('/usr/bin/sandbox-exec',['-p',statusPolicy,binary,'login','status'],{env,cwd:scratch});
+  const status=await boundedProbe('/usr/bin/sandbox-exec',['-p',statusPolicy,binary,'login','status'],{env,cwd:scratch,timeoutMs:remaining()});
   if(status.code||!status.cleanupComplete)codexFail(status.code??'uncertain');
   if(/API key|api_key/i.test(status.output))codexFail('auth_mode_unsupported');
   if(/not logged in|logged out/i.test(status.output))codexFail('login_required');
@@ -112,5 +115,5 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
   const args=Object.freeze(['-f',policyPath,binary,...isolatedArgs({schema,scratch})]);
   const launch=Object.freeze({executable:'/usr/bin/sandbox-exec',args,env,cwd:scratch,root,runId,binaryVersion:'0.141.0',binarySha256:BINARY_SHA256,policySha256:sha256(policy),contractSha256:CONTRACT_SHA256,cleanup});
   certified.add(launch);return launch;
- }catch(e){await cleanup();throw e;}
+ }catch(e){try{await cleanup();}catch{const error=new Error('uncertain');error.code='uncertain';error.cleanupComplete=cleaned;error.scratchRoot=root;throw error;}throw e;}
 }
