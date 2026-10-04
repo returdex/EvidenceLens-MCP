@@ -1907,3 +1907,1572 @@ Source: `skills/assignment-review/references/template-disclosure-cases.md`; extr
   ]
 }
 ```
+
+## recheck-collector
+
+Command: `sh /tmp/el17-evidence/recheck.sh`; start `2026-10-04T06:35:37.185153+00:00`; cap 60s; elapsed 0.078s; exit 0; timeout:false; owned_group_remaining:false.
+
+Source: `skills/assignment-review/references/recheck-cases.md`; extracted block SHA-256 `a2803817d7604c545a4bd8c812a7f890dcc256fe53db4e9c6a8f3fe2ed91c651`. 18 actual steps, all existing assertions completed. This proves collection, not language semantics.
+
+```json
+{
+  "observedAt": "2026-10-04T06:35:37.245Z",
+  "outputs": [
+    {
+      "step": "E01-preparation",
+      "inspectedAt": "2026-10-04T06:35:37.243Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": null,
+          "status": "not_provided"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E01-initial",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "W-J1"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J1",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J1",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "W-J1",
+          "content": "§1 Method: A. §2 Results: TODO measurements. §3 Appendix D: Entirely manual. §4 Signature: ____.",
+          "contentHash": "68fdb3e7449813558079dd0d820f122be6c6822d1eeecc1710059a5d1d3a26ef"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E01-clarification",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": null,
+          "status": "not_provided"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E01-recheck",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "provided Method/Limitations/disclosure/signature excerpt; Results absent from coverage",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J2"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J2",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [
+          {
+            "id": "W-OLD",
+            "reason": "not_current_artifact"
+          },
+          {
+            "id": "H-OLD",
+            "reason": "history_not_requested"
+          }
+        ],
+        "currentArtifact": {
+          "sourceId": "W-J2",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J2",
+          "content": "§1 Method: A. §2 Limitations: small sample. §3 Appendix D: Tool Q helped outline Method. §4 Signature: ____.",
+          "contentHash": "f00be7cd7abf14fb3d83db0ca1cae4dce8caab6f985ddb096f6725b689c168f2"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E02-W-J3",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J3"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J3",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J3",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J3",
+          "content": "§1 Method: A costs less; B is easier to maintain. Choose A for a limited budget because lower cost matters more here. §2 Limitations: small sample. §3 Results: synthetic values A=1, B=2. §4 Appendix D: Tool Q helped outline Method. §5 Signature: ____.",
+          "contentHash": "94ec440f87a9f077e10832a2e26a0f62e49026e8581fc2bd9d9b50cc56e94deb"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E02-W-J3b",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J3b"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J3b",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J3b",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J3b",
+          "content": "§1 Results: synthetic values A=1, B=2. §2 Method: B offers easier maintenance; A has lower cost, so choose A under this limited budget. §3 Appendix D: Tool Q helped outline Method. §4 Limitations: sample is small. §5 Signature: ____.",
+          "contentHash": "c38739e5255c5749c729390eb04e4571e64f26e49e7b82e9cc4d6f14e3307ac7"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E02-W-J4",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J4"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J4",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J4",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J4",
+          "content": "§1 Results: synthetic values A=1, B=2. §2 Method: B offers easier maintenance; A has lower cost, so choose A under this limited budget. §3 Appendix D: Tool Q helped outline Method. §4 Signature: ____.",
+          "contentHash": "c8ca074008effa1c3239ea7fc9c9025e2cd9a8a8b6e0db09a5936ee65667c58a"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E02-no-prior",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J4"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J4",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J4",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J4",
+          "content": "§1 Results: synthetic values A=1, B=2. §2 Method: B offers easier maintenance; A has lower cost, so choose A under this limited budget. §3 Appendix D: Tool Q helped outline Method. §4 Signature: ____.",
+          "contentHash": "c8ca074008effa1c3239ea7fc9c9025e2cd9a8a8b6e0db09a5936ee65667c58a"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E03-failed",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "no current content",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-FAIL"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-FAIL",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [
+          {
+            "id": "W-OLD",
+            "reason": "not_current_artifact"
+          },
+          {
+            "id": "H-OLD",
+            "reason": "history_not_requested"
+          }
+        ],
+        "currentArtifact": {
+          "sourceId": "W-FAIL",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        }
+      ],
+      "unavailable": [
+        {
+          "id": "W-FAIL",
+          "reason": "read_failed"
+        }
+      ]
+    },
+    {
+      "step": "E03-denied",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "no current content",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          }
+        ],
+        "skipped": [
+          {
+            "id": "W-DENY",
+            "reason": "partial_exclusion_unsupported"
+          },
+          {
+            "id": "ALIAS",
+            "reason": "partial_exclusion_unsupported"
+          },
+          {
+            "id": "W-OLD",
+            "reason": "not_current_artifact"
+          },
+          {
+            "id": "H-OLD",
+            "reason": "history_not_requested"
+          }
+        ],
+        "currentArtifact": {
+          "sourceId": "W-DENY",
+          "status": "unavailable"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E03-same-before",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-SAME"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-SAME",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-SAME",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-SAME",
+          "content": "§1 Method: A. §2 Results: TODO measurements. §3 Appendix D: Entirely manual. §4 Signature: ____.",
+          "contentHash": "68fdb3e7449813558079dd0d820f122be6c6822d1eeecc1710059a5d1d3a26ef"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E03-same-after",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-SAME"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-SAME",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-SAME",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-SAME",
+          "content": "§1 Method: A costs less; B is easier to maintain. Choose A for a limited budget because lower cost matters more here. §2 Limitations: small sample. §3 Results: synthetic values A=1, B=2. §4 Appendix D: Tool Q helped outline Method. §5 Signature: ____.",
+          "contentHash": "94ec440f87a9f077e10832a2e26a0f62e49026e8581fc2bd9d9b50cc56e94deb"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E03-no-ledger",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J3"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J3",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [
+          {
+            "id": "W-OLD",
+            "reason": "not_current_artifact"
+          },
+          {
+            "id": "H-OLD",
+            "reason": "history_not_requested"
+          }
+        ],
+        "currentArtifact": {
+          "sourceId": "W-J3",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J3",
+          "content": "§1 Method: A costs less; B is easier to maintain. Choose A for a limited budget because lower cost matters more here. §2 Limitations: small sample. §3 Results: synthetic values A=1, B=2. §4 Appendix D: Tool Q helped outline Method. §5 Signature: ____.",
+          "contentHash": "94ec440f87a9f077e10832a2e26a0f62e49026e8581fc2bd9d9b50cc56e94deb"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E04-unsupported",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "W-J1"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J1",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J1",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "W-J1",
+          "content": "§1 Method: A. §2 Results: TODO measurements. §3 Appendix D: Entirely manual. §4 Signature: ____.",
+          "contentHash": "68fdb3e7449813558079dd0d820f122be6c6822d1eeecc1710059a5d1d3a26ef"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E04-sourced",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "full synthetic text",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J1"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J1",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [
+          {
+            "id": "H-X",
+            "reason": "user_excluded"
+          },
+          {
+            "id": "X-RECORD",
+            "reason": "user_excluded"
+          }
+        ],
+        "currentArtifact": {
+          "sourceId": "W-J1",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J1",
+          "content": "§1 Method: A. §2 Results: TODO measurements. §3 Appendix D: Entirely manual. §4 Signature: ____.",
+          "contentHash": "68fdb3e7449813558079dd0d820f122be6c6822d1eeecc1710059a5d1d3a26ef"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E05-W-F1",
+      "inspectedAt": "2026-10-04T06:35:37.244Z",
+      "coverage": "provided text only; figure/rendering and remote receipt not supplied",
+      "calls": [
+        "B-F",
+        "Q-F",
+        "P-F",
+        "U-F",
+        "W-F1"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "B-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-F1",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-F1",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "B-F",
+          "content": "DEMO-F §1 Keep Method and Limitations headings. §2 Include a figure. §3 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "aa6a9c618900da39155fc84fd6cf7e9f8a648478bb9c679d18bfb705934d0cee"
+        },
+        {
+          "id": "Q-F",
+          "content": "DEMO-F §1 Support the reasoning behind the comparison; no weights provided.",
+          "contentHash": "2e9c29862fb2b0deb34a32c41e397b4047f476cb49403bcd39f23f5f4546a536"
+        },
+        {
+          "id": "P-F",
+          "content": "DEMO-F §1 AI drafting requires disclosure.",
+          "contentHash": "fa215fd5257dc27ef50a261f90cf1d75047a1e5b508a0b9c7bdb7c792f36afe4"
+        },
+        {
+          "id": "U-F",
+          "content": "User report §1 Tool Q helped outline Method. §2 Uploaded already; no receipt supplied.",
+          "contentHash": "8c7b0c88eb6faa2a21356e9792f1b84c92a43e7e8cfed99e5ec46f928ea886b0"
+        },
+        {
+          "id": "W-F1",
+          "content": "§1 Method: A is best. §2 Appendix D: Tool Q helped outline Method. §3 happy to help.",
+          "contentHash": "137e3c2457bb3aa98b320454238a57f2004a2e850d937af4b670b3b5e1b16b8d"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E05-W-F2",
+      "inspectedAt": "2026-10-04T06:35:37.245Z",
+      "coverage": "provided text only; figure/rendering and remote receipt not supplied",
+      "calls": [
+        "B-F",
+        "Q-F",
+        "P-F",
+        "U-F",
+        "W-F2"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "B-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-F",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-F2",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-F2",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "B-F",
+          "content": "DEMO-F §1 Keep Method and Limitations headings. §2 Include a figure. §3 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "aa6a9c618900da39155fc84fd6cf7e9f8a648478bb9c679d18bfb705934d0cee"
+        },
+        {
+          "id": "Q-F",
+          "content": "DEMO-F §1 Support the reasoning behind the comparison; no weights provided.",
+          "contentHash": "2e9c29862fb2b0deb34a32c41e397b4047f476cb49403bcd39f23f5f4546a536"
+        },
+        {
+          "id": "P-F",
+          "content": "DEMO-F §1 AI drafting requires disclosure.",
+          "contentHash": "fa215fd5257dc27ef50a261f90cf1d75047a1e5b508a0b9c7bdb7c792f36afe4"
+        },
+        {
+          "id": "U-F",
+          "content": "User report §1 Tool Q helped outline Method. §2 Uploaded already; no receipt supplied.",
+          "contentHash": "8c7b0c88eb6faa2a21356e9792f1b84c92a43e7e8cfed99e5ec46f928ea886b0"
+        },
+        {
+          "id": "W-F2",
+          "content": "§1 Method: synthetic comparison A costs 1, B costs 2; select A for a lower cost under this limited budget. §2 Limitations: small synthetic sample; maintenance untested. §3 Appendix D: Tool Q helped outline Method.",
+          "contentHash": "608fd135fb795c088ff0690d714f391b70d5a1acca46fc1547230fc8bc0daf7b"
+        }
+      ],
+      "unavailable": []
+    },
+    {
+      "step": "E06-requested-review",
+      "inspectedAt": "2026-10-04T06:35:37.245Z",
+      "coverage": "same provided excerpt as E01-recheck; Results not supplied",
+      "calls": [
+        "T-J",
+        "B-J",
+        "Q-J",
+        "P-J",
+        "U-J",
+        "C-J",
+        "W-J2"
+      ],
+      "selection": {
+        "reads": [
+          {
+            "id": "T-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "B-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "Q-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "P-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "U-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "C-J",
+            "purpose": "baseline"
+          },
+          {
+            "id": "W-J2",
+            "purpose": "current_artifact"
+          }
+        ],
+        "skipped": [],
+        "currentArtifact": {
+          "sourceId": "W-J2",
+          "status": "selected"
+        }
+      },
+      "items": [
+        {
+          "id": "T-J",
+          "content": "DEMO-J §1 Keep Method and Limitations headings. §2 Signature: ____.",
+          "contentHash": "d1787d855cce3388dd250111e41bd37f6fd31de5f0961331982dec014ea7e556"
+        },
+        {
+          "id": "B-J",
+          "content": "DEMO-J §1 Compare A/B. §2 Results must include measured values. §3 Include a chart. §4 Disclose AI tools and purposes in Appendix D.",
+          "contentHash": "7a86ecf9006692c4203950dab3402777d877c8b28bac483b0a7c15cbbf7890bd"
+        },
+        {
+          "id": "Q-J",
+          "content": "DEMO-J §1 Explain the reasoning behind the comparison; no numerical weights supplied.",
+          "contentHash": "bd2d9e4c2e70854d4011aa8a05033ed878f0839802880049d75d994edbdf96d4"
+        },
+        {
+          "id": "P-J",
+          "content": "DEMO-J §1 AI drafting requires disclosure.",
+          "contentHash": "7df55abe876d62ec486e4252403d82634b500228872b07a665f4b2736e348d87"
+        },
+        {
+          "id": "U-J",
+          "content": "User report §1 Tool Q helped outline Method.",
+          "contentHash": "bd9aeb5b05254edb0854b6504b185e8044bececad9f6a6177c3d74bbbb509b90"
+        },
+        {
+          "id": "C-J",
+          "content": "DEMO-J §1 Chart requirement in B-J §3 is withdrawn; all other requirements remain.",
+          "contentHash": "a50e44395c0919c22e035e178ae3d700eb643a730a7aba929ef22937653dfca7"
+        },
+        {
+          "id": "W-J2",
+          "content": "§1 Method: A. §2 Limitations: small sample. §3 Appendix D: Tool Q helped outline Method. §4 Signature: ____.",
+          "contentHash": "f00be7cd7abf14fb3d83db0ca1cae4dce8caab6f985ddb096f6725b689c168f2"
+        }
+      ],
+      "unavailable": []
+    }
+  ]
+}
+```
