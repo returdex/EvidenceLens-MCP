@@ -6,3 +6,7 @@
 - 18-03-03 pending: six actual discovery and invocation observations in another assignment project. UI tool restriction prevents direct native selector inspection; human authorization for a dedicated FIT5032 chat or actual manual observations requested.
 
 Plan remains incomplete. No 18-03 SUMMARY or phase completion is claimed. Plan 04 not started because it depends on actual acceptance. Product version 0.3.0 retained. Scoped code inspection considered destination preflight, source lookup, rollback ownership and path redirects; full workflow phase code-review/verification waits until all plans finish.
+
+## Authorized continuation — UTC 2026-10-04
+
+User allowed the dedicated FIT5032 chat and six tests. All six ran; actual host-catalog discovery and commands/results are captured in 18-HOST-RECEIPTS.json. Help omitted examples; 6f16da4 strengthened the rule. Separate one-message retest authorization requested, no reply received at save time. Do not resend all six or create another chat. All stage/recheck/prompt behaviors accepted within synthetic scope; Plan 03 final gate remains pending the help retest. Fresh current 0.3.0 build and 118 affected tests plus 21 Node tests pass; no dependency versions changed. Plan 04 not started, phase not complete.

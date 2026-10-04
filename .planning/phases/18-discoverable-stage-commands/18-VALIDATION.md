@@ -8,7 +8,7 @@ created: 2026-10-04
 ---
 # Phase 18 — Validation strategy
 
-Execution started: Plans 01–02 passed; Plan 03 synthetic and actual installation work passed, native invocation remains pending. No real host invocation or runtime regression is claimed. Existing milestone research is reused; research=false means formal Nyquist research gating is not applicable. Keep this task map anyway; manually judged language behavior cannot be labeled automatic coverage.
+Execution started: Plans 01–02 passed; Plan 03 synthetic/installation work and six host invocations observed. Help initially omitted examples; rule fixed, one additional host retest awaits authorization. Fresh pre-patch 0.3.0 build and six-file/118-test affected suite passed; see 18-RUNTIME-EVIDENCE.md. Plan 04 patch has not started. Existing milestone research is reused; research=false means formal Nyquist research gating is not applicable. Keep this task map anyway; manually judged language behavior cannot be labeled automatic coverage.
 
 ## Task map
 
@@ -20,7 +20,7 @@ Execution started: Plans 01–02 passed; Plan 03 synthetic and actual installati
 | 18-02-02 | 2 | CMD-03/05 | Guide/examples checked; 8/8 tests rerun; 18-02-SUMMARY | passed |
 | 18-03-01 | 3 | CMD-02/04/05 | 10 manual cases + 11 collector steps, Node 21/21 after identity error repair; 18-COMMAND-EVALUATION / 18-03-PROGRESS | passed (manual semantics) |
 | 18-03-02 | 3 | CMD-01/03 | Clean dry-run / apply / unchanged; installed references verified; 18-HOST-EVIDENCE | passed |
-| 18-03-03 | 3 | CMD-01/02/03/05 | Actual six-command discovery/invocation in another assignment project | awaiting user |
+| 18-03-03 | 3 | CMD-01/02/03/05 | Actual six-command discovery/invocation in another assignment project | six observed; help retest awaiting authorization |
 | 18-04-01 | 4 | CMD-01/05 | Product version equality; lock dependency/analyzer/history preservation | pending |
 | 18-04-02 | 4 | CMD-01/05 | Six affected offline files + all command/boundary Node tests | pending |
 

@@ -8,7 +8,7 @@
 
 ## Approval State
 
-The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 has two completed plans; command implementation and installation are ready, cross-project host acceptance remains pending. Original phase directories and audit/proof snapshots remain in place.
+The user explicitly approved all 21 requirements and this four-phase roadmap on 2026-10-04. Phase 18 has two completed plans; six commands are installed and were invoked in a dedicated FIT5032 synthetic chat; corrected help output awaits one additional host retest. Original phase directories and audit/proof snapshots remain in place.
 
 ## Phases
 
@@ -90,7 +90,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 | Phase | Plans Complete | Status | Completed |
 |---|---|---|---|
-| 18. Discoverable Stage Commands | 2/4 | Host checkpoint | — |
+| 18. Discoverable Stage Commands | 2/4 | Help retest checkpoint | — |
 | 19. Captured Task Prompts and Export | 0/TBD | Not started | — |
 | 20. Bounded Independent Codex Execution | 0/TBD | Not started | — |
 | 21. Review Handoff and Usage Acceptance | 0/TBD | Not started | — |
