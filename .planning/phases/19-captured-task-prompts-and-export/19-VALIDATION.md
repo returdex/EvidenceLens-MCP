@@ -20,8 +20,8 @@ Voluntary task map under research=false; no new RESEARCH/Validation Architecture
 | 19-03-02 | 3 | PRM-02/04/05 | installed-helper external cwd/missing-dependency tests + guide | passed (see plan summary) |
 | 19-04-01 | 4 | PRM-01/02/03/04/05 | lifecycle.mjs concurrency, process faults, stale receipts and source changes | passed (see plan summary) |
 | 19-04-02 | 4 | PRM-01/02/03/04/05 | current installed-host synthetic four stages + repeated/failed export receipts | passed (see plan summary) |
-| 19-05-01 | 5 | PRM-01/05 | version equality and unchanged dependency/analyzer metadata | pending |
-| 19-05-02 | 5 | PRM-01/02/03/04/05 | fresh build + six affected offline files + all Node prompts/commands/boundary | pending |
+| 19-05-01 | 5 | PRM-01/05 | version equality and unchanged dependency/analyzer metadata | passed (see plan summary) |
+| 19-05-02 | 5 | PRM-01/02/03/04/05 | fresh build + six affected offline files + all Node prompts/commands/boundary | passed (see plan summary) |
 
 ## Timing and prerequisites
 

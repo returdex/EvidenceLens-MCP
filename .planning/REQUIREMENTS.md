@@ -2,7 +2,7 @@
 
 **Defined:** 2026-10-04
 **Milestone:** 快捷指令与 Codex 独立审阅
-**Status:** Approved on 2026-10-04; CMD-01–05 completed in Phase 18 on 2026-10-05.
+**Status:** Approved on 2026-10-04; CMD-01–05 completed in Phase 18 and PRM-01–05 completed in Phase 19 on 2026-10-05.
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence.
 
 ## v1.2 Requirements
@@ -19,11 +19,11 @@ The user confirmed the milestone direction and revised command semantics. Five c
 
 ### 最近一次提示词的记录与导出
 
-- [ ] **PRM-01**: 用户每次执行阶段指令时，系统在派发前保存该次实际任务提示词的不可变快照，关联任务、对话、run ID、阶段及材料身份/覆盖。
-- [ ] **PRM-02**: 用户执行 `$el-prompt` 时取得本对话、本任务最近一次阶段运行捕获的提示词原文；文件变化或重复导出不会重新生成内容，也不会再次调用模型。
-- [ ] **PRM-03**: 用户在无记录、记录损坏、身份不明或运行失败时获得真实状态；导出明确对应最新运行，不能静默退回其他任务或较早的成功记录。
-- [ ] **PRM-04**: 用户复制导出的提示词时同时获得与原文分开的阶段、当前稿、材料清单和使用限制说明；未提供的文件不冒充在另一对话中可用。
-- [ ] **PRM-05**: 用户的提示词和记录保存于明确的本地非 Git 位置，可查看保留/删除方法；隔离不同任务与对话，并排除凭据、内部推理和未获准内容。
+- [x] **PRM-01**: 用户每次执行阶段指令时，系统在派发前保存该次实际任务提示词的不可变快照，关联任务、对话、run ID、阶段及材料身份/覆盖。
+- [x] **PRM-02**: 用户执行 `$el-prompt` 时取得本对话、本任务最近一次阶段运行捕获的提示词原文；文件变化或重复导出不会重新生成内容，也不会再次调用模型。
+- [x] **PRM-03**: 用户在无记录、记录损坏、身份不明或运行失败时获得真实状态；导出明确对应最新运行，不能静默退回其他任务或较早的成功记录。
+- [x] **PRM-04**: 用户复制导出的提示词时同时获得与原文分开的阶段、当前稿、材料清单和使用限制说明；未提供的文件不冒充在另一对话中可用。
+- [x] **PRM-05**: 用户的提示词和记录保存于明确的本地非 Git 位置，可查看保留/删除方法；隔离不同任务与对话，并排除凭据、内部推理和未获准内容。
 
 ### Codex 独立执行
 
@@ -71,11 +71,11 @@ The user confirmed the milestone direction and revised command semantics. Five c
 | CMD-03 | Phase 18 | Complete |
 | CMD-04 | Phase 18 | Complete |
 | CMD-05 | Phase 18 | Complete |
-| PRM-01 | Phase 19 | Pending |
-| PRM-02 | Phase 19 | Pending |
-| PRM-03 | Phase 19 | Pending |
-| PRM-04 | Phase 19 | Pending |
-| PRM-05 | Phase 19 | Pending |
+| PRM-01 | Phase 19 | Complete |
+| PRM-02 | Phase 19 | Complete |
+| PRM-03 | Phase 19 | Complete |
+| PRM-04 | Phase 19 | Complete |
+| PRM-05 | Phase 19 | Complete |
 | CDX-01 | Phase 20 | Pending |
 | CDX-02 | Phase 20 | Pending |
 | CDX-03 | Phase 20 | Pending |

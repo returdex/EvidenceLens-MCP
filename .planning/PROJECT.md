@@ -33,13 +33,14 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Task-mapped retrospective records for Phases 12–15 and expanded audit closure — Phase 17 (`VAL-03` to `VAL-06`); 4/4 criteria and 17 original task mappings verified. Manual semantic automation remains PARTIAL.
 
-- ✓ Six installed command entries, shared fixed-stage routing, conservative installation, complete help and actual cross-project synthetic host acceptance — Phase 18 (`CMD-01` to `CMD-05`); product 0.3.1, fresh build/118 affected tests/21 Node tests. Prompt capture remains unavailable until Phase 19.
+- ✓ Six installed command entries, shared fixed-stage routing, conservative installation, complete help and actual cross-project synthetic host acceptance — Phase 18 (`CMD-01` to `CMD-05`); product 0.3.1, fresh build/118 affected tests/21 Node tests. Prompt capture was unavailable at the Phase 18 baseline.
+
+- ✓ Immutable task/conversation-scoped pre-review capture, exact `$el-prompt` export, truthful latest/failure states and private retention/deletion — Phase 19 (`PRM-01` to `PRM-05`), product 0.3.2; four actual current-host synthetic stage flows, fresh build/118 affected tests/51 Node tests.
 
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phase 18 is complete. Phase 19 has five verified plans; next: execute Phase 19.
+Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–19 are complete; next: plan Phase 20 independent Codex execution.
 
-- [ ] `$el-prompt` exports the actual latest task prompt for this conversation/task after a stage command; no stage guessing or reconstructed prompt.
 - [ ] Independent Codex review with explicit evidence scope, existing local login, bounded execution and return to the work conversation.
 - [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
 
@@ -69,11 +70,11 @@ Source-bound evidence includes Phase 16 official validator/control, successful b
 
 **Goal:** Use fixed stage commands to run a bounded independent review, return concise evidence-backed findings to the work conversation, and export the exact task prompt from that run on request.
 
-**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands choose the shared workflow; prompt export currently reports unavailable and will read a recorded run after Phase 19. Explicit current artifact and user focus remain authoritative.
+**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands capture their actual task-facing prompt before current-host review; prompt export reads the latest attempted run for the same task/conversation, with separate status and material limits. Phase 19 acceptance used the current installed host and synthetic materials. Explicit current artifact and user focus remain authoritative.
 
 **Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
 
-**Version:** Planning milestone v1.2; development product 0.3.1 after the first accepted command feature patch. Last published product is v0.2.4. No v0.3.1 Release/tag is created by phase completion. Phase numbering continues at 18.
+**Version:** Planning milestone v1.2; development product 0.3.2 after the accepted capture/export feature patch. Last published product is v0.2.4. No v0.3.2 Release/tag is created by phase completion. Phase numbering continues at 18.
 
 **Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
 

@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: executing
-last_updated: "2026-10-04T14:32:52.292Z"
-last_activity: 2026-10-04
+status: ready_to_plan
+last_updated: "2026-10-04T14:39:43.744002+00:00"
+last_activity: 2026-10-05 — Phase 19 complete; Phase 20 ready to plan
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 89
+  completed_plans: 9
+  percent: 50
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute Phase 19 prompt capture/export. Phase 18 complete at product 0.3.1; Phase 19 accepted feature patch 0.3.2 is under final regression.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: plan Phase 20 independent Codex execution. Phase 19 complete at product 0.3.2.
 
 ## Current Position
 
-Phase: 19 (Captured Task Prompts and Export) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-10-04
+Phase: 20
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-05 — Phase 19 verified and completed
 
 ## Accepted Coverage Debt
 
@@ -40,10 +40,10 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-Run `$gsd-execute-phase 19` for Captured Task Prompts and Export. Five plans passed structure checks, PRM-01–05 coverage and D-01–06 decision coverage; implementation and runtime acceptance remain pending. Phase 18: 4/4 plans, 9/9 tasks, CMD-01–05 complete, three goal criteria passed. Corrected help accepted in the authorized FIT5032 synthetic chat; no real coursework accessed. Product 0.3.1 has fresh build, 118 affected tests and 21 Node tests passing; no release/tag.
+Run `$gsd-plan-phase 20` for Bounded Independent Codex Execution. Phase 19: 5/5 plans, 10/10 tasks, PRM-01–05 complete and 3/3 goal criteria passed. Four stage commands capture before review; `$el-prompt` exports the actual scoped snapshot with separate status/material limits. Current-host synthetic flow and failure/deletion acceptance passed.
 
-Progress percent is 1/4 milestone phases (25%); 4/9 defined plans are complete (Phase 18: 4, Phase 19: 5); Phases 20–21 remain TBD. Manual semantic automation remains partial (18-VALIDATION nyquist_compliant=false); GUI selector, native slash aliases and other hosts are unverified. `$el-prompt` currently returns unavailable until Phase 19 implements capture/export.
+Product 0.3.2: fresh build, 118 affected runtime tests, 51 Node tests and seven official Skill validations passed. No release/tag. Progress is 2/4 milestone phases (50%); all 9 currently defined plans complete. Phases 20–21 remain TBD. Phase 19 semantic evaluation is manual (nyquist_compliant=false); independent Codex execution and usage reporting are not implemented. Native slash aliases, GUI selector and other hosts remain unverified.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 19 planning recorded via SDK `state.planned-phase`; Phase 18 completed via SDK `phase.complete`; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.
+Last session: 2026-10-05. Phase 19 completed via SDK `phase.complete` with zero warnings; current development product 0.3.2. v1.2 was initialized at 0.3.0. Prior scope/evidence/debt remain in the v1.1 completion record. Preserve original phase directories because historical proof and audit links depend on them; do not run destructive `phases.clear`. Research choice is for this milestone only.

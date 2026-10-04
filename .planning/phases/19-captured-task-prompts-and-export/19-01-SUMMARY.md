@@ -11,7 +11,7 @@ key-files:
   modified: ["skills/assignment-review/scripts/prompt-contract.mjs", "skills/assignment-review/scripts/prompt-store.mjs", "skills/assignment-review/references/prompt-records.md", "tests/prompts/contract.mjs", "tests/prompts/store.mjs"]
 key-decisions: ["Reuse installed stdlib helpers and preserve existing evidence boundaries"]
 patterns-established: ["Snapshot bytes are authoritative; host status is explicitly attributed"]
-requirements-completed: []
+requirements-completed: ["PRM-01", "PRM-03", "PRM-05"]
 metrics:
   tasks: 2
   files: 5

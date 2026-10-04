@@ -8,10 +8,10 @@ provides: ["Stage capture wiring and installed command export"]
 affects: [19, 20]
 key-files:
   created: []
-  modified: ["skills/assignment-review/references/command-entrypoints.md", "skills/assignment-review/references/prompt-records.md", "skills/el-prompt/SKILL.md", "skills/assignment-review/SKILL.md", "docs/review-commands.md", "tests/commands/skill-contract.mjs"]
+  modified: ["skills/assignment-review/references/command-entrypoints.md", "skills/assignment-review/references/prompt-records.md", "skills/el-prompt/SKILL.md", "skills/assignment-review/SKILL.md", "docs/review-commands.md", "tests/commands/skill-contract.mjs", "skills/assignment-review/scripts/prompt-records.mjs"]
 key-decisions: ["Reuse installed stdlib helpers and preserve existing evidence boundaries"]
 patterns-established: ["Snapshot bytes are authoritative; host status is explicitly attributed"]
-requirements-completed: []
+requirements-completed: ["PRM-01", "PRM-02", "PRM-03", "PRM-04", "PRM-05"]
 metrics:
   tasks: 2
   files: 6

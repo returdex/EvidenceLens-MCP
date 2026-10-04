@@ -8,10 +8,10 @@ provides: ["Process-fault coverage and actual installed host acceptance"]
 affects: [19, 20]
 key-files:
   created: []
-  modified: ["tests/prompts/lifecycle.mjs", "skills/assignment-review/references/prompt-cases.md", ".planning/phases/19-captured-task-prompts-and-export/19-PROMPT-EVALUATION.md", ".planning/phases/19-captured-task-prompts-and-export/19-VALIDATION.md"]
+  modified: ["tests/prompts/lifecycle.mjs", "skills/assignment-review/references/prompt-cases.md", ".planning/phases/19-captured-task-prompts-and-export/19-PROMPT-EVALUATION.md", ".planning/phases/19-captured-task-prompts-and-export/19-VALIDATION.md", "skills/assignment-review/scripts/prompt-contract.mjs"]
 key-decisions: ["Reuse installed stdlib helpers and preserve existing evidence boundaries"]
 patterns-established: ["Snapshot bytes are authoritative; host status is explicitly attributed"]
-requirements-completed: []
+requirements-completed: ["PRM-01", "PRM-02", "PRM-03", "PRM-04", "PRM-05"]
 metrics:
   tasks: 2
   files: 4
