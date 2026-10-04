@@ -40,6 +40,8 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
+New research input (2026-10-05): [FIT5032 A1.3 review failure](../docs/research/fit5032-a13-review-failure.md) and a sanitized regression case now document feature-to-band overclaim, finding loss, rubric version drift and contradictory CRUD evidence. Phase 21 planning should consider lossless finding handoff; a separate explicit scope decision is needed for the larger review-quality contract. Existing phase completion remains technical acceptance, not demonstrated semantic review quality. Claude original transcript and new live case evaluation are still unavailable / NOT_RUN. No roadmap requirement or product version changed by this research.
+
 `$gsd-plan-phase 21` — plan concise review handoff, current-version updates, truthful model/token usage and authorized real inference acceptance. No automatic next-phase execution.
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).

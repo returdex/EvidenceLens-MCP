@@ -1,0 +1,18 @@
+{
+  "caseId": "fit5032-a13-2026",
+  "representation": "sanitized source-grounded reconstruction; descriptions are paraphrases, not verbatim source excerpts",
+  "stage": "final",
+  "task": "Assess this submitted candidate against the supplied local rubric, including evidence against the highest band. Distinguish submission readiness, functional behavior, quality risks and unknowns. Do not predict an exact mark.",
+  "sources": [
+    {"id":"B1","origin":"S-SPEC page 1","content":"The assignment permits the basic application to run entirely in client-side code and says not to worry about Firebase. It requests Business Requirements C, a filled report and application ZIP. The deadline is 23:55 local time."},
+    {"id":"R1","origin":"S-RUBRIC-LOCAL C.1","content":"Highest local band: basic login and registration for multiple users, underlying data structures, properly managed accounts, and a seamless and secure user experience."},
+    {"id":"R2","origin":"S-RUBRIC-LOCAL C.2","content":"Highest local band: comprehensive roles, at least two distinct roles with appropriate authorization and access control on different pages; well-designed implementation enhancing security and user experience. This source does not explicitly mandate CRUD or user-role editing."},
+    {"id":"R3","origin":"S-RUBRIC-LOCAL C.3","content":"Highest local band: robust, intuitive rating and aggregate score, well-designed implementation, clear feedback and enhanced user experience."},
+    {"id":"R4","origin":"S-RUBRIC-LOCAL C.4","content":"Highest local band: comprehensive security measures, XSS protection, best practices such as no client-side API keys, client validation; server validation only if a server component exists. Security should be well-designed and enhance the application."},
+    {"id":"C1","origin":"submitted-code/src/stores/auth.js:17-47","content":"Users, roles and session identity are restored from browser storage. A fixed administrator email/password pair is embedded in client source. The seeded administrator's stored password is hashed with a salt. Login compares a supplied password using the hash function. There is no server-side authorization boundary."},
+    {"id":"C2","origin":"submitted-code/src/components/AppHeader.vue:79-88; src/App.vue:39-43","content":"The Admin navigation control is rendered whenever isAuthenticated is true. The navigation handler denies the administrator view unless the signed-in user is an administrator."},
+    {"id":"C3","origin":"submitted-code/src/views/AdminView.vue:83-144; src/App.vue:30-36,55-58","content":"The administrator view displays users and listings. A Remove button emits remove-item; the parent removes the listing, persists the new list and removes its associated ratings. The user table has no role-editing action."},
+    {"id":"C4","origin":"submitted-code/src/views/MarketplaceView.vue:36-70; src/utils/ratingStorage.js:38-81; src/utils/listingStorage.js:25-34","content":"A signed-in user can create a listing and rate a listing. Rating insertion receives item ID, user ID and score, validates scores from 1 to 5, and updates one rating per user/item. The creation and rating paths do not record/check listing ownership. Average and count are computed correctly for stored ratings."},
+    {"id":"D1","origin":"S-REPORT pages 1-2","content":"The report selects Exceeds for all four criteria. Its security reflection states that no API keys or secrets are included in client code, describes salted password hashing, and acknowledges that browser storage can be modified and the prototype is not production security."}
+  ]
+}
