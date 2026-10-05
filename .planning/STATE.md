@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
 status: planning
 last_updated: "2026-10-05T16:37:21.705Z"
-last_activity: 2026-10-05
+last_activity: 2026-10-06
 progress:
   total_phases: 0
   completed_phases: 0
@@ -17,14 +17,14 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: plan the next milestone only on request; product 0.3.17 publication verified.
+See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: v1.3 requirements confirmation; released product remains 0.3.17.
 
 ## Current Position
 
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-10-05 — Milestone v1.3 started
+Last activity: 2026-10-06 — Milestone v1.3 started (Australia/Melbourne)
 
 ## Deferred Items
 
@@ -36,4 +36,4 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-gsd-new-milestone for fresh scope/requirements. Next minor version and milestone are not selected.
+Confirm the v1.3 requirements draft, then derive and approve the roadmap starting at Phase 22. No implementation or provider execution has started.
