@@ -1,3 +1,4 @@
+import { bindRunMetrics } from './codex-metrics.mjs';
 import { newDiagnostics } from './codex-diagnostics.mjs';
 import fs from 'node:fs/promises';
 import { validateBoundCodexResult } from './codex-result.mjs';
@@ -183,10 +184,10 @@ export async function exportLatest(scope,{expectedRunId}={}){
 }
 async function deletionPreview(c,t){
  await dirs(taskDir(c,t),false,c.root);
- const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider'].map(k=>r.runId+'.'+k+'.json')));
+ const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider','metrics'].map(k=>r.runId+'.'+k+'.json')));
  let preservedUnknownCount=0,count=0;
  const d=await fs.opendir(taskDir(c,t));
- for await(const e of d){if(++count>LIMITS.runs*6+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ for await(const e of d){if(++count>LIMITS.runs*7+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
  return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
 }
 export async function forgetTask(scope,{apply=false}={}){
@@ -203,6 +204,8 @@ export async function forgetTask(scope,{apply=false}={}){
    try{
     const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
     const lraw=await read(lp),sraw=await read(sp);
+    const mp=recordPath(c,t,r.runId,'metrics'),mraw=await read(mp,16384);
+    if(mraw){if(!lraw)fail('corrupt_record');bindRunMetrics(mraw,await execution(c,t,validateLifecycle(lraw)));await fs.unlink(mp);}
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
     for(const kind of ['execution','result','scratch','provider']){
      const p=recordPath(c,t,r.runId,kind),v=await read(p);if(!v)continue;
@@ -242,9 +245,10 @@ export async function recordCodexScratch(scope,runId,attemptId,root){return tran
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);if(!e||e.attemptId!==attemptId||e.status!=='preparing')fail('busy');
  const v=validateScratch({schemaVersion:1,runId,taskId:l.taskId,conversationId:l.conversationId,attemptId,root});tx.dirty();await writeExclusive(recordPath(c,t,runId,'scratch'),v);await tx.publish();
 });}
-export async function completeCodexRun(scope,runId,{execution:input,result=null,signal}){return transaction(scope,false,async tx=>{
+export async function completeCodexRun(scope,runId,{execution:input,result=null,metrics=null,signal}){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),old=await execution(c,t,l),e=validateExecutionRecord(input);
  if(!old||old.status!=='preparing'||['attemptId','runId','taskId','conversationId','promptSha256','startedAt'].some(k=>e[k]!==old[k])||e.status==='preparing')fail('uncertain');
+ const m=metrics===null?null:bindRunMetrics(metrics,e);
  if(e.status==='succeeded'){
   if(l.status!=='dispatched')fail('uncertain');const r=validateResultEnvelope(result);
   if(['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||r.resultSha256!==e.resultSha256)fail('corrupt_record');
@@ -253,7 +257,9 @@ export async function completeCodexRun(scope,runId,{execution:input,result=null,
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');
  if(signal?.aborted&&e.cleanupComplete){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.resultSha256=null;if(e.schemaVersion===2&&!e.diagnostics.trigger)e.diagnostics={...e.diagnostics,stage:'publication',trigger:'aborted'};}
- const next=transition(l,e.status,{errorCode:e.errorCode});tx.dirty();await replace(recordPath(c,t,runId,'execution'),e);await boundary(c,'after_execution');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {...receipt(next),execution:e,...(result?{result}:{} )};
+ const next=transition(l,e.status,{errorCode:e.errorCode});
+ if(m){tx.dirty();await writeExclusive(recordPath(c,t,runId,'metrics'),m);await boundary(c,'after_metrics');}
+ tx.dirty();await replace(recordPath(c,t,runId,'execution'),e);await boundary(c,'after_execution');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {...receipt(next),execution:e,metrics:m,...(result?{result}:{} )};
 });}
 export async function readCodexResult(scope,runId){
  const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);
@@ -269,4 +275,13 @@ export async function diagnoseCodexRun(scope,runId){
  const diagnosticAvailability=!e?'not_started':e.schemaVersion===1?'not_recorded':e.status==='preparing'?'pending':'recorded';
  await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
  return {metadata:receipt(l),execution:e,diagnosticAvailability};
+}
+
+export async function readCodexMetrics(scope,runId){
+ const c=await context(scope);await unlocked(c);const index=await loadIndex(c),t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);
+ if(l.executionKind!=='codex_exec')fail('unsupported');
+ if(e&&(e.status==='preparing'?!['captured','dispatched'].includes(l.status):e.status!==l.status))fail('corrupt_record');
+ const raw=await read(recordPath(c,t,runId,'metrics'),16384),metrics=raw?bindRunMetrics(raw,e):null;
+ await boundary(c,'metrics_read');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
+ return {metadata:receipt(l),metrics,availability:metrics?'recorded':'not_recorded'};
 }
