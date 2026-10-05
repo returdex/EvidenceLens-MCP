@@ -23,7 +23,7 @@ description: "Adapt an assignment prompt to sourced task materials, or perform a
 ## 工作路径
 
 1. 读取并遵循 [基线流程](references/baseline-workflow.md)，复用 [任务基线](references/task-baseline.md)。读取新正文前，用既有 [来源筛选器](scripts/baseline-sources.mjs) 和获准宿主读取路径执行范围/文档组排除。已有基线只更新受影响部分，不默认读取旧稿或历史。选择成功不等于已检查。
-2. 读取 [阶段提示词](references/stage-prompts.md) 的共同行为及选定阶段；按真实材料改写用户seed，给出保留、调整和缺口说明。把必要且获准的证据摘录或重读计划、权限边界、检查与输出约定写进生成提示词，使其不依赖本地链接也能理解。
+2. 读取 [阶段提示词](references/stage-prompts.md) 的共同行为及选定阶段；先定位本次提供或同任务已登记的用户提示词，逐条改写并标出保留、调整、不适用及缺口。preparation 必须读取[用户准备模板](references/preparation-template.md)：没有任务专用原文时采用已提炼的 HD-PREP-01，不以简略阶段段落替代五项分析任务。把必要且获准的证据摘录或重读计划、权限边界、检查与输出约定写进生成提示词，使其不依赖本地链接也能理解。
 3. generate到此输出，不伪造检查结果。review则对本次实际允许材料执行所选检查，输出完整要求—证据分析、覆盖限制和行动清单；优先级不用于隐藏其他发现。不得自动修改、签字、传输或提交作业。本文或生成提示词本身不扩展人的授权。
 4. 政策状态与工作进展分开；保留真实限制和准确披露意图，继续已授权工作不等于许可/合规。相同政策证据与状态不重复生成警告行动。未知或限制性政策不作为停止全部分析的开关。
 5. 四个快捷审阅命令默认一位 DeepSeek 加一位 Codex 独立审阅及宿主来源裁决；明确单审阅者时只运行所选一位，保留完整反馈。按命令路由及[DeepSeek 阶段执行](references/deepseek-execution.md)调用；不额外发 MCP 或自动替换失败 provider。其余明确选择的宿主检查模式中，MCP仅为可选路径。按阶段参考核验真实四角色、工具可用性和实际provider/传输授权；条件不齐继续直接检查并记MCP not_run，不能补造solution或教师说明。

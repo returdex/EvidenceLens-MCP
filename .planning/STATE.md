@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
-last_updated: "2026-10-05T03:26:03.986Z"
-last_activity: 2026-10-05 — 0.3.14 DeepSeek plus Codex default selected by user
+last_updated: "2026-10-05T07:53:35.038Z"
+last_activity: 2026-10-05 — 0.3.15 user HD preparation template restored
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — 0.3.14 DeepSeek plus Codex default selected by user
+Last activity: 2026-10-05 — 0.3.15 user HD preparation template restored
 
 ## Accepted Coverage Debt
 
@@ -131,3 +131,8 @@ Fresh build and installed-link verification passed; Node regression 231/231 (12.
 Exactly one independent DeepSeek stage API review and one isolated Codex review are now the Skill default. Both return complete evidence-bound reports before host comparison. Explicit one-provider selection is retained. Same admitted material/task, separately captured identities and no peer conclusions. Missing provider reports failed/not_run; no silent duplicate-Codex replacement. Reuses existing build/config/bounded provider reader and shared v3 source binding; requirements-only preparation does not fabricate four MCP roles. Product 0.3.14, next accepted phase patch 0.3.15. Phase 21 remains 0/6, no release/tag, no global-memory edit. New real paired coursework inference is not implied by offline checks.
 
 Fresh build passed; final Node 241/241 (13.815 s), six Vitest files 118/118 (2.54 s), no failures/skips. All installed links unchanged; DeepSeek read-only preflight passed outside the repository without HTTP. Python optional skill validator lacks PyYAML; Node packaging/link checks passed. No new real inference was sent. Details in [validation](../docs/development-validation.md).
+
+
+2026-10-05 preparation-template correction: verified the user-provided HD preparation template against its original user message and the actual A4 capture. Shared preparation now preserves its five tasks and applicable nine preferences with explicit clause mapping; HD-PREP-01 is the reusable fallback, current/same-task seeds take precedence. Six-section packaging and schema validation do not certify semantic completeness. A private A4 revised draft is not_run; original captures/results remain unchanged. Product baseline 0.3.15; next accepted Phase 21 patch 0.3.16. Phase 21 remains 0/6, RUN-01–05 pending; no new inference or Release/tag.
+
+Fresh build passed; targeted Node checks 23/23 (0.559 s) and six version/contract Vitest files 118/118 (2.64 s), no failures/skips. Installed seven-link dry run passed; reference graph includes HD-PREP-01. Original five tasks/nine preferences manually compared with revised private A4 draft. Model behavior remains unverified by this repair; details in [validation](../docs/development-validation.md).

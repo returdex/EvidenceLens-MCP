@@ -139,3 +139,25 @@ User selects one DeepSeek plus one Codex independent stage reviewer by default, 
 Fresh `npm run build` passed. Final Node Codex/prompt/command/source-boundary batch passed 241/241 in 13.815 seconds; six affected Vitest files passed 118/118 in 2.54 seconds. Ten DeepSeek checks exercise full findings beyond the old MCP cap, requirements-only evidence, cross-provider capture independence, saved-result revalidation, exact export, rejected identities/citations, truncated/tool finishes, HTTP failure privacy/no retry, deadline across response body, disabled/misconfigured transport, CLI override rejection, cancellation publication, running deletion protection and competing ownership. All 359 checks passed, zero failures/skips. A transient test failure after adding schema text was fixed by retaining the guide's final identity JSON line; final complete rerun passed.
 
 Installed seven-link dry run is unchanged; DeepSeek installed-helper read-only preflight passed in an external cwd with inference=not_run. Existing project-local provider configuration is selected as one complete configuration, excluding different ambient credentials; environment config is used only without the project-local file. No original credential/config file was edited. Python skill-creator quick validator could not import missing PyYAML; Node frontmatter/reference/install graph checks passed with their narrower scope. No new paid inference, A4 paired rerun, external chat message, dependency, Release/tag or Phase 21 completion is implied. Historical three-Codex A4 records remain unchanged. Next accepted Phase 21 patch is 0.3.15.
+
+## User preparation-template repair (product 0.3.15)
+
+The original user-provided “Assignment HD 完成流程提示词模板” stage 1 was verified against its actual user message. The actual prior A4 captured prompt used a generic six-section preparation request without mapping this template's tasks. The shared instructions previously preserved language and format but did not require complete semantic clause adaptation. This was a prompt assembly omission, not a failed source binding or missing requirement file.
+
+Shared preparation now reads [HD-PREP-01](../skills/assignment-review/references/preparation-template.md), prefers current or registered same-task seeds, records each clause's retained/adapted/inapplicable/unverifiable handling, and gives both reviewers the same complete tasks. The default remains one DeepSeek plus one Codex. No runtime schema or dependency changes.
+
+Manual comparison against the real user template and a revised private A4 draft covered:
+
+| Original preparation task | Repaired coverage |
+|---|---|
+| Official requirements | Topic, actual deliverables and submission limits, mandatory versus optional, evidence and unknowns |
+| Rubric breakdown | Each criterion, actual grade-band differences, highest-band evidence, lost-mark risks and verification |
+| Zero-to-submission workflow | Each step's inputs, outputs, dependencies, parallel work and review checkpoints |
+| Next material requests | Task-relevant material, purpose, sufficient format/scope and priority |
+| HD strategy | Source-backed priorities, reasoning beyond execution, evidence and actual deliverable organization |
+
+All nine original preferences were accounted for: no fabrication; conflict handling; rubric-linked advice; missing-material best effort; academic report expression; complete runnable code/files when later implementing; task-appropriate data analysis; realistic highest-band aim; incremental living-plan updates. A4 maps report planning to its actual Quiz/video deliverables, keeps code generation outside this preparation scope, and follows its explicit no-cleaning requirement. No new report or generic EDA requirement is invented. Actual rubric column boundaries remain unknown where text extraction cannot establish them.
+
+The revised A4 prompt is draft/not_run, uses the same frozen two sources/eight excerpts, and preserves original captures, exports and results. Real future execution must check current materials and create fresh bound captures for each provider. Private source identifiers, paths, raw chats and coursework evidence are excluded from this repository. This manual clause comparison does not establish future model output quality or a completed paired review.
+
+Fresh `npm run build` passed. `node --test tests/commands/*.mjs tests/baseline/source-boundary.mjs` passed 23/23 in 0.559 seconds; six affected Vitest files (`project-config`, `review-tool`, `public-contract-docs`, `fit5032-fixture`, `review-provider`, `docker-review`) passed 118/118 in 2.64 seconds with provider inference disabled. All 141 checks passed without failure/skip. Seven installed Skill links are unchanged; their shared reference graph includes the new preparation reference. These packaging, source-boundary and version/contract checks do not certify semantic prompt coverage; that comparison was performed manually above. Python skill-creator validator remains unavailable due to missing PyYAML. Phase 21 remains 0/6 and next accepted phase patch becomes 0.3.16; no new inference, external chat message or Release/tag.
