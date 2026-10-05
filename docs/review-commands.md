@@ -96,3 +96,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 help/export 均不预检、不启动 Codex、不读取来源。失败但已捕获的尝试仍可导出原文。执行记录不保存原始事件、stderr 或推理；删除仍使用确切任务的 dry-run / --apply，运行中或清理未确认时返回 busy。
 
 当前证据区分：真实 CLI/OS + 本地协议服务已验证；真实登录状态只读预检已验证；实际 ChatGPT 模型推理 NOT_RUN。不能把本地服务的合成结果当作真实审阅。
+
+## 完整回传与复查
+
+四阶段继续沿用同一安装路径：run → review-records show/full → 主对话当前证据 R/F 评估 → annotate。默认完整报告；简版须明确请求并附同轮全报告。JSON 输入与字段见 [共享指令](../skills/assignment-review/references/command-entrypoints.md#完整回传主对话评估与只读记录)。show/full/annotate、help/export 均不调用模型、不读作业原件。运行 succeeded 不是成绩/提交验收。缺 token 显示 unavailable，合法零保留，requested/reported model 分列，不估算账单；失败也可能消耗用量。旧轮明确标 historical。私有 metrics/handoff 由同任务 forget-task 验证后删除，未知/损坏文件保留。

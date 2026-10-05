@@ -104,3 +104,10 @@ CLI 0.160.0 在目录 ETag 与服务端 `x-models-etag` 相同时，可能输出
 此前来源 ID、覆盖、区间与原文等错误统一返回 source_mismatch，不能由旧回执还原具体失败引用。现在保留封闭 binding_* trigger，分别区分 identity、coverage、status、excerpt、missing_evidence、reference、span、quote_mismatch、quote_missing、quote_ambiguous、duplicate_evidence。字段结构保持 diagnostics v1；不保存错误引用、来源正文、原始模型输出或任意错误消息。旧失败回执不改写、不重发。新的模型 v2 去掉手算字节范围，严格绑定后保存为兼容的结果 v1。
 
 修复后一次真实 GPT-6 合成审阅已通过：中文及 emoji 引用由本地计算范围，结果保存为 v1 并再次验证，提示词导出未变。新协议的完整 A4 运行与 Phase 21 复检／交接／用量验收仍分别待核验；详见仓库 `docs/codex-source-binding-repair.md`。
+
+
+## Phase 21 本地回传记录
+
+`review-records.mjs show/full/annotate` 的完整 stdin 示例及四阶段路径见[共享命令](command-entrypoints.md#完整回传主对话评估与只读记录)。读取须明确 expectedRunId 或 historicalRunId，不能猜 latest、读原作业或启动模型。完整有效结果保留所有 finding IDs；默认全报告。metrics v1 只保存 CLI 实报数字与 provenance，缺失/无效不补零，requested model 不等于 reported model，不推算账单。失败/取消可能消耗远端用量。
+
+新增私有 `<runId>.metrics.json` 和 `<runId>.handoff.json`，沿用所有者/0600/no-follow/限额/事务和身份摘要约束。旧记录缺 sidecar 明确 not_recorded。present corrupt metrics 是记录错误；corrupt handoff 显示比较不可验证且保留有效原始结果。handoff 是 host_review 的当前证据 R/F 语义评估，结构验证不证明语义正确。相同首次记录幂等，不同覆写拒绝。只删除已识别且身份/摘要匹配的本任务文件；未知/损坏/链接保留并报告 incomplete。不自动过期、重试或恢复。

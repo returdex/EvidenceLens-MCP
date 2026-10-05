@@ -69,3 +69,7 @@ test('installed prompt CLI executes through sibling link from external Unicode c
 });
 
 test('four stages share independent capture/run while help/export retain read-only routes',async()=>{const text=await readFile(join(source,'assignment-review/references/command-entrypoints.md'),'utf8');assert.match(text,/executionKind="codex_exec"/);assert.match(text,/codex-review\.mjs/);assert.match(text,/不自动重发/);assert.match(text,/不重新生成/);assert.match(text,/先固定阶段/);});
+test('four stages preserve full handoff and truthful model/usage/recheck semantics',async()=>{
+ const text=await readFile(join(source,'assignment-review/references/command-entrypoints.md'),'utf8');for(const token of ['review-records.mjs','show','full','annotate','historicalRunId','assessmentSha256','host_judgment_not_independently_verified','input_tokens','reasoning_output_tokens','reportedModel','unmapped','延期','不推算账单'])assert.ok(text.includes(token),token);
+ for(const name of ['codex-metrics','review-handoff','review-recheck','review-records'])await readFile(join(source,`assignment-review/scripts/${name}.mjs`));
+});

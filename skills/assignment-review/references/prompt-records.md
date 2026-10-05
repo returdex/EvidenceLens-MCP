@@ -64,3 +64,10 @@ Owned runtime directories can remain after a host crash; their exact journal is 
 The stage API uses existing host_skill/v1 lifecycle and unchanged snapshot v1. Atomic claim marks dispatched before configuration/HTTP, ensuring another runner cannot dispatch or overwrite the owner. It records a validated v1 result plus a private provider sidecar with provider=deepseek, bound identity/prompt hash, requested/reported model, status, safe error/trigger, elapsed time, HTTP status, observed request count (0/1) and result hash. It stores no raw HTTP errors, key, endpoint, usage or reasoning. Local lifecycle alone remains insufficient provider proof; only the runner's validated result and receipt support this bounded execution claim. Diagnostics read explicit run metadata; export still uses latest begin order. The common capture guide now embeds the v3 JSON schema for both providers; Codex's per-run schema enforcement is unchanged.
 
 Deletion recognizes the added provider sidecar and refuses any dispatched attempt; foreign files remain preserved. A process that disappears before terminal publication remains incomplete. No PID guessing, replay, or older-success fallback. Installed DeepSeek stage instructions and build/config prerequisites are in [DeepSeek execution](deepseek-execution.md).
+
+
+## Phase 21 本地回传记录
+
+`review-records.mjs show/full/annotate` 的完整 stdin 示例及四阶段路径见[共享命令](command-entrypoints.md#完整回传主对话评估与只读记录)。读取须明确 expectedRunId 或 historicalRunId，不能猜 latest、读原作业或启动模型。完整有效结果保留所有 finding IDs；默认全报告。metrics v1 只保存 CLI 实报数字与 provenance，缺失/无效不补零，requested model 不等于 reported model，不推算账单。失败/取消可能消耗远端用量。
+
+新增私有 `<runId>.metrics.json` 和 `<runId>.handoff.json`，沿用所有者/0600/no-follow/限额/事务和身份摘要约束。旧记录缺 sidecar 明确 not_recorded。present corrupt metrics 是记录错误；corrupt handoff 显示比较不可验证且保留有效原始结果。handoff 是 host_review 的当前证据 R/F 语义评估，结构验证不证明语义正确。相同首次记录幂等，不同覆写拒绝。只删除已识别且身份/摘要匹配的本任务文件；未知/损坏/链接保留并报告 incomplete。不自动过期、重试或恢复。
