@@ -1,7 +1,7 @@
 # Requirements: EvidenceLens MCP — v1.3
 
 **Defined:** 2026-10-06 (Australia/Melbourne)
-**Status:** Draft — awaiting user confirmation
+**Status:** Confirmed by user on 2026-10-06; roadmap pending approval
 **Core Value:** Trustworthy independently checked findings grounded in controlled local evidence.
 
 ## v1.3 Requirements
@@ -95,4 +95,4 @@ Pending requirements confirmation and roadmap creation; planned phase numbering 
 A1.3 is a known tuning/regression candidate. FIT5046 A2 is a held-out candidate only; exact assessed artifact and complete process availability must be verified. The current host has read its feedback summary; isolated reviewers must not inherit that context. No provider calls, model training or assignment changes are authorized merely by initialization. Freeze the comparison protocol and evaluator rubric before test outputs; never tune using held-out outcomes and still call the same case unseen. Historical receipts, reports and phase paths remain intact. RR/FM entries need explicit evidence-backed closure.
 
 ---
-*Last updated: 2026-10-06 after confirmed milestone scope; detailed requirements awaiting confirmation.*
+*Last updated: 2026-10-06 after confirmed milestone scope; detailed requirements confirmed; roadmap pending approval.*

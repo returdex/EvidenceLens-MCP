@@ -48,7 +48,7 @@ Actual authorized synthetic initial/recheck Codex pair succeeded with exact expo
 
 ### Active
 
-Milestone v1.3 scope approved by the user on 2026-10-06; detailed requirements pending confirmation.
+Milestone v1.3 scope approved by the user on 2026-10-06; 20 detailed requirements confirmed by the user on 2026-10-06; roadmap pending approval.
 
 - [ ] Repair preparation, in-progress, final and recheck prompts and their full-feedback delivery.
 - [ ] Diagnose real execution failures; accept recoverable presentation differences without weakening authorization, identity or evidence validation.
@@ -108,4 +108,4 @@ At phase transitions, move verified requirements to Validated, record invalidate
 </details>
 
 ---
-*Last updated: 2026-10-06 after user approval of v1.3 milestone goals; requirements pending confirmation.*
+*Last updated: 2026-10-06 after user approval of v1.3 milestone goals; requirements confirmed; roadmap pending approval.*
