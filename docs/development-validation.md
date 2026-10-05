@@ -194,3 +194,7 @@ Details: [host/offline evidence](../.planning/phases/21-review-handoff-and-usage
 Build 0.3.17: exit 0 (0.763 s). Node: node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/*.mjs — 276/276, 19.795 s, no skips/failures. Offline Vitest with EVIDENCELENS_DISABLE_PROVIDER=1: seven Plan 06 files, 124/124, 2.99 s, exit 0. Existing PDF font/index warnings did not fail tests.
 
 Authorized real pair and scoped host judgments: see ../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-ACCEPTANCE.md and 21-VERIFICATION.md. No additional inference, dependency changes, release/tag or grading claims.
+
+## v1.2 archival compatibility — 2026-10-05
+
+Archive safety commit 77b1b83 precedes requirements removal. Exact snapshots/audit preservation, 21 archived completed requirements and 42 derived relative links checked. Runtime/source/package/lock/version unchanged from a6ab604. Offline proof-chain suite after removal: 81/81, exit 0, 5.98 s, no skips/failures. No model or provider request. See [completion](../.planning/milestones/v1.2-COMPLETION.md).
