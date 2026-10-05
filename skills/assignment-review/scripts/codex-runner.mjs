@@ -1,7 +1,7 @@
 import { validateBoundCodexResult } from './codex-result.mjs';
 import { spawn } from 'node:child_process';
 import { CODEX_LIMITS,codexError,parseEvidenceCapsule } from './codex-contract.mjs';
-import { newDiagnostics,diagnosticEvent,diagnosticItem,diagnosticErrno,diagnosticSignal,reportedErrorCategory } from './codex-diagnostics.mjs';
+import { newDiagnostics,diagnosticEvent,diagnosticItem,diagnosticErrno,diagnosticSignal,reportedErrorCategory,diagnosticBindingTrigger } from './codex-diagnostics.mjs';
 import { decode } from './prompt-contract.mjs';
 import { claimCodexRun,recordCodexScratch,readForDispatch,completeCodexRun } from './prompt-store.mjs';
 import { preflightCodex } from './codex-preflight.mjs';
@@ -116,7 +116,7 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
   if(!owned)return {ok:false,runId,...codexError(e)};
   if(e.scratchRoot)await recordCodexScratch(scope,runId,execution.attemptId,e.scratchRoot).catch(()=>{});
   const trigger={capsule:'capsule_invalid',preflight:'preflight_rejected',launch:'launch_failed',dispatch:'dispatch_failed',process:'supervisor_failed',result_validation:'result_rejected'}[stage]??'supervisor_failed';
-  outcome={status:dispatch||e.cleanupComplete===false?'uncertain':'failed',code:codexError(e).code,terminalObserved:outcome?.terminalObserved??false,cleanupComplete:outcome?.cleanupComplete??(dispatch?false:e.cleanupComplete!==false),diagnostics:{...(outcome?.diagnostics??newDiagnostics()),stage,trigger}};
+  outcome={status:dispatch||e.cleanupComplete===false?'uncertain':'failed',code:codexError(e).code,terminalObserved:outcome?.terminalObserved??false,cleanupComplete:outcome?.cleanupComplete??(dispatch?false:e.cleanupComplete!==false),diagnostics:{...(outcome?.diagnostics??newDiagnostics()),stage,trigger:stage==='result_validation'?diagnosticBindingTrigger(e.bindingTrigger):trigger}};
  }
  if(launch&&outcome.cleanupComplete){try{await launch.cleanup();}catch{outcome={...outcome,status:'uncertain',code:'uncertain',cleanupComplete:false,diagnostics:outcome.diagnostics?.trigger?outcome.diagnostics:{...(outcome.diagnostics??newDiagnostics()),stage:'cleanup',trigger:'cleanup_failed'}};}}
  if(signal?.aborted&&outcome.cleanupComplete){outcome={...outcome,status:'cancelled',code:null,diagnostics:outcome.diagnostics?.trigger?outcome.diagnostics:{...(outcome.diagnostics??newDiagnostics()),stage,trigger:'aborted'}};result=null;}

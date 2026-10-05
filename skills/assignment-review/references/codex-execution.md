@@ -12,7 +12,11 @@
 
 ## 结果形状
 
-`MODEL_RESULT_SCHEMA` 为封闭字段 JSON Schema，每层 additionalProperties=false。模型字段：schemaVersion/runId/taskId/stage/currentSourceId/coverage/findings/limitations。coverage 含 sourceId/status/excerptIds，状态 covered/partial/unavailable/excluded。finding 含 findingId/kind/severity/claim/evidence/action，evidence 含 sourceId/excerptId/startByte/endByte/quote。action 可为 null。
+生产模型使用 `MODEL_CITATION_SCHEMA`（schemaVersion=2），每层 additionalProperties=false。字段为 schemaVersion/runId/taskId/stage/currentSourceId/coverage/findings/limitations。coverage 含 sourceId/status/excerptIds，状态 covered/partial/unavailable/excluded。finding 含 findingId/kind/severity/claim/evidence/action；模型 evidence 仅含 sourceId/excerptId/quote，action 可为 null。
+
+模型复制精确且在指定摘录内仅出现一次的非空 quote；本地查找原文并计算 source-relative UTF-8 startByte/endByte，不由模型数中文、emoji 或换行字节。不规范化空白、标点或 Unicode，不跨来源搜索，不修补错误引用；原文缺失或多处匹配均拒绝。保存前转为既有 `MODEL_RESULT_SCHEMA` v1 和结果封装 v1，完整字节绑定继续验证。旧模型 v1 输出仍严格读取，错误旧偏移不自动更正。
+
+capture 在六节正文之后自动追加 `<evidencelens-output-v2>`，含实际运行身份、每个登记材料及摘录 ID 的完整映射；covered 模板只有实际读完时可使用，缺失/排除材料不能升级。它只统一输出形状，不改变用户检查目标、来源授权或任务范围。所有新增内容在 capture 时一起计算 promptSha256，派发和导出仍逐字相同。
 
 模型不提供 promptSha256：本地验证后从已捕获字节加入，避免自引用哈希。结构校验不是来源校验或语义真实性证明；终态、进程退出、引用/区间/原文绑定须全部验证，才可记录独立 succeeded。执行完成不等于作业合格。
 
@@ -93,3 +97,10 @@ SIGINT/SIGTERM 转成当前自有运行的取消信号：TERM 后最多 2 秒发
 CLI 0.160.0 在目录 ETag 与服务端 `x-models-etag` 相同时，可能输出精确日志 `ERROR codex_models_manager::manager: failed to renew cache TTL: cache not found`。隔离目录没有持久缓存，这条日志不表示模型不可用。运行器现仅容许这条已由实际二进制复现的缓存缺失日志；未知日志、模型错误、权限错误及工具活动继续终止运行。分类先去掉日志模块前缀，再检查错误正文，避免把模块名 models 和 cache not found 误拼为模型不可用。
 
 修复后一次 GPT-6 配置下的真实合成准备审阅已成功，来源验证、结果保存和已安装 skill 的提示词导出均通过。此前失败回执保持原状态；A4 尚未重新审阅，完整复检/交接/用量验收仍由 Phase 21 执行。详情见仓库 `docs/codex-startup-repair.md` 的 0.3.8 记录。
+
+
+## 来源绑定修复（0.3.10）
+
+此前来源 ID、覆盖、区间与原文等错误统一返回 source_mismatch，不能由旧回执还原具体失败引用。现在保留封闭 binding_* trigger，分别区分 identity、coverage、status、excerpt、missing_evidence、reference、span、quote_mismatch、quote_missing、quote_ambiguous、duplicate_evidence。字段结构保持 diagnostics v1；不保存错误引用、来源正文、原始模型输出或任意错误消息。旧失败回执不改写、不重发。新的模型 v2 去掉手算字节范围，严格绑定后保存为兼容的结果 v1。
+
+修复后一次真实 GPT-6 合成审阅已通过：中文及 emoji 引用由本地计算范围，结果保存为 v1 并再次验证，提示词导出未变。新协议的完整 A4 运行与 Phase 21 复检／交接／用量验收仍分别待核验；详见仓库 `docs/codex-source-binding-repair.md`。

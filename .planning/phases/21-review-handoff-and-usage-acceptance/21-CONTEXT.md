@@ -16,7 +16,7 @@ Complete the installed review → concise complete-finding handoff → exact pro
 - **D-06:** Keep snapshot v1, lifecycle v1/v2, execution v1/v2 compatibility and MODEL_RESULT_SCHEMA v1 unchanged (v2 safe diagnostics were added by the user-requested 0.3.4 repair). Store new local metrics and host handoff annotations as bounded, versioned, run/attempt/hash-bound private sidecars, with old-record absence explicitly unavailable. Reuse existing transactions, identity checks, retention and exact export. No model text can choose a path or invoke an action.
 - **D-07:** Use installed sibling stdlib modules, existing four stage commands and help/export separation. Read-only record/handoff inspection spawns no model and reads no assignment file. Explicit old-run inspection must not masquerade as the latest result.
 - **D-08:** Separate automated synthetic coverage, actual pinned CLI/installed-host coverage and authorized real inference. Prepare two small synthetic source sets and exact prompts for initial review + current-version recheck before seeking the remaining live authorization, only if not already covered by explicit human authorization. No course/private case corpus or extra chat creation. H-04; RUN-05.
-- **D-09:** After all required acceptance, apply one compatible patch from 0.3.9 to 0.3.10 and refresh affected tests/metadata. No Release/tag during phase execution; milestone closure is separate. Existing RR/FM items remain non-blocking, not silently promoted.
+- **D-09:** After all required acceptance, apply one compatible patch from 0.3.10 to 0.3.11 and refresh affected tests/metadata. No Release/tag during phase execution; milestone closure is separate. Existing RR/FM items remain non-blocking, not silently promoted.
 </decisions>
 
 ### Implementation discretion
@@ -50,3 +50,6 @@ Inline research/planning/checking follows the Skill adapter and no-delegation pr
 
 
 2026-10-05 review-duration amendment: current product baseline is 0.3.9 after the default independent review deadline increased from 120 to 600 seconds, following a real two-source preparation timeout and the user's five-minute review expectation. Clock-controlled real-child tests cover completion past the old deadline and termination/cleanup at the new ceiling. No new model inference, coursework replay or acceptance closure occurred. Plan 06 now targets 0.3.10. Phase 21 remains 0/6 and RUN-01–05 stay pending; prior amendments remain historical.
+
+
+2026-10-05 source-binding amendment: current baseline is 0.3.10. Production model v2 supplies exact quote/source/excerpt identities, local code calculates spans and saves compatible v1 results; safe binding triggers distinguish rejection branches. Earlier actual A4 success on 0.3.9 does not establish the new protocol's live acceptance or close Phase 21 handoff/recheck/usage work. Plan 06 targets 0.3.11. Phase stays 0/6 and RUN-01–05 remain pending.

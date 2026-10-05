@@ -2,7 +2,9 @@ import { fields,fail } from './prompt-contract.mjs';
 
 // Never retain free-form CLI text, paths, identifiers, stderr or reasoning here.
 const stages=['preparing','capsule','preflight','launch','dispatch','process','result_validation','cleanup','publication'];
-const triggers=['aborted','deadline_exceeded','spawn_failed','stdin_failed','invalid_json','invalid_utf8','invalid_event','event_order','cli_error','cli_turn_failed','unexpected_event','unexpected_stderr','tool_activity','result_shape','output_limit','missing_thread','missing_turn','missing_terminal','missing_final','nonzero_exit','signal_exit','cleanup_unconfirmed','capsule_invalid','preflight_rejected','launch_failed','dispatch_failed','supervisor_failed','result_rejected','cleanup_failed','publication_failed'];
+const bindingTriggers=['binding_identity_mismatch','binding_coverage_mismatch','binding_status_mismatch','binding_excerpt_mismatch','binding_missing_evidence','binding_reference_mismatch','binding_span_mismatch','binding_quote_mismatch','binding_quote_missing','binding_quote_ambiguous','binding_duplicate_evidence'];
+export const diagnosticBindingTrigger=v=>bindingTriggers.includes(v)?v:'result_rejected';
+const triggers=['aborted','deadline_exceeded','spawn_failed','stdin_failed','invalid_json','invalid_utf8','invalid_event','event_order','cli_error','cli_turn_failed','unexpected_event','unexpected_stderr','tool_activity','result_shape','output_limit','missing_thread','missing_turn','missing_terminal','missing_final','nonzero_exit','signal_exit','cleanup_unconfirmed','capsule_invalid','preflight_rejected','launch_failed','dispatch_failed','supervisor_failed','result_rejected','cleanup_failed','publication_failed',...bindingTriggers];
 const events=['thread.started','turn.started','turn.completed','turn.failed','error','item.started','item.updated','item.completed','other'];
 const items=['agent_message','reasoning','error','command_execution','file_change','mcp_tool_call','web_search','todo_list','other'];
 const categories=['authentication','rate_limit','model_unavailable','model_cache_missing','model_metadata_missing','invalid_schema','network','permission','unknown'];

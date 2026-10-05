@@ -99,3 +99,6 @@ One explicitly authorized real smoke failed with permission-class stderr; its ap
 
 
 2026-10-05 review-duration amendment: current product baseline is 0.3.9 after the default independent review deadline increased from 120 to 600 seconds, following a real two-source preparation timeout and the user's five-minute review expectation. Clock-controlled real-child tests cover completion past the old deadline and termination/cleanup at the new ceiling. No new model inference, coursework replay or acceptance closure occurred. Plan 06 now targets 0.3.10. Phase 21 remains 0/6 and RUN-01–05 stay pending; prior amendments remain historical.
+
+
+2026-10-05 source-binding amendment: current baseline is 0.3.10. Production model v2 supplies exact quote/source/excerpt identities, local code calculates spans and saves compatible v1 results; safe binding triggers distinguish rejection branches. Earlier actual A4 success on 0.3.9 does not establish the new protocol's live acceptance or close Phase 21 handoff/recheck/usage work. Plan 06 targets 0.3.11. Phase stays 0/6 and RUN-01–05 remain pending.

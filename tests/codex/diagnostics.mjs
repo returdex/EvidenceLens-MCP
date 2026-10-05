@@ -54,7 +54,7 @@ test('diagnostic schema rejects arbitrary text, added fields and accessors',()=>
 });
 test('invalid source-bound result retains observed terminal/exit and exact prompt',async t=>{
  const x=await capturedFlow(t);x.f.result.findings[0].evidence[0].quote='FORGED';
- const r=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(r.status,'uncertain');assert.equal(r.execution.errorCode,'source_mismatch');assert.equal(r.execution.terminalObserved,true);assert.equal(r.execution.diagnostics.trigger,'result_rejected');assert.equal(r.execution.diagnostics.stage,'result_validation');assert.equal(r.execution.diagnostics.exitCode,0);assert.equal(r.execution.cleanupComplete,true);assert.equal(r.execution.resultSha256,null);assert.equal((await x.exportPrompt()).promptText,x.exported.promptText);
+ const r=await executeCapturedWithAdapter(x.scope,x.receipt.runId,{},x.adapter);assert.equal(r.status,'uncertain');assert.equal(r.execution.errorCode,'source_mismatch');assert.equal(r.execution.terminalObserved,true);assert.equal(r.execution.diagnostics.trigger,'binding_quote_mismatch');assert.equal(r.execution.diagnostics.stage,'result_validation');assert.equal(r.execution.diagnostics.exitCode,0);assert.equal(r.execution.cleanupComplete,true);assert.equal(r.execution.resultSha256,null);assert.equal((await x.exportPrompt()).promptText,x.exported.promptText);
  const d=await store.diagnoseCodexRun(x.scope,x.receipt.runId);assert.deepEqual(d.execution,r.execution);assert.equal(d.diagnosticAvailability,'recorded');assert.equal(x.calls(),1);
 });
 test('cleanup failure retains terminal and process exit facts',async t=>{

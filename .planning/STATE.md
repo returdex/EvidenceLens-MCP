@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
 last_updated: "2026-10-05T03:26:03.986Z"
-last_activity: 2026-10-05 — 0.3.9 independent review deadline raised to ten minutes
+last_activity: 2026-10-05 — 0.3.10 local quote binding and specific diagnostics repair
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — 0.3.9 independent review deadline raised to ten minutes
+Last activity: 2026-10-05 — 0.3.10 local quote binding and specific diagnostics repair
 
 ## Accepted Coverage Debt
 
@@ -53,11 +53,11 @@ User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/researc
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
-Current product 0.3.9, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. A real bounded synthetic ChatGPT review now succeeded with validated stored result and installed export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
+Current product 0.3.10, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real bounded synthetic ChatGPT reviews and one actual A4 preparation review have succeeded with validated stored results and exact prompt export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.9, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or coursework replay performed. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
+Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.10, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or coursework replay performed. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
 
 ## Compatible repair — 2026-10-05
 
@@ -96,3 +96,10 @@ Fresh build, Node 199/199 and Vitest 118/118 passed. Current independent runner 
 ## Assignment review deadline repair — 2026-10-05
 
 Product 0.3.9 raises the default independent review deadline from 120 to 600 seconds after an actual two-source preparation attempt was stopped by the old deadline at 120408 ms. The user reports ordinary assignment reviews around five minutes; the ten-minute ceiling provides margin while retaining termination, cancellation, strict result validation and cleanup. Skill guidance now waits for the same live process and offers independent-review recovery instead of making host-chat analysis the only recovery. Original failed receipts remain unchanged. Clock-controlled real-child tests verify completion after five minutes of supervisor time and termination at ten minutes; they are not real model inference. See [repair evidence](../docs/codex-timeout-repair.md). No new model call or A4 replay occurred. Phase 21 stays 0/6, RUN-01–05 remain pending; Plan 06 now targets 0.3.10. No release/tag.
+
+
+## Local quote binding repair — 2026-10-05
+
+Product 0.3.10 removes model-computed byte spans from production wire output (model v2), resolves exact unique quotes locally, then validates and stores compatible v1 results. Capture adds actual identity and complete source/excerpt mapping; binding failures retain safe specific triggers. Legacy outputs/receipts keep strict validation and remain unchanged. An actual A4 preparation review succeeded earlier on 0.3.9 using copied short-excerpt spans (234445 ms, 97 excerpts, 17 findings, saved result revalidated); that success does not test the new v2 protocol. See [repair evidence](../docs/codex-source-binding-repair.md). Phase 21 remains 0/6, RUN-01–05 pending, next accepted phase patch 0.3.11. RR/FM reminders remain non-blocking; no release/tag.
+
+Fresh build, Node 219/219 and Vitest 118/118 passed. One real post-repair synthetic GPT-6 preparation check succeeded in 11685 ms with exact Unicode quote binding, exit 0, terminal observed, cleanup complete, persisted v1 result revalidated and exact prompt export unchanged. No course content was dispatched by this check; it does not close the separate Phase 21 acceptance.

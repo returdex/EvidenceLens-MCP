@@ -85,6 +85,20 @@ export const MODEL_RESULT_SCHEMA=freeze(object({
  findings:list(object({findingId:ident,kind:enumeration(['observation','gap','conflict','unknown']),severity:enumeration(['info','warning','error']),claim:str(),evidence:list(object({sourceId:ident,excerptId:ident,startByte:integer,endByte:integer,quote:str()})),action:nullable(str())})),
  limitations:list(str())
 }));
+// Production model output omits numeric spans; the local binder resolves exact quotes.
+// Stored results retain the original v1 shape for existing readers and receipts.
+export const MODEL_CITATION_SCHEMA=freeze({...MODEL_RESULT_SCHEMA,properties:{...MODEL_RESULT_SCHEMA.properties,
+ schemaVersion:{type:'integer',enum:[2]},
+ findings:list(object({...MODEL_RESULT_SCHEMA.properties.findings.items.properties,
+  evidence:list(object({sourceId:ident,excerptId:ident,quote:str()}))}))
+}});
+export function renderCodexOutputGuide(snapshot,capsule){
+ const s=validateSnapshot(snapshot),c=validateEvidenceCapsule(capsule,s);
+ const sources=new Map(c.sources.map(x=>[x.sourceId,x]));
+ const coverage=s.materials.map(m=>({sourceId:m.sourceId,status:m.status==='excluded'?'excluded':m.status==='inspected'&&m.availability==='inline_excerpt'&&sources.has(m.sourceId)?'covered':'unavailable',excerptIds:sources.get(m.sourceId)?.excerpts.map(e=>e.excerptId)??[]}));
+ const guide={schemaVersion:2,runId:s.runId,taskId:s.taskId,stage:s.stage,currentSourceId:s.currentSourceId,coverage};
+ return '<evidencelens-output-v2>\nRuntime output contract: return schemaVersion=2, overriding earlier output-shape examples only. Preserve the requested review task and constraints. Each evidence object has ONLY sourceId, excerptId, quote. Copy an exact non-empty quote that occurs exactly once inside that identified excerpt, including original whitespace and punctuation. Do not calculate or return startByte/endByte; the local binder computes UTF-8 positions and rejects missing, ambiguous or forged quotes. Copy the identity below exactly. The coverage template lists every registered material and all captured excerpt IDs: use covered only after reviewing all of them; otherwise report partial/unavailable honestly with only the excerpt IDs actually reviewed. Unavailable and excluded sources cannot supply evidence. Findings retain findingId/kind/severity/claim/evidence/action; limitations remain an array.\n'+canonical(guide)+'\n</evidencelens-output-v2>';
+}
 // Deliberately limited validator for this fixed schema, not a general JSON Schema engine.
 function check(value,schema){
  if(schema.anyOf){for(const choice of schema.anyOf){try{return check(value,choice);}catch{}}codexFail('result_invalid');}
@@ -97,16 +111,19 @@ function check(value,schema){
  if(schema.enum&&!schema.enum.includes(value))codexFail('result_invalid');
  return value;
 }
-export function validateCodexResultShape(input){
+function validateModelShape(input,schema){
  try{
-  const r=check(input,MODEL_RESULT_SCHEMA);
+  const r=check(input,schema);
   if(!uuid(r.runId)||!id(r.taskId)||!stage(r.stage)||Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.final)codexFail('result_invalid');
   if(!unique(r.findings.map(f=>f.findingId))||!unique(r.coverage.map(c=>c.sourceId)))codexFail('result_invalid');
   for(const c of r.coverage)if(!unique(c.excerptIds))codexFail('result_invalid');
-  for(const f of r.findings)for(const e of f.evidence)if(!bytesRange(e.startByte,e.endByte))codexFail('result_invalid');
+  for(const f of r.findings)for(const e of f.evidence)if(schema===MODEL_RESULT_SCHEMA&&!bytesRange(e.startByte,e.endByte))codexFail('result_invalid');
   return r;
  }catch{codexFail('result_invalid');}
 }
+
+export const validateCodexResultShape=input=>validateModelShape(input,MODEL_RESULT_SCHEMA);
+export const validateCitationResultShape=input=>validateModelShape(input,MODEL_CITATION_SCHEMA);
 
 export function validateExecutionRecord(input){
  const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;

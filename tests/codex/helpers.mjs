@@ -14,7 +14,7 @@ import { mkdtemp,mkdir,writeFile,chmod,rm,realpath,readFile } from 'node:fs/prom
 import { spawn,spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { executableIdentity } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
-import { MODEL_RESULT_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
+import { MODEL_RESULT_SCHEMA,MODEL_CITATION_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
 export const PINNED_BINARY_SHA256='6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201';
 import { isolationPolicy,isolatedArgs,createReviewHome,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
 export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,supervise=false}={}) {
@@ -33,7 +33,7 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false,responseHeaders={},catalogEtag=null}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false,responseHeaders={},catalogEtag=null,citationOnly=false}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -54,8 +54,8 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  for(const entry of homeEntries){if(!/^[A-Za-z0-9_.-]+$/.test(entry))throw Error('Invalid synthetic entry');await writeFile(codexHome+'/'+entry,'SYNTHETIC_PRIVATE_STATE',{mode:0o600});}
  const installationId=randomUUID();await writeFile(codexHome+'/installation_id',installationId,{mode:0o600});
  const outside=base+'/outside.txt';await writeFile(outside,'OUTSIDE_SYNTHETIC_SENTINEL_20');
- const schema=control+'/schema.json';await writeFile(schema,JSON.stringify(MODEL_RESULT_SCHEMA),{mode:0o400});
- const {result}=fixture();const requests=[];
+ const schema=control+'/schema.json';await writeFile(schema,JSON.stringify(citationOnly?MODEL_CITATION_SCHEMA:MODEL_RESULT_SCHEMA),{mode:0o400});
+ const {result}=fixture();if(citationOnly){result.schemaVersion=2;for(const f of result.findings)for(const e of f.evidence){delete e.startByte;delete e.endByte;}}const requests=[];
  function sse(res,type,data){res.write('event: '+type+'\ndata: '+JSON.stringify({type,...data})+'\n\n');}
  const server=createServer((req,res)=>{
   let body='';req.on('data',b=>body+=b);req.on('end',()=>{
