@@ -1,7 +1,7 @@
 # Requirements: EvidenceLens MCP — v1.3
 
 **Defined:** 2026-10-06 (Australia/Melbourne)
-**Status:** Confirmed by user on 2026-10-06; roadmap pending approval
+**Status:** Confirmed by user on 2026-10-06; roadmap approved 2026-10-06
 **Core Value:** Trustworthy independently checked findings grounded in controlled local evidence.
 
 ## v1.3 Requirements
@@ -63,36 +63,36 @@
 
 ## Traceability
 
-Pending requirements confirmation and roadmap creation; planned phase numbering starts at 22.
+Requirements and roadmap approved. Each requirement maps exactly once to Phases 22–27.
 
 | Requirement | Phase | Status |
 |---|---|---|
-| PPT-01 | Not assigned | Pending |
-| PPT-02 | Not assigned | Pending |
-| PPT-03 | Not assigned | Pending |
-| OUT-01 | Not assigned | Pending |
-| OUT-02 | Not assigned | Pending |
-| OUT-03 | Not assigned | Pending |
-| OUT-04 | Not assigned | Pending |
-| FBK-01 | Not assigned | Pending |
-| FBK-02 | Not assigned | Pending |
-| FBK-03 | Not assigned | Pending |
-| BND-01 | Not assigned | Pending |
-| BND-02 | Not assigned | Pending |
-| EVA-01 | Not assigned | Pending |
-| EVA-02 | Not assigned | Pending |
-| EVA-03 | Not assigned | Pending |
-| EVA-04 | Not assigned | Pending |
-| CFG-01 | Not assigned | Pending |
-| CFG-02 | Not assigned | Pending |
-| CFG-03 | Not assigned | Pending |
-| CFG-04 | Not assigned | Pending |
+| PPT-01 | Phase 24 | Pending |
+| PPT-02 | Phase 24 | Pending |
+| PPT-03 | Phase 24 | Pending |
+| OUT-01 | Phase 22 | Pending |
+| OUT-02 | Phase 23 | Pending |
+| OUT-03 | Phase 23 | Pending |
+| OUT-04 | Phase 23 | Pending |
+| FBK-01 | Phase 25 | Pending |
+| FBK-02 | Phase 25 | Pending |
+| FBK-03 | Phase 25 | Pending |
+| BND-01 | Phase 24 | Pending |
+| BND-02 | Phase 24 | Pending |
+| EVA-01 | Phase 22 | Pending |
+| EVA-02 | Phase 22 | Pending |
+| EVA-03 | Phase 27 | Pending |
+| EVA-04 | Phase 27 | Pending |
+| CFG-01 | Phase 26 | Pending |
+| CFG-02 | Phase 26 | Pending |
+| CFG-03 | Phase 26 | Pending |
+| CFG-04 | Phase 26 | Pending |
 
-**Coverage:** 20 requirements; mapping pending.
+**Coverage:** 20 requirements; 20 mapped exactly once; 0 unmapped. Roadmap approved 2026-10-06.
 
 ## Evaluation and preservation notes
 
 A1.3 is a known tuning/regression candidate. FIT5046 A2 is a held-out candidate only; exact assessed artifact and complete process availability must be verified. The current host has read its feedback summary; isolated reviewers must not inherit that context. No provider calls, model training or assignment changes are authorized merely by initialization. Freeze the comparison protocol and evaluator rubric before test outputs; never tune using held-out outcomes and still call the same case unseen. Historical receipts, reports and phase paths remain intact. RR/FM entries need explicit evidence-backed closure.
 
 ---
-*Last updated: 2026-10-06 after confirmed milestone scope; detailed requirements confirmed; roadmap pending approval.*
+*Last updated: 2026-10-06 after confirmed milestone scope; detailed requirements confirmed; roadmap approved 2026-10-06.*
