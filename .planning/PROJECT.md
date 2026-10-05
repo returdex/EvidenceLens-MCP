@@ -48,7 +48,13 @@ Actual authorized synthetic initial/recheck Codex pair succeeded with exact expo
 
 ### Active
 
-None selected. Start the next milestone with fresh requirements; no automatic v1.3 scope or version bump.
+Milestone v1.3 scope approved by the user on 2026-10-06; detailed requirements pending confirmation.
+
+- [ ] Repair preparation, in-progress, final and recheck prompts and their full-feedback delivery.
+- [ ] Diagnose real execution failures; accept recoverable presentation differences without weakening authorization, identity or evidence validation.
+- [ ] Provide criterion-level grade-band assessments and separate minimum goals from optional planning margins.
+- [ ] Evaluate old/new behavior on a tuning assignment and a separate frozen assignment, withholding tutor feedback and feedback-derived material from reviewers.
+- [ ] Add `$el-settings` with project/user persistence, per-call overrides, a single-Codex/full-response default and transparent multi-reviewer comparison.
 
 ### Deferred
 
@@ -76,9 +82,23 @@ Current tracked TS/MJS source/tests/helpers: 21,454 lines across 132 files at a6
 | Preserve original proof and phase paths | Good: exact snapshots/audit copies; no paid replay |
 | Semantic automation and deeper quality evaluation | Revisit: retained Nyquist/RR/FM debt |
 
-## Next Milestone Goals
+## Current Milestone: v1.3 提示词、反馈质量与可配置审阅
 
-Not selected. Review the retained debt and future memo with the user during gsd-new-milestone; do not promote them automatically. Continue phase numbering after 21.
+**Goal:** Make staged reviews usable, complete and evidence-grounded, with configurable reviewers and feedback-withheld evaluation of advice and grade-band judgments.
+
+**Target features:** Four-stage prompt repair; bounded output compatibility and failure diagnostics; complete merged feedback with retained disagreements and original reports; criterion-level band assessment; reproducible tuning/held-out evaluation; `$el-settings`.
+
+**Confirmed defaults:** One Codex reviewer, full response, no automatic retry. Multi-reviewer selection produces a combined assessment with agreements, unique findings, disagreements, unresolved items and linked full reports. Per-call explicit instruction overrides project settings, which override user defaults. Settings live in configuration rather than edits to Skill prose.
+
+**Grade goals:** Minimum acceptable band and optional planning target are distinct. A P request does not silently become D; D planning is an opt-in margin, not a guarantee of passing. Official rubric wording and mandatory gates remain authoritative.
+
+**Evaluation:** FIT5032 A1.3 is a tuning/regression candidate and is already known. FIT5046 A2 is a held-out candidate, pending verification of the exact assessed submission and historical stage records. The host has seen its feedback summary; test reviewers must use fresh isolated contexts. Tutor feedback, marks, feedback-derived plans, prior diagnoses and later revisions are evaluator-only for the frozen test. Freeze inputs, prompt/config/model identities and outputs before feedback comparison. Do not claim two cases establish general accuracy or automatically authorize provider calls.
+
+**Planning boundaries:** Continue phase numbering at 22. Ecosystem research is skipped using the existing default; implementation/failure investigation remains required. Product version remains 0.3.17 during initialization. Historical phase directories and receipts remain at their original paths, as required by the recorded preservation decision. RR/FM items close only with new evidence; no blanket debt closure.
+
+## Evolution
+
+At phase transitions, move verified requirements to Validated, record invalidated or new requirements and update decisions and project context. At milestone completion, review all sections, the Core Value and deferred/out-of-scope items against actual evidence.
 
 <details>
 <summary>Previous project context and decisions</summary>
@@ -88,4 +108,4 @@ Not selected. Review the retained debt and future memo with the user during gsd-
 </details>
 
 ---
-*Last updated: 2026-10-05 after v1.2 milestone completion.*
+*Last updated: 2026-10-06 after user approval of v1.3 milestone goals; requirements pending confirmation.*
