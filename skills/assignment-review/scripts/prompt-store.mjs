@@ -1,3 +1,4 @@
+import { admitPriorSummaries,validateReviewAssessment } from './review-recheck.mjs';
 import { bindRunMetrics } from './codex-metrics.mjs';
 import { newDiagnostics } from './codex-diagnostics.mjs';
 import fs from 'node:fs/promises';
@@ -184,10 +185,10 @@ export async function exportLatest(scope,{expectedRunId}={}){
 }
 async function deletionPreview(c,t){
  await dirs(taskDir(c,t),false,c.root);
- const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider','metrics'].map(k=>r.runId+'.'+k+'.json')));
+ const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider','metrics','handoff'].map(k=>r.runId+'.'+k+'.json')));
  let preservedUnknownCount=0,count=0;
  const d=await fs.opendir(taskDir(c,t));
- for await(const e of d){if(++count>LIMITS.runs*7+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ for await(const e of d){if(++count>LIMITS.runs*8+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
  return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
 }
 export async function forgetTask(scope,{apply=false}={}){
@@ -204,6 +205,8 @@ export async function forgetTask(scope,{apply=false}={}){
    try{
     const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
     const lraw=await read(lp),sraw=await read(sp);
+    const hp=recordPath(c,t,r.runId,'handoff'),hraw=await read(hp);
+    if(hraw){if(!lraw||!sraw)fail('corrupt_record');validateStoredHandoff(hraw,lraw,sraw);await fs.unlink(hp);}
     const mp=recordPath(c,t,r.runId,'metrics'),mraw=await read(mp,16384);
     if(mraw){if(!lraw)fail('corrupt_record');bindRunMetrics(mraw,await execution(c,t,validateLifecycle(lraw)));await fs.unlink(mp);}
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
@@ -289,7 +292,8 @@ export async function readCodexMetrics(scope,runId){
 // Bundles can only be obtained by a scoped coherent private-store read.
 const trustedBundles=new WeakSet();
 export const isTrustedRunBundle=value=>trustedBundles.has(value);
-export async function readRunRecord(scope,{expectedRunId,historicalRunId}={}){
+export async function readRunRecord(scope,{expectedRunId,historicalRunId}={},depth=0){
+ if(depth>10)fail('store_limit');
  if(Boolean(expectedRunId)===Boolean(historicalRunId)||!uuid(expectedRunId??historicalRunId))fail('identity_required');
  const runId=expectedRunId??historicalRunId,c=await context(scope);await unlocked(c);
  const index=await loadIndex(c),t=taskFor(index,scope.taskId);member(t,runId);
@@ -306,8 +310,37 @@ export async function readRunRecord(scope,{expectedRunId,historicalRunId}={}){
   if(JSON.stringify(raw)!==JSON.stringify(bound)||raw.resultSha256!==(e??provider).resultSha256)fail('corrupt_record');result=bound;
  }
  await boundary(c,'record_read');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
- const bundle={metadata:{...receipt(l),selection:historicalRunId?'historical':'latest'},snapshot:s,execution:e,provider,metrics,metricsAvailability:metrics?'recorded':'not_recorded',result};
+ const bundle={metadata:{...receipt(l),selection:historicalRunId?'historical':'latest'},snapshot:s,execution:e,provider,metrics,metricsAvailability:metrics?'recorded':'not_recorded',result,assessment:null,assessmentAvailability:'not_recorded'};
+ trustedBundles.add(bundle);
+ try{
+  const raw=await read(recordPath(c,t,runId,'handoff'));
+  if(raw){validateStoredHandoff(raw,l,s);
+   const priors=[];for(const p of raw.admittedPrior){
+    if(p.kind==='local'){const prior=await readRunRecord(scope,{historicalRunId:p.runId},depth+1);if(!prior.result||prior.result.resultSha256!==p.resultSha256||prior.metadata.sequence>=bundle.metadata.sequence||prior.snapshot.reviewMode!==s.reviewMode)fail('corrupt_record');priors.push({...p,bundle:prior});}
+    else priors.push({...p,summarySha256:p.summarySha256});
+   }
+   bundle.assessment=validateReviewAssessment(bundle,priors,raw);bundle.assessmentAvailability='recorded';
+  }
+ }catch(error){bundle.assessmentAvailability='record_error';bundle.assessmentError=error.code??'corrupt_record';}
+ await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
  // Freeze data transitively so callers cannot rewrite a trusted result before rendering.
  const freeze=v=>{if(v&&typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v);}return v;};
  freeze(bundle);trustedBundles.add(bundle);return bundle;
+}
+
+function validateStoredHandoff(raw,l,s){
+ const v=fields(raw,['schemaVersion','runId','taskId','conversationId','promptSha256','resultSha256','assessor','requirements','findings','admittedPrior','semanticVerification','assessmentSha256']);
+ const {assessmentSha256,...body}=v;
+ if(['runId','taskId','conversationId','promptSha256'].some(k=>v[k]!==l[k])||!s||v.assessor!=='host_review'||assessmentSha256!==sha256(JSON.stringify(body)))fail('corrupt_record');
+ return v;
+}
+export async function annotateRun(scope,{expectedRunId,admittedPriorSummaries=[],assessment}){
+ const bundle=await readRunRecord(scope,{expectedRunId}),prior=await admitPriorSummaries(scope,bundle,admittedPriorSummaries),v=validateReviewAssessment(bundle,prior,assessment);
+ return transaction(scope,false,async tx=>{
+  const {c,index}=tx,t=taskFor(index,scope.taskId);if(t.latest!==expectedRunId)fail('latest_mismatch');const l=await state(c,t,expectedRunId);
+  const r=validateResultEnvelope(await read(recordPath(c,t,expectedRunId,'result')));if(l.status!=='succeeded'||r.resultSha256!==v.resultSha256||l.promptSha256!==v.promptSha256)fail('corrupt_record');
+  const bound=validateBoundCodexResult(await snapshot(c,t,l),r.modelResponse);if(JSON.stringify(bound)!==JSON.stringify(r))fail('corrupt_record');
+  const p=recordPath(c,t,expectedRunId,'handoff'),existing=await read(p);if(existing){if(JSON.stringify(existing)!==JSON.stringify(v))fail('uncertain');return {ok:true,runId:expectedRunId,assessmentSha256:v.assessmentSha256};}
+  tx.dirty();await writeExclusive(p,v);await boundary(c,'after_handoff');await tx.publish();return {ok:true,runId:expectedRunId,assessmentSha256:v.assessmentSha256};
+ });
 }

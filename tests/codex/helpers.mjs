@@ -88,17 +88,18 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
 }
 
 // Trusted library adapter fixture; this is never a production CLI option.
-export async function capturedFlow(t,{stage='in_progress',current=true,sourceId='S1',installed=false}={}){
+export async function capturedFlow(t,{stage='in_progress',current=true,sourceId='S1',installed=false,scope:providedScope,transform}={}){
  const fs=await import('node:fs/promises');const store=await import('../../skills/assignment-review/scripts/prompt-store.mjs');const {captureCodexPrompt}=await import('../../skills/assignment-review/scripts/codex-review.mjs');
  const root=await fs.mkdtemp('/private/tmp/el20-flow-');await fs.chmod(root,0o700);t.after(()=>fs.rm(root,{recursive:true,force:true}));
- const f=fixture(),scope={stateRoot:root+'/state',taskId:f.snapshot.taskId,conversationId:f.snapshot.conversationId};
+ const f=fixture(),scope=providedScope??{stateRoot:root+'/state',taskId:f.snapshot.taskId,conversationId:f.snapshot.conversationId};
  if(sourceId!=='S1'){f.snapshot.currentSourceId=f.capsule.currentSourceId=f.result.currentSourceId=sourceId;f.snapshot.materials[0].sourceId=f.capsule.sources[0].sourceId=f.result.coverage[0].sourceId=f.result.findings[0].evidence[0].sourceId=f.admitted[0].sourceId=sourceId;}
  await fs.mkdir(root+'/project');await fs.symlink((await import('node:url')).fileURLToPath(new URL('../../skills/assignment-review',import.meta.url)),root+'/installed');
  const cli=(helper,action,input)=>{const r=spawnSync(process.execPath,[root+'/installed/scripts/'+helper+'.mjs',action],{env:{PATH:'/usr/bin:/bin',HOME:root,CODEX_THREAD_ID:scope.conversationId,EVIDENCELENS_STATE_ROOT:scope.stateRoot},cwd:root+'/project',input:JSON.stringify(input),encoding:'utf8',timeout:15000});if(r.status!==0)throw Error('Synthetic installed helper failed: '+r.stderr);return JSON.parse(r.stdout);};
  const receipt=installed?cli('prompt-records','begin',{taskId:scope.taskId,executionKind:'codex_exec'}):await store.beginRun(scope,{executionKind:'codex_exec'});
- for(const value of [f.snapshot,f.capsule,f.result]){value.runId=receipt.runId;value.stage=stage;if(!current)value.currentSourceId=null;}
+ for(const value of [f.snapshot,f.capsule,f.result]){value.runId=receipt.runId;value.taskId=scope.taskId;if(Object.hasOwn(value,'conversationId'))value.conversationId=scope.conversationId;value.stage=stage;if(!current)value.currentSourceId=null;}
  f.snapshot.sequence=receipt.sequence;
  if(!current){f.snapshot.materials=[];f.capsule.sources=[];f.admitted=[];f.result.coverage=[];f.result.findings=[];}
+ transform?.(f);
  const captureInput={snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted};
  if(installed)cli('codex-review','capture',{taskId:scope.taskId,runId:receipt.runId,...captureInput});else await captureCodexPrompt(scope,receipt.runId,captureInput);
  const exportPrompt=()=>installed?cli('prompt-records','export',{taskId:scope.taskId,expectedRunId:receipt.runId}):store.exportLatest(scope,{expectedRunId:receipt.runId});
