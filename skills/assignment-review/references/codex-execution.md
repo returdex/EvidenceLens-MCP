@@ -38,7 +38,9 @@ ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 au
 
 审阅进程通过 stdin 接收提示词；仅能读取运行库、私有控制/临时目录和 Codex 自有认证文件。从现有非凭据 `installation_id` 建立本次私有副本，仅该副本允许所需的文件数据/模式操作；原文件只校验元数据与内容未变，不授予写权限。审阅 CODEX_HOME 只含指向原 Codex `auth.json` 的只读链接及 installation_id 副本；不读取/复制认证正文，不允许修改原认证、替换链接或写入控制目录。全局 agents、config、models cache、skills 和 memory 不加入该目录。登录状态使用独立的无网络策略，仅额外允许 Codex 读取配置文件及直接的 agent TOML 配置；这些读取权限不进入审阅进程。
 
-四个内置工具仍存在。文件工具受到外层 OS 拒绝；任何 JSONL 工具/计划事件或 stderr tools-router 诊断均拒绝该审阅。进程中止前可能已有内部后续请求，必须标记不确定，不能声称远端撤回成功。全局/项目指令、skills 和 memory 的合成注入标记已验证不进入请求。当前启动器、独立运行记录及本地结果验证已通过合成验收；真实远端推理仍待 Phase 21 验证。
+四个内置工具仍存在。文件工具受到外层 OS 拒绝；实际 JSONL 工具/计划事件及其他 stderr tools-router 诊断仍拒绝。固定 CLI 上已验证三个执行处理器前的拒绝分支可继续：`unsupported call: 工具名`、`request_user_input is unavailable in Default mode`、`failed to parse function arguments: …`。这些拒绝没有执行处理器或取得新材料；运行仍有原期限和输出限额。diagnostics v2 的 refusedToolCalls 记录次数，旧 v1 原样读取。尝试读取／修改文件后发生的错误不属于此例外，实际工具事件继续拒绝。一次 CLI 派发可能产生多个内部模型请求，不能宣称只有一次远端请求或没有调用尝试。全局/项目指令、skills 和 memory 的合成注入标记已验证不进入请求；真实远端验收单独记录。
+
+模型 JSON Schema 的字符串 maxLength 按 Unicode 字符数校验，避免把中文误按 UTF-8 字节缩小上限；总输出、封装及事件流的字节上限继续独立生效。身份、来源、覆盖状态和真实引用校验不因此放宽。
 
 ## 安装后的调用
 

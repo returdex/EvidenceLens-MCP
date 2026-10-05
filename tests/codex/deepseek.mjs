@@ -42,6 +42,40 @@ test('requirements-only DeepSeek uses captured prompt, preserves >4 full finding
  await assert.rejects(runCapturedDeepSeek(x.scope,x.receipt.runId,{},x.adapter));assert.equal(x.calls(),1);
  const deleted=await forgetTask(x.scope,{apply:true});assert.equal(deleted.incomplete,false);
 });
+test('full Chinese analysis follows Unicode character limits and roundtrips through stored result',async t=>{
+ const x=await setup(t,{preparation:true});x.model.findings[0].claim='中文分析'.repeat(1500);
+ x.model.findings[0].action='🙂'.repeat(6000);x.model.limitations=['覆盖限制'.repeat(1000)];
+ const r=await runCapturedDeepSeek(x.scope,x.receipt.runId,{},x.adapter);
+ assert.equal(r.status,'succeeded');assert.equal(r.result.modelResponse.findings[0].claim,x.model.findings[0].claim);
+ assert.equal(r.result.modelResponse.findings[0].action,x.model.findings[0].action);
+ assert.deepEqual(validateBoundCodexResult({...x.f.snapshot,promptText:x.saved.promptText,promptSha256:sha256(x.saved.promptText)},r.result.modelResponse),r.result);
+});
+test('validation diagnostics name only a closed reason and field, retaining legacy receipt reads',async t=>{
+ for(const [change,expected] of [
+  [m=>m.findings[0].severity='PRIVATE_INVALID_VALUE',{reason:'enum',field:'severity'}],
+  [m=>m.findings[0].claim='中'.repeat(8193),{reason:'string_limit',field:'claim'}],
+  [m=>m.findings[0].evidence[0].excerptId='FAKE',{reason:'binding_reference_mismatch',field:'evidence'}]
+ ]){
+  const x=await setup(t);change(x.model);const r=await runCapturedDeepSeek(x.scope,x.receipt.runId,{},x.adapter);
+  assert.equal(r.status,'uncertain');assert.deepEqual(r.execution.validationFailure,expected);
+  assert.doesNotMatch(JSON.stringify(r),/PRIVATE_INVALID_VALUE/);
+  const prefix=x.scope.stateRoot+'/'+sha256(x.scope.conversationId)+'/'+sha256(x.scope.taskId)+'/'+x.receipt.runId;
+  const {validationFailure,...legacy}=r.execution;legacy.schemaVersion=1;
+  await fs.writeFile(prefix+'.provider.json',JSON.stringify(legacy));
+  const before=await fs.readFile(prefix+'.provider.json');assert.deepEqual((await readHostProviderRun(x.scope,x.receipt.runId)).execution,legacy);
+  assert.deepEqual(await fs.readFile(prefix+'.provider.json'),before);
+ }
+});
+test('nonstandard classification retains full analysis as unknown without relaxing evidence or identity',async t=>{
+ const x=await setup(t);x.model.findings[0].kind='recommendation';
+ const r=await runCapturedDeepSeek(x.scope,x.receipt.runId,{},x.adapter);
+ assert.equal(r.status,'succeeded');assert.equal(r.result.modelResponse.findings[0].kind,'unknown');
+ assert.equal(r.result.modelResponse.findings[0].claim,x.model.findings[0].claim);assert.equal(r.result.modelResponse.findings[0].action,x.model.findings[0].action);
+ assert.ok(r.result.limitations.some(x=>x.includes('normalized locally to unknown')));
+ const y=await setup(t);y.model.findings[0].kind='recommendation';y.model.findings[0].evidence[0].excerptId='FAKE';
+ const bad=await runCapturedDeepSeek(y.scope,y.receipt.runId,{},y.adapter);assert.equal(bad.status,'uncertain');assert.equal(bad.result,undefined);
+ assert.equal(bad.execution.validationFailure.reason,'binding_reference_mismatch');
+});
 test('two prepared reviewer identities retain identical raw task/evidence without peer feedback',async t=>{
  const x=await setup(t);const {captureCodexPrompt}=await import('../../skills/assignment-review/scripts/codex-review.mjs');
  const r=await beginRun(x.scope,{executionKind:'codex_exec'});

@@ -4,6 +4,18 @@ import { fields,fail } from './prompt-contract.mjs';
 const stages=['preparing','capsule','preflight','launch','dispatch','process','result_validation','cleanup','publication'];
 const bindingTriggers=['binding_identity_mismatch','binding_coverage_mismatch','binding_status_mismatch','binding_excerpt_mismatch','binding_missing_evidence','binding_reference_mismatch','binding_span_mismatch','binding_quote_mismatch','binding_quote_missing','binding_quote_ambiguous','binding_duplicate_evidence'];
 export const diagnosticBindingTrigger=v=>bindingTriggers.includes(v)?v:'result_rejected';
+const validationReasons=['type','fields','array_limit','string_limit','byte_limit','json_syntax','unsafe_text','identifier','enum','constraints',...bindingTriggers];
+const validationFields=['result','schemaVersion','runId','taskId','stage','currentSourceId','coverage','sourceId','status','excerptIds','findings','findingId','kind','severity','claim','evidence','excerptId','startByte','endByte','quote','action','limitations'];
+export function validateValidationFailure(input){
+ if(input===null)return null;
+ const d=fields(input,['reason','field']);
+ if(!validationReasons.includes(d.reason)||!validationFields.includes(d.field))fail('corrupt_record');
+ return d;
+}
+export function safeValidationFailure(error){
+ if(bindingTriggers.includes(error?.bindingTrigger))return {reason:error.bindingTrigger,field:'evidence'};
+ try{return validateValidationFailure(error?.validationFailure??null);}catch{return null;}
+}
 const triggers=['aborted','deadline_exceeded','spawn_failed','stdin_failed','invalid_json','invalid_utf8','invalid_event','event_order','cli_error','cli_turn_failed','unexpected_event','unexpected_stderr','tool_activity','result_shape','output_limit','missing_thread','missing_turn','missing_terminal','missing_final','nonzero_exit','signal_exit','cleanup_unconfirmed','capsule_invalid','preflight_rejected','launch_failed','dispatch_failed','supervisor_failed','result_rejected','cleanup_failed','publication_failed',...bindingTriggers];
 const events=['thread.started','turn.started','turn.completed','turn.failed','error','item.started','item.updated','item.completed','other'];
 const items=['agent_message','reasoning','error','command_execution','file_change','mcp_tool_call','web_search','todo_list','other'];
@@ -16,7 +28,7 @@ export const diagnosticItem=v=>bounded(v,items);
 export const diagnosticErrno=v=>bounded(v,errnos);
 export const diagnosticSignal=v=>bounded(v,signals);
 export function newDiagnostics(stage='preparing',trigger=null){
- return {schemaVersion:1,stage,trigger,eventType:null,itemType:null,reportedErrorCategory:null,osErrorCode:null,exitCode:null,exitSignal:null,terminationRequested:false,closeObserved:false,threadObserved:false,turnObserved:false};
+ return {schemaVersion:2,refusedToolCalls:0,stage,trigger,eventType:null,itemType:null,reportedErrorCategory:null,osErrorCode:null,exitCode:null,exitSignal:null,terminationRequested:false,closeObserved:false,threadObserved:false,turnObserved:false};
 }
 // A bounded hint from a CLI-reported error, not an independently proven root cause.
 export function reportedErrorCategory(message){
@@ -34,9 +46,11 @@ export function reportedErrorCategory(message){
  return 'unknown';
 }
 export function validateDiagnostics(input){
- const d=fields(input,Object.keys(newDiagnostics()));
+ const version=Object.getOwnPropertyDescriptor(input??{},'schemaVersion')?.value;
+ const d=fields(input,Object.keys(newDiagnostics()).filter(k=>version===2||k!=='refusedToolCalls'));
  const member=(v,values)=>v===null||values.includes(v);
- if(d.schemaVersion!==1||!stages.includes(d.stage)||!member(d.trigger,triggers)||!member(d.eventType,events)||!member(d.itemType,items)||!member(d.reportedErrorCategory,categories)||!member(d.osErrorCode,errnos)||!member(d.exitSignal,signals))fail('corrupt_record');
+ if(![1,2].includes(d.schemaVersion)||!stages.includes(d.stage)||!member(d.trigger,triggers)||!member(d.eventType,events)||!member(d.itemType,items)||!member(d.reportedErrorCategory,categories)||!member(d.osErrorCode,errnos)||!member(d.exitSignal,signals))fail('corrupt_record');
+ if(version===2&&(!Number.isSafeInteger(d.refusedToolCalls)||d.refusedToolCalls<0||d.refusedToolCalls>100000))fail('corrupt_record');
  if(d.exitCode!==null&&(!Number.isSafeInteger(d.exitCode)||d.exitCode<0||d.exitCode>255))fail('corrupt_record');
  for(const k of ['terminationRequested','closeObserved','threadObserved','turnObserved'])if(typeof d[k]!=='boolean')fail('corrupt_record');
  if(!d.closeObserved&&(d.exitCode!==null||d.exitSignal!==null)||d.exitCode!==null&&d.exitSignal!==null||d.turnObserved&&!d.threadObserved)fail('corrupt_record');

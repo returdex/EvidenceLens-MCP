@@ -116,3 +116,16 @@ test('model logger prefix never misclassifies cache or unrelated not-found messa
  const d={...newDiagnostics('process','unexpected_stderr'),reportedErrorCategory:'model_cache_missing'};
  assert.deepEqual(validateDiagnostics(d),d);
 });
+test('actual CLI refusals recover without disclosure; other tool activity still stops',async()=>{
+ for(const [name,args] of [['update_plan',{plan:[{step:'review supplied text',status:'in_progress'}]}],['functions.exec',{}],['request_user_input',{questions:[]}],['view_image',{}]]){
+  const r=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,tool:()=>({type:'function_call',call_id:'call_plan',name,arguments:JSON.stringify(args)})});
+  assert.equal(r.outcome.status,'candidate',JSON.stringify(r.outcome));assert.equal(r.requests.length,2);
+  assert.equal(r.authUnchanged,true);assert.equal(r.outsideUnchanged,true);assert.equal(r.outcome.cleanupComplete,true);
+  assert.equal(r.outcome.diagnostics.refusedToolCalls,1);
+ }
+ for(const line of ['error=handler failed: exec_command','error=unsupported call: update_plan EXTRA','error=tool executed: update_plan']){
+  const x=await run(emit(start)+`process.stderr.write(${JSON.stringify('2026-10-05T00:00:00Z ERROR codex_core::tools::router: '+line+'\n')});`+emit([final,end]));
+  assert.notEqual(x.status,'candidate');assert.equal(x.diagnostics.trigger,'tool_activity');
+ }
+ const {refusedToolCalls,...legacy}=newDiagnostics();legacy.schemaVersion=1;assert.deepEqual(validateDiagnostics(legacy),legacy);
+});

@@ -141,29 +141,38 @@ export function renderCodexOutputGuide(snapshot,capsule){
  const sources=new Map(c.sources.map(x=>[x.sourceId,x]));
  const coverage=s.materials.map(m=>({sourceId:m.sourceId,status:m.status==='excluded'?'excluded':m.status==='inspected'&&m.availability==='inline_excerpt'&&sources.has(m.sourceId)?'covered':'unavailable',excerptIds:sources.get(m.sourceId)?.excerpts.map(e=>e.excerptId)??[]}));
  const guide={schemaVersion:3,runId:s.runId,taskId:s.taskId,stage:s.stage,currentSourceId:s.currentSourceId,coverage};
- return '<evidencelens-output-v3>\nRuntime output contract: return schemaVersion=3, overriding earlier output-shape examples only. Preserve the requested review task and constraints. Each evidence object has ONLY sourceId and excerptId selected from the final captured evidence capsule below. Do not copy or generate quote/startByte/endByte: local code fills the exact captured excerpt and its source-relative UTF-8 range. Choose excerpts that actually support the claim; reference validity does not establish semantic correctness. Oversized input excerpts may have been split; use the final capsule IDs, not earlier examples. Copy the identity below exactly. The coverage template lists every registered material and all captured excerpt IDs: use covered only after reviewing all of them; otherwise report partial/unavailable honestly with only the excerpt IDs actually reviewed. Unavailable and excluded sources cannot supply evidence. Findings retain findingId/kind/severity/claim/evidence/action; limitations remain an array. Unless the user explicitly requests a brief response, provide the complete substantive review: each claim explains the sourced requirement, assessment basis, evidence limits and applicable risks; action gives concrete verification and follow-up steps. Do not silently drop low-severity findings or replace requested analysis with a terse checklist. Provide checkable explanations, not hidden reasoning.\n'+'JSON schema: '+canonical(MODEL_REFERENCE_SCHEMA)+'\n'+canonical(guide)+'\n</evidencelens-output-v3>';
+ return '<evidencelens-output-v3>\nDo not call tools, including update_plan; do all planning directly in the final analysis. Runtime output contract: return schemaVersion=3, overriding earlier output-shape examples only. Preserve the requested review task and constraints. Each evidence object has ONLY sourceId and excerptId selected from the final captured evidence capsule below. Do not copy or generate quote/startByte/endByte: local code fills the exact captured excerpt and its source-relative UTF-8 range. Choose excerpts that actually support the claim; reference validity does not establish semantic correctness. Oversized input excerpts may have been split; use the final capsule IDs, not earlier examples. Copy the identity below exactly. The coverage template lists every registered material and all captured excerpt IDs: use covered only after reviewing all of them; otherwise report partial/unavailable honestly with only the excerpt IDs actually reviewed. Unavailable and excluded sources cannot supply evidence. Findings retain findingId/kind/severity/claim/evidence/action; limitations remain an array. Unless the user explicitly requests a brief response, provide the complete substantive review: each claim explains the sourced requirement, assessment basis, evidence limits and applicable risks; action gives concrete verification and follow-up steps. Do not silently drop low-severity findings or replace requested analysis with a terse checklist. Provide checkable explanations, not hidden reasoning.\n'+'JSON schema: '+canonical(MODEL_REFERENCE_SCHEMA)+'\n'+canonical(guide)+'\n</evidencelens-output-v3>';
 }
 // Deliberately limited validator for this fixed schema, not a general JSON Schema engine.
-function check(value,schema){
- if(schema.anyOf){for(const choice of schema.anyOf){try{return check(value,choice);}catch{}}codexFail('result_invalid');}
- if(schema.type==='null'){if(value!==null)codexFail('result_invalid');return null;}
- if(schema.type==='object'){const v=fields(value,schema.required);for(const k of schema.required)v[k]=check(v[k],schema.properties[k]);return v;}
- if(schema.type==='array')return array(value,schema.maxItems,v=>check(v,schema.items));
- if(schema.type==='string'){text(value,schema.maxLength??8192);if(schema.pattern&&!new RegExp(schema.pattern).test(value))codexFail('result_invalid');}
- else if(schema.type==='integer'){if(!Number.isSafeInteger(value)||value<(schema.minimum??0)||value>(schema.maximum??Number.MAX_SAFE_INTEGER))codexFail('result_invalid');}
- else codexFail('result_invalid');
- if(schema.enum&&!schema.enum.includes(value))codexFail('result_invalid');
+function shapeFail(reason,field){const e=new Error('result_invalid');e.code='result_invalid';e.validationFailure={reason,field};throw e;}
+function check(value,schema,field='result'){
+ if(schema.anyOf){let failure;for(const choice of schema.anyOf){if(choice.type==='null'&&value!==null)continue;try{return check(value,choice,field);}catch(e){failure??=e;}}if(failure)throw failure;shapeFail('type',field);}
+ if(schema.type==='null'){if(value!==null)shapeFail('type',field);return null;}
+ if(schema.type==='object'){let v;try{v=fields(value,schema.required);}catch{shapeFail('fields',field);}for(const k of schema.required)v[k]=check(v[k],schema.properties[k],k);return v;}
+ if(schema.type==='array'){if(!Array.isArray(value))shapeFail('type',field);if(value.length>schema.maxItems)shapeFail('array_limit',field);try{return array(value,schema.maxItems,v=>check(v,schema.items,field));}catch(e){if(e.validationFailure)throw e;shapeFail('type',field);}}
+ if(schema.type==='string'){
+  if(typeof value!=='string')shapeFail('type',field);
+  const max=schema.maxLength??8192;
+  if(value.length>max*2||[...value].length>max)shapeFail('string_limit',field);
+  // JSON Schema maxLength counts Unicode characters, not UTF-8 bytes. Overall byte caps remain.
+  try{text(value,max*4);}catch{shapeFail('unsafe_text',field);}
+  if(schema.pattern&&!new RegExp(schema.pattern).test(value))shapeFail('identifier',field);
+ }
+ else if(schema.type==='integer'){if(!Number.isSafeInteger(value)||value<(schema.minimum??0)||value>(schema.maximum??Number.MAX_SAFE_INTEGER))shapeFail('type',field);}
+ else shapeFail('type',field);
+ if(schema.enum&&!schema.enum.includes(value))shapeFail('enum',field);
  return value;
 }
 function validateModelShape(input,schema){
  try{
   const r=check(input,schema);
-  if(!uuid(r.runId)||!id(r.taskId)||!stage(r.stage)||Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.final)codexFail('result_invalid');
+  if(!uuid(r.runId)||!id(r.taskId)||!stage(r.stage))codexFail('result_invalid');
+  if(Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.final)shapeFail('byte_limit','result');
   if(!unique(r.findings.map(f=>f.findingId))||!unique(r.coverage.map(c=>c.sourceId)))codexFail('result_invalid');
   for(const c of r.coverage)if(!unique(c.excerptIds))codexFail('result_invalid');
   for(const f of r.findings)for(const e of f.evidence)if(schema===MODEL_RESULT_SCHEMA&&!bytesRange(e.startByte,e.endByte))codexFail('result_invalid');
   return r;
- }catch{codexFail('result_invalid');}
+ }catch(e){if(e.validationFailure)throw e;shapeFail('constraints','result');}
 }
 
 export const validateCodexResultShape=input=>validateModelShape(input,MODEL_RESULT_SCHEMA);
@@ -187,7 +196,8 @@ export function validateExecutionRecord(input){
 export function validateResultEnvelope(input){
  const r=fields(input,['schemaVersion','runId','taskId','conversationId','promptSha256','modelResponse','limitations','resultSha256']);
  if(r.schemaVersion!==1||!uuid(r.runId)||!uuid(r.conversationId)||!id(r.taskId)||!hash(r.promptSha256)||!hash(r.resultSha256))codexFail('result_invalid');
- r.modelResponse=validateCodexResultShape(r.modelResponse);r.limitations=array(r.limitations,300,x=>text(x));
+ r.modelResponse=validateCodexResultShape(r.modelResponse);r.limitations=check(r.limitations,list(str(),300),'limitations');
  const {resultSha256,...body}=r;
- if(sha256(JSON.stringify(body))!==resultSha256||r.modelResponse.runId!==r.runId||r.modelResponse.taskId!==r.taskId||Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.envelope)codexFail('result_invalid');return r;
+ if(sha256(JSON.stringify(body))!==resultSha256||r.modelResponse.runId!==r.runId||r.modelResponse.taskId!==r.taskId)codexFail('result_invalid');
+ if(Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.envelope)shapeFail('byte_limit','result');return r;
 }

@@ -117,3 +117,6 @@ One explicitly authorized real smoke failed with permission-class stderr; its ap
 
 
 2026-10-05 preparation-template correction: verified the user-provided HD preparation template against its original user message and the actual A4 capture. Shared preparation now preserves its five tasks and applicable nine preferences with explicit clause mapping; HD-PREP-01 is the reusable fallback, current/same-task seeds take precedence. Six-section packaging and schema validation do not certify semantic completeness. A private A4 revised draft is not_run; original captures/results remain unchanged. Product baseline 0.3.15; next accepted Phase 21 patch 0.3.16. Phase 21 remains 0/6, RUN-01–05 pending; no new inference or Release/tag.
+
+
+2026-10-05 result-usability repair: model maxLength now follows Unicode character counts, retaining byte/resource limits, source identity and evidence validation. Only exact CLI-refused update_plan diagnostics may continue; actual tool events and other router errors remain rejected. DeepSeek provider receipt v2 records a closed validation reason/field; v1 stays readable unchanged. Deliver a successful reviewer in full even if its peer fails. Product baseline 0.3.16, next accepted phase patch 0.3.17. Current Phase 21 progress and pending synthetic live authorization are unchanged by separate user-authorized A4 debugging. No Release/tag.

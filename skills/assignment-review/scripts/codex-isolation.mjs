@@ -47,12 +47,13 @@ export async function createReviewHome({control,auth,installationText}) {
  await fs.chmod(codexHome,0o500);return {codexHome,installation};
 }
 // Called on the complete bounded stream as well as incrementally (chunk splits cannot hide markers).
+export const rejectedToolCall=text=>/^\S+ ERROR codex_core::tools::router: error=(?:unsupported call: [A-Za-z][A-Za-z0-9_.:-]{0,127}|request_user_input is unavailable in Default mode|failed to parse function arguments: [^\r\n]+)$/.test(text.trim());
 export function toolAttempt(stdout,stderr) {
- if(stderr.includes('codex_core::tools::router'))return true;
+ if(stderr.split('\n').some(line=>line.includes('codex_core::tools::router')&&!rejectedToolCall(line)))return true;
  return /"type"\s*:\s*"(?:todo_list|file_change|command_execution|mcp_tool_call|tool_call|web_search|agent_tool_call|image_view)"/.test(stdout);
 }
-export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),JSON.stringify([CODEX_VERSION,CODEX_MODEL,CODEX_BINARY_SHA256]),JSON.stringify(DISABLED_FEATURES),boundModelReferenceSchema.toString(),JSON.stringify(MODEL_REFERENCE_SCHEMA),DYLD_SHA256].join('\n'));}
-const CONTRACT_SHA256='7406be507fc9220acda56c0a211b611c2722a396873e04eb554bee3bcb87db99';
+export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),rejectedToolCall.toString(),JSON.stringify([CODEX_VERSION,CODEX_MODEL,CODEX_BINARY_SHA256]),JSON.stringify(DISABLED_FEATURES),boundModelReferenceSchema.toString(),JSON.stringify(MODEL_REFERENCE_SCHEMA),DYLD_SHA256].join('\n'));}
+const CONTRACT_SHA256='82b34c0d5202b69d1a4fbafe3744b138fbe166e8eb4ca0150f14ff4a27b28c33';
 async function regular(p,{max=1024*1024,privateOnly=false}={}){
  const s=await fs.lstat(p);
  if(!s.isFile()||s.isSymbolicLink()||s.uid!==process.getuid()||s.nlink!==1||s.mode&0o022||privateOnly&&s.mode&0o077||s.size>max)codexFail('unsafe_path');

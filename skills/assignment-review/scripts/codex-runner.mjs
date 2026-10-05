@@ -6,7 +6,7 @@ import { newDiagnostics,diagnosticEvent,diagnosticItem,diagnosticErrno,diagnosti
 import { decode } from './prompt-contract.mjs';
 import { claimCodexRun,recordCodexScratch,readForDispatch,completeCodexRun } from './prompt-store.mjs';
 import { preflightCodex } from './codex-preflight.mjs';
-import { createIsolatedLaunch,assertCertifiedLaunch,toolAttempt } from './codex-isolation.mjs';
+import { createIsolatedLaunch,assertCertifiedLaunch,toolAttempt,rejectedToolCall } from './codex-isolation.mjs';
 
 // Internal library seam for deterministic process fixtures; never exposed as CLI arguments.
 export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMITS.reviewMs}={}){
@@ -38,7 +38,8 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
   function line(raw,isError){
    let text;try{text=decode(raw);}catch{return stop('protocol_invalid','invalid_utf8');}if(!text.trim())return;
    if(isError){
-    if(toolAttempt('',text))return stop('uncertain','tool_activity');
+    if(rejectedToolCall(text)){diagnostics.refusedToolCalls++;return;} // CLI refused before executing a handler.
+    if(toolAttempt('',text))return stop('uncertain','tool_activity',{reportedErrorCategory:reportedErrorCategory(text)});
     // These startup diagnostics are proven consequences of denied global context/cache writes.
     if(/^WARNING: proceeding, even though we could not create PATH aliases: Operation not permitted \(os error 1\)$/.test(text))return;
     if(/^\S+ ERROR (?:codex_core_skills::manager|codex_skills_extension::host_service): failed to install system skills: io error while create (?:skills root|system skills) dir: Operation not permitted \(os error 1\)$/.test(text))return;

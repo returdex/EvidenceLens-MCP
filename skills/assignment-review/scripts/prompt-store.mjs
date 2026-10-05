@@ -1,6 +1,6 @@
 import { admitPriorSummaries,validateReviewAssessment } from './review-recheck.mjs';
 import { bindRunMetrics } from './codex-metrics.mjs';
-import { newDiagnostics } from './codex-diagnostics.mjs';
+import { newDiagnostics,validateValidationFailure } from './codex-diagnostics.mjs';
 import fs from 'node:fs/promises';
 import { validateBoundCodexResult } from './codex-result.mjs';
 import { validateExecutionRecord,validateResultEnvelope } from './codex-contract.mjs';
@@ -137,8 +137,10 @@ export async function claimHostProviderRun(scope,runId){return transaction(scope
  tx.dirty();await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return v;
 });}
 function providerReceipt(v,l){
- const r=fields(v,['schemaVersion','provider','runId','taskId','conversationId','promptSha256','status','errorCode','model','reportedModel','elapsedMs','observedRequests','httpStatus','trigger','resultSha256']);
- if(r.schemaVersion!==1||r.provider!=='deepseek'||['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||!['succeeded','failed','cancelled','uncertain'].includes(r.status)||!Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<0||![0,1].includes(r.observedRequests)||!(r.httpStatus===null||Number.isInteger(r.httpStatus)&&r.httpStatus>=100&&r.httpStatus<=599))fail('corrupt_record');
+ const version=Object.getOwnPropertyDescriptor(v??{},'schemaVersion')?.value;
+ const r=fields(v,['schemaVersion','provider','runId','taskId','conversationId','promptSha256','status','errorCode','model','reportedModel','elapsedMs','observedRequests','httpStatus','trigger','resultSha256',...(version===2?['validationFailure']:[])]);
+ if(![1,2].includes(r.schemaVersion)||r.provider!=='deepseek'||['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||!['succeeded','failed','cancelled','uncertain'].includes(r.status)||!Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<0||![0,1].includes(r.observedRequests)||!(r.httpStatus===null||Number.isInteger(r.httpStatus)&&r.httpStatus>=100&&r.httpStatus<=599))fail('corrupt_record');
+ if(version===2){r.validationFailure=validateValidationFailure(r.validationFailure);if(r.validationFailure!==null&&r.trigger!=='result_rejected')fail('corrupt_record');}
  for(const k of ['model','reportedModel'])if(r[k]!==null&&(typeof r[k]!=='string'||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(r[k])))fail('corrupt_record');
  if(![null,'runtime_unavailable','configuration_unavailable','provider_disabled','recursive_call','http_error','network_error','response_invalid','result_rejected','aborted','deadline_exceeded'].includes(r.trigger))fail('corrupt_record');
  if(!(r.resultSha256===null||typeof r.resultSha256==='string'&&/^[a-f0-9]{64}$/.test(r.resultSha256)))fail('corrupt_record');
@@ -157,7 +159,7 @@ export async function completeHostProviderRun(scope,runId,{execution:input,resul
   tx.dirty();await writeExclusive(recordPath(c,t,runId,'result'),r);
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');
- if(signal?.aborted){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.trigger='aborted';e.resultSha256=null;}
+ if(signal?.aborted){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.trigger='aborted';e.resultSha256=null;if(e.schemaVersion===2)e.validationFailure=null;}
  const next=transition(l,e.status,{errorCode:e.errorCode});
  tx.dirty();await writeExclusive(recordPath(c,t,runId,'provider'),e);await replace(recordPath(c,t,runId,'state'),next);await tx.publish();
  return {...receipt(next),execution:e,...(result?{result}:{})};

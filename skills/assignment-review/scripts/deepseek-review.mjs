@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { captureEvidencePrompt } from './codex-review.mjs';
 import { parseEvidenceCapsule, CODEX_LIMITS } from './codex-contract.mjs';
 import { validateBoundCodexResult } from './codex-result.mjs';
+import { safeValidationFailure } from './codex-diagnostics.mjs';
 import { claimHostProviderRun, completeHostProviderRun, readHostProviderRun } from './prompt-store.mjs';
 import { fields, array, text, uuid, id, decode, LIMITS, fail, safeError } from './prompt-contract.mjs';
 
@@ -27,13 +28,25 @@ export async function preflightDeepSeek() {
  catch(e){return {ok:false,...safeError(e),trigger:e.trigger??'configuration_unavailable',inference:'not_run'};}
 }
 export const captureDeepSeekPrompt=(scope,runId,input)=>captureEvidencePrompt(scope,runId,input,'host_skill');
+// JSON mode does not constrain enum labels. Retain content; classify unfamiliar labels conservatively.
+export function normalizeDeepSeekLabels(content){
+ let value;try{value=JSON.parse(content);}catch{return content;}
+ if(value?.schemaVersion!==3||!Array.isArray(value.findings)||!Array.isArray(value.limitations))return content;
+ for(const [index,f] of value.findings.entries()){
+  if(!f||typeof f!=='object'||typeof f.kind!=='string'||['observation','gap','conflict','unknown'].includes(f.kind))continue;
+  try{text(f.kind,80);}catch{continue;}
+  f.kind='unknown';
+  value.limitations.push('Finding '+(index+1)+': nonstandard DeepSeek kind label normalized locally to unknown; original claim/action retained and host classification required.');
+ }
+ return JSON.stringify(value);
+}
 // Trusted in-process seam only; CLI accepts no endpoint, model, credential, or adapter.
 export async function runCapturedDeepSeek(scope,runId,{signal}={},adapter) {
  const snapshot=await claimHostProviderRun(scope,runId);
  const started=Date.now(),controller=new AbortController();
  const abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});
  let timeout,expired=false,result=null;
- const execution={schemaVersion:1,provider:'deepseek',runId,taskId:snapshot.taskId,conversationId:snapshot.conversationId,promptSha256:snapshot.promptSha256,status:'failed',errorCode:null,model:null,reportedModel:null,elapsedMs:0,observedRequests:0,httpStatus:null,trigger:null,resultSha256:null};
+ const execution={schemaVersion:2,validationFailure:null,provider:'deepseek',runId,taskId:snapshot.taskId,conversationId:snapshot.conversationId,promptSha256:snapshot.promptSha256,status:'failed',errorCode:null,model:null,reportedModel:null,elapsedMs:0,observedRequests:0,httpStatus:null,trigger:null,resultSha256:null};
  let stage='preflight';
  try {
   if(process.env.EVIDENCELENS_DISABLE_PROVIDER==='1'){execution.trigger='provider_disabled';fail('unsupported');}
@@ -58,11 +71,12 @@ export async function runCapturedDeepSeek(scope,runId,{signal}={},adapter) {
   // Discard reasoning_content. Length/tool/error finishes never promote partial JSON.
   if(!Array.isArray(body?.choices)||body.choices.length!==1||choice.finish_reason!=='stop'||choice.message?.tool_calls||typeof choice.message?.content!=='string'||!choice.message.content.trim())fail('result_invalid');
   if(typeof body.model==='string'&&/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.model))execution.reportedModel=body.model;
-  stage='validation';result=validateBoundCodexResult(snapshot,choice.message.content);
+  stage='validation';result=validateBoundCodexResult(snapshot,normalizeDeepSeekLabels(choice.message.content));
   if(controller.signal.aborted)throw new Error('aborted');
   execution.status='succeeded';execution.resultSha256=result.resultSha256;
  } catch(e) {
   result=null;
+  if(stage==='validation')execution.validationFailure=safeValidationFailure(e);
   execution.status=signal?.aborted?'cancelled':execution.observedRequests?'uncertain':'failed';
   execution.errorCode=signal?.aborted?null:expired?'timed_out':stage==='request'?'uncertain':stage==='response'?'result_invalid':safeError(e).code;
   execution.trigger=signal?.aborted?'aborted':expired?'deadline_exceeded':execution.trigger??e.trigger??({request:'network_error',response:'response_invalid',validation:'result_rejected'}[stage]??'configuration_unavailable');

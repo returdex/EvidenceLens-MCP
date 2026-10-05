@@ -23,10 +23,10 @@ for(const name of ['view_image','apply_patch','request_user_input','update_plan'
  const outputs=r.requests[1].body.input.filter(x=>x.type.endsWith('_output'));assert.equal(outputs.length,1);
  assert.ok(!JSON.stringify(outputs).includes(r.authSentinel));assert.ok(!JSON.stringify(outputs).includes('OUTSIDE_SYNTHETIC_SENTINEL_20'));
  assert.ok(r.stderr.includes('codex_core::tools::router'));assert.ok(!events(r).some(x=>['tool_call','file_change','command_execution'].includes(x.item?.type)));
- t.diagnostic('No supervisor used: two internal requests; '+name+' JSONL visibility absent; stderr error only. This does not pass runtime abort acceptance.');
+ t.diagnostic('No supervisor used: two internal requests; '+name+' JSONL visibility absent; stderr error only. Exact refused update_plan has a separate supervised recovery check.');
 });
 
-for(const name of ['view_image','apply_patch','request_user_input','update_plan'])test('revised supervision aborts '+name+' with no disclosure',async()=>{
+for(const name of ['view_image','apply_patch'])test('revised supervision aborts '+name+' with no disclosure',async()=>{
  const r=await protocolFixture('success',{...diagnostic,supervise:true,tool:({auth,outside})=>name==='apply_patch'?{type:'custom_tool_call',id:'ct_1',call_id:'call_fixture',name,input:'*** Begin Patch\n*** Delete File: '+outside+'\n*** End Patch'}:{type:'function_call',id:'fc_1',call_id:'call_fixture',name,arguments:JSON.stringify(name==='view_image'?{path:auth}:name==='update_plan'?{plan:[{step:'synthetic',status:'in_progress'}]}:{questions:[{id:'q',header:'Test',question:'synthetic?',options:[{label:'A',description:'A'},{label:'B',description:'B'}]}]})}});
  usable(r);assert.equal(r.rejected,true);assert.notEqual(r.exitCode,0);assert.ok(r.requests.length>=1&&r.requests.length<=2);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });

@@ -14,8 +14,8 @@
 2. 两位各自 `capture`：DeepSeek 输入 `{taskId,runId,snapshot,capsule,admitted,evidenceRoots?}`，复用捕获、摘录拆分和模型 v3 输出协议。两份在首次模型调用前完成，保持相同原材料／任务，无同伴结论。
 3. `deepseek-review.mjs preflight` 输入 `{}`；只验证运行库和配置，不发 HTTP，报告 `inference:not_run`。这不能证明远端 key/model 可用。
 4. `deepseek-review.mjs run` 输入 `{taskId,runId,evidenceRoots?}`。生命周期 captured → dispatched 原子认领防重放；只发送一次 /chat/completions，重试固定为零，无模型替换／fallback／工具。每位审阅默认期限 600 秒，覆盖请求及正文读取；宿主继续等待同一运行。阶段任务完整保存，没有沿用 MCP 的四条简短发现限制。
-5. HTTP 200、单个 choice、finish_reason=stop、有效 JSON v3、实际身份／coverage／来源绑定全部通过，才保存私有 result 和 provider 回执并标 succeeded。length、工具调用、空正文、错引用、取消及未验证内容均不发布审阅结果。reasoning_content 丢弃。绑定保证引用来自捕获内容，不证明语义推理正确。
-6. 输出的 lifecycle executionKind 为 host_skill，独立 provider 回执标 deepseek；不要称为 MCP 或 Codex 执行。保留完整报告及最小回执。无效配置、HTTP 状态、网络／结果／超时分支为封闭诊断，不回显 provider 原文或凭据。`diagnose` 输入 `{taskId,runId}`，只读指定运行的状态／安全 provider 回执，不读来源、不重发。部分结果不作为结论。
+5. HTTP 200、单个 choice、finish_reason=stop、有效 JSON v3、实际身份／coverage／来源绑定全部通过，才保存私有 result 和 provider 回执并标 succeeded。JSON 模式不能约束分类枚举：短且通过安全文本校验的非标准 kind 可在本地保守改为 unknown，正文／行动保持原样，在 limitations 明确标注待宿主归类。这不修复身份、coverage 或引用，不把无证据判断升级为事实；源绑定照常验证。length、工具调用、空正文、错引用、取消及未验证内容均不发布审阅结果。reasoning_content 丢弃。绑定保证引用来自捕获内容，不证明语义推理正确。
+6. 输出的 lifecycle executionKind 为 host_skill，独立 provider 回执标 deepseek；不要称为 MCP 或 Codex 执行。保留完整报告及最小回执。新 provider 回执 v2 的 `validationFailure` 只包含封闭的 reason/field，区分类型、字段、枚举、字符／总字节上限和来源绑定；旧 v1 原样只读，缺少的原因不能追溯补造。无效配置、HTTP 状态、网络／结果／超时分支不回显 provider 原文或凭据。`diagnose` 输入 `{taskId,runId}`，只读指定运行的状态／安全 provider 回执，不读来源、不重发。部分结果不作为结论。
 
 provider/result 文件沿用 Git 外状态根、0700 目录／0600 文件、排除路径及事务检查。取消后已发请求可能消耗用量，不能承诺服务端撤回。进程突然消失且未保存终态时保留 dispatched 为未完成；不自行重发或伪造成功。删除 dry-run/--apply 沿用记录助手；运行中 dispatched 不允许删除。
 

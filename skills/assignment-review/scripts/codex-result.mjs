@@ -4,7 +4,11 @@ function rejectBinding(trigger){const e=new Error('source_mismatch');e.code='sou
 export function validateBoundCodexResult(snapshot,modelResponse){
  const s=validateSnapshot(snapshot),capsule=parseEvidenceCapsule(s);
  let input=modelResponse;
- if(typeof input==='string'){if(Buffer.byteLength(input)>CODEX_LIMITS.final)codexFail('result_invalid');try{input=JSON.parse(input);}catch{codexFail('result_invalid');}}
+ if(typeof input==='string'){
+  const reject=reason=>{const e=new Error('result_invalid');e.code='result_invalid';e.validationFailure={reason,field:'result'};throw e;};
+  if(Buffer.byteLength(input)>CODEX_LIMITS.final)reject('byte_limit');
+  try{input=JSON.parse(input);}catch{reject('json_syntax');}
+ }
  const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;
  const citationOnly=version===2,referenceOnly=version===3;
  const r=referenceOnly?validateReferenceResultShape(input):citationOnly?validateCitationResultShape(input):validateCodexResultShape(input);
