@@ -24,3 +24,11 @@ Fresh build passed. Node Codex/prompt/command/source-boundary checks: 231/231 in
 ## Composite-report verification
 
 Root corrected the composite table's cross-topic reference omissions: combined findings must not be treated as missing coverage because they lack a separate row. The original host comparison was retained privately; all independent model reports and persisted results stayed unchanged. Root also clarified that a gap/unknown mapping adjustment is not evidence the reviewers invented a confirmed assignment defect: their claims already stated missing current materials. One review already warned against deriving time bands from mixed text, so restricting that text is not proof the reviewer had actually assigned an incorrect band. Synthesis must preserve qualifications before claiming a correction. These are exploratory observations for future semantic/handoff work, not completion of a general adjudication engine.
+
+
+## User-selected default — 0.3.13
+
+The user subsequently selected multi-review as the normal default. All four stage review commands now coordinate three independent Codex reviewers and source-backed host comparison; an explicit single-reviewer request selects one. Full feedback is retained in both modes. Help/export/prompt-only generation do not start reviews. This is a shared Skill selection policy reusing the already validated workflow, not a new internal CLI agent system. The A4 experiment contained zero DeepSeek requests; the existing DeepSeek MCP provider remains a separate path and is not part of this composition. No additional model call, credential access or provider switch occurred for this default update. Next Phase 21 feature patch is 0.3.14.
+
+
+The current Skill's optional MCP path requires genuine nonempty assignment_brief, rubric, solution and teacher_instructions inputs plus verified provider/transport authorization. The A4 preparation corpus contained requirements and a marking guide, without a current solution or independent teacher instructions; the workflow correctly recorded MCP not_run rather than manufacturing role inputs. Connecting DeepSeek to requirements-only independent review needs its own honest input/result adaptation. This policy edit does not make that connection. Fresh build, installed links, Node 231/231 and six Vitest files 118/118 passed.

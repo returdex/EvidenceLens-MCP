@@ -2,9 +2,9 @@
 
 ## Transport and tool
 
-EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.3.12`. For the hardened container profiles, read-only `/workspace` mount, offline smoke path, and explicit DeepSeek deployment command, see [Docker deployment](docker-deployment.md).
+EvidenceLens runs as an MCP server over `stdio`. Start it with `npm run dev`. Clients discover one tool through `tools/list` and invoke it through `tools/call` with `name: "review_evidence"`. The server and response metadata version is `0.3.13`. For the hardened container profiles, read-only `/workspace` mount, offline smoke path, and explicit DeepSeek deployment command, see [Docker deployment](docker-deployment.md).
 
-`review_evidence` is read-only and idempotent, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.3.12`.
+`review_evidence` is read-only and idempotent, and returns one MCP text content item containing JSON. The response maps `response.requestId = request.reviewId` and uses the fixed generated timestamp `1970-01-01T00:00:00.000Z`. The server and response metadata version is `0.3.13`.
 
 ## Request
 
@@ -244,7 +244,7 @@ The complete deterministic-only runtime response for that exact request is:
   ],
   "metadata": {
     "serverName": "evidencelens",
-    "serverVersion": "0.3.12",
+    "serverVersion": "0.3.13",
     "analyzerName": "deterministic-rules",
     "analyzerVersion": "1.0.0",
     "generatedAt": "1970-01-01T00:00:00.000Z"

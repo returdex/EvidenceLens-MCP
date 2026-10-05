@@ -190,3 +190,6 @@ Multi-provider comparison, aggregate statistics, incremental indexing, general p
 
 
 **Complete-feedback revision (2026-10-05):** The user explicitly rejects default shortening. Phase 21 handoff now defaults to complete analysis, evidence and actions; only user-requested summaries accompany an accessible full report. Product baseline 0.3.12 after the shared Skill/capture correction; next accepted phase patch 0.3.13. A user-authorized three-reviewer A4 experiment is exploratory and does not close the pending phase or expand normal single-review dispatch.
+
+
+**Default-selection update (2026-10-05):** User selects three independent Codex reviewers and host source-backed comparison for ordinary four-stage review commands; explicit single-reviewer selection remains available. Default complete analysis remains. Current baseline 0.3.13, next accepted Phase 21 patch 0.3.14. Existing DeepSeek MCP provider has not been integrated into this composition; no new model request or phase closure accompanies this policy update.

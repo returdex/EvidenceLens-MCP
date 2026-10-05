@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
 last_updated: "2026-10-05T03:26:03.986Z"
-last_activity: 2026-10-05 — 0.3.12 complete-feedback correction; three-reviewer A4 test validated and complete reports delivered
+last_activity: 2026-10-05 — 0.3.13 three-reviewer default selected by user
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — 0.3.12 complete-feedback correction; three-reviewer A4 test validated and complete reports delivered
+Last activity: 2026-10-05 — 0.3.13 three-reviewer default selected by user
 
 ## Accepted Coverage Debt
 
@@ -53,11 +53,11 @@ User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/researc
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
-Current product 0.3.12, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real bounded synthetic ChatGPT reviews and one actual A4 preparation review have succeeded with validated stored results and exact prompt export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
+Current product 0.3.13, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real bounded synthetic ChatGPT reviews and one actual A4 preparation review have succeeded with validated stored results and exact prompt export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.12, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat or auth mutation performed; subsequent explicitly authorized A4 debugging is recorded below. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
+Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.13, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat or auth mutation performed; subsequent explicitly authorized A4 debugging is recorded below. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
 
 ## Compatible repair — 2026-10-05
 
@@ -115,3 +115,12 @@ Product 0.3.11 replaces production model quote copying with sourceId/excerptId-o
 The user rejected unsolicited shortening and explicitly requested testing multi-agent decisions. Product 0.3.12 makes complete substantive analysis the shared Skill/capture default: source-backed interpretations, evidence limits, applicable risks and concrete verification/actions; no silent removal of info/Low findings. Full analysis is delivered directly or in accessible private reports, with optional summaries only on explicit request. Phase 21 D-01, handoff Plan 02, CLI Plan 04 and planning input are amended accordingly; no plan is marked complete. Next accepted phase patch is 0.3.13.
 
 An explicitly requested bounded experiment uses three separate independent CLI reviewer contexts with identical frozen official A4 material and substantive task, separately bound run identities, the unchanged requested GPT-6/low configuration, and no earlier conclusions in their prompts. It runs serially to avoid private-store transaction contention; host comparison follows all three attempts and preserves minority findings and unresolved disagreements. This is an exploratory three-reviewer test, not a general multi-agent runtime or evidence that majority decisions are correct. All three actual preparation runs succeeded (243281/256748/253774 ms, 18/13/17 findings); root independently revalidated stored result/snapshot/execution joins and complete report preservation. All captures preceded first inference. The original conversation delivered all full reports and source-backed comparison; root corrected composite cross-topic reference omissions and clarified that metadata mapping is not proof of invented defects, retaining original composite and all independent outputs. One additional constraint-check reminder survived comparison; no accuracy gain was measured. This does not certify semantic accuracy. Fresh build, Node 231/231 (12.381 s), six Vitest files 118/118 (3.74 s) passed; no dependencies, auth, model or isolation policy changed. The optional skill-creator Python validator could not start because PyYAML is absent; existing Node packaging/reference/install checks passed. RR/FM remain non-blocking.
+
+
+## Default three-reviewer selection — 2026-10-05
+
+User explicitly selected multi-review as the default. Product 0.3.13 sets all four installed review entrypoints to three independent Codex review contexts plus source-backed host comparison, with an explicit single-reviewer override. Full feedback remains the default in either mode; help/export/generate do not launch review. Reuse the three-process workflow already validated on A4; no new inference is necessary for changing this selection policy. Internal CLI multi_agent stays disabled, each reviewer retains its own begin/capture/run and receipt; export still returns the latest actual capture. Preflight system unavailability stops undispatched rounds and is reported honestly.
+
+The A4 experiment used Codex only, with MCP not_run and zero DeepSeek requests. The existing DeepSeek MCP provider is a separate path and is not connected to this default reviewer composition. This change does not authorize or claim a cross-provider A4 dispatch. Next accepted Phase 21 patch 0.3.14; phase stays 0/6 and RUN-01–05 pending. No release/tag or global-memory edit.
+
+Fresh build and installed-link verification passed; Node regression 231/231 (12.164 s), six Vitest files 118/118 (3.56 s), zero failures/skips. These verify packaging/compatibility and the unchanged execution path; no new paid inference was run solely to change the default.
