@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
 last_updated: "2026-10-05T03:26:03.986Z"
-last_activity: 2026-10-05 — 0.3.13 three-reviewer default selected by user
+last_activity: 2026-10-05 — 0.3.14 DeepSeek plus Codex default selected by user
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — 0.3.13 three-reviewer default selected by user
+Last activity: 2026-10-05 — 0.3.14 DeepSeek plus Codex default selected by user
 
 ## Accepted Coverage Debt
 
@@ -124,3 +124,10 @@ User explicitly selected multi-review as the default. Product 0.3.13 sets all fo
 The A4 experiment used Codex only, with MCP not_run and zero DeepSeek requests. The existing DeepSeek MCP provider is a separate path and is not connected to this default reviewer composition. This change does not authorize or claim a cross-provider A4 dispatch. Next accepted Phase 21 patch 0.3.14; phase stays 0/6 and RUN-01–05 pending. No release/tag or global-memory edit.
 
 Fresh build and installed-link verification passed; Node regression 231/231 (12.164 s), six Vitest files 118/118 (3.56 s), zero failures/skips. These verify packaging/compatibility and the unchanged execution path; no new paid inference was run solely to change the default.
+
+
+## DeepSeek plus Codex default — 2026-10-05
+
+Exactly one independent DeepSeek stage API review and one isolated Codex review are now the Skill default. Both return complete evidence-bound reports before host comparison. Explicit one-provider selection is retained. Same admitted material/task, separately captured identities and no peer conclusions. Missing provider reports failed/not_run; no silent duplicate-Codex replacement. Reuses existing build/config/bounded provider reader and shared v3 source binding; requirements-only preparation does not fabricate four MCP roles. Product 0.3.14, next accepted phase patch 0.3.15. Phase 21 remains 0/6, no release/tag, no global-memory edit. New real paired coursework inference is not implied by offline checks.
+
+Fresh build passed; final Node 241/241 (13.815 s), six Vitest files 118/118 (2.54 s), no failures/skips. All installed links unchanged; DeepSeek read-only preflight passed outside the repository without HTTP. Python optional skill validator lacks PyYAML; Node packaging/link checks passed. No new real inference was sent. Details in [validation](../docs/development-validation.md).

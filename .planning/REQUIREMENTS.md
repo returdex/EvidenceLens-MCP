@@ -103,3 +103,6 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 
 
 **2026-10-05 用户默认项修订：** 四个审阅入口默认三位独立Codex审阅者及宿主来源裁决，明确指定单审阅者时一次；两种模式均完整交付。帮助/导出/仅生成不启动模型。DeepSeek MCP为独立路径，本轮A4和当前默认组合均没有DeepSeek调用。该默认选择沿用已验证三审阅流程，不新增需求编号或关闭现有验收。
+
+
+2026-10-05 cross-provider default amendment: user replaces the three-Codex default with exactly one DeepSeek and one Codex independent reviewer plus source-backed host comparison. Full feedback and explicit single-provider choice remain. Stage DeepSeek API uses genuine captured excerpts, including requirements-only preparation, with existing provider config/bounded reading and shared v3 local binding; does not relax the four-role MCP contract or inherit its four-short-finding limit. Both captures precede inference, no peer findings, no automatic substitute/retry. Host-skill lifecycle includes safe DeepSeek receipt and validated saved result. Product baseline 0.3.14; next accepted Phase 21 patch 0.3.15. Offline integration and read-only configuration checks are distinct from new live inference; historical A4 used only Codex. Phase 21 stays 0/6, RUN-01–05 pending.

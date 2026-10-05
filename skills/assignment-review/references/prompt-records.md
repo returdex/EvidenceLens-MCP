@@ -1,6 +1,6 @@
 # Captured task prompt records (schemaVersion 1)
 
-The installed Node stdlib snapshot helpers capture a task-facing prompt before review. Snapshots do not record hidden instructions, reasoning, credentials, raw chat history, results or provider events. The separate Codex adapter owns transport and stores only validated results and minimal execution receipts in sidecars (see the schema v2 section below); original schema v1 snapshots remain unchanged. Host composition must use the existing source gate. Recognition of common credential strings is a limited rejection check, not exhaustive secret detection.
+The installed Node stdlib snapshot helpers capture a task-facing prompt before review. Snapshots do not record hidden instructions, reasoning, credentials, raw chat history, results or provider events. The separate Codex and DeepSeek stage adapters own transport and store only validated results and minimal execution receipts in sidecars (see the schema v2 section below); original schema v1 snapshots remain unchanged. Host composition must use the existing source gate. Recognition of common credential strings is a limited rejection check, not exhaustive secret detection.
 
 ## Contract
 
@@ -57,3 +57,10 @@ Snapshot v1 bytes stay unchanged. `begin` optionally accepts `executionKind:"cod
 Private sidecars: execution.json (strict identity, prompt/binary/policy/result digests, timing, terminal/cleanup status), result.json (strict locally validated envelope), scratch.json (owned temporary-root journal). No raw stdout, stderr, events, reasoning, environment or credentials are stored. Result and receipt publish before lifecycle success; an interrupted mutation remains locked/unavailable. Cancellation observed before the terminal commit decision wins; there is one terminal publication. Running/interrupted ownership and unconfirmed cleanup make deletion busy. Completed safe deletion validates and removes only these known sidecars, preserving foreign links and other tasks. It does not follow scratch paths or kill a PID from disk.
 
 Owned runtime directories can remain after a host crash; their exact journal is retained for explicit inspection. Automatic recovery, recursive deletion from a journal and task takeover remain unsupported. Successful process exit alone never certifies independent success; Phase 20 result binding is required.
+
+
+## DeepSeek stage sidecars (product 0.3.14)
+
+The stage API uses existing host_skill/v1 lifecycle and unchanged snapshot v1. Atomic claim marks dispatched before configuration/HTTP, ensuring another runner cannot dispatch or overwrite the owner. It records a validated v1 result plus a private provider sidecar with provider=deepseek, bound identity/prompt hash, requested/reported model, status, safe error/trigger, elapsed time, HTTP status, observed request count (0/1) and result hash. It stores no raw HTTP errors, key, endpoint, usage or reasoning. Local lifecycle alone remains insufficient provider proof; only the runner's validated result and receipt support this bounded execution claim. Diagnostics read explicit run metadata; export still uses latest begin order. The common capture guide now embeds the v3 JSON schema for both providers; Codex's per-run schema enforcement is unchanged.
+
+Deletion recognizes the added provider sidecar and refuses any dispatched attempt; foreign files remain preserved. A process that disappears before terminal publication remains incomplete. No PID guessing, replay, or older-success fallback. Installed DeepSeek stage instructions and build/config prerequisites are in [DeepSeek execution](deepseek-execution.md).

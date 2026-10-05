@@ -9,14 +9,15 @@ import {renderEvidenceCapsule,parseEvidenceCapsule,renderCodexOutputGuide,valida
 import {preflightCodex} from './codex-preflight.mjs';
 import {createIsolatedLaunch} from './codex-isolation.mjs';
 import {runCapturedCodex} from './codex-runner.mjs';
-export async function captureCodexPrompt(scope,runId,input){
+export async function captureEvidencePrompt(scope,runId,input,executionKind){
  const v=fields(input,['snapshot','capsule','admitted']);
  const capsule=prepareReferenceCapsule(validateEvidenceCapsule(v.capsule,v.snapshot,v.admitted));
  const block=renderEvidenceCapsule(capsule,v.snapshot,v.admitted);
  const promptText=v.snapshot.promptText+'\n\n'+renderCodexOutputGuide(v.snapshot,capsule)+'\n\n'+block,snapshot={...v.snapshot,promptText,promptSha256:sha256(promptText)};
  parseEvidenceCapsule(snapshot);
- return captureRun(scope,runId,snapshot,{executionKind:'codex_exec'});
+ return captureRun(scope,runId,snapshot,{executionKind});
 }
+export const captureCodexPrompt=(scope,runId,input)=>captureEvidencePrompt(scope,runId,input,'codex_exec');
 export async function isolatedPreflight(){
  const started=Date.now(),deadline=started+10000;const receipt=await preflightCodex();if(!receipt.ok)return receipt;
  const launch=await createIsolatedLaunch({executableReceipt:receipt,runId:randomUUID(),deadline});

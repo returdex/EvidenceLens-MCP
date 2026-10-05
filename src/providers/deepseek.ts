@@ -124,7 +124,7 @@ function invalidResponse(diagnostics: DiagnosticSink | undefined, path: readonly
   throw new ProviderError("PROVIDER_INVALID_RESPONSE", { retryable: false });
 }
 
-async function readBoundedJson(response: Response, diagnostics?: DiagnosticSink): Promise<unknown> {
+export async function readBoundedJson(response: Response, diagnostics?: DiagnosticSink): Promise<unknown> {
   const reader = response.body?.getReader();
   if (reader === undefined) invalidResponse(diagnostics, ["provider", "http", "body"], "invalid_type");
   const chunks: Uint8Array[] = [];

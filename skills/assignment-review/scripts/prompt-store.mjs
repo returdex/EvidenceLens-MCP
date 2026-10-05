@@ -127,6 +127,45 @@ export async function readForDispatch(scope,runId,{attemptId}={}){return transac
  if(l.executionKind==='codex_exec'){const e=await execution(c,t,l);if(!e||e.attemptId!==attemptId||e.status!=='preparing')fail('busy');}
  if(l.status!=='captured')fail('uncertain');const v=await snapshot(c,t,l),next=transition(l,'dispatched');tx.dirty();await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {promptText:v.promptText,metadata:{...receipt(next),stage:v.stage,currentSourceId:v.currentSourceId,materials:v.materials,limitations:v.limitations}};
 });}
+// Internal DeepSeek stage path. Host-skill lifecycle is retained; provider identity is explicit.
+export async function claimHostProviderRun(scope,runId){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind!=='host_skill'||l.status!=='captured')fail('unsupported');
+ const v=await snapshot(c,t,l),next=transition(l,'dispatched');
+ tx.dirty();await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return v;
+});}
+function providerReceipt(v,l){
+ const r=fields(v,['schemaVersion','provider','runId','taskId','conversationId','promptSha256','status','errorCode','model','reportedModel','elapsedMs','observedRequests','httpStatus','trigger','resultSha256']);
+ if(r.schemaVersion!==1||r.provider!=='deepseek'||['runId','taskId','conversationId','promptSha256'].some(k=>r[k]!==l[k])||!['succeeded','failed','cancelled','uncertain'].includes(r.status)||!Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<0||![0,1].includes(r.observedRequests)||!(r.httpStatus===null||Number.isInteger(r.httpStatus)&&r.httpStatus>=100&&r.httpStatus<=599))fail('corrupt_record');
+ for(const k of ['model','reportedModel'])if(r[k]!==null&&(typeof r[k]!=='string'||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(r[k])))fail('corrupt_record');
+ if(![null,'runtime_unavailable','configuration_unavailable','provider_disabled','recursive_call','http_error','network_error','response_invalid','result_rejected','aborted','deadline_exceeded'].includes(r.trigger))fail('corrupt_record');
+ if(!(r.resultSha256===null||typeof r.resultSha256==='string'&&/^[a-f0-9]{64}$/.test(r.resultSha256)))fail('corrupt_record');
+ transition(l,r.status,{errorCode:r.errorCode});
+ if(r.status==='succeeded'&&(r.observedRequests!==1||r.httpStatus!==200||r.trigger!==null||r.resultSha256===null)||r.status!=='succeeded'&&r.resultSha256!==null)fail('corrupt_record');
+ return r;
+}
+export async function completeHostProviderRun(scope,runId,{execution:input,result=null,signal}){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind!=='host_skill'||l.status!=='dispatched')fail('unsupported');
+ const e=providerReceipt(input,l);
+ if(e.status==='succeeded'){
+  if(l.status!=='dispatched')fail('uncertain');
+  const r=validateResultEnvelope(result),bound=validateBoundCodexResult(await snapshot(c,t,l),r.modelResponse);
+  if(JSON.stringify(r)!==JSON.stringify(bound)||r.resultSha256!==e.resultSha256)fail('corrupt_record');
+  tx.dirty();await writeExclusive(recordPath(c,t,runId,'result'),r);
+ }else if(result!==null)fail('corrupt_record');
+ await boundary(c,'before_terminal_commit');
+ if(signal?.aborted){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.trigger='aborted';e.resultSha256=null;}
+ const next=transition(l,e.status,{errorCode:e.errorCode});
+ tx.dirty();await writeExclusive(recordPath(c,t,runId,'provider'),e);await replace(recordPath(c,t,runId,'state'),next);await tx.publish();
+ return {...receipt(next),execution:e,...(result?{result}:{})};
+});}
+export async function readHostProviderRun(scope,runId){return transaction(scope,false,async tx=>{
+ const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
+ if(l.executionKind!=='host_skill')fail('unsupported');
+ const raw=await read(recordPath(c,t,runId,'provider'));
+ return {metadata:receipt(l),execution:raw?providerReceipt(raw,l):null,diagnosticAvailability:raw?'recorded':'not_recorded'};
+});}
 export async function finishRun(scope,runId,outcome){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
  if(l.executionKind==='codex_exec'&&(outcome.status==='succeeded'||await execution(c,t,l)))fail('unsupported');
@@ -144,10 +183,10 @@ export async function exportLatest(scope,{expectedRunId}={}){
 }
 async function deletionPreview(c,t){
  await dirs(taskDir(c,t),false,c.root);
- const recognized=new Set(t.runs.flatMap(r=>[r.runId+'.state.json',r.runId+'.snapshot.json',r.runId+'.execution.json',r.runId+'.result.json',r.runId+'.scratch.json']));
+ const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider'].map(k=>r.runId+'.'+k+'.json')));
  let preservedUnknownCount=0,count=0;
  const d=await fs.opendir(taskDir(c,t));
- for await(const e of d){if(++count>LIMITS.runs*5+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ for await(const e of d){if(++count>LIMITS.runs*6+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
  return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
 }
 export async function forgetTask(scope,{apply=false}={}){
@@ -156,7 +195,7 @@ export async function forgetTask(scope,{apply=false}={}){
  return transaction(scope,false,async tx=>{
   const {c,index}=tx,t=taskFor(index,scope.taskId);if(!t)fail('no_record');
   const preview=await deletionPreview(c,t);
-  if(!t.deleted)for(const r of t.runs){const l=await state(c,t,r.runId);if(l.executionKind==='codex_exec'){const e=await execution(c,t,l);if(l.status==='dispatched'||e?.status==='preparing'||e&&!e.cleanupComplete)fail('busy');}}
+  if(!t.deleted)for(const r of t.runs){const l=await state(c,t,r.runId);if(l.status==='dispatched')fail('busy');if(l.executionKind==='codex_exec'){const e=await execution(c,t,l);if(e?.status==='preparing'||e&&!e.cleanupComplete)fail('busy');}}
 
   t.deleted=true;tx.dirty();await tx.publish();await boundary(c,'after_tombstone');
   const remaining=[];
@@ -165,10 +204,12 @@ export async function forgetTask(scope,{apply=false}={}){
     const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
     const lraw=await read(lp),sraw=await read(sp);
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
-    for(const kind of ['execution','result','scratch']){
+    for(const kind of ['execution','result','scratch','provider']){
      const p=recordPath(c,t,r.runId,kind),v=await read(p);if(!v)continue;
-     if(!lraw||lraw.executionKind!=='codex_exec'||v.runId!==r.runId||v.taskId!==t.taskId||v.conversationId!==scope.conversationId)fail('corrupt_record');
-     if(kind==='execution')validateExecutionRecord(v);else if(kind==='result')validateResultEnvelope(v);else validateScratch(v);
+     if(!lraw||v.runId!==r.runId||v.taskId!==t.taskId||v.conversationId!==scope.conversationId)fail('corrupt_record');
+     if(kind==='provider'){if(lraw.executionKind!=='host_skill')fail('corrupt_record');providerReceipt(v,validateLifecycle(lraw));}
+     else if(kind==='result')validateResultEnvelope(v);
+     else {if(lraw.executionKind!=='codex_exec')fail('corrupt_record');if(kind==='execution')validateExecutionRecord(v);else validateScratch(v);}
      await fs.unlink(p);
     }
     if(sraw){const v=validateSnapshot(sraw);if(!lraw||v.runId!==r.runId||v.sequence!==r.sequence||v.taskId!==t.taskId||v.conversationId!==scope.conversationId||v.promptSha256!==lraw.promptSha256)fail('corrupt_record');await fs.unlink(sp);await boundary(c,'after_delete_snapshot');}
