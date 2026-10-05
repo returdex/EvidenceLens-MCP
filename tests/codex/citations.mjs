@@ -55,7 +55,7 @@ test('numeric overrides and mixed evidence shapes in v2 are rejected; legacy v1 
 });
 test('capture generates actual identity and complete source mapping; export preserves it exactly',async t=>{
  const x=await capturedFlow(t,{installed:true}),p=x.exported.promptText;
- const open='<evidencelens-output-v2>',close='</evidencelens-output-v2>',guide=p.slice(p.indexOf(open)+open.length,p.indexOf(close));
+ const open='<evidencelens-output-v3>',close='</evidencelens-output-v3>',guide=p.slice(p.indexOf(open)+open.length,p.indexOf(close));
  const data=JSON.parse(guide.trim().split('\n').at(-1));
  assert.equal(data.runId,x.receipt.runId);assert.equal(data.taskId,x.scope.taskId);assert.equal(data.currentSourceId,'S1');assert.deepEqual(data.coverage,x.f.result.coverage);
  assert.equal((await x.exportPrompt()).promptText,p);

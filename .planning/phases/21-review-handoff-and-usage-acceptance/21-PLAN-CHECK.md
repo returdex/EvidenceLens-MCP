@@ -102,3 +102,6 @@ One explicitly authorized real smoke failed with permission-class stderr; its ap
 
 
 2026-10-05 source-binding amendment: current baseline is 0.3.10. Production model v2 supplies exact quote/source/excerpt identities, local code calculates spans and saves compatible v1 results; safe binding triggers distinguish rejection branches. Earlier actual A4 success on 0.3.9 does not establish the new protocol's live acceptance or close Phase 21 handoff/recheck/usage work. Plan 06 targets 0.3.11. Phase stays 0/6 and RUN-01–05 remain pending.
+
+
+2026-10-05 captured-reference amendment: current baseline is 0.3.11. Model v3 selects only admitted source/excerpt IDs; local code supplies exact captured text/spans and preserves stored v1 compatibility. Oversized excerpts split before immutable capture; per-run schemas constrain identities and source/excerpt pairs. Fresh build and Node 231/231 plus Vitest 118/118 pass. One user-authorized actual A4 preparation run succeeded in its original conversation (126683 ms, two sources, eight excerpts, 16 findings, complete cleanup and stored-result revalidation). It does not close revised-source/handoff/usage acceptance. Phase 21 stays 0/6, RUN-01–05 pending; Plan 06 now targets 0.3.12. Prior amendments are historical.

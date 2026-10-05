@@ -5,14 +5,15 @@ import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
 import {captureRun,diagnoseCodexRun} from './prompt-store.mjs';
 import {sha256,uuid,id,fields,array,text,decode,LIMITS,fail,safeError} from './prompt-contract.mjs';
-import {renderEvidenceCapsule,parseEvidenceCapsule,renderCodexOutputGuide} from './codex-contract.mjs';
+import {renderEvidenceCapsule,parseEvidenceCapsule,renderCodexOutputGuide,validateEvidenceCapsule,prepareReferenceCapsule} from './codex-contract.mjs';
 import {preflightCodex} from './codex-preflight.mjs';
 import {createIsolatedLaunch} from './codex-isolation.mjs';
 import {runCapturedCodex} from './codex-runner.mjs';
 export async function captureCodexPrompt(scope,runId,input){
  const v=fields(input,['snapshot','capsule','admitted']);
- const block=renderEvidenceCapsule(v.capsule,v.snapshot,v.admitted);
- const promptText=v.snapshot.promptText+'\n\n'+renderCodexOutputGuide(v.snapshot,v.capsule)+'\n\n'+block,snapshot={...v.snapshot,promptText,promptSha256:sha256(promptText)};
+ const capsule=prepareReferenceCapsule(validateEvidenceCapsule(v.capsule,v.snapshot,v.admitted));
+ const block=renderEvidenceCapsule(capsule,v.snapshot,v.admitted);
+ const promptText=v.snapshot.promptText+'\n\n'+renderCodexOutputGuide(v.snapshot,capsule)+'\n\n'+block,snapshot={...v.snapshot,promptText,promptSha256:sha256(promptText)};
  parseEvidenceCapsule(snapshot);
  return captureRun(scope,runId,snapshot,{executionKind:'codex_exec'});
 }

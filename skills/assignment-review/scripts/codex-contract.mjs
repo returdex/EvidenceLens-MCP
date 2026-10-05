@@ -85,19 +85,63 @@ export const MODEL_RESULT_SCHEMA=freeze(object({
  findings:list(object({findingId:ident,kind:enumeration(['observation','gap','conflict','unknown']),severity:enumeration(['info','warning','error']),claim:str(),evidence:list(object({sourceId:ident,excerptId:ident,startByte:integer,endByte:integer,quote:str()})),action:nullable(str())})),
  limitations:list(str())
 }));
-// Production model output omits numeric spans; the local binder resolves exact quotes.
+// Legacy v2 output omits numeric spans; the local binder resolves exact quotes.
 // Stored results retain the original v1 shape for existing readers and receipts.
 export const MODEL_CITATION_SCHEMA=freeze({...MODEL_RESULT_SCHEMA,properties:{...MODEL_RESULT_SCHEMA.properties,
  schemaVersion:{type:'integer',enum:[2]},
  findings:list(object({...MODEL_RESULT_SCHEMA.properties.findings.items.properties,
   evidence:list(object({sourceId:ident,excerptId:ident,quote:str()}))}))
 }});
+export const MODEL_REFERENCE_SCHEMA=freeze({...MODEL_RESULT_SCHEMA,properties:{...MODEL_RESULT_SCHEMA.properties,
+ schemaVersion:{type:'integer',enum:[3]},
+ findings:list(object({...MODEL_RESULT_SCHEMA.properties.findings.items.properties,
+  evidence:list(object({sourceId:ident,excerptId:ident}))}))
+}});
+// Split oversized references before capture; preserve every admitted byte and parent locator.
+export function prepareReferenceCapsule(capsule){
+ const sources=capsule.sources.map(source=>{
+  const occupied=new Set(source.excerpts.map(e=>e.excerptId));
+  const excerpts=[];
+  for(const e of source.excerpts){
+   const bytes=Buffer.from(e.text);let offset=0,part=0;
+   while(offset<bytes.length){
+    let end=Math.min(offset+4096,bytes.length);
+    if(end<bytes.length){
+     while((bytes[end]&0xc0)===0x80)end--;
+     const newline=bytes.lastIndexOf(10,end-1);if(newline>=offset+2048)end=newline+1;
+    }
+    const excerptId=part===0?e.excerptId:'E'+sha256(source.sourceId+'\n'+e.excerptId).slice(0,16)+'_p'+part;
+    if(part&&occupied.has(excerptId))codexFail('source_mismatch');occupied.add(excerptId);
+    const content=decode(bytes.subarray(offset,end));
+    excerpts.push({...e,excerptId,startByte:e.startByte+offset,endByte:e.startByte+end,text:content,excerptSha256:sha256(content)});
+    offset=end;part++;
+   }
+  }
+  if(excerpts.length>CODEX_LIMITS.excerpts)codexFail('source_mismatch');
+  return {...source,excerpts};
+ });
+ return {...capsule,sources};
+}
+// Per-run enum pairs prevent the model from inventing or crossing source/excerpt identities.
+export function boundModelReferenceSchema(snapshot){
+ const s=validateSnapshot(snapshot),c=parseEvidenceCapsule(s),sourceIds=s.materials.map(m=>m.sourceId);
+ const references=c.sources.map(source=>object({sourceId:enumeration([source.sourceId]),excerptId:enumeration(source.excerpts.map(e=>e.excerptId))}));
+ const coverage=s.materials.map(m=>{
+  const source=c.sources.find(x=>x.sourceId===m.sourceId);
+  return object({sourceId:enumeration([m.sourceId]),status:enumeration(m.status==='excluded'?['excluded']:source?['covered','partial','unavailable']:['unavailable']),excerptIds:source?list(enumeration(source.excerpts.map(e=>e.excerptId))):{...list(ident),maxItems:0}});
+ });
+ return {...MODEL_REFERENCE_SCHEMA,properties:{...MODEL_REFERENCE_SCHEMA.properties,
+  runId:enumeration([s.runId]),taskId:enumeration([s.taskId]),stage:enumeration([s.stage]),currentSourceId:s.currentSourceId===null?{type:'null'}:enumeration([s.currentSourceId]),
+  coverage:coverage.length?list({anyOf:coverage},sourceIds.length):{...list(MODEL_REFERENCE_SCHEMA.properties.coverage.items),maxItems:0},
+  findings:list(object({...MODEL_REFERENCE_SCHEMA.properties.findings.items.properties,evidence:references.length?list({anyOf:references}):{...list(MODEL_REFERENCE_SCHEMA.properties.findings.items.properties.evidence.items),maxItems:0}}))
+ }};
+}
 export function renderCodexOutputGuide(snapshot,capsule){
  const s=validateSnapshot(snapshot),c=validateEvidenceCapsule(capsule,s);
  const sources=new Map(c.sources.map(x=>[x.sourceId,x]));
  const coverage=s.materials.map(m=>({sourceId:m.sourceId,status:m.status==='excluded'?'excluded':m.status==='inspected'&&m.availability==='inline_excerpt'&&sources.has(m.sourceId)?'covered':'unavailable',excerptIds:sources.get(m.sourceId)?.excerpts.map(e=>e.excerptId)??[]}));
- const guide={schemaVersion:2,runId:s.runId,taskId:s.taskId,stage:s.stage,currentSourceId:s.currentSourceId,coverage};
- return '<evidencelens-output-v2>\nRuntime output contract: return schemaVersion=2, overriding earlier output-shape examples only. Preserve the requested review task and constraints. Each evidence object has ONLY sourceId, excerptId, quote. Copy an exact non-empty quote that occurs exactly once inside that identified excerpt, including original whitespace and punctuation. Do not calculate or return startByte/endByte; the local binder computes UTF-8 positions and rejects missing, ambiguous or forged quotes. Copy the identity below exactly. The coverage template lists every registered material and all captured excerpt IDs: use covered only after reviewing all of them; otherwise report partial/unavailable honestly with only the excerpt IDs actually reviewed. Unavailable and excluded sources cannot supply evidence. Findings retain findingId/kind/severity/claim/evidence/action; limitations remain an array.\n'+canonical(guide)+'\n</evidencelens-output-v2>';
+ const guide={schemaVersion:3,runId:s.runId,taskId:s.taskId,stage:s.stage,currentSourceId:s.currentSourceId,coverage};
+ return '<evidencelens-output-v3>\nRuntime output contract: return schemaVersion=3, overriding earlier output-shape examples only. Preserve the requested review task and constraints. Each evidence object has ONLY sourceId and excerptId selected from the final captured evidence capsule below. Do not copy or generate quote/startByte/endByte: local code fills the exact captured excerpt and its source-relative UTF-8 range. Choose excerpts that actually support the claim; reference validity does not establish semantic correctness. Oversized input excerpts may have been split; use the final capsule IDs, not earlier examples. Copy the identity below exactly. The coverage template lists every registered material and all captured excerpt IDs: use covered only after reviewing all of them; otherwise report partial/unavailable honestly with only the excerpt IDs actually reviewed. Unavailable and excluded sources cannot supply evidence. Findings retain findingId/kind/severity/claim/evidence/action; limitations remain an array.\n'+canonical(guide)+'\n</evidencelens-output-v3>';
 }
 // Deliberately limited validator for this fixed schema, not a general JSON Schema engine.
 function check(value,schema){
@@ -124,6 +168,7 @@ function validateModelShape(input,schema){
 
 export const validateCodexResultShape=input=>validateModelShape(input,MODEL_RESULT_SCHEMA);
 export const validateCitationResultShape=input=>validateModelShape(input,MODEL_CITATION_SCHEMA);
+export const validateReferenceResultShape=input=>validateModelShape(input,MODEL_REFERENCE_SCHEMA);
 
 export function validateExecutionRecord(input){
  const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;

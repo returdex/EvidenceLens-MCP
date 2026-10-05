@@ -5,7 +5,7 @@ import { dirname,join,resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { sha256,uuid } from './prompt-contract.mjs';
-import { MODEL_CITATION_SCHEMA,codexFail } from './codex-contract.mjs';
+import { MODEL_REFERENCE_SCHEMA,boundModelReferenceSchema,codexFail } from './codex-contract.mjs';
 import { executableIdentity,childEnvironment,boundedProbe } from './codex-preflight.mjs';
 
 export const BINARY_SHA256=CODEX_BINARY_SHA256;
@@ -51,8 +51,8 @@ export function toolAttempt(stdout,stderr) {
  if(stderr.includes('codex_core::tools::router'))return true;
  return /"type"\s*:\s*"(?:todo_list|file_change|command_execution|mcp_tool_call|tool_call|web_search|agent_tool_call|image_view)"/.test(stdout);
 }
-export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),JSON.stringify([CODEX_VERSION,CODEX_MODEL,CODEX_BINARY_SHA256]),JSON.stringify(DISABLED_FEATURES),JSON.stringify(MODEL_CITATION_SCHEMA),DYLD_SHA256].join('\n'));}
-const CONTRACT_SHA256='bc6aaacaed14e55552f565e591b6eaa411ea729ec9f0d9f61e5181e931cb16ba';
+export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),JSON.stringify([CODEX_VERSION,CODEX_MODEL,CODEX_BINARY_SHA256]),JSON.stringify(DISABLED_FEATURES),boundModelReferenceSchema.toString(),JSON.stringify(MODEL_REFERENCE_SCHEMA),DYLD_SHA256].join('\n'));}
+const CONTRACT_SHA256='7406be507fc9220acda56c0a211b611c2722a396873e04eb554bee3bcb87db99';
 async function regular(p,{max=1024*1024,privateOnly=false}={}){
  const s=await fs.lstat(p);
  if(!s.isFile()||s.isSymbolicLink()||s.uid!==process.getuid()||s.nlink!==1||s.mode&0o022||privateOnly&&s.mode&0o077||s.size>max)codexFail('unsafe_path');
@@ -71,7 +71,7 @@ export async function verifyIsolationContract(receipt){
  if(receipt.version!==CODEX_VERSION||actual.binarySha256!==BINARY_SHA256||actual.binarySha256!==receipt.binarySha256)codexFail('isolation_unverified');return actual;
 }
 export function assertCertifiedLaunch(launch){if(!certified.has(launch))codexFail('isolation_unverified');}
-export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoots=[],stateRoot,deadline=Date.now()+10000}={}){
+export async function createIsolatedLaunch({executableReceipt,runId,snapshot,evidenceRoots=[],stateRoot,deadline=Date.now()+10000}={}){
  if(process.env.EVIDENCELENS_CHILD==='1')codexFail('recursive_call');if(!uuid(runId))codexFail('unsafe_path');
  const remaining=()=>{const ms=deadline-Date.now();if(ms<=0)codexFail('timed_out');return Math.min(ms,10000);};remaining();
  const {executable:binary}=await verifyIsolationContract(executableReceipt);
@@ -98,7 +98,7 @@ export async function createIsolatedLaunch({executableReceipt,runId,evidenceRoot
  try {
   if(canonicalRoots.some(p=>overlap(p,root)))codexFail('unsafe_path');
   await fs.mkdir(scratch,{mode:0o700});await fs.mkdir(control,{mode:0o700});
-  const schema=join(control,'schema.json');await fs.writeFile(schema,JSON.stringify(MODEL_CITATION_SCHEMA),{flag:'wx',mode:0o400});
+  const schema=join(control,'schema.json');await fs.writeFile(schema,JSON.stringify(snapshot?boundModelReferenceSchema(snapshot):MODEL_REFERENCE_SCHEMA),{flag:'wx',mode:0o400});
   const env=Object.freeze(childEnvironment(process.env,scratch));
   // Cheap positive/negative OS check on every launch, before any captured prompt is consumed.
   const approved=join(control,'sentinel'),denied=join(root,'denied');await fs.writeFile(approved,'synthetic');await fs.writeFile(denied,'synthetic');

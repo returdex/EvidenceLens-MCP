@@ -103,7 +103,7 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
   else {
    stage='capsule';parseEvidenceCapsule(owned.snapshot);
    stage='preflight';const preflight=await adapter.preflight();if(!preflight.ok){const e=new Error(preflight.code);e.code=preflight.code;e.cleanupComplete=preflight.cleanupComplete!==false;throw e;}
-   stage='launch';launch=await adapter.createLaunch({executableReceipt:preflight,runId,deadline:started+CODEX_LIMITS.preflightMs,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});adapter.assertLaunch(launch);
+   stage='launch';launch=await adapter.createLaunch({executableReceipt:preflight,runId,snapshot:owned.snapshot,deadline:started+CODEX_LIMITS.preflightMs,evidenceRoots:scope.evidenceRoots??[],stateRoot:scope.stateRoot??process.env.EVIDENCELENS_STATE_ROOT});adapter.assertLaunch(launch);
    await recordCodexScratch(scope,runId,execution.attemptId,launch.root);
    if(signal?.aborted)outcome=cancelled();
    else {

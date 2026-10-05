@@ -12,11 +12,11 @@
 
 ## 结果形状
 
-生产模型使用 `MODEL_CITATION_SCHEMA`（schemaVersion=2），每层 additionalProperties=false。字段为 schemaVersion/runId/taskId/stage/currentSourceId/coverage/findings/limitations。coverage 含 sourceId/status/excerptIds，状态 covered/partial/unavailable/excluded。finding 含 findingId/kind/severity/claim/evidence/action；模型 evidence 仅含 sourceId/excerptId/quote，action 可为 null。
+生产模型使用 `MODEL_REFERENCE_SCHEMA`（schemaVersion=3），每层 additionalProperties=false。字段为 schemaVersion/runId/taskId/stage/currentSourceId/coverage/findings/limitations。coverage 含 sourceId/status/excerptIds，状态 covered/partial/unavailable/excluded。finding 含 findingId/kind/severity/claim/evidence/action；模型 evidence 仅含 sourceId/excerptId，action 可为 null。运行时 schema 固定本次身份，并限定合法来源与摘录组合。
 
-模型复制精确且在指定摘录内仅出现一次的非空 quote；本地查找原文并计算 source-relative UTF-8 startByte/endByte，不由模型数中文、emoji 或换行字节。不规范化空白、标点或 Unicode，不跨来源搜索，不修补错误引用；原文缺失或多处匹配均拒绝。保存前转为既有 `MODEL_RESULT_SCHEMA` v1 和结果封装 v1，完整字节绑定继续验证。旧模型 v1 输出仍严格读取，错误旧偏移不自动更正。
+本地从指定的已捕获摘录填入完整原文及 source-relative UTF-8 startByte/endByte，再转换为既有 `MODEL_RESULT_SCHEMA` v1 和结果封装 v1，完整字节绑定继续验证。不规范化原文、不跨来源搜索、不接受模型自填 quote 或偏移。旧模型 v1 的偏移及 v2 的精确唯一 quote 保持严格读取。引用绑定证明原文来自指定材料，不自动证明 claim 的语义正确。
 
-capture 在六节正文之后自动追加 `<evidencelens-output-v2>`，含实际运行身份、每个登记材料及摘录 ID 的完整映射；covered 模板只有实际读完时可使用，缺失/排除材料不能升级。它只统一输出形状，不改变用户检查目标、来源授权或任务范围。所有新增内容在 capture 时一起计算 promptSha256，派发和导出仍逐字相同。
+capture 校验后将超过 4096 字节的摘录按 UTF-8 边界拆分，保留原始字节和父 locator；超过每来源 100 摘录限制则拒绝捕获。capture 在六节正文之后自动追加 `<evidencelens-output-v3>`，含实际运行身份、每个登记材料及最终摘录 ID 的完整映射；covered 模板只有实际读完时可使用，缺失/排除材料不能升级。它只统一输出形状，不改变用户检查目标、来源授权或任务范围。所有新增内容在 capture 时一起计算 promptSha256，派发和导出仍逐字相同。
 
 模型不提供 promptSha256：本地验证后从已捕获字节加入，避免自引用哈希。结构校验不是来源校验或语义真实性证明；终态、进程退出、引用/区间/原文绑定须全部验证，才可记录独立 succeeded。执行完成不等于作业合格。
 

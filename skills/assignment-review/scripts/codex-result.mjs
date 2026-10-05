@@ -1,13 +1,14 @@
 import { validateSnapshot,sha256,decode } from './prompt-contract.mjs';
-import { parseEvidenceCapsule,validateCodexResultShape,validateCitationResultShape,validateResultEnvelope,CODEX_LIMITS,codexFail } from './codex-contract.mjs';
+import { parseEvidenceCapsule,validateCodexResultShape,validateCitationResultShape,validateReferenceResultShape,validateResultEnvelope,CODEX_LIMITS,codexFail } from './codex-contract.mjs';
 function rejectBinding(trigger){const e=new Error('source_mismatch');e.code='source_mismatch';e.bindingTrigger=trigger;throw e;}
 export function validateBoundCodexResult(snapshot,modelResponse){
  const s=validateSnapshot(snapshot),capsule=parseEvidenceCapsule(s);
  let input=modelResponse;
  if(typeof input==='string'){if(Buffer.byteLength(input)>CODEX_LIMITS.final)codexFail('result_invalid');try{input=JSON.parse(input);}catch{codexFail('result_invalid');}}
- const citationOnly=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value===2;
- const r=citationOnly?validateCitationResultShape(input):validateCodexResultShape(input);
- if(citationOnly)r.schemaVersion=1;
+ const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;
+ const citationOnly=version===2,referenceOnly=version===3;
+ const r=referenceOnly?validateReferenceResultShape(input):citationOnly?validateCitationResultShape(input):validateCodexResultShape(input);
+ if(citationOnly||referenceOnly)r.schemaVersion=1;
  if(['runId','taskId','stage','currentSourceId'].some(k=>r[k]!==s[k]))rejectBinding('binding_identity_mismatch');
  const sources=new Map(capsule.sources.map(x=>[x.sourceId,x])),coverage=new Map(r.coverage.map(x=>[x.sourceId,x]));
  if(coverage.size!==s.materials.length||s.materials.some(m=>!coverage.has(m.sourceId)))rejectBinding('binding_coverage_mismatch');
@@ -30,6 +31,7 @@ export function validateBoundCodexResult(snapshot,modelResponse){
    const source=sources.get(e.sourceId),excerpt=source?.excerpts.find(x=>x.excerptId===e.excerptId),row=coverage.get(e.sourceId);
    if(!excerpt||!row||!['covered','partial'].includes(row.status)||!row.excerptIds.includes(e.excerptId))rejectBinding('binding_reference_mismatch');
    const bytes=Buffer.from(excerpt.text);
+   if(referenceOnly){e.quote=excerpt.text;e.startByte=excerpt.startByte;e.endByte=excerpt.endByte;}
    if(citationOnly){
     const needle=Buffer.from(e.quote),offset=needle.length?bytes.indexOf(needle):-1;
     if(offset<0)rejectBinding('binding_quote_missing');
