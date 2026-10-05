@@ -150,7 +150,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 3** *(depends on Wave 2)*
 
-- [ ] 21-03-PLAN.md — Host assessment binding and current-action recheck.
+- [x] 21-03-PLAN.md — Host assessment binding and current-action recheck.
 
 **Wave 4** *(depends on Wave 3)*
 
@@ -178,7 +178,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
 | 20. Bounded Independent Codex Execution | 6/6 | Complete | 2026-10-05 |
-| 21. Review Handoff and Usage Acceptance | 2/6 | In Progress|  |
+| 21. Review Handoff and Usage Acceptance | 3/6 | In Progress|  |
 
 ## Coverage and Research
 
