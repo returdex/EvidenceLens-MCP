@@ -41,3 +41,11 @@
 本地检查、政策评估、远程提交独立报告。用户说已上传只能记“用户报告已上传，远程状态未核验”；仅实际适用回执／工具状态证据能支持已提交。没有覆盖视觉、原文件或完整过程时不扩大结论。
 
 generate 仍只生成提示词；review 才实际执行，已授权请求无需重复确认。按[六节结构](stage-prompts.md)带入必要且获准的当前摘录或明确授权重读计划、最小先前 F 摘要及出处／限度、有效 R 版本、四状态／行动退役规则和既有排除／传输／编辑边界。仅路径或 hash 不够；不要打包整段私聊。接收方必须核实自己实际拥有的证据和权限。preparation 没有旧账本或解答仍可规划，当前缺失也不把指定 final 改成已通过。
+
+## 本地绑定的主对话评估
+
+完整模型结果保持不可变。`review-records.mjs annotate` 只写一次同轮私有 handoff sidecar；重复相同内容幂等，不同内容拒绝覆盖。评估标记 `assessor=host_review`、`semanticVerification=host_judgment_not_independently_verified`，结构/引用绑定不证明语义判断正确。
+
+R 行分别记录要求来源、状态、当前发现/证据与理由；F 行记录稳定 ID、获准前次来源、当前模型 ID、四状态、证据覆盖和独立行动处置。resolved 必须有当前解答证据与充分覆盖，no_longer_applicable 必须有已记录的适用性改变；两者不携带旧修正行动。still_present 可 active/deferred，延期仍可见；unverifiable 进入 verify。
+
+前次摘要必须显式逐项准入，同任务/同 reviewMode，access=allowed、exclusion=none。本地来源必须明确 runId/resultSha256，并复核已有私有结果和前次评估；只读已准入结果，不扫描历史或抓取聊天。外部摘要只有有限历史效力，不能证明自动回归。没有可验证的前次关闭就只报当前问题。普通改名/版本差异不能自动重开。缺失/损坏评估显示 comparison unavailable/record_error，完整有效模型结果仍保留。读历史运行必须明确 historicalRunId，不能冒充最新结果。
