@@ -1,6 +1,7 @@
 import { fields,fail,id,uuid,hash,sha256,array,text,LIMITS } from './prompt-contract.mjs';
 import { parseEvidenceCapsule } from './codex-contract.mjs';
 import { isTrustedRunBundle,readRunRecord } from './prompt-store.mjs';
+const requirementKeys=['requirementId','type','reference','findingIds','evidence','status','rationale'],findingKeys=['findingId','origin','findingIds','criterionIds','state','evidence','coverage','rationale','lastKnownHistoricalState','actionDisposition','action','reopened'],evidenceKeys=['sourceId','excerptId','startByte','endByte','quote'];
 const states=['still_present','resolved','unverifiable','no_longer_applicable'];
 const unique=xs=>{if(new Set(xs).size!==xs.length)fail('corrupt_record');return xs;};
 const ids=xs=>unique(array(xs,100,x=>{if(!id(x))fail('corrupt_record');return x;}));
@@ -20,7 +21,7 @@ export async function admitPriorSummaries(scope,bundle,input=[]){
 }
 function evidenceValidator(bundle){
  const capsule=parseEvidenceCapsule(bundle.snapshot),coverage=bundle.result.modelResponse.coverage;
- return raw=>{const e=fields(raw,['sourceId','excerptId','startByte','endByte','quote']);
+ return raw=>{const e=fields(raw,evidenceKeys);
   const src=capsule.sources.find(s=>s.sourceId===e.sourceId),ex=src?.excerpts.find(x=>x.excerptId===e.excerptId),c=coverage.find(x=>x.sourceId===e.sourceId);
   if(!ex||!c||!['covered','partial'].includes(c.status)||!c.excerptIds.includes(e.excerptId)||!Number.isSafeInteger(e.startByte)||!Number.isSafeInteger(e.endByte)||e.startByte<ex.startByte||e.endByte>ex.endByte||e.endByte<=e.startByte||typeof e.quote!=='string')fail('corrupt_record');
   const bytes=Buffer.from(ex.text).subarray(e.startByte-ex.startByte,e.endByte-ex.startByte);if(!bytes.equals(Buffer.from(e.quote)))fail('corrupt_record');return e;
@@ -34,14 +35,14 @@ export function validateReviewAssessment(bundle,admittedPriorSummaries,input){
  const expectedPrior=admittedPriorSummaries.map(p=>p.kind==='local'?{kind:'local',runId:p.runId,resultSha256:p.resultSha256}:{kind:'external',summarySha256:p.summarySha256??sha256(p.summary)});
  if(JSON.stringify(v.admittedPrior)!==JSON.stringify(expectedPrior))fail('corrupt_record');
  v.requirements=array(v.requirements,100,raw=>{
-  const r=fields(raw,['requirementId','type','reference','findingIds','evidence','status','rationale']);
+  const r=fields(raw,requirementKeys);
   if(!id(r.requirementId)||!['mandatory','rubric','optional','unknown'].includes(r.type)||!['satisfied','gap','conflict','unknown','not_applicable'].includes(r.status))fail('corrupt_record');
   r.reference=ev(r.reference);const material=bundle.snapshot.materials.find(m=>m.sourceId===r.reference.sourceId);if(!['requirements','rubric','teacher_guidance'].includes(material?.role))fail('corrupt_record');
   r.findingIds=ids(r.findingIds);if(r.findingIds.some(x=>!modelIds.has(x)))fail('corrupt_record');r.evidence=refs(r.evidence);text(r.rationale);if(!r.rationale.trim())fail('corrupt_record');
   if(['satisfied','not_applicable'].includes(r.status)&&!r.evidence.length)fail('corrupt_record');return r;
  });unique(v.requirements.map(r=>r.requirementId));const requirements=new Map(v.requirements.map(r=>[r.requirementId,r]));
  v.findings=array(v.findings,100,raw=>{
-  const f=fields(raw,['findingId','origin','findingIds','criterionIds','state','evidence','coverage','rationale','lastKnownHistoricalState','actionDisposition','action','reopened']);
+  const f=fields(raw,findingKeys);
   if(!id(f.findingId)||!states.includes(f.state)||!['sufficient','partial','unavailable'].includes(f.coverage)||!['active','deferred','done','retired','verify'].includes(f.actionDisposition)||typeof f.reopened!=='boolean'||!(f.lastKnownHistoricalState===null||states.includes(f.lastKnownHistoricalState)))fail('corrupt_record');
   f.findingIds=ids(f.findingIds);if(f.findingIds.some(x=>!modelIds.has(x)))fail('corrupt_record');f.criterionIds=ids(f.criterionIds);if(f.criterionIds.some(x=>!requirements.has(x)))fail('corrupt_record');f.evidence=refs(f.evidence);text(f.rationale);if(!f.rationale.trim())fail('corrupt_record');if(f.action!==null)text(f.action);
   let priorState=null;
@@ -62,6 +63,8 @@ export function validateReviewAssessment(bundle,admittedPriorSummaries,input){
  const {assessmentSha256,...body}=v;if(assessmentSha256!==sha256(JSON.stringify(body))||Buffer.byteLength(JSON.stringify(v))>LIMITS.snapshot)fail('corrupt_record');return v;
 }
 export function createReviewAssessment(bundle,prior,{requirements=[],findings=[]}={}){
+ const orderedRows=(rows,keys)=>array(rows,100,raw=>{const row=fields(raw,keys);if(row.reference)row.reference=fields(row.reference,evidenceKeys);if(row.origin)row.origin=fields(row.origin,['runId','findingId']);row.evidence=array(row.evidence,100,e=>fields(e,evidenceKeys));return row;});
+ requirements=orderedRows(requirements,requirementKeys);findings=orderedRows(findings,findingKeys);
  const body={schemaVersion:1,runId:bundle.metadata.runId,taskId:bundle.metadata.taskId,conversationId:bundle.metadata.conversationId,promptSha256:bundle.metadata.promptSha256,resultSha256:bundle.result?.resultSha256,assessor:'host_review',requirements,findings,admittedPrior:prior.map(p=>p.kind==='local'?{kind:'local',runId:p.runId,resultSha256:p.resultSha256}:{kind:'external',summarySha256:p.summarySha256??sha256(p.summary)}),semanticVerification:'host_judgment_not_independently_verified'};
  return validateReviewAssessment(bundle,prior,{...body,assessmentSha256:sha256(JSON.stringify(body))});
 }

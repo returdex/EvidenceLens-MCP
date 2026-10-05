@@ -44,3 +44,6 @@ test('retention deletes valid bound annotation and preserves foreign result hash
   assert.equal((await store.forgetTask(x.scope,{apply:true})).incomplete,foreign);if(foreign)assert.ok(await fs.stat(p));else await assert.rejects(fs.stat(p),{code:'ENOENT'});
  }
 });
+test('host row/quote key order does not change the validated assessment digest',async t=>{
+ const x=await assessmentFlow(t),reverse=v=>Object.fromEntries(Object.entries(v).reverse());const normal=createReviewAssessment(x.bundle,[],{requirements:[x.requirement],findings:[x.finding]});const reordered=createReviewAssessment(x.bundle,[],{requirements:[{...reverse(x.requirement),reference:reverse(x.requirement.reference),evidence:x.requirement.evidence.map(reverse)}],findings:[{...reverse(x.finding),evidence:x.finding.evidence.map(reverse)}]});assert.deepEqual(reordered,normal);await store.annotateRun(x.scope,{expectedRunId:x.receipt.runId,assessment:reordered});assert.equal((await store.readRunRecord(x.scope,{expectedRunId:x.receipt.runId})).assessmentAvailability,'recorded');
+});

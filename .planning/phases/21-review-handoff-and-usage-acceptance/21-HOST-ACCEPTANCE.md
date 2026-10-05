@@ -29,3 +29,7 @@ Read-only installed preflight: ok=true, executionReady=true, auth=chatgpt, macOS
 ## Remaining manual/live evidence
 
 Use the current chat and installed el-check then el-recheck paths for the shown synthetic-only source pair, explicitly selecting Codex for this acceptance. No new/messaged chat required. After applicable human authorization, at most two logical dispatches through existing ChatGPT login; inspect each complete result, runtime usage and export, then source-bound host annotations with manually checked closure/retained optional item. First failure stops the dependent second run. No resends, implicit model changes or coursework replay. The cross-provider ordinary default is unchanged and not tested by this Codex-only gate.
+
+## Authorized pair completed
+
+See [live acceptance](21-LIVE-ACCEPTANCE.md). Installed manifests/shared route, exact export, full/show, historical/latest selection and source-bound host annotations were exercised. No GUI selector observation is claimed.
