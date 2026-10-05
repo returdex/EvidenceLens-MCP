@@ -187,7 +187,7 @@ Plans 01–04 implemented and locally verified: source-scoped terminal metrics, 
 - Current installed manifests and read-only actual ChatGPT/isolation preflight verified, inference=not_run; no effective-model claim. Helper subprocesses with spawn/exec/fork throw sentinel work from both installed link/copy layouts outside repo.
 - Inline trust-boundary review: metrics allowlist/null/provenance, once-only terminal observer, attempt/hash-bound private transaction, frozen trusted bundles/source rebind, escaped Markdown, explicit admitted prior origins, current proof/deferral separation, strict installed CLI, owned sidecar retention. No open high-severity finding after result-digest retention repair. Structural source checks do not establish semantic grading or correctness.
 
-Details: [host/offline evidence](../.planning/phases/21-review-handoff-and-usage-acceptance/21-HOST-ACCEPTANCE.md), [reviewable live inputs](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-INPUTS.md), [NOT_RUN live status](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-ACCEPTANCE.md). Historical smokes and A4 experiments do not authorize this new two-run pair; no automatic resend/model switch/coursework replay.
+Details: [host/offline evidence](../.planning/phases/21-review-handoff-and-usage-acceptance/21-HOST-ACCEPTANCE.md), [reviewable live inputs](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-INPUTS.md), [live acceptance status](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-ACCEPTANCE.md). Historical smokes and A4 experiments do not authorize this new two-run pair; no automatic resend/model switch/coursework replay.
 
 ## Phase 21 final acceptance — 2026-10-05 / 0.3.17
 

@@ -2,13 +2,17 @@
 
 ## What This Is
 
-EvidenceLens MCP combines a controlled, read-only multimodal second-review service with one shared assignment-review Skill and six installed command entry Skills. The Skill adapts prompts to sourced requirements, supports preparation/progress/final reviews, checks template structure and truthful disclosure, and updates findings against the designated current artifact.
-
-The existing service offers deterministic offline review and a replaceable DeepSeek provider path. Historical Linux/Docker/paid proof remains bound to its original certified source. The four stage commands now dispatch captured prompts through a bounded independent Codex adapter on the verified macOS host. They do not edit documents, sign declarations or submit work; real inference acceptance remains Phase 21.
+A controlled read-only evidence-review service with one shared assignment-review Skill and six installed stage/utility entry Skills. Ordinary review uses one DeepSeek and one Codex independent reviewer with source-backed host comparison; explicit single-provider review remains supported. Preparation, progress, final and recheck preserve the designated current artifact, full feedback, source limitations and truthful disclosure. Help/export/inspection do not launch review.
 
 ## Core Value
 
 Produce trustworthy, independently checked findings grounded in controlled local evidence, with enough provenance for the primary agent to verify every important claim.
+
+## Current State
+
+Milestone **v1.2 complete 2026-10-05**, product **0.3.17**, release preparation in progress. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
+
+Actual authorized synthetic initial/recheck Codex pair succeeded with exact exports and reported CLI token provenance. Separate A4 DeepSeek/Codex evidence is recorded, not repeated here. Inline host semantic judgments and source binding do not certify grade bands, submission, universal model accuracy or other platforms. Supported actual boundary is the pinned macOS arm64 CLI/Skill host; GUI selector observation is unavailable.
 
 ## Requirements
 
@@ -37,93 +41,51 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 - ✓ Immutable task/conversation-scoped pre-review capture, exact `$el-prompt` export, truthful latest/failure states and private retention/deletion — Phase 19 (`PRM-01` to `PRM-05`), product 0.3.2; four actual current-host synthetic stage flows, fresh build/118 affected tests/51 Node tests.
 
-- ✓ Bounded independent Codex adapter, Codex-owned login, actual pinned macOS isolation, once-only dispatch and locally validated source-bound results — Phase 20 (`CDX-01` to `CDX-06`), product 0.3.3; fresh build/118 affected tests/157 Node tests. Real ChatGPT inference remains Phase 21 NOT_RUN.
+- ✓ Bounded independent Codex adapter, Codex-owned login, actual pinned macOS isolation, once-only dispatch and locally validated source-bound results — Phase 20 (`CDX-01` to `CDX-06`), product 0.3.3; fresh build/118 affected tests/157 Node tests. Phase 20 records its historical local/host scope; Phase 21 adds separately authorized live acceptance.
+
+
+- ✓ Complete default feedback, source-bound host requirement/finding annotations, current actions and actual run/model/usage records — Phase 21 / v1.2 (RUN-01–05); explicitly authorized successful synthetic live pair and scoped host semantics.
 
 ### Active
 
-Milestone v1.2 scope, all 21 detailed requirements and the Phase 18–21 roadmap were explicitly approved on 2026-10-04. Phases 18–20 are complete (16/21 requirements); Phase 21 has six checked plans and is ready for `$gsd-execute-phase 21`.
-
-- [ ] Authorized real Codex inference and concise result handoff in the work conversation, building on the completed Phase 20 adapter.
-- [ ] Per-run status, elapsed time and available token usage, with current-version finding updates.
-
-2026-10-05 user-directed refinement: [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md) adds complete-finding handoff and truthful status presentation within RUN-01/02/05. The stage is now planned (six sequential plans, 13 tasks); no runtime change is claimed.
+None selected. Start the next milestone with fresh requirements; no automatic v1.3 scope or version bump.
 
 ### Deferred
 
-- Review quality and A1.3 real-case follow-ups: [future memo](notes/2026-10-05-review-quality-future.md), all non-blocking. Completed components have [pending revision reminders](REVIEW-REVISIONS.md); these do not reopen completed phases.
-
-- Multi-provider comparison and disagreement surfacing (`REVW-05`).
-- Incremental evidence indexing and cache reuse (`REVW-06`).
-- General server-side policy configuration beyond this milestone's Skill workflow (`REVW-07`, partially addressed by v1.1).
-- Optional authenticated multi-user access and audit log storage (`SAFE-05`).
-- Cross-model comparison and aggregate usage/cost analytics; basic Codex run records are active v1.2 scope.
+Three partial Nyquist/manual-semantic entries (Phases 18–20); DeepSeek generic show Markdown provider-model display (full receipt retains fields); [RR-01–08](REVIEW-REVISIONS.md) and [FM-01–06](notes/2026-10-05-review-quality-future.md). These remain non-blocking and are not closed by source/JSON checks. General disagreement-quality evaluation, repeated blind cases, criterion grade contracts, A1.3 semantic evaluation and missing Claude evidence remain future work. Incremental indexing, general server policy configuration and optional multi-user access remain unselected.
 
 ### Out of Scope
 
-- Full autonomous assignment completion — EvidenceLens remains a reviewer and evidence layer.
-- Broad filesystem indexing or unrestricted workspace access — explicit readable roots remain part of the security model.
-- Automatic mutation of evidence or solution files — review stays read-only by default.
-- A polished end-user UI — MCP clients remain the interaction surface.
-- Foundation-model training or fine-tuning — providers remain replaceable integrations.
+Autonomous assignment writing/editing/signing/submission, unrestricted indexing, a new credential/OAuth service, automatic inference retries/model substitutions, account-wide quota/cost analytics and a polished UI. Historical Docker/paid-provider receipts are not renewed at closure.
 
-## Delivered Baseline
+## Context and Constraints
 
-Milestone **v1.1 complete, archived and published 2026-10-04**: six phases, 13 plans, 28 tasks, 22/22 requirements. Published product **0.2.4**, [published on GitHub](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) after the user explicitly lifted the remote-history hold. [Completion record](milestones/v1.1-COMPLETION.md) is current authority for archive/release status; [requirements](milestones/v1.1-REQUIREMENTS.md) contain accepted outcomes.
-
-Source-bound evidence includes Phase 16 official validator/control, successful build and 43-file/795-test offline pass, plus Phase 17 12 boundary tests and 57 actual collector steps. Semantic language judgments and audit interpretation remain manual; TD-12/13/14/15 coverage debt is accepted for closure, alongside inherited v1.0 debt. Historical host I/O root cause is unknown, preserved dependencies remain recoverable. Archival compatibility verification is recorded in the completion record. No real-coursework, installed discovery, universal host isolation or remote submission claim.
-
-## Current Milestone: v1.2 快捷指令与 Codex 独立审阅
-
-**Goal:** Use fixed stage commands to run a bounded independent review, return concise evidence-backed findings to the work conversation, and export the exact task prompt from that run on request.
-
-**Target commands:** `$el-help`, `$el-prepare`, `$el-check`, `$el-final`, `$el-recheck`, `$el-prompt`. All six entries are installed and accepted on this macOS Codex host using a synthetic FIT5032 chat. Stage commands capture their actual task-facing prompt before independent execution; prompt export reads the latest attempted run for the same task/conversation, with separate status and material limits. Phase 19 acceptance used the current installed host and synthetic materials. Explicit current artifact and user focus remain authoritative.
-
-**Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
-
-**Version:** Planning milestone v1.2; development product 0.3.16 with verified real synthetic independent review on desktop Codex CLI 0.160.0 / gpt-6.1-sol. Last published product is v0.2.4. No v0.3.16 Release/tag is created by phase completion. Phase numbering continues at 18.
-
-**Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
-
-**Evidence and retention:** Reuse the existing source selector and permission boundaries. Store task-facing prompts and minimal receipts locally in an explicit non-Git state location. Do not store internal reasoning, credentials, raw unrelated chats or excluded evidence. Missing records are unknown, not zero or no-use.
-
-**Acceptance:** Verify command selection and cross-project installation on the target host, immutable prompt export, isolated context/evidence, terminal-state handling, source-bound results and available usage. A local login status is not an actual inference acceptance result.
-
-## Context
-
-At acceptance commit 8c2d391, tracked src/scripts/tests/Skill helper totalled 18,314 TS/MJS lines. v1.1 changed 102 files across 59 commits through acceptance (mostly planning/evidence); final close adds documentation and a narrow archival-compatible test snapshot. No runtime dependency, role/schema or provider behavior change is introduced by closeout.
-
-## Constraints
-
-- **Security**: Default operation is read-only and restricted to configured allowlisted directories.
-- **Traceability**: Findings preserve source metadata needed to reproduce or inspect each claim.
-- **Interoperability**: The service speaks MCP and returns stable JSON.
-- **Multimodality**: The evidence pipeline preserves visual context in addition to extracted text.
-- **Deployability**: Docker is a supported reproducible deployment path.
+Current tracked TS/MJS source/tests/helpers: 21,454 lines across 132 files at a6ab604. Existing TypeScript MCP and DeepSeek runtime plus stdlib Node Skill helpers; no new runtime dependency during closing. Private immutable prompt/result/metrics/annotation records stay outside Git with explicit task/conversation/run identity and conservative manual retention. Evidence is selected before read, then locally bound by excerpt identity/hash/UTF-8 range. Codex manages authentication; strict timeout/cancel/tool/context and result-validation boundaries remain. Model selection, schema validity and agreeing reviewers do not establish semantic accuracy.
 
 ## Key Decisions and Outcomes
 
 | Decision | Outcome |
 |---|---|
-| Keep independently traceable findings grounded in controlled evidence | Core value retained; MCP service remains reviewer/evidence layer |
-| Separate continued authorized assistance from policy permission/compliance | Validated in sourced baseline and stage cases |
-| Preserve template authority, legitimate comments and truthful centralized disclosure | Validated with source-backed handoffs; no automatic signing/editing |
-| Default to actual current artifact and retire supported resolved findings | Validated with connected recheck cases; unknowns remain explicit |
-| One Skill and existing gate; no new editor/provider platform | Delivered; bounded Codex integration added in Phase 20, live acceptance remains Phase 21 |
-| Pin isolated developer validator prerequisite and preserve exact-lock dependencies | Official tooling and offline acceptance recovered; I/O root cause unknown |
-| Separate record completion from automated semantic coverage | 22/22 requirements accepted with honest partial Nyquist fields |
-| Preserve historical paths, paid proof and report bytes | Archives and source-bound evidence retained |
-| Distinguish milestone v1.1 from product 0.2.4 and remote publication | User lifted history hold; main and both tags published, product v0.2.4 Release verified |
+| One shared Skill with six fixed entry commands | Good: installed graph and actual cross-project receipts |
+| Capture before dispatch and export exact latest attempt | Good: immutable bytes and no silent old-success fallback |
+| Codex-owned ChatGPT login and sealed independent context | Good within pinned host scope; no new auth service |
+| Default full reports, retaining every info/Low finding | Good: complete same-run records and optional requested summary |
+| Separate host assessment from raw model findings | Good: source-bound closing, deferral and action retirement; semantics still manual |
+| Ordinary DeepSeek/Codex pair with explicit one-provider override | Good: independent captures/results; accuracy gain not measured |
+| Truthful event usage and requested/reported model split | Good: missing is unavailable, no billing estimates |
+| Preserve original proof and phase paths | Good: exact snapshots/audit copies; no paid replay |
+| Semantic automation and deeper quality evaluation | Revisit: retained Nyquist/RR/FM debt |
 
-## Evolution
+## Next Milestone Goals
 
-After each phase, move verified requirements to Validated with phase references, retain invalidation reasons and new decisions, and check the product description against actual implementation. At each milestone boundary, review scope and deferred features, retain historical evidence, and update current context and version status.
+Not selected. Review the retained debt and future memo with the user during gsd-new-milestone; do not promote them automatically. Continue phase numbering after 21.
 
 <details>
 <summary>Previous project context and decisions</summary>
 
-[Complete pre-close PROJECT snapshot](milestones/v1.1-PROJECT.md), [state/decision history](milestones/v1.1-STATE.md), and [v1.0 milestone](milestones/v1.0-ROADMAP.md) remain available. Historical snapshots keep their original date and evidence scope.
+[Exact pre-close v1.2 PROJECT snapshot](milestones/v1.2-PROJECT.md), [state snapshot](milestones/v1.2-STATE.md), [v1.1 PROJECT](milestones/v1.1-PROJECT.md) and [milestone ledger](MILESTONES.md). Snapshot links retain their original .planning/ base; original bytes also remain at a6ab604.
 
 </details>
 
 ---
-*Last updated: 2026-10-05 after Phase 20 completion and non-blocking review-quality triage*
+*Last updated: 2026-10-05 after v1.2 milestone completion.*

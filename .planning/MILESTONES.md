@@ -1,5 +1,32 @@
 # Project Milestones: EvidenceLens MCP
 
+## v1.2 快捷指令与 Codex 独立审阅 (Completed: 2026-10-05)
+
+**Delivered:** Installed stage commands through immutable independent review, full source-backed feedback, exact prompt export and revised-source recheck. Product 0.3.17; remote release pending verification.
+
+**Phases completed:** 18–21 (4 phases, 21 plans, 44 tasks); 21/21 requirements.
+
+**Key accomplishments:**
+
+- Six installed fixed-stage commands with actual cross-project discovery/help acceptance.
+- Immutable task/conversation/run prompts, exact export and explicit latest/failure/retention semantics.
+- Bounded macOS independent Codex execution using Codex-owned ChatGPT login, sealed evidence context and validated terminal results.
+- Complete findings, source-bound host requirement/finding matrices and current-evidence action transitions; deferred is not resolved.
+- Per-run actual status/time and CLI token provenance, unavailable effective model and no inferred billing.
+- Ordinary one-DeepSeek/one-Codex blind review plus host source comparison, explicit single-provider override and separately preserved full reports.
+
+**Stats:** 91 commits from pre-initialization base 26501e6 through audit a6ab604; 190 changed files / 9,679 insertions / 72 deletions. 21,454 tracked TS/MJS lines in 132 src/scripts/tests/Skill helper files. Timeline 2026-10-04 → 2026-10-05 Australia/Melbourne. Closing commits excluded.
+
+**Git range:** b20aac9 → a6ab604 (initialization through audit); planning tag v1.2 is separate from product tag v0.3.17.
+
+**Known deferred items:** open-artifact scan 0; 18 retained current items after reconciling the audit's current-documentation observation: three partial Nyquist/manual-semantic entries, one DeepSeek generic-view presentation item, eight RR and six FM records. Inherited debt remains historical. No incomplete functional requirement.
+
+**Archives:** [roadmap](milestones/v1.2-ROADMAP.md), [requirements](milestones/v1.2-REQUIREMENTS.md), [audit](milestones/v1.2-MILESTONE-AUDIT.md), [completion](milestones/v1.2-COMPLETION.md).
+
+**Next:** gsd-new-milestone to define fresh requirements; next scope/version not selected.
+
+---
+
 ## v1.1 Assignment Prompt Adaptation and Staged Review (Shipped: 2026-10-04)
 
 **Delivered:** One repository Skill for sourced preparation, stage review, template/disclosure checks and current-version recheck, with bounded verification evidence.

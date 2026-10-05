@@ -98,6 +98,45 @@
 
 ---
 
+## Milestone: v1.2 — 快捷指令与 Codex 独立审阅
+
+**Completed:** 2026-10-05 | **Product:** 0.3.17, remote release pending verification.
+**Phases:** 4 | **Plans:** 21 | **Tasks:** 44
+
+### What Was Built
+
+- Six installed fixed-stage commands with actual cross-project discovery/help acceptance.
+- Immutable task/conversation/run prompts, exact export and explicit latest/failure/retention semantics.
+- Bounded macOS independent Codex execution using Codex-owned ChatGPT login, sealed evidence context and validated terminal results.
+- Complete findings, source-bound host requirement/finding matrices and current-evidence action transitions; deferred is not resolved.
+- Per-run actual status/time and CLI token provenance, unavailable effective model and no inferred billing.
+- Ordinary one-DeepSeek/one-Codex blind review plus host source comparison, explicit single-provider override and separately preserved full reports.
+
+### What Worked
+
+Immutable captured inputs, exact export and source-bound terminal result joins made actual runs auditable. Private sidecars extend metadata without rewriting original prompts/results. Full feedback and explicit source-backed host judgments keep optional findings visible and separate deferral from resolution.
+
+### What Was Inefficient
+
+Pinned CLI startup/tool/output compatibility required several narrowly authorized repairs; failed receipts stayed preserved. Host and actual inference gates were easy to conflate. Current PROJECT prose drifted behind implementation. SDK milestone completion reported zero tasks/accomplishments despite actual 44 PLAN tasks; closure reconciles the count and accomplishments explicitly.
+
+### Patterns Established
+
+One installed graph; capture before each blind review; separate provider records; bounded no-resend execution; complete same-run reporting; local canonical closed-schema annotation; no grades inferred from success. Original phase/audit paths remain stable during archival.
+
+### Key Lessons
+
+1. Native tool refusals must be distinguished from executed tool handlers without relaxing source isolation.
+2. Source references and valid JSON certify provenance/shape, not language judgment quality.
+3. Update current product/status prose while preserving dated historical receipts.
+4. Use exact PLAN task counts, not SDK summary-pattern estimates.
+
+### Cost Observations
+
+The approved synthetic pair used two real Codex calls; exact per-run usage is in Phase 21 live evidence. Separate prior A4 runs are distinct. Total sessions/model mix/billing are unavailable and not estimated. Closure makes no model request.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -106,6 +145,7 @@
 |-----------|--------|------------|
 | v1.0 | 11 | Added immutable proof authority, independent verification, and canonical re-audit closure |
 | v1.1 | 6 | Single Skill, current-evidence lifecycle and truthful retrospective coverage |
+| v1.2 | 4 | Installed commands, immutable execution/export and complete source-bound handoff |
 
 ### Cumulative Quality
 
@@ -113,6 +153,7 @@
 |-----------|-------|----------------------|---------------------|
 | v1.0 | 795-test offline suite plus focused E2E, Docker, and Linux checks | 20/20 | 0 open items |
 | v1.1 | 795-test offline suite; 12 boundary tests; 57 collector steps; manual language review | 22/22; manual automation partial | 0 open items |
+| v1.2 | 276 Node / 124 Vitest final execution; 50 fresh audit integration checks; actual synthetic live pair | 21/21; semantic limits retained | 0 open items, RR/FM separate |
 
 ### Top Lessons
 

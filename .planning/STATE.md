@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: milestone_ready_for_completion
-last_updated: "2026-10-05T10:57:52.787Z"
+status: completed_release_pending
+last_updated: "2026-10-05T11:42:05.883Z"
 last_activity: 2026-10-05
 progress:
   total_phases: 4
@@ -15,125 +15,22 @@ progress:
 
 # EvidenceLens MCP — Project State
 
+## Project Reference
+
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: complete product 0.3.17 publication, then plan the next milestone only on request.
+
 ## Current Position
 
-Phase 21 complete: 6/6 plans, all 13 tasks and RUN-01–05 verified. Product 0.3.17; milestone v1.2 unchanged. Four of four phases and 21/21 requirements complete. Two authorized synthetic Codex calls succeeded; no retry. Build and 276 Node / 124 Vitest tests passed. See phases/21-review-handoff-and-usage-acceptance/21-VERIFICATION.md.
+v1.2 complete/archived; 4 phases, 21 plans, 44 tasks, 21/21 requirements. Product 0.3.17 unchanged. Remote release pending verification. Archives and [completion authority](milestones/v1.2-COMPLETION.md) preserve history; original phase directories retained.
+
+## Deferred Items
+
+User invoked completion after the tech_debt audit and disclosed non-blocking scope. Retained: three partial Nyquist/manual-semantic phase entries (18–20), one DeepSeek generic show model-display improvement (full receipt has metadata), RR-01–08 and FM-01–06. 18 current items after current-documentation observation reconciled at close. Inherited v1.0/v1.1 debt, historical I/O root-cause unknown and preserved dependencies/proofs remain in [pre-close state](milestones/v1.2-STATE.md). No functional gaps or scheduled reminders inferred.
+
+## Verification
+
+Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four phase verifications and 21 summaries complete. Audit: 21/21 requirements, 6/6 integration seams, 5/5 scoped flows; fresh 50/50 Node checks. Existing final execution: build 0.3.17, 276/276 Node and 124/124 Vitest. No inference at closure.
 
 ## Next Action
 
-Milestone audit completed: tech_debt, 21/21 requirements, 4/4 phases, 6/6 integration seams and 5/5 scoped flows; no critical blocker. See [v1.2 audit](v1.2-MILESTONE-AUDIT.md). Next: gsd-complete-milestone v1.2, reviewing retained non-blocking debt. No Release/tag or archival performed; RR/FM and full A1.3 semantic evaluation remain deferred.
-
-## Historical continuity and coverage notes
-
-The following earlier checkpoints are preserved as history; their pending status/version statements are superseded by the current position above.
-
-## Accepted Coverage Debt
-
-- TD-12/13/14/15: missing records resolved; manual semantic coverage remains partial, accepted at explicit milestone completion.
-- Phase 17 audit interpretation remains manual; no independent evaluator claim.
-- TD-V/TD-B closed with actual source-bound evidence; intermittent I/O root cause unknown and original dependency backup preserved.
-- Inherited v1.0 Nyquist gaps outside Phase 09 and WR-01/WR-02 warnings unchanged. Historical paid proof is not renewed.
-- Historical open-artifact audit at Phase 20 completion: 0 open items, 0 scan errors. New 2026-10-05 improvement records are listed separately below; the historical audit is not a current reminder count.
-
-## Non-blocking Revision Records
-
-- [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md): H-01–04 refine current RUN-01/02/05 handoff and recheck acceptance. H-01–04 are implemented in completed Plans 01–04; actual live/semantic acceptance remains pending.
-- [Completed-work reminders](REVIEW-REVISIONS.md): RR-01–08 are 待修订 / non-blocking, revisited when their module or related planning work is touched. Completed phase status and historical proofs remain intact.
-- [Future project memo](notes/2026-10-05-review-quality-future.md): FM-01–06 are deferred proposals, not new phase requirements or dependencies. Claude originals and broader semantic evaluation are not prerequisites for continuing Phase 21.
-- These are project records, not scheduled notifications. Current progress remains 3/4 phases and 16/21 requirements complete; existing safety and authorized live-inference acceptance remain applicable.
-
-## Previous Milestone Publication
-
-The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote main was fast-forwarded from d78a115 to closure commit 4409ffb (799 commits, including 737 pre-v1.1 commits); both tags were verified at that same commit. [Product v0.2.4](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.2.4) was published at 2026-10-04T07:19:24Z (not draft). Publication receipt documentation follows the release commit on main. This historical publication remains product v0.2.4; v1.2 development starts at 0.3.0 without a new release.
-
-## Next Action
-
-Phase 21 Plans 01–04 complete (metrics, complete handoff, host R/F assessment/current actions, installed record CLI). Plan 05 Task 01 offline/host-input preparation passed; Task 02 awaits applicable human approval for exactly two shown synthetic Codex ChatGPT runs. See [reviewable inputs](phases/21-review-handoff-and-usage-acceptance/21-LIVE-INPUTS.md) and [host evidence](phases/21-review-handoff-and-usage-acceptance/21-HOST-ACCEPTANCE.md). Existing limited smokes/A4 approvals do not cover this new pair. No real inference this execution turn. No new chat/auth mutation.
-
-Build passed; Node 272/272 (18.294 s); final offline Vitest 124/124. Full handoff preserves all findings and metrics provenance; current-proof annotation and private retention exercised. Four of six plans complete, 19/21 milestone plans, 3/4 phases (75% phase-based display). RUN-01–05 final acceptance remains pending. Product 0.3.15 until Plan 06 accepted patch 0.3.16; no Release/tag. RR/FM remain non-blocking.
-
-## Session Continuity
-
-Current checkpoint: Plans 01–04 complete; Plan 05 Task 01 verified, Task 02 concrete live authorization pending. Continue with the prepared pair after applicable approval, then complete Plan 06/goal verification. 0.3.15 remains current. No new real model call this execution turn. Earlier continuity note below is retained as history.
-
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.13, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat or auth mutation performed; subsequent explicitly authorized A4 debugging is recorded below. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
-
-## Compatible repair — 2026-10-05
-
-User-requested failure diagnostics fix, product 0.3.4: bounded diagnostic fields, observed terminal/exit preservation, truthful cleanup on supervisor exceptions and read-only explicit-run inspection; old v1 records remain unchanged. See [repair evidence](../docs/codex-diagnostics-repair.md). The A4 failed attempt cannot establish its original cause; no coursework replay or live inference occurred during this repair. Phase 21 stays 0/6 and RUN-01–05 pending; its next accepted patch is 0.3.5.
-
-## Startup permission repair — 2026-10-05
-
-Product 0.3.5: actual Codex home agents discovery reproduced the user's permission failure before thread.started; denied model cache reads reproduced a second ambient-state failure. A sealed per-run CODEX_HOME now contains only a read alias to the original auth file and a private installation_id copy. Existing auth/config/installation files are unchanged; original installation writes are no longer allowed. Actual-host network-denied startup crosses thread.started/turn.started; full loopback and boundary suites pass. See [startup evidence](../docs/codex-startup-repair.md).
-
-A concrete one-run synthetic real inference check was subsequently authorized by the user and executed once; it failed in 0.3.5 with permission-class stderr. That approval is consumed; no retry occurred. Source/template hashes and the dry-run script are in the repair record. This optional smoke cannot close Phase 21 RUN-05's separate two-run handoff/recheck acceptance. Phase 21 remains 0/6; its next accepted patch is now 0.3.6, superseding prior next-patch notes.
-
-## Authorized smoke and HOME repair — 2026-10-05
-
-The direct user reply “允许” authorized exactly one prepared synthetic run. It returned failed/protocol_invalid/unexpected_stderr/permission in 925 ms, with no terminal/result, cleanup complete and exact prompt export unchanged. No A4 material was sent; no remote usage is inferred as zero. Offline diagnosis identified original HOME/.agents/skills discovery still outside the sealed CODEX_HOME. Product 0.3.6 now seals both HOME/CODEX_HOME and binds production launcher wiring into the isolation digest. See the updated [startup evidence](../docs/codex-startup-repair.md). Local verification passed; post-0.3.6 real inference is NOT_RUN and needs new applicable authorization. Phase 21 remains 0/6; next accepted feature patch 0.3.7 supersedes prior next-patch notes.
-
-## 0.3.6 live smoke and model gate — 2026-10-05
-
-The user's second explicit “允许” authorized one further same-source synthetic run. It reached thread.started and failed before turn.started with item.completed/error, reportedErrorCategory=model_unavailable; no permission stderr was recorded. Duration 1044 ms, cleanup complete, result null, exact export unchanged. No retry or model switch. Safe receipt details are recorded in [startup evidence](../docs/codex-startup-repair.md).
-
-Read-only actual CLI model discovery, including a fresh sealed home without a model cache, lists gpt-5.5 and hidden codex-auto-review; gpt-5.4 is absent. Proposal: explicitly authorize changing the fixed review model to gpt-5.5, recertify its contract and run one further prepared synthetic check. This is not yet authorized or implemented. Version remains 0.3.6; next accepted compatible patch 0.3.7. Phase 21 is still 0/6 with RUN-01–05 pending; successful real review/export/recheck acceptance remains incomplete.
-
-## GPT-6 migration — 2026-10-05
-
-User explicitly requested GPT-6, superseding the unimplemented GPT-5.5 proposal above. Product 0.3.7 now pins desktop CLI 0.160.0 and gpt-6.1-sol / low with recertified isolation, historical receipt compatibility and 196/196 Node plus 118/118 Vitest checks. Exactly one prepared synthetic live attempt reached thread/turn and failed with process/unexpected_stderr/model_unavailable; no result, cleanup complete, export unchanged. Read-only discovery under the same isolated configuration lists the model. Cause beyond the safe error category remains unconfirmed; do not assume missing account access or claim restored reviews. See [full evidence](../docs/codex-startup-repair.md). No automatic retry, coursework replay or fallback. Phase 21 remains 0/6, RUN-01–05 pending; its next accepted feature patch is 0.3.8.
-
-## Real independent review restored — 2026-10-05
-
-Product 0.3.8 fixes the exact non-fatal cache TTL miss and logger-prefix classification. Actual CLI ETag fixtures reproduce the trigger and pass strict supervision; genuine model/cache permission failures remain rejected. The protocol compatibility candidate was reverted. A production synthetic preparation run with gpt-6.1-sol / low succeeded on 2026-10-05 at 14:22:07–14:22:14 Australia/Melbourne: 6699 ms, terminal observed, exit 0, cleanup complete, source-bound result published and installed skill export unchanged. The persisted result digest was re-read successfully. Three preceding diagnostic runs stayed failed; no automatic retry or A4 replay occurred. See [full dispatch and validation evidence](../docs/codex-startup-repair.md).
-
-Fresh build, Node 199/199 and Vitest 118/118 passed. Current independent runner feedback is verified for this synthetic preparation case. A4 review and the separate Phase 21 two-run revised-source/usage/handoff acceptance remain pending; Phase 21 stays 0/6 and RUN-01–05 unclosed. Plan 06 now targets 0.3.9; milestone v1.2 and non-blocking RR/FM reminders remain unchanged. No release/tag.
-
-## Assignment review deadline repair — 2026-10-05
-
-Product 0.3.9 raises the default independent review deadline from 120 to 600 seconds after an actual two-source preparation attempt was stopped by the old deadline at 120408 ms. The user reports ordinary assignment reviews around five minutes; the ten-minute ceiling provides margin while retaining termination, cancellation, strict result validation and cleanup. Skill guidance now waits for the same live process and offers independent-review recovery instead of making host-chat analysis the only recovery. Original failed receipts remain unchanged. Clock-controlled real-child tests verify completion after five minutes of supervisor time and termination at ten minutes; they are not real model inference. See [repair evidence](../docs/codex-timeout-repair.md). No new model call or A4 replay occurred. Phase 21 stays 0/6, RUN-01–05 remain pending; Plan 06 now targets 0.3.10. No release/tag.
-
-## Local quote binding repair — 2026-10-05
-
-Product 0.3.10 removes model-computed byte spans from production wire output (model v2), resolves exact unique quotes locally, then validates and stores compatible v1 results. Capture adds actual identity and complete source/excerpt mapping; binding failures retain safe specific triggers. Legacy outputs/receipts keep strict validation and remain unchanged. An actual A4 preparation review succeeded earlier on 0.3.9 using copied short-excerpt spans (234445 ms, 97 excerpts, 17 findings, saved result revalidated); that success does not test the new v2 protocol. See [repair evidence](../docs/codex-source-binding-repair.md). Phase 21 remains 0/6, RUN-01–05 pending, next accepted phase patch 0.3.11. RR/FM reminders remain non-blocking; no release/tag.
-
-Fresh build, Node 219/219 and Vitest 118/118 passed. One real post-repair synthetic GPT-6 preparation check succeeded in 11685 ms with exact Unicode quote binding, exit 0, terminal observed, cleanup complete, persisted v1 result revalidated and exact prompt export unchanged. No course content was dispatched by this check; it does not close the separate Phase 21 acceptance.
-
-## Captured-reference binding repair — 2026-10-05
-
-Product 0.3.11 replaces production model quote copying with sourceId/excerptId-only v3 output. Per-run schemas constrain identity and legal source/excerpt pairs. Capture splits oversized excerpts into at most 4096 UTF-8 bytes without changing admitted text; local binding fills exact captured quotes/spans and saves compatible v1 results. Legacy v1/v2 validation and failed receipts remain strict and unchanged. Fresh build, Node 231/231 (14.709 s), six Vitest files 118/118 (4.02 s) passed. The user explicitly authorized messaging the original A4 conversation and continued repair/debugging; one new actual preparation attempt succeeded there in 126683 ms: two sources, eight excerpts, 16 findings, complete coverage, exit 0 and cleanup complete. Stored result independently revalidated with matching snapshot/envelope/execution digests; the original conversation completed and displayed the validated review. All five earlier failed/uncertain receipts remained unchanged. No assignment answer, submission or source-file edits are authorized by this repair. Phase 21 remains 0/6, RUN-01–05 pending; next accepted phase patch 0.3.12. RR/FM reminders remain non-blocking; no release/tag.
-
-## Complete feedback and three-reviewer test — 2026-10-05
-
-The user rejected unsolicited shortening and explicitly requested testing multi-agent decisions. Product 0.3.12 makes complete substantive analysis the shared Skill/capture default: source-backed interpretations, evidence limits, applicable risks and concrete verification/actions; no silent removal of info/Low findings. Full analysis is delivered directly or in accessible private reports, with optional summaries only on explicit request. Phase 21 D-01, handoff Plan 02, CLI Plan 04 and planning input are amended accordingly; no plan is marked complete. Next accepted phase patch is 0.3.13.
-
-An explicitly requested bounded experiment uses three separate independent CLI reviewer contexts with identical frozen official A4 material and substantive task, separately bound run identities, the unchanged requested GPT-6/low configuration, and no earlier conclusions in their prompts. It runs serially to avoid private-store transaction contention; host comparison follows all three attempts and preserves minority findings and unresolved disagreements. This is an exploratory three-reviewer test, not a general multi-agent runtime or evidence that majority decisions are correct. All three actual preparation runs succeeded (243281/256748/253774 ms, 18/13/17 findings); root independently revalidated stored result/snapshot/execution joins and complete report preservation. All captures preceded first inference. The original conversation delivered all full reports and source-backed comparison; root corrected composite cross-topic reference omissions and clarified that metadata mapping is not proof of invented defects, retaining original composite and all independent outputs. One additional constraint-check reminder survived comparison; no accuracy gain was measured. This does not certify semantic accuracy. Fresh build, Node 231/231 (12.381 s), six Vitest files 118/118 (3.74 s) passed; no dependencies, auth, model or isolation policy changed. The optional skill-creator Python validator could not start because PyYAML is absent; existing Node packaging/reference/install checks passed. RR/FM remain non-blocking.
-
-## Default three-reviewer selection — 2026-10-05
-
-User explicitly selected multi-review as the default. Product 0.3.13 sets all four installed review entrypoints to three independent Codex review contexts plus source-backed host comparison, with an explicit single-reviewer override. Full feedback remains the default in either mode; help/export/generate do not launch review. Reuse the three-process workflow already validated on A4; no new inference is necessary for changing this selection policy. Internal CLI multi_agent stays disabled, each reviewer retains its own begin/capture/run and receipt; export still returns the latest actual capture. Preflight system unavailability stops undispatched rounds and is reported honestly.
-
-The A4 experiment used Codex only, with MCP not_run and zero DeepSeek requests. The existing DeepSeek MCP provider is a separate path and is not connected to this default reviewer composition. This change does not authorize or claim a cross-provider A4 dispatch. Next accepted Phase 21 patch 0.3.14; phase stays 0/6 and RUN-01–05 pending. No release/tag or global-memory edit.
-
-Fresh build and installed-link verification passed; Node regression 231/231 (12.164 s), six Vitest files 118/118 (3.56 s), zero failures/skips. These verify packaging/compatibility and the unchanged execution path; no new paid inference was run solely to change the default.
-
-## DeepSeek plus Codex default — 2026-10-05
-
-Exactly one independent DeepSeek stage API review and one isolated Codex review are now the Skill default. Both return complete evidence-bound reports before host comparison. Explicit one-provider selection is retained. Same admitted material/task, separately captured identities and no peer conclusions. Missing provider reports failed/not_run; no silent duplicate-Codex replacement. Reuses existing build/config/bounded provider reader and shared v3 source binding; requirements-only preparation does not fabricate four MCP roles. Product 0.3.14, next accepted phase patch 0.3.15. Phase 21 remains 0/6, no release/tag, no global-memory edit. New real paired coursework inference is not implied by offline checks.
-
-Fresh build passed; final Node 241/241 (13.815 s), six Vitest files 118/118 (2.54 s), no failures/skips. All installed links unchanged; DeepSeek read-only preflight passed outside the repository without HTTP. Python optional skill validator lacks PyYAML; Node packaging/link checks passed. No new real inference was sent. Details in [validation](../docs/development-validation.md).
-
-2026-10-05 preparation-template correction: verified the user-provided HD preparation template against its original user message and the actual A4 capture. Shared preparation now preserves its five tasks and applicable nine preferences with explicit clause mapping; HD-PREP-01 is the reusable fallback, current/same-task seeds take precedence. Six-section packaging and schema validation do not certify semantic completeness. A private A4 revised draft is not_run; original captures/results remain unchanged. Product baseline 0.3.15; next accepted Phase 21 patch 0.3.16. Phase 21 remains 0/6, RUN-01–05 pending; no new inference or Release/tag.
-
-Fresh build passed; targeted Node checks 23/23 (0.559 s) and six version/contract Vitest files 118/118 (2.64 s), no failures/skips. Installed seven-link dry run passed; reference graph includes HD-PREP-01. Original five tasks/nine preferences manually compared with revised private A4 draft. Model behavior remains unverified by this repair; details in [validation](../docs/development-validation.md).
-
-
-## Phase 21 execution checkpoint — 2026-10-05
-
-Plans 01–04 summaries record actual commits/checks. Plan 05 preparation artifacts and two source/template hashes are ready; no 21-05-SUMMARY is written because real acceptance has not occurred. Plan 06 remains pending, not skipped/completed. Fresh whole affected Node regression passes; offline Vitest needs the existing EVIDENCELENS_DISABLE_PROVIDER=1 flag (first command omitted it and failed four config/isolation checks; corrected run passes). Historical state entries below/above describe earlier turns and are superseded by Current Position/Next Action where applicable. Continue this living phase after approval, without repeating completed work or reusing consumed smoke approvals.
-
-
-2026-10-05 result-usability repair: model maxLength now follows Unicode character counts, retaining byte/resource limits, source identity and evidence validation. Only exact CLI-refused update_plan diagnostics may continue; actual tool events and other router errors remain rejected. DeepSeek provider receipt v2 records a closed validation reason/field; v1 stays readable unchanged. Deliver a successful reviewer in full even if its peer fails. Product baseline 0.3.16, next accepted phase patch 0.3.17. Current Phase 21 progress and pending synthetic live authorization are unchanged by separate user-authorized A4 debugging. No Release/tag.
-
-The verified exception covers CLI refusals before handler execution (unsupported calls, unavailable request_user_input, argument-parse failures), counted in diagnostics v2.refusedToolCalls. Actual tool events and native-handler read/write failures still stop. Real A4 diagnostic located DeepSeek kind enum; safe nonstandard labels conservatively become unknown with unchanged claim/action and explicit host-classification limitation. Final build, Node 275/275 (18.342 s), Vitest 118/118 (2.40 s) and installed links passed. Separate new A4 paired debugging is underway; no Phase 21 synthetic-live acceptance is inferred. See [validation](../docs/development-validation.md).
-
-New authorized A4 pair now succeeded: DeepSeek 33 findings / 77,090 ms; Codex 23 findings / 452,413 ms. Root independently revalidated saved results/capture and execution hashes. This pair used zero kind conversions and zero refused-tool continuations; tests cover those recovery branches, not this live success. Earlier failures are preserved. Full private reports and separate source adjudication do not certify grades or replace Phase 21's pending synthetic acceptance. See [validation](../docs/development-validation.md).
+Verify publication, then gsd-new-milestone for fresh scope/requirements. Next minor version and milestone are not selected.
