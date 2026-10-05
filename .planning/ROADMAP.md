@@ -4,7 +4,7 @@
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) — Phases 1–11, completed 2026-09-24.
 - ✅ [v1.1 Assignment Prompt Adaptation and Staged Review](milestones/v1.1-ROADMAP.md) — Phases 12–17, product v0.2.4 published 2026-10-04.
-- ✅ [v1.2 快捷指令与 Codex 独立审阅](milestones/v1.2-ROADMAP.md) — Phases 18–21, 21 plans / 44 tasks / 21 requirements complete 2026-10-05; product 0.3.17 release pending verification.
+- ✅ [v1.2 快捷指令与 Codex 独立审阅](milestones/v1.2-ROADMAP.md) — Phases 18–21, 21 plans / 44 tasks / 21 requirements complete 2026-10-05; product [0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17).
 
 ## Next Milestone
 

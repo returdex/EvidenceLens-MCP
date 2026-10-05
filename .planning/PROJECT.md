@@ -10,7 +10,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Milestone **v1.2 complete 2026-10-05**, product **0.3.17**, release preparation in progress. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
+Milestone **v1.2 complete 2026-10-05**, product **[0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17)**. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
 
 Actual authorized synthetic initial/recheck Codex pair succeeded with exact exports and reported CLI token provenance. Separate A4 DeepSeek/Codex evidence is recorded, not repeated here. Inline host semantic judgments and source binding do not certify grade bands, submission, universal model accuracy or other platforms. Supported actual boundary is the pinned macOS arm64 CLI/Skill host; GUI selector observation is unavailable.
 

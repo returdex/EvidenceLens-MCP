@@ -1,8 +1,8 @@
 # Project Milestones: EvidenceLens MCP
 
-## v1.2 快捷指令与 Codex 独立审阅 (Completed: 2026-10-05)
+## v1.2 快捷指令与 Codex 独立审阅 (Shipped: 2026-10-05)
 
-**Delivered:** Installed stage commands through immutable independent review, full source-backed feedback, exact prompt export and revised-source recheck. Product 0.3.17; remote release pending verification.
+**Delivered:** Installed stage commands through immutable independent review, full source-backed feedback, exact prompt export and revised-source recheck. Product [0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17) at 2026-10-05T11:43:34Z.
 
 **Phases completed:** 18–21 (4 phases, 21 plans, 44 tasks); 21/21 requirements.
 

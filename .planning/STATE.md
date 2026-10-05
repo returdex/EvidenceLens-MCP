@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: completed_release_pending
+status: completed
 last_updated: "2026-10-05T11:42:05.883Z"
 last_activity: 2026-10-05
 progress:
@@ -17,11 +17,11 @@ progress:
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: complete product 0.3.17 publication, then plan the next milestone only on request.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: plan the next milestone only on request; product 0.3.17 publication verified.
 
 ## Current Position
 
-v1.2 complete/archived; 4 phases, 21 plans, 44 tasks, 21/21 requirements. Product 0.3.17 unchanged. Remote release pending verification. Archives and [completion authority](milestones/v1.2-COMPLETION.md) preserve history; original phase directories retained.
+v1.2 complete/archived; 4 phases, 21 plans, 44 tasks, 21/21 requirements. Product 0.3.17 unchanged. [GitHub Release published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17) at 2026-10-05T11:43:34Z, not draft/prerelease. Both remote annotated tags peel to 97e97d9fc6a00f72ff985eed9b5d0b41f7ba48fd. Archives and [completion authority](milestones/v1.2-COMPLETION.md) preserve history; original phase directories retained.
 
 ## Deferred Items
 
@@ -33,4 +33,4 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Verify publication, then gsd-new-milestone for fresh scope/requirements. Next minor version and milestone are not selected.
+gsd-new-milestone for fresh scope/requirements. Next minor version and milestone are not selected.

@@ -100,7 +100,7 @@
 
 ## Milestone: v1.2 — 快捷指令与 Codex 独立审阅
 
-**Completed:** 2026-10-05 | **Product:** 0.3.17, remote release pending verification.
+**Completed:** 2026-10-05 | **Product:** [0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17).
 **Phases:** 4 | **Plans:** 21 | **Tasks:** 44
 
 ### What Was Built
