@@ -29,3 +29,17 @@ for(const name of ['view_image','apply_patch','request_user_input','update_plan'
  const r=await protocolFixture('success',{...diagnostic,supervise:true,tool:({auth,outside})=>name==='apply_patch'?{type:'custom_tool_call',id:'ct_1',call_id:'call_fixture',name,input:'*** Begin Patch\n*** Delete File: '+outside+'\n*** End Patch'}:{type:'function_call',id:'fc_1',call_id:'call_fixture',name,arguments:JSON.stringify(name==='view_image'?{path:auth}:name==='update_plan'?{plan:[{step:'synthetic',status:'in_progress'}]}:{questions:[{id:'q',header:'Test',question:'synthetic?',options:[{label:'A',description:'A'},{label:'B',description:'B'}]}]})}});
  usable(r);assert.equal(r.rejected,true);assert.notEqual(r.exitCode,0);assert.ok(r.requests.length>=1&&r.requests.length<=2);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });
+
+
+test('matching server model ETag renews absent sealed cache without invalidating completed review',async()=>{
+ const options={permitInstallationMetadata:true,responseHeaders:{'x-models-etag':'synthetic-etag'},catalogEtag:'synthetic-etag'};
+ const observed=await protocolFixture('success',options);usable(observed);
+ assert.equal(observed.exitCode,0);assert.equal(observed.requests.length,1);
+ assert.match(observed.stderr,/ERROR codex_models_manager::manager: failed to renew cache TTL: cache not found/);
+ assert.equal(events(observed).at(-1).type,'turn.completed');
+ const supervised=await protocolFixture('success',{...options,useRunner:true});
+ assert.equal(supervised.outcome.status,'candidate',JSON.stringify(supervised.outcome));
+ assert.deepEqual(JSON.parse(supervised.outcome.candidate),supervised.result);
+ assert.equal(supervised.requests.length,1);assert.equal(supervised.outcome.cleanupComplete,true);
+ assert.equal(supervised.authUnchanged,true);assert.equal(supervised.installationUnchanged,true);assert.equal(supervised.outsideUnchanged,true);
+});

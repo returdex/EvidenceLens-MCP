@@ -93,3 +93,6 @@ One explicitly authorized real smoke failed with permission-class stderr; its ap
 
 
 2026-10-05 GPT-6 amendment: user explicitly selected the GPT-6 family. Current baseline is product 0.3.7 with desktop CLI 0.160.0 / gpt-6.1-sol (low), recertified local isolation and preserved legacy receipts. One same-source live smoke reached a turn but failed on model-related stderr; catalog visibility does not establish usable inference. Plan 05 now requests this model and retains its independent two-run acceptance; Plan 06 targets 0.3.8. No requirement or plan was closed. Earlier baseline/proposed-model notes remain historical.
+
+
+2026-10-05 cache TTL amendment: baseline is product 0.3.8 after exact cache-miss supervision and classifier repair. The actual pinned CLI ETag fixture and a real synthetic preparation review now pass through result validation, private publication and installed export. This is a single smoke; the planned two-run revised-source/recheck/usage handoff still requires its own acceptance and remains pending. Plan 06 targets 0.3.9. The earlier compatibility provider candidate was reverted; binary/model/isolation pins remain at the 0.3.7 GPT-6 configuration. 0/6 plan completion and RUN-01–05 status are unchanged.

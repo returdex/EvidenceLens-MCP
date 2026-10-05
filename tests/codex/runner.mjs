@@ -37,3 +37,14 @@ test('actual pinned CLI hidden native tool call is rejected by production superv
  const {protocolFixture}=await import('./helpers.mjs');const r=await protocolFixture('success',{permitInstallationMetadata:true,useRunner:true,tool:({auth})=>({type:'function_call',id:'fc',call_id:'call',name:'view_image',arguments:JSON.stringify({path:auth})})});
  assert.equal(r.outcome.status,'uncertain');assert.equal(r.outcome.cleanupComplete,true);assert.equal(r.outcome.candidate,null);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });
+
+
+test('only exact cache TTL miss is tolerated; model failures and changed cache diagnostics still stop',async()=>{
+ const prefix='2026-10-05T00:00:00Z ERROR codex_models_manager::manager: ';
+ const code=message=>emit(start)+`process.stderr.write(${JSON.stringify(prefix+message+'\n')});`+emit([final,end]);
+ const allowed=await run(code('failed to renew cache TTL: cache not found'));
+ assert.equal(allowed.status,'candidate');assert.equal(allowed.terminalObserved,true);assert.equal(allowed.cleanupComplete,true);
+ for(const message of ['failed to renew cache TTL: unexpected private failure','failed to renew cache TTL: cache not found EXTRA','failed to renew cache TTL: Operation not permitted (os error 1)','model_not_found PRIVATE_SENTINEL']){
+  const rejected=await run(code(message));assert.notEqual(rejected.status,'candidate');assert.equal(rejected.candidate,null);assert.equal(rejected.diagnostics.trigger,'unexpected_stderr');assert.equal(rejected.cleanupComplete,true);assert.ok(!JSON.stringify(rejected).includes('PRIVATE_SENTINEL'));
+ }
+});

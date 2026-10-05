@@ -50,7 +50,7 @@ test('timeout and pre-cancel have explicit cause',async()=>{
 test('diagnostic schema rejects arbitrary text, added fields and accessors',()=>{
  for(const delta of [{eventType:sentinel},{itemType:sentinel},{reportedErrorCategory:sentinel},{osErrorCode:sentinel},{exitSignal:sentinel},{trigger:sentinel},{stage:sentinel},{stderr:sentinel},{exitCode:9},{closeObserved:true,exitCode:-1},{turnObserved:true}])assert.throws(()=>validateDiagnostics({...newDiagnostics(),...delta}));
  let read=false;const d=newDiagnostics();Object.defineProperty(d,'trigger',{enumerable:true,get(){read=true;return null;}});assert.throws(()=>validateDiagnostics(d));assert.equal(read,false);
- for(const [message,category] of [['HTTP 429 '+sentinel,'rate_limit'],['model_not_found '+sentinel,'model_unavailable'],['stream disconnected '+sentinel,'network'],[sentinel,'unknown']])assert.equal(reportedErrorCategory(message),category);
+ for(const [message,category] of [['HTTP 429 '+sentinel,'rate_limit'],['model_not_found '+sentinel,'model_unavailable'],['Model metadata for `synthetic` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.','model_metadata_missing'],['stream disconnected '+sentinel,'network'],[sentinel,'unknown']])assert.equal(reportedErrorCategory(message),category);
 });
 test('invalid source-bound result retains observed terminal/exit and exact prompt',async t=>{
  const x=await capturedFlow(t);x.f.result.findings[0].evidence[0].quote='FORGED';
@@ -105,4 +105,14 @@ test('inspection distinguishes not-started/pending, rejects mixed terminal state
  const path=privateDir(x)+'/'+x.receipt.runId+'.execution.json',e=JSON.parse(await fs.readFile(path,'utf8'));e.status='failed';await fs.writeFile(path,JSON.stringify(e));await assert.rejects(store.diagnoseCodexRun(x.scope,x.receipt.runId),{code:'corrupt_record'});
  const r=spawnSync(process.execPath,[x.root+'/installed/scripts/codex-review.mjs','diagnose'],{env:{PATH:'/usr/bin:/bin',HOME:x.root,CODEX_THREAD_ID:x.scope.conversationId,EVIDENCELENS_STATE_ROOT:x.scope.stateRoot},cwd:x.root+'/project',input:JSON.stringify({taskId:x.scope.taskId,runId:x.receipt.runId,conversationId:'11111111-1111-1111-1111-111111111111'}),encoding:'utf8'});
  assert.equal(r.status,1);assert.equal(JSON.parse(r.stderr).code,'identity_required');assert.equal(r.stdout,'');
+});
+
+
+test('model logger prefix never misclassifies cache or unrelated not-found messages',()=>{
+ const prefix='2026-10-05T00:00:00Z ERROR codex_models_manager::manager: ';
+ assert.equal(reportedErrorCategory(prefix+'failed to renew cache TTL: cache not found'),'model_cache_missing');
+ assert.equal(reportedErrorCategory(prefix+'unrelated file not found'),'unknown');
+ assert.equal(reportedErrorCategory(prefix+'model_not_found PRIVATE_SENTINEL'),'model_unavailable');
+ const d={...newDiagnostics('process','unexpected_stderr'),reportedErrorCategory:'model_cache_missing'};
+ assert.deepEqual(validateDiagnostics(d),d);
 });

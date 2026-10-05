@@ -33,7 +33,7 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false,responseHeaders={},catalogEtag=null}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
@@ -59,11 +59,11 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
  function sse(res,type,data){res.write('event: '+type+'\ndata: '+JSON.stringify({type,...data})+'\n\n');}
  const server=createServer((req,res)=>{
   let body='';req.on('data',b=>body+=b);req.on('end',()=>{
-   if(req.method==='GET'){res.writeHead(200,{'content-type':'application/json'});res.end('{"models":[]}');return;}
+   if(req.method==='GET'){res.writeHead(200,{'content-type':'application/json',...(catalogEtag?{etag:catalogEtag}:{})});res.end('{"models":[]}');return;}
    requests.push({path:req.url,body:JSON.parse(body)});
    if(mode==='500'||mode==='429'){res.writeHead(Number(mode),{'content-type':'application/json'});res.end('{"error":{"message":"synthetic failure","type":"server_error"}}');return;}
    if(mode==='disconnect'){req.socket.destroy();return;}
-   res.writeHead(200,{'content-type':'text/event-stream'});
+   res.writeHead(200,{'content-type':'text/event-stream',...responseHeaders});
    sse(res,'response.created',{response:{id:'resp_fixture',object:'response',status:'in_progress',output:[]}});
    if(mode==='truncated'){res.end();return;}
    if(mode==='failed'){sse(res,'response.failed',{response:{id:'resp_fixture',status:'failed',error:{code:'server_error',message:'synthetic failure'}}});res.end();return;}

@@ -94,3 +94,8 @@ The second user-authorized one-shot smoke reached thread.started and failed on a
 ## GPT-6 desktop CLI migration (product 0.3.7)
 
 User-directed model pin is gpt-6.1-sol / low with actual desktop CLI 0.160.0. Fresh build passed, Node regression 196/196 (11.251 s), six affected Vitest files 118/118 (2.47 s). Read-only installed preflight passed. One real synthetic attempt reached a turn but failed on model-related stderr; catalog visibility is confirmed, real success is not. See [migration and precise limits](codex-startup-repair.md). No automatic retry or A4 replay. Phase 21 remains pending.
+
+
+## Model-cache TTL repair and successful real smoke (product 0.3.8)
+
+The actual CLI fixture with matching catalog/inference ETags reproduces a non-fatal cache TTL miss, previously misclassified as model_unavailable and rejected. Only its exact known log is now tolerated; new negative controls retain genuine failures. Fresh build passed, Node regression 199/199 (10.505 s), six affected Vitest files 118/118 (2.52 s); focused checks 62/62 (7.754 s). One real production synthetic review succeeded (exit 0, terminal observed, source validation, complete cleanup), with persisted result and installed skill export verified afterward. Three preceding diagnostic runs remained failed; no old record was retried. See [precise evidence and dispatch accounting](codex-startup-repair.md). Phase 21 two-run/recheck/usage acceptance stays pending.

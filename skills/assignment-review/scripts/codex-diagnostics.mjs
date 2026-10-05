@@ -5,7 +5,7 @@ const stages=['preparing','capsule','preflight','launch','dispatch','process','r
 const triggers=['aborted','deadline_exceeded','spawn_failed','stdin_failed','invalid_json','invalid_utf8','invalid_event','event_order','cli_error','cli_turn_failed','unexpected_event','unexpected_stderr','tool_activity','result_shape','output_limit','missing_thread','missing_turn','missing_terminal','missing_final','nonzero_exit','signal_exit','cleanup_unconfirmed','capsule_invalid','preflight_rejected','launch_failed','dispatch_failed','supervisor_failed','result_rejected','cleanup_failed','publication_failed'];
 const events=['thread.started','turn.started','turn.completed','turn.failed','error','item.started','item.updated','item.completed','other'];
 const items=['agent_message','reasoning','error','command_execution','file_change','mcp_tool_call','web_search','todo_list','other'];
-const categories=['authentication','rate_limit','model_unavailable','invalid_schema','network','permission','unknown'];
+const categories=['authentication','rate_limit','model_unavailable','model_cache_missing','model_metadata_missing','invalid_schema','network','permission','unknown'];
 const errnos=['ENOENT','ENOTDIR','EACCES','EPERM','EPIPE','EAGAIN','ENOMEM','EINVAL','other'];
 const signals=['SIGTERM','SIGKILL','SIGABRT','SIGSEGV','SIGINT','SIGHUP','SIGPIPE','SIGBUS','SIGILL','SIGTRAP','SIGQUIT','other'];
 const bounded=(v,values)=>v===null||v===undefined?null:values.includes(v)?v:'other';
@@ -19,9 +19,13 @@ export function newDiagnostics(stage='preparing',trigger=null){
 // A bounded hint from a CLI-reported error, not an independently proven root cause.
 export function reportedErrorCategory(message){
  if(typeof message!=='string')return 'unknown';
+ // Logger module names must not turn an unrelated cache miss into a model failure.
+ message=message.replace(/^\S+ (?:ERROR|WARN|INFO|DEBUG|TRACE) [A-Za-z0-9_:]+: /,'');
+ if(message==='failed to renew cache TTL: cache not found')return 'model_cache_missing';
  if(/invalid (?:json )?schema|invalid_json_schema|schema.*(?:not supported|required|additionalProperties)/i.test(message))return 'invalid_schema';
  if(/authentication|unauthorized|invalid_api_key|token.*expired|not logged in|HTTP\s+401\b/i.test(message))return 'authentication';
  if(/rate.limit|quota|usage.limit|HTTP\s+429\b/i.test(message))return 'rate_limit';
+ if(/Model metadata for `[^`\r\n]+` not found\. Defaulting to fallback metadata; this can degrade performance and cause issues\./.test(message))return 'model_metadata_missing';
  if(/model_not_found|model.*(?:not found|not supported|does not exist|not available)/i.test(message))return 'model_unavailable';
  if(/permission denied|operation not permitted|access denied/i.test(message))return 'permission';
  if(/connection|dns|tls|network|timed? out|stream disconnected|error sending request/i.test(message))return 'network';

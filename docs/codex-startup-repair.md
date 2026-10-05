@@ -1,4 +1,4 @@
-# Codex startup and model migration — 0.3.5 / 0.3.6 / 0.3.7
+# Codex startup and model migration — 0.3.5 through 0.3.8
 
 Date: 2026-10-05, Australia/Melbourne.
 
@@ -102,3 +102,45 @@ After failure, a read-only catalog query using the production isolated home and 
 - Six affected Vitest files: 118/118, 2.47 s.
 - New coverage includes denied CFPreferences synchronization before dispatch, request model/reasoning identity, absent tool catalog, CLI 0.141.0 historical receipt inspection, and current native sandbox behavior.
 - No release/tag; active milestone and non-blocking review-quality reminders are unchanged.
+
+
+## Cache TTL rejection repair and real success — 0.3.8
+
+The user requested continued diagnosis and repair. The final cause was a non-fatal model-cache message rejected by the supervisor, combined with a misleading classifier. This exact line is produced by CLI 0.160.0 when a model catalog response has an ETag and an inference response echoes that same `x-models-etag`, while the sealed per-run home has no persistent model cache:
+
+```text
+<timestamp> ERROR codex_models_manager::manager: failed to renew cache TTL: cache not found
+```
+
+The generic classifier searched the complete log line for `model.*not found`; the logger name `codex_models_manager` supplied “model” and the cache message supplied “not found”. It therefore reported model_unavailable, although the message did not identify an unavailable model. The supervisor terminated the otherwise active review on this unexpected stderr line. The [official cache implementation](https://github.com/openai/codex/blob/main/codex-rs/models-manager/src/cache.rs) describes cache failures as non-fatal and returns “cache not found” on missing TTL storage. Source inspection informs the explanation; the exact pinned binary reproduction establishes behavior for this host.
+
+### Reproduction and bounded fix
+
+The loopback fixture now supplies a catalog ETag and matching inference response header. Without supervision, the real binary emits the exact TTL message, produces the complete schema result and exits 0 after one inference request. With the repaired supervisor it produces a source-valid candidate after one request, with authentication, original installation metadata and outside files unchanged. This closes the gap in older fixtures, which omitted the server's catalog-version headers.
+
+Only the exact timestamped ERROR / codex_models_manager::manager / cache-TTL-miss line is tolerated. Changed cache messages, cache permission errors, model_not_found, unknown stderr and tool activity remain rejected. The error classifier strips a conventional logger prefix before matching message content and provides separate bounded model_cache_missing and model_metadata_missing hints. No raw CLI text or model reasoning is retained; old execution receipts remain unchanged.
+
+A candidate OpenAI protocol identity/version-header adjustment was tested during diagnosis and did not resolve the failure. It was reverted before the final test. The final fix preserves the existing bounded provider, fixed gpt-6.1-sol / low, no-retry flags, binary/isolation digest, sealed home and access policy. No preference/cache write permissions were added.
+
+### Dispatch accounting
+
+The continuation included three failed, explicitly dispatched same-source diagnostic runs before the final repair validation. They did not replay old execution records, change the approved synthetic source/template, or introduce automatic retry:
+
+| Purpose | Australia/Melbourne time, 2026-10-05 | Elapsed | Outcome | Captured prompt SHA-256 |
+| --- | --- | --- | --- | --- |
+| Separate metadata diagnostics | 14:14:02–14:14:04 | 2599 ms | failed / unexpected_stderr / model_unavailable | 18d5622aeb34da63d071b305016d7885e7ab0018832c7e756ce7a35da20cc7a6 |
+| Protocol compatibility candidate | 14:17:27–14:17:29 | 1833 ms | failed / unexpected_stderr / model_unavailable | 2daaf0ba850db32d1fac4c7218daf28308c57bf5689b77a4cb74e81274c9faf6 |
+| Restricted diagnostic keyword probe | 14:18:44–14:18:46 | 1954 ms | failed / unexpected_stderr / model_unavailable | 2a182a2e4b4c3037a7ea0667fcdaf308406335983f241089023cc6c9ff3e9420 |
+| Exact cache-TTL repair validation | 14:22:07–14:22:14 | 6699 ms | succeeded | e697a741ec2b453e903a5786a31e168c2f23bba0aca7b8adecdf17a5cf22c79d |
+
+All four retained their immutable prompt exports and completed cleanup. The keyword probe emitted only a fixed-vocabulary subset, “model” and “not found”; its temporary instrumentation was removed. Each failed run remains a failure in private history. No A4 coursework was submitted to these probes.
+
+### Real accepted result
+
+The final production runner returned succeeded, observed thread/turn/terminal completion, exitCode=0, no exit signal, cleanupComplete=true and terminationRequested=false. Result SHA-256 `d2c32e8f5e2b5bc6bdefca3def04800399beef0679dfd043123e92f5a4dec0d0`. The model response covers R1 / E1, has no findings, and correctly limits its scope to the synthetic preparation check. The existing result validator verified identities, coverage and sources before publication.
+
+A subsequent read-only result load confirmed the persisted envelope digest. Export through the installed assignment-review skill path returned status=succeeded and the same captured prompt digest. The installed skill resolves to this repository, so this repair is active there. The requested GPT-6 model configuration is preserved; the CLI terminal event does not separately expose a provider-attested effective-model field or account usage. The successful smoke demonstrates actual bounded review, validation, storage and export; A4 requirements and Phase 21's revised-source/two-run/usage acceptance have not been evaluated by this smoke.
+
+### Final verification
+
+Product 0.3.8: fresh build passed; Node Codex/prompt/command/source-boundary suites 199/199, zero failures/skips, 10.505 s; six affected Vitest files 118/118, 2.52 s. Focused cache/protocol/supervisor/diagnostics checks 62/62, 7.754 s. Inline review confirms the whitelist is exact, failure categories retain no free text, no policy/credential changes remain, and genuine failures still cannot publish success. No Release/tag. Phase 21 stays 0/6; its next accepted feature patch is 0.3.9.

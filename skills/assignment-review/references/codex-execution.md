@@ -86,3 +86,10 @@ SIGINT/SIGTERM 转成当前自有运行的取消信号：TERM 后最多 2 秒发
 独立审阅固定使用桌面应用内的 CLI 0.160.0 实际二进制和 `gpt-6.1-sol` / low，由 `scripts/codex-profile.mjs` 集中定义；不再通过 PATH 选择旧版 CLI。预检、二进制摘要及隔离摘要均需匹配。旧版 0.141.0 的历史回执继续可读，不允许因此重放。
 
 新版启动需要 CFPreferences 两个精确共享内存名称的只读访问和 `com.openai.codex` 域的只读查询；无配置写入权限。模拟协议、边界和安装入口回归通过；一次真实合成检查已进入 turn，但因模型相关 stderr 返回 failed，尚无有效审阅结果。只读模型目录列出该型号，不能单凭该目录宣称真实审阅可用。失败诊断类别不等于已确定的根因，完整交接/复检/用量验收仍待 Phase 21。详见仓库 `docs/codex-startup-repair.md`。
+
+
+## 缓存续期误判修复（0.3.8）
+
+CLI 0.160.0 在目录 ETag 与服务端 `x-models-etag` 相同时，可能输出精确日志 `ERROR codex_models_manager::manager: failed to renew cache TTL: cache not found`。隔离目录没有持久缓存，这条日志不表示模型不可用。运行器现仅容许这条已由实际二进制复现的缓存缺失日志；未知日志、模型错误、权限错误及工具活动继续终止运行。分类先去掉日志模块前缀，再检查错误正文，避免把模块名 models 和 cache not found 误拼为模型不可用。
+
+修复后一次 GPT-6 配置下的真实合成准备审阅已成功，来源验证、结果保存和已安装 skill 的提示词导出均通过。此前失败回执保持原状态；A4 尚未重新审阅，完整复检/交接/用量验收仍由 Phase 21 执行。详情见仓库 `docs/codex-startup-repair.md` 的 0.3.8 记录。

@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
 status: ready_to_execute
-last_updated: "2026-10-04T18:31:35.665Z"
-last_activity: 2026-10-05 — 0.3.7 GPT-6 migration verified locally; real smoke failed on model-related stderr
+last_updated: "2026-10-05T03:26:03.986Z"
+last_activity: 2026-10-05 — 0.3.8 cache TTL misclassification repaired; real synthetic GPT-6 review succeeded
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,7 +24,7 @@ See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independ
 Phase: 21 (Review Handoff and Usage Acceptance)
 Plan: 0/6 complete; six checked plans ready
 Status: Ready to execute
-Last activity: 2026-10-05 — 0.3.7 GPT-6 migration verified locally; real smoke failed on model-related stderr
+Last activity: 2026-10-05 — 0.3.8 cache TTL misclassification repaired; real synthetic GPT-6 review succeeded
 
 ## Accepted Coverage Debt
 
@@ -53,11 +53,11 @@ User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/researc
 
 Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
 
-Current product 0.3.7, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Successful real ChatGPT inference and usage/handoff acceptance remain pending; authorized startup smokes failed, with the latest GPT-6 attempt reaching a turn; semantic automation remains partial. Local host readiness is not remote inference evidence.
+Current product 0.3.8, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. A real bounded synthetic ChatGPT review now succeeded with validated stored result and installed export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
 
 ## Session Continuity
 
-Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.7, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or coursework replay performed. Three separately authorized synthetic live attempts failed; none counts as acceptance.
+Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.8, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat, auth mutation or coursework replay performed. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
 
 ## Compatible repair — 2026-10-05
 
@@ -84,3 +84,10 @@ Read-only actual CLI model discovery, including a fresh sealed home without a mo
 ## GPT-6 migration — 2026-10-05
 
 User explicitly requested GPT-6, superseding the unimplemented GPT-5.5 proposal above. Product 0.3.7 now pins desktop CLI 0.160.0 and gpt-6.1-sol / low with recertified isolation, historical receipt compatibility and 196/196 Node plus 118/118 Vitest checks. Exactly one prepared synthetic live attempt reached thread/turn and failed with process/unexpected_stderr/model_unavailable; no result, cleanup complete, export unchanged. Read-only discovery under the same isolated configuration lists the model. Cause beyond the safe error category remains unconfirmed; do not assume missing account access or claim restored reviews. See [full evidence](../docs/codex-startup-repair.md). No automatic retry, coursework replay or fallback. Phase 21 remains 0/6, RUN-01–05 pending; its next accepted feature patch is 0.3.8.
+
+
+## Real independent review restored — 2026-10-05
+
+Product 0.3.8 fixes the exact non-fatal cache TTL miss and logger-prefix classification. Actual CLI ETag fixtures reproduce the trigger and pass strict supervision; genuine model/cache permission failures remain rejected. The protocol compatibility candidate was reverted. A production synthetic preparation run with gpt-6.1-sol / low succeeded on 2026-10-05 at 14:22:07–14:22:14 Australia/Melbourne: 6699 ms, terminal observed, exit 0, cleanup complete, source-bound result published and installed skill export unchanged. The persisted result digest was re-read successfully. Three preceding diagnostic runs stayed failed; no automatic retry or A4 replay occurred. See [full dispatch and validation evidence](../docs/codex-startup-repair.md).
+
+Fresh build, Node 199/199 and Vitest 118/118 passed. Current independent runner feedback is verified for this synthetic preparation case. A4 review and the separate Phase 21 two-run revised-source/usage/handoff acceptance remain pending; Phase 21 stays 0/6 and RUN-01–05 unclosed. Plan 06 now targets 0.3.9; milestone v1.2 and non-blocking RR/FM reminders remain unchanged. No release/tag.

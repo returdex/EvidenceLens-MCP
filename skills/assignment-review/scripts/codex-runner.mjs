@@ -42,6 +42,8 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
     if(/^WARNING: proceeding, even though we could not create PATH aliases: Operation not permitted \(os error 1\)$/.test(text))return;
     if(/^\S+ ERROR (?:codex_core_skills::manager|codex_skills_extension::host_service): failed to install system skills: io error while create (?:skills root|system skills) dir: Operation not permitted \(os error 1\)$/.test(text))return;
     if(/^\S+ ERROR codex_models_manager::(?:cache|manager): failed to write models cache: Operation not permitted \(os error 1\)$/.test(text))return;
+    // Matching server/catalog ETags renew an intentionally absent sealed-home cache.
+    if(/^\S+ ERROR codex_models_manager::manager: failed to renew cache TTL: cache not found$/.test(text))return;
     if(text.endsWith(' ERROR codex_core_skills::loader: failed to read skills dir '+launch.env.CODEX_HOME+'/skills: Operation not permitted (os error 1)')&&/^\S+ ERROR /.test(text))return;
     return stop('protocol_invalid','unexpected_stderr',{reportedErrorCategory:reportedErrorCategory(text)});
    }
