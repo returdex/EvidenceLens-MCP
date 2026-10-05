@@ -9,7 +9,7 @@ created: 2026-10-05
 
 # Phase 21 — Validation Strategy
 
-Execution in progress. Plan 01 local checks passed; live acceptance remains NOT_RUN.
+Execution in progress. Plans 01–04 and Plan 05 preparation local checks passed; live acceptance remains NOT_RUN.
 
 ## Test infrastructure and sampling
 
@@ -27,7 +27,7 @@ Node built-in test runner (stdlib installed helpers), existing Vitest and TypeSc
 | 21-03-02 | 03 | 3 | RUN-01, RUN-02 | T-21-03, T-21-04 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/recheck.mjs tests/codex/handoff.mjs` | created by owning task where new | local checks passed |
 | 21-04-01 | 04 | 4 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/records-cli.mjs tests/commands/install-review-skills.mjs tests/prompts/cli.mjs` | created by owning task where new | local checks passed |
 | 21-04-02 | 04 | 4 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/commands/skill-contract.mjs tests/codex/records-cli.mjs tests/baseline/source-boundary.mjs` | created by owning task where new | local checks passed |
-| 21-05-01 | 05 | 5 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05, T-21-06 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/handoff-acceptance.mjs tests/codex/live-acceptance.mjs` | created by owning task where new | pending |
+| 21-05-01 | 05 | 5 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05, T-21-06 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/handoff-acceptance.mjs tests/codex/live-acceptance.mjs` | created by owning task where new | preparation passed; live NOT_RUN |
 | 21-05-02 | 05 | 5 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05, T-21-06 | bounded current identity, provenance and no implicit dispatch | manual + preparation test | `node --test tests/codex/live-acceptance.mjs` | created by owning task where new | pending |
 | 21-05-03 | 05 | 5 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-05, T-21-06 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/live-acceptance.mjs tests/codex/handoff-acceptance.mjs` | created by owning task where new | pending |
 | 21-06-01 | 06 | 6 | RUN-01, RUN-02, RUN-03, RUN-04, RUN-05 | T-21-07 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `npm run build` | created by owning task where new | pending |
@@ -67,3 +67,11 @@ The live pair uses existing 600 s per-review timeout plus bounded cleanup. A fai
 - [ ] Semantic judgments checked manually, without universal automated-grading claim.
 
 Planning validation passes do not set nyquist_compliant or wave_0_complete to true. Keep execution coverage truthful; record eventual manual-only limitations.
+
+## Execution checkpoint (2026-10-05)
+
+- Build 0.3.15 passed (0.917 s).
+- Node affected regression: 272/272, 18.294 s, no failures/skips.
+- Offline Vitest: 124/124, seven files; use existing EVIDENCELENS_DISABLE_PROVIDER=1. Initial command omitted flag and failed 4 config/isolation checks, 120 passed. Corrected command is the valid final evidence; no source/dependency change to accommodate it.
+- Actual installed manifest/login/isolation preflight recorded separately. Actual model/host-stage pair/semantic closure remains pending.
+- 21-05-02 / 03 and Plan 06 uncompleted. No requirement final closure, feature version bump, release/tag or real inference.

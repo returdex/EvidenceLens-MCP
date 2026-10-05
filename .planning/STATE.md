@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: executing
+status: awaiting_live_authorization
 last_updated: "2026-10-05T10:06:10.280Z"
 last_activity: 2026-10-05
 progress:
@@ -10,20 +10,20 @@ progress:
   completed_phases: 3
   total_plans: 21
   completed_plans: 19
-  percent: 90
+  percent: 75
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: execute checked Phase 21 review handoff and usage acceptance plans. Phase 20 complete at product 0.3.3.
+See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Plan 05 prepared two-run synthetic live acceptance; implementations 01–04 verified. Phase 20 complete at product 0.3.3.
 
 ## Current Position
 
 Phase: 21 (Review Handoff and Usage Acceptance) — EXECUTING
-Plan: 5 of 6
-Status: Ready to execute
+Plan: 4/6 complete; Plan 05 Task 01 complete, Task 02 checkpoint
+Status: Plans 01–04 complete; Plan 05 Task 01 verified, concrete live authorization pending
 Last activity: 2026-10-05
 
 ## Accepted Coverage Debt
@@ -36,7 +36,7 @@ Last activity: 2026-10-05
 
 ## Non-blocking Revision Records
 
-- [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md): H-01–04 refine current RUN-01/02/05 handoff and recheck acceptance. Six checked PLAN files now cover H-01–04; no runtime implementation yet.
+- [Phase 21 planning input](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md): H-01–04 refine current RUN-01/02/05 handoff and recheck acceptance. H-01–04 are implemented in completed Plans 01–04; actual live/semantic acceptance remains pending.
 - [Completed-work reminders](REVIEW-REVISIONS.md): RR-01–08 are 待修订 / non-blocking, revisited when their module or related planning work is touched. Completed phase status and historical proofs remain intact.
 - [Future project memo](notes/2026-10-05-review-quality-future.md): FM-01–06 are deferred proposals, not new phase requirements or dependencies. Claude originals and broader semantic evaluation are not prerequisites for continuing Phase 21.
 - These are project records, not scheduled notifications. Current progress remains 3/4 phases and 16/21 requirements complete; existing safety and authorized live-inference acceptance remain applicable.
@@ -47,15 +47,13 @@ The user explicitly lifted the accumulated-history hold on 2026-10-04. Remote ma
 
 ## Next Action
 
-User-directed triage (2026-10-05): [FIT5032 A1.3 review failure](../docs/research/fit5032-a13-review-failure.md) now feeds H-01–04 into Phase 21 planning. Broader review-quality work is memoized and completed components carry non-blocking revision reminders. Existing phase completion remains technical acceptance, not demonstrated semantic review quality. Claude original transcript and new live case evaluation remain unavailable / NOT_RUN. Requirement IDs/count remain unchanged; the subsequent diagnostic repair is product 0.3.4.
+Phase 21 Plans 01–04 complete (metrics, complete handoff, host R/F assessment/current actions, installed record CLI). Plan 05 Task 01 offline/host-input preparation passed; Task 02 awaits applicable human approval for exactly two shown synthetic Codex ChatGPT runs. See [reviewable inputs](phases/21-review-handoff-and-usage-acceptance/21-LIVE-INPUTS.md) and [host evidence](phases/21-review-handoff-and-usage-acceptance/21-HOST-ACCEPTANCE.md). Existing limited smokes/A4 approvals do not cover this new pair. No real inference this execution turn. No new chat/auth mutation.
 
-`$gsd-execute-phase 21` — execute six checked sequential plans (13 tasks). Read [plan check](phases/21-review-handoff-and-usage-acceptance/21-PLAN-CHECK.md) and current planning input. Prepare live inputs before checking any still-missing authorization in Plan 05. RR/FM records remain non-blocking. No auto-advance from this planning turn.
-
-Phase 20 complete: 6/6 plans, 12/12 tasks, CDX-01–06, 4/4 goal criteria. Approved R1 resolved the isolation gate; original failures remain recorded. Fresh build passed, six affected Vitest files 118/118, final Node suites 157/157, seven official Skills and negative control passed. Inline review and 11 planned threats have no open finding. See [verification](phases/20-bounded-independent-codex-execution/20-VERIFICATION.md).
-
-Current product 0.3.13, no Release/tag. Milestone progress: 3/4 phases (75%), 15/21 currently defined plans; Phase 21 0/6, planned and checked. 16/21 requirements complete, RUN-01–05 pending. Real bounded synthetic ChatGPT reviews and one actual A4 preparation review have succeeded with validated stored results and exact prompt export. Phase 21 revised-source, usage/handoff and two-run acceptance remain pending; semantic automation remains partial.
+Build passed; Node 272/272 (18.294 s); final offline Vitest 124/124. Full handoff preserves all findings and metrics provenance; current-proof annotation and private retention exercised. Four of six plans complete, 19/21 milestone plans, 3/4 phases (75% phase-based display). RUN-01–05 final acceptance remains pending. Product 0.3.15 until Plan 06 accepted patch 0.3.16; no Release/tag. RR/FM remain non-blocking.
 
 ## Session Continuity
+
+Current checkpoint: Plans 01–04 complete; Plan 05 Task 01 verified, Task 02 concrete live authorization pending. Continue with the prepared pair after applicable approval, then complete Plan 06/goal verification. 0.3.15 remains current. No new real model call this execution turn. Earlier continuity note below is retained as history.
 
 Last session: 2026-10-05. Phase 21 planning passed (6 plans, 13 tasks, 5/5 RUN requirements and 9/9 decisions covered); Phase 21 runtime work is pending; the subsequent diagnostic repair is separate. Phase 20 finished after explicitly approved R1 and final alias/preflight cleanup fixes. Do not request R1 approval again. v1.2 began at product 0.3.0; current product 0.3.13, latest published product 0.2.4. Preserve original phase directories, dependency backup and historical paid proof. Research choice applies only to this milestone. No new chat or auth mutation performed; subsequent explicitly authorized A4 debugging is recorded below. Six diagnostic/startup runs remain failed in private history; the seventh synthetic run succeeded. This smoke does not close Phase 21 acceptance.
 
@@ -126,3 +124,8 @@ Fresh build passed; final Node 241/241 (13.815 s), six Vitest files 118/118 (2.5
 2026-10-05 preparation-template correction: verified the user-provided HD preparation template against its original user message and the actual A4 capture. Shared preparation now preserves its five tasks and applicable nine preferences with explicit clause mapping; HD-PREP-01 is the reusable fallback, current/same-task seeds take precedence. Six-section packaging and schema validation do not certify semantic completeness. A private A4 revised draft is not_run; original captures/results remain unchanged. Product baseline 0.3.15; next accepted Phase 21 patch 0.3.16. Phase 21 remains 0/6, RUN-01–05 pending; no new inference or Release/tag.
 
 Fresh build passed; targeted Node checks 23/23 (0.559 s) and six version/contract Vitest files 118/118 (2.64 s), no failures/skips. Installed seven-link dry run passed; reference graph includes HD-PREP-01. Original five tasks/nine preferences manually compared with revised private A4 draft. Model behavior remains unverified by this repair; details in [validation](../docs/development-validation.md).
+
+
+## Phase 21 execution checkpoint — 2026-10-05
+
+Plans 01–04 summaries record actual commits/checks. Plan 05 preparation artifacts and two source/template hashes are ready; no 21-05-SUMMARY is written because real acceptance has not occurred. Plan 06 remains pending, not skipped/completed. Fresh whole affected Node regression passes; offline Vitest needs the existing EVIDENCELENS_DISABLE_PROVIDER=1 flag (first command omitted it and failed four config/isolation checks; corrected run passes). Historical state entries below/above describe earlier turns and are superseded by Current Position/Next Action where applicable. Continue this living phase after approval, without repeating completed work or reusing consumed smoke approvals.
