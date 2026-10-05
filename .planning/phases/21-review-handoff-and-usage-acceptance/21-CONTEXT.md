@@ -16,7 +16,7 @@ Complete the installed review → concise complete-finding handoff → exact pro
 - **D-06:** Keep snapshot v1, lifecycle v1/v2, execution v1/v2 compatibility and MODEL_RESULT_SCHEMA v1 unchanged (v2 safe diagnostics were added by the user-requested 0.3.4 repair). Store new local metrics and host handoff annotations as bounded, versioned, run/attempt/hash-bound private sidecars, with old-record absence explicitly unavailable. Reuse existing transactions, identity checks, retention and exact export. No model text can choose a path or invoke an action.
 - **D-07:** Use installed sibling stdlib modules, existing four stage commands and help/export separation. Read-only record/handoff inspection spawns no model and reads no assignment file. Explicit old-run inspection must not masquerade as the latest result.
 - **D-08:** Separate automated synthetic coverage, actual pinned CLI/installed-host coverage and authorized real inference. Prepare two small synthetic source sets and exact prompts for initial review + current-version recheck before seeking the remaining live authorization, only if not already covered by explicit human authorization. No course/private case corpus or extra chat creation. H-04; RUN-05.
-- **D-09:** After all required acceptance, apply one compatible patch from 0.3.8 to 0.3.9 and refresh affected tests/metadata. No Release/tag during phase execution; milestone closure is separate. Existing RR/FM items remain non-blocking, not silently promoted.
+- **D-09:** After all required acceptance, apply one compatible patch from 0.3.9 to 0.3.10 and refresh affected tests/metadata. No Release/tag during phase execution; milestone closure is separate. Existing RR/FM items remain non-blocking, not silently promoted.
 </decisions>
 
 ### Implementation discretion
@@ -47,3 +47,6 @@ Inline research/planning/checking follows the Skill adapter and no-delegation pr
 
 
 2026-10-05 cache TTL amendment: baseline is product 0.3.8 after exact cache-miss supervision and classifier repair. The actual pinned CLI ETag fixture and a real synthetic preparation review now pass through result validation, private publication and installed export. This is a single smoke; the planned two-run revised-source/recheck/usage handoff still requires its own acceptance and remains pending. Plan 06 targets 0.3.9. The earlier compatibility provider candidate was reverted; binary/model/isolation pins remain at the 0.3.7 GPT-6 configuration. 0/6 plan completion and RUN-01–05 status are unchanged.
+
+
+2026-10-05 review-duration amendment: current product baseline is 0.3.9 after the default independent review deadline increased from 120 to 600 seconds, following a real two-source preparation timeout and the user's five-minute review expectation. Clock-controlled real-child tests cover completion past the old deadline and termination/cleanup at the new ceiling. No new model inference, coursework replay or acceptance closure occurred. Plan 06 now targets 0.3.10. Phase 21 remains 0/6 and RUN-01–05 stay pending; prior amendments remain historical.

@@ -1,6 +1,6 @@
 # Codex 独立审阅协议（Phase 20）
 
-独立执行已接入四个阶段入口，已通过 Phase 20 的本地控制与目标宿主验收。已通过真实 CLI 的本地合成协议检查；真实 ChatGPT 推理尚未完成成功验收；已有失败尝试不能算成功，预检或合成结果也不能称为真实审阅。
+独立执行已接入四个阶段入口，已通过 Phase 20 的本地控制与目标宿主验收。已通过真实 CLI 的本地合成协议检查；真实 ChatGPT 合成准备审阅已通过运行、来源验证、保存及安装路径导出；真实作业与完整交接/复检/用量验收须分别验证。已有失败尝试不能算成功，预检或本地模拟结果也不能称为真实审阅。
 
 ## 证据与原文
 
@@ -8,7 +8,7 @@
 
 区块保存 schemaVersion=1、runId/taskId/conversationId/stage/currentSourceId，以及 sources：sourceId/sourceHash/excerpts。每个 excerpt 含 excerptId/startByte/endByte/text/excerptSha256/locator；区间左闭右开，按原 UTF-8 字节计数。sourceHash 指获准原文本，不是摘录哈希。排除/未读/requires_reread 不携带摘录，artifact_only 不携带 history。旧提示词没有该区块时可照常导出，不能自动改写后作为独立调用输入。
 
-快照仍为既有 schema v1，提示词上限 256 KiB，快照 1 MiB。区块最多 100 来源、每来源 100 摘录。最终模型 JSON 最多 240 KiB、100 findings；本地验证封装最多 256 KiB。输出 JSONL 单行 512 KiB、总量 2 MiB；预检 10 秒、审阅 120 秒、TERM 收尾 2 秒。
+快照仍为既有 schema v1，提示词上限 256 KiB，快照 1 MiB。区块最多 100 来源、每来源 100 摘录。最终模型 JSON 最多 240 KiB、100 findings；本地验证封装最多 256 KiB。输出 JSONL 单行 512 KiB、总量 2 MiB；预检 10 秒、审阅默认 600 秒（10 分钟）、TERM 收尾 2 秒。
 
 ## 结果形状
 

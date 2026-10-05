@@ -99,3 +99,10 @@ User-directed model pin is gpt-6.1-sol / low with actual desktop CLI 0.160.0. Fr
 ## Model-cache TTL repair and successful real smoke (product 0.3.8)
 
 The actual CLI fixture with matching catalog/inference ETags reproduces a non-fatal cache TTL miss, previously misclassified as model_unavailable and rejected. Only its exact known log is now tolerated; new negative controls retain genuine failures. Fresh build passed, Node regression 199/199 (10.505 s), six affected Vitest files 118/118 (2.52 s); focused checks 62/62 (7.754 s). One real production synthetic review succeeded (exit 0, terminal observed, source validation, complete cleanup), with persisted result and installed skill export verified afterward. Three preceding diagnostic runs remained failed; no old record was retried. See [precise evidence and dispatch accounting](codex-startup-repair.md). Phase 21 two-run/recheck/usage acceptance stays pending.
+
+
+## Assignment review duration repair (product 0.3.9)
+
+After an actual two-source preparation review hit the former 120-second ceiling, the independent supervisor's default and maximum deadline is now 600 seconds. Fresh `npm run build` passed. `node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/source-boundary.mjs` passed 201/201 in 11.943 seconds with zero failures/skips. The six affected Vitest files (`project-config`, `review-tool`, `public-contract-docs`, `fit5032-fixture`, `review-provider`, `docker-review`) passed 118/118 in 3.80 seconds with zero failures/skips. Existing PDF/font warnings remained non-fatal.
+
+The two new deadline tests use actual supervised child processes with the parent's deadline clock controlled: successful completion after five minutes of supervisor time, and termination/cleanup at ten minutes. These tests do not claim a live ten-minute model run. Installed command/reference graph regression passed within the Node suite. No new model request, A4 replay, dependency change or Phase 21 acceptance closure occurred. See [duration repair evidence](codex-timeout-repair.md).

@@ -1,7 +1,7 @@
 import { validateDiagnostics } from './codex-diagnostics.mjs';
 import { fields,array,text,id,uuid,hash,sha256,decode,validateSnapshot } from './prompt-contract.mjs';
 
-export const CODEX_LIMITS=Object.freeze({sources:100,excerpts:100,findings:100,final:240*1024,envelope:256*1024,line:512*1024,output:2*1024*1024,preflightMs:10000,reviewMs:120000,graceMs:2000});
+export const CODEX_LIMITS=Object.freeze({sources:100,excerpts:100,findings:100,final:240*1024,envelope:256*1024,line:512*1024,output:2*1024*1024,preflightMs:10000,reviewMs:600000,graceMs:2000});
 export const CODEX_CODES=Object.freeze(['codex_missing','codex_incompatible','login_required','auth_mode_unsupported','isolation_unverified','recursive_call','protocol_invalid','output_limit','timed_out','result_invalid','source_mismatch','uncertain','unsafe_path','unsupported']);
 export function codexFail(code){const error=new Error(code);error.code=code;throw error;}
 export function codexError(error){return {code:CODEX_CODES.includes(error?.code)?error.code:'uncertain'};}

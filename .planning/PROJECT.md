@@ -80,7 +80,7 @@ Source-bound evidence includes Phase 16 official validator/control, successful b
 
 **Target features:** Command installation/discovery; task/conversation-scoped prompt snapshots; isolated Codex invocation; validated result handoff and basic run usage. Independent execution need not create a visible desktop sidebar chat; that UI behavior has not been established. Keep raw intermediate events out of the work conversation.
 
-**Version:** Planning milestone v1.2; development product 0.3.8 with verified real synthetic independent review on desktop Codex CLI 0.160.0 / gpt-6.1-sol. Last published product is v0.2.4. No v0.3.8 Release/tag is created by phase completion. Phase numbering continues at 18.
+**Version:** Planning milestone v1.2; development product 0.3.9 with verified real synthetic independent review on desktop Codex CLI 0.160.0 / gpt-6.1-sol. Last published product is v0.2.4. No v0.3.9 Release/tag is created by phase completion. Phase numbering continues at 18.
 
 **Research:** User explicitly selected research of Codex invocation, authentication and usage interfaces. Perform inline under the skill adapter and current no-delegation preference. `workflow.research: false` remains the default for future planning; this one-time selection does not change it.
 

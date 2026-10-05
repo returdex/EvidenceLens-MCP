@@ -96,3 +96,6 @@ One explicitly authorized real smoke failed with permission-class stderr; its ap
 
 
 2026-10-05 cache TTL amendment: baseline is product 0.3.8 after exact cache-miss supervision and classifier repair. The actual pinned CLI ETag fixture and a real synthetic preparation review now pass through result validation, private publication and installed export. This is a single smoke; the planned two-run revised-source/recheck/usage handoff still requires its own acceptance and remains pending. Plan 06 targets 0.3.9. The earlier compatibility provider candidate was reverted; binary/model/isolation pins remain at the 0.3.7 GPT-6 configuration. 0/6 plan completion and RUN-01–05 status are unchanged.
+
+
+2026-10-05 review-duration amendment: current product baseline is 0.3.9 after the default independent review deadline increased from 120 to 600 seconds, following a real two-source preparation timeout and the user's five-minute review expectation. Clock-controlled real-child tests cover completion past the old deadline and termination/cleanup at the new ceiling. No new model inference, coursework replay or acceptance closure occurred. Plan 06 now targets 0.3.10. Phase 21 remains 0/6 and RUN-01–05 stay pending; prior amendments remain historical.
