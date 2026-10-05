@@ -21,7 +21,7 @@ Phase 21 complete: 6/6 plans, all 13 tasks and RUN-01–05 verified. Product 0.3
 
 ## Next Action
 
-Milestone audit/completion is a separate workflow. No Release/tag or archival performed. RR/FM reminders and full A1.3 semantic evaluation remain deferred and non-blocking.
+Milestone audit completed: tech_debt, 21/21 requirements, 4/4 phases, 6/6 integration seams and 5/5 scoped flows; no critical blocker. See [v1.2 audit](v1.2-MILESTONE-AUDIT.md). Next: gsd-complete-milestone v1.2, reviewing retained non-blocking debt. No Release/tag or archival performed; RR/FM and full A1.3 semantic evaluation remain deferred.
 
 ## Historical continuity and coverage notes
 
