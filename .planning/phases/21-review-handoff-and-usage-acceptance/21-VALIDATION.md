@@ -9,7 +9,7 @@ created: 2026-10-05
 
 # Phase 21 — Validation Strategy
 
-Planning only. No new implementation test or real inference is claimed to have passed.
+Execution in progress. Plan 01 local checks passed; live acceptance remains NOT_RUN.
 
 ## Test infrastructure and sampling
 
@@ -19,8 +19,8 @@ Node built-in test runner (stdlib installed helpers), existing Vitest and TypeSc
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure behavior | Test type | Automated command | File exists | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 21-01-01 | 01 | 1 | RUN-03, RUN-04 | T-21-01, T-21-02 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/metrics.mjs tests/codex/runner.mjs` | created by owning task where new | pending |
-| 21-01-02 | 01 | 1 | RUN-03, RUN-04 | T-21-01, T-21-02 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/metrics.mjs tests/prompts/retention.mjs tests/codex/cli.mjs` | created by owning task where new | pending |
+| 21-01-01 | 01 | 1 | RUN-03, RUN-04 | T-21-01, T-21-02 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/metrics.mjs tests/codex/runner.mjs` | created by owning task where new | local checks passed |
+| 21-01-02 | 01 | 1 | RUN-03, RUN-04 | T-21-01, T-21-02 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/metrics.mjs tests/prompts/retention.mjs tests/codex/cli.mjs` | created by owning task where new | local checks passed |
 | 21-02-01 | 02 | 2 | RUN-01, RUN-03, RUN-04 | T-21-02, T-21-03 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/handoff.mjs tests/codex/result.mjs tests/prompts/store.mjs` | created by owning task where new | pending |
 | 21-02-02 | 02 | 2 | RUN-01, RUN-03, RUN-04 | T-21-02, T-21-03 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/handoff.mjs` | created by owning task where new | pending |
 | 21-03-01 | 03 | 3 | RUN-01, RUN-02 | T-21-03, T-21-04 | bounded current identity, provenance and no implicit dispatch | automated + stated manual evidence | `node --test tests/codex/recheck.mjs tests/prompts/retention.mjs` | created by owning task where new | pending |
