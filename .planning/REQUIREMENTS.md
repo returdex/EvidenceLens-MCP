@@ -2,7 +2,7 @@
 
 **Defined:** 2026-10-04
 **Milestone:** 快捷指令与 Codex 独立审阅
-**Status:** Approved on 2026-10-04; CMD-01–05, PRM-01–05 and CDX-01–06 completed in Phases 18–20 on 2026-10-05. RUN-01–05 remain pending.
+**Status:** Approved on 2026-10-04; CMD-01–05, PRM-01–05 and CDX-01–06 completed in Phases 18–20 on 2026-10-05. RUN-01–05 completed in Phase 21 on 2026-10-05.
 **Core value:** Produce trustworthy, independently checked findings grounded in controlled local evidence.
 
 ## v1.2 Requirements
@@ -38,11 +38,11 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 
 ### 结果回传、用量与验收
 
-- [ ] **RUN-01**: 用户在原作业对话中收到该次运行的完整分析、要求—证据对应关系、检查范围、未知项和完整行动，并仅在明确请求简版时提供摘要，并能定位对应运行记录。
-- [ ] **RUN-02**: 用户复查新稿后看到按当前证据更新的问题状态；已解决项退出当前行动，普通版本差异不会自动重开旧问题。
-- [ ] **RUN-03**: 用户可查看每次运行的阶段、状态、耗时、关联身份以及真实可得的模型/用量字段；模型或用量未报告时显示不可得。
-- [ ] **RUN-04**: 用户看到的 token 数据保留事件来源与统计范围，不重复累计缓存/推理子项，也不以账号额度变化推算单次用量或金额。
-- [ ] **RUN-05**: 用户可按文档完成安装→阶段检查→提示词导出→修改后复查的完整流程；验收区分合成测试、目标宿主发现和获授权的真实 Codex 运行证据。
+- [x] **RUN-01**: 用户在原作业对话中收到该次运行的完整分析、要求—证据对应关系、检查范围、未知项和完整行动，并仅在明确请求简版时提供摘要，并能定位对应运行记录。
+- [x] **RUN-02**: 用户复查新稿后看到按当前证据更新的问题状态；已解决项退出当前行动，普通版本差异不会自动重开旧问题。
+- [x] **RUN-03**: 用户可查看每次运行的阶段、状态、耗时、关联身份以及真实可得的模型/用量字段；模型或用量未报告时显示不可得。
+- [x] **RUN-04**: 用户看到的 token 数据保留事件来源与统计范围，不重复累计缓存/推理子项，也不以账号额度变化推算单次用量或金额。
+- [x] **RUN-05**: 用户可按文档完成安装→阶段检查→提示词导出→修改后复查的完整流程；验收区分合成测试、目标宿主发现和获授权的真实 Codex 运行证据。
 
 **2026-10-05 当前工作修订（用户授权）：** RUN-01 的简洁回传须可定位完整有效发现（含低级别项），保留 findingId、证据及覆盖限制；运行成功不自动等于最高档或已提交。RUN-02 的暂不处理属于行动处置，不等于已解决。RUN-05 增补上述回传/状态的合成负例，仍沿用既有来源绑定和真实运行验收。具体 H-01–04 见 [Phase 21 修订输入](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md)。这是现有要求的验收细化，需求数仍为 21；完整档位契约及模型语义评估另列[非阻塞未来备忘](notes/2026-10-05-review-quality-future.md)，不作为本阶段新增完成门槛。
 
@@ -88,11 +88,11 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 | CDX-04 | Phase 20 | Complete |
 | CDX-05 | Phase 20 | Complete |
 | CDX-06 | Phase 20 | Complete |
-| RUN-01 | Phase 21 | Pending |
-| RUN-02 | Phase 21 | Pending |
-| RUN-03 | Phase 21 | Pending |
-| RUN-04 | Phase 21 | Pending |
-| RUN-05 | Phase 21 | Pending |
+| RUN-01 | Phase 21 | Complete |
+| RUN-02 | Phase 21 | Complete |
+| RUN-03 | Phase 21 | Complete |
+| RUN-04 | Phase 21 | Complete |
+| RUN-05 | Phase 21 | Complete |
 
 **Coverage:** 21 requirements; 21 mapped exactly once; 0 unmapped. Mapping approved on 2026-10-04.
 
@@ -106,3 +106,5 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 
 
 2026-10-05 cross-provider default amendment: user replaces the three-Codex default with exactly one DeepSeek and one Codex independent reviewer plus source-backed host comparison. Full feedback and explicit single-provider choice remain. Stage DeepSeek API uses genuine captured excerpts, including requirements-only preparation, with existing provider config/bounded reading and shared v3 local binding; does not relax the four-role MCP contract or inherit its four-short-finding limit. Both captures precede inference, no peer findings, no automatic substitute/retry. Host-skill lifecycle includes safe DeepSeek receipt and validated saved result. Product baseline 0.3.14; next accepted Phase 21 patch 0.3.15. Offline integration and read-only configuration checks are distinct from new live inference; historical A4 used only Codex. Phase 21 stays 0/6, RUN-01–05 pending.
+
+Current acceptance 2026-10-05: RUN-01–05 complete per Phase 21 verification. Earlier dated amendments above are retained as historical decisions; their pending status is superseded by this acceptance.

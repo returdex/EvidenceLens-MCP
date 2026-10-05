@@ -15,7 +15,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 - [x] **Phase 18: Discoverable Stage Commands** — 命令入口与安装。 (completed 2026-10-05)
 - [x] **Phase 19: Captured Task Prompts and Export** — 提示词记录与导出。 (completed 2026-10-05)
 - [x] **Phase 20: Bounded Independent Codex Execution** — Codex 独立执行。 (completed 2026-10-05)
-- [ ] **Phase 21: Review Handoff and Usage Acceptance** — 结果回传与用量验收。
+- [x] **Phase 21: Review Handoff and Usage Acceptance** — 结果回传与用量验收。
 
 ## Phase Details
 
@@ -136,7 +136,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 3. 调用记录含状态和耗时；可得模型及 token 值有来源/范围，缺值不填零、不推算账单。
 4. 完整流程有合成负例、目标宿主发现和获授权真实 Codex 运行证据；缺任何一层就明确保留验收缺口。
 
-**Plans**: 0/6 complete; six sequential plans / 13 tasks checked in [21-PLAN-CHECK.md](phases/21-review-handoff-and-usage-acceptance/21-PLAN-CHECK.md).
+**Plans**: 6/6 complete; six sequential plans / 13 tasks checked in [21-PLAN-CHECK.md](phases/21-review-handoff-and-usage-acceptance/21-PLAN-CHECK.md).
 
 **Planning revision (2026-10-05):** Read [21-PLANNING-INPUT](phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md). H-01–04 refine RUN-01/02/05: preserve access to every validated finding in concise handoff, separate execution success from band/submission claims, distinguish deferred action from resolved findings, and test those boundaries with source-bound synthetic results. Larger semantic-review changes remain in the [non-blocking future memo](notes/2026-10-05-review-quality-future.md); completed phases have [revision reminders](REVIEW-REVISIONS.md) without reopening their status. Phase 21 is planned and ready to execute, with no new phase dependency.
 
@@ -158,11 +158,11 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 5** *(depends on Wave 4)*
 
-- [ ] 21-05-PLAN.md — Synthetic, installed-host and authorized real acceptance.
+- [x] 21-05-PLAN.md — Synthetic, installed-host and authorized real acceptance.
 
 **Wave 6** *(depends on Wave 5)*
 
-- [ ] 21-06-PLAN.md — Accepted feature patch and scoped verification.
+- [x] 21-06-PLAN.md — Accepted feature patch and scoped verification.
 
 **Cross-cutting constraints:**
 
@@ -178,7 +178,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
 | 20. Bounded Independent Codex Execution | 6/6 | Complete | 2026-10-05 |
-| 21. Review Handoff and Usage Acceptance | 4/6 | In Progress|  |
+| 21. Review Handoff and Usage Acceptance | 6/6 | Complete | 2026-10-05 |
 
 ## Coverage and Research
 
@@ -196,3 +196,5 @@ Multi-provider comparison, aggregate statistics, incremental indexing, general p
 
 
 2026-10-05 cross-provider default amendment: user replaces the three-Codex default with exactly one DeepSeek and one Codex independent reviewer plus source-backed host comparison. Full feedback and explicit single-provider choice remain. Stage DeepSeek API uses genuine captured excerpts, including requirements-only preparation, with existing provider config/bounded reading and shared v3 local binding; does not relax the four-role MCP contract or inherit its four-short-finding limit. Both captures precede inference, no peer findings, no automatic substitute/retry. Host-skill lifecycle includes safe DeepSeek receipt and validated saved result. Product baseline 0.3.14; next accepted Phase 21 patch 0.3.15. Offline integration and read-only configuration checks are distinct from new live inference; historical A4 used only Codex. Phase 21 stays 0/6, RUN-01–05 pending.
+
+Current acceptance 2026-10-05: Phase 21 complete at 0.3.17, all four phases and 21 requirements accepted within stated verification scope. Earlier amendment status is historical. Milestone completion/archive and Release/tag remain separate.

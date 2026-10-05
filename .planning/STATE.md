@@ -2,29 +2,30 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 快捷指令与 Codex 独立审阅
-status: awaiting_live_authorization
-last_updated: "2026-10-05T10:06:10.280Z"
+status: milestone_ready_for_completion
+last_updated: "2026-10-05T10:57:52.787Z"
 last_activity: 2026-10-05
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 21
-  completed_plans: 19
-  percent: 75
+  completed_plans: 21
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
 
-## Project Reference
-
-See [PROJECT](PROJECT.md), updated 2026-10-05. Core value: trustworthy, independently checked findings grounded in controlled local evidence. Current focus: Plan 05 prepared two-run synthetic live acceptance; implementations 01–04 verified. Phase 20 complete at product 0.3.3.
-
 ## Current Position
 
-Phase: 21 (Review Handoff and Usage Acceptance) — EXECUTING
-Plan: 4/6 complete; Plan 05 Task 01 complete, Task 02 checkpoint
-Status: Plans 01–04 complete; Plan 05 Task 01 verified, concrete live authorization pending
-Last activity: 2026-10-05
+Phase 21 complete: 6/6 plans, all 13 tasks and RUN-01–05 verified. Product 0.3.17; milestone v1.2 unchanged. Four of four phases and 21/21 requirements complete. Two authorized synthetic Codex calls succeeded; no retry. Build and 276 Node / 124 Vitest tests passed. See phases/21-review-handoff-and-usage-acceptance/21-VERIFICATION.md.
+
+## Next Action
+
+Milestone audit/completion is a separate workflow. No Release/tag or archival performed. RR/FM reminders and full A1.3 semantic evaluation remain deferred and non-blocking.
+
+## Historical continuity and coverage notes
+
+The following earlier checkpoints are preserved as history; their pending status/version statements are superseded by the current position above.
 
 ## Accepted Coverage Debt
 

@@ -188,3 +188,9 @@ Plans 01–04 implemented and locally verified: source-scoped terminal metrics, 
 - Inline trust-boundary review: metrics allowlist/null/provenance, once-only terminal observer, attempt/hash-bound private transaction, frozen trusted bundles/source rebind, escaped Markdown, explicit admitted prior origins, current proof/deferral separation, strict installed CLI, owned sidecar retention. No open high-severity finding after result-digest retention repair. Structural source checks do not establish semantic grading or correctness.
 
 Details: [host/offline evidence](../.planning/phases/21-review-handoff-and-usage-acceptance/21-HOST-ACCEPTANCE.md), [reviewable live inputs](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-INPUTS.md), [NOT_RUN live status](../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-ACCEPTANCE.md). Historical smokes and A4 experiments do not authorize this new two-run pair; no automatic resend/model switch/coursework replay.
+
+## Phase 21 final acceptance — 2026-10-05 / 0.3.17
+
+Build 0.3.17: exit 0 (0.763 s). Node: node --test tests/codex/*.mjs tests/prompts/*.mjs tests/commands/*.mjs tests/baseline/*.mjs — 276/276, 19.795 s, no skips/failures. Offline Vitest with EVIDENCELENS_DISABLE_PROVIDER=1: seven Plan 06 files, 124/124, 2.99 s, exit 0. Existing PDF font/index warnings did not fail tests.
+
+Authorized real pair and scoped host judgments: see ../.planning/phases/21-review-handoff-and-usage-acceptance/21-LIVE-ACCEPTANCE.md and 21-VERIFICATION.md. No additional inference, dependency changes, release/tag or grading claims.
