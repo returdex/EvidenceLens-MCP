@@ -154,7 +154,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 **Wave 4** *(depends on Wave 3)*
 
-- [ ] 21-04-PLAN.md — Installed helper and four-stage command wiring.
+- [x] 21-04-PLAN.md — Installed helper and four-stage command wiring.
 
 **Wave 5** *(depends on Wave 4)*
 
@@ -178,7 +178,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 | 18. Discoverable Stage Commands | 4/4 | Complete | 2026-10-05 |
 | 19. Captured Task Prompts and Export | 5/5 | Complete    | 2026-10-05 |
 | 20. Bounded Independent Codex Execution | 6/6 | Complete | 2026-10-05 |
-| 21. Review Handoff and Usage Acceptance | 3/6 | In Progress|  |
+| 21. Review Handoff and Usage Acceptance | 4/6 | In Progress|  |
 
 ## Coverage and Research
 
