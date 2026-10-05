@@ -285,3 +285,29 @@ export async function readCodexMetrics(scope,runId){
  await boundary(c,'metrics_read');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
  return {metadata:receipt(l),metrics,availability:metrics?'recorded':'not_recorded'};
 }
+
+// Bundles can only be obtained by a scoped coherent private-store read.
+const trustedBundles=new WeakSet();
+export const isTrustedRunBundle=value=>trustedBundles.has(value);
+export async function readRunRecord(scope,{expectedRunId,historicalRunId}={}){
+ if(Boolean(expectedRunId)===Boolean(historicalRunId)||!uuid(expectedRunId??historicalRunId))fail('identity_required');
+ const runId=expectedRunId??historicalRunId,c=await context(scope);await unlocked(c);
+ const index=await loadIndex(c),t=taskFor(index,scope.taskId);member(t,runId);
+ if(expectedRunId&&t.latest!==runId)fail('latest_mismatch');
+ const l=await state(c,t,runId),s=l.promptSha256===null?null:await snapshot(c,t,l);
+ const e=l.executionKind==='codex_exec'?await execution(c,t,l):null;
+ if(e&&(e.status==='preparing'?!['captured','dispatched'].includes(l.status):e.status!==l.status))fail('corrupt_record');
+ const providerRaw=l.executionKind==='host_skill'?await read(recordPath(c,t,runId,'provider')):null,provider=providerRaw?providerReceipt(providerRaw,l):null;
+ if(provider&&provider.status!==l.status)fail('corrupt_record');
+ const mraw=await read(recordPath(c,t,runId,'metrics'),16384),metrics=mraw?bindRunMetrics(mraw,e):null;
+ let result=null;
+ if(l.status==='succeeded'&&(e||provider)){
+  const raw=validateResultEnvelope(await read(recordPath(c,t,runId,'result'))),bound=validateBoundCodexResult(s,raw.modelResponse);
+  if(JSON.stringify(raw)!==JSON.stringify(bound)||raw.resultSha256!==(e??provider).resultSha256)fail('corrupt_record');result=bound;
+ }
+ await boundary(c,'record_read');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
+ const bundle={metadata:{...receipt(l),selection:historicalRunId?'historical':'latest'},snapshot:s,execution:e,provider,metrics,metricsAvailability:metrics?'recorded':'not_recorded',result};
+ // Freeze data transitively so callers cannot rewrite a trusted result before rendering.
+ const freeze=v=>{if(v&&typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v);}return v;};
+ freeze(bundle);trustedBundles.add(bundle);return bundle;
+}

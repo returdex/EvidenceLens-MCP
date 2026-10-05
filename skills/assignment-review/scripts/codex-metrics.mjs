@@ -37,6 +37,6 @@ export function createRunMetrics(execution,launch,usage=normalizeTerminalMetrics
 }
 export function bindRunMetrics(input,execution){
  const v=validateRunMetrics(input);
- if(!execution||['runId','taskId','conversationId','attemptId','promptSha256','binarySha256'].some(k=>v[k]!==execution[k])||Boolean(v.usage.eventType)!==execution.terminalObserved||execution.status==='preparing')fail('corrupt_record');
+ if(!execution||['runId','taskId','conversationId','attemptId','promptSha256','binarySha256'].some(k=>v[k]!==execution[k])||Boolean(v.usage.eventType)!==execution.terminalObserved||v.observedAt!==execution.finishedAt||execution.status==='preparing')fail('corrupt_record');
  return v;
 }
