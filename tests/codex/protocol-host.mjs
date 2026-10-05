@@ -11,6 +11,7 @@ test('diagnostic metadata exception: actual binary completes synthetic schema ou
  assert.ok(!JSON.stringify(r.requests).includes(r.ambient));assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
  assert.deepEqual(JSON.parse(events(r).find(x=>x.item?.type==='agent_message').item.text),r.result);
  assert.equal(events(r).at(-1).type,'turn.completed');
+ assert.deepEqual(events(r).at(-1).usage,{input_tokens:10,cached_input_tokens:0,output_tokens:10,reasoning_output_tokens:0});
  t.diagnostic('Diagnostic only; metadata writes allowed. Policy template SHA256 '+r.policySha256);
 });
 for(const mode of ['429','500','disconnect','truncated','failed'])test('diagnostic '+mode+': one model request, terminal failure, no retry',async()=>{

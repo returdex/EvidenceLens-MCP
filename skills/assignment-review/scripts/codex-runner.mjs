@@ -1,3 +1,4 @@
+import { normalizeTerminalMetrics,createRunMetrics } from './codex-metrics.mjs';
 import { validateBoundCodexResult } from './codex-result.mjs';
 import { spawn } from 'node:child_process';
 import { CODEX_LIMITS,codexError,parseEvidenceCapsule } from './codex-contract.mjs';
@@ -10,7 +11,7 @@ import { createIsolatedLaunch,assertCertifiedLaunch,toolAttempt } from './codex-
 // Internal library seam for deterministic process fixtures; never exposed as CLI arguments.
 export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMITS.reviewMs}={}){
  return new Promise(resolve=>{
-  let child,settled=false,reason=null,bytes=0,thread=false,turn=false,terminal=false,final=null,stdout=Buffer.alloc(0),stderr=Buffer.alloc(0),termTimer,hardTimer;
+  let child,settled=false,reason=null,bytes=0,thread=false,turn=false,terminal=false,metrics=normalizeTerminalMetrics(null),final=null,stdout=Buffer.alloc(0),stderr=Buffer.alloc(0),termTimer,hardTimer;
   const diagnostics=newDiagnostics('process'),started=Date.now();
   // Preserve the first rejection; cancellation/cleanup must not erase its evidence.
   const note=(trigger,details={})=>{if(!diagnostics.trigger)Object.assign(diagnostics,{trigger},details);};
@@ -23,7 +24,7 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
    }
    Object.assign(diagnostics,{threadObserved:thread,turnObserved:turn});
    const code=reason,status=code==='cancelled'?'cancelled':code==='uncertain'||!cleanupComplete?'uncertain':code?'failed':'candidate';
-   resolve({status,code:code==='cancelled'?null:code,terminalObserved:terminal,cleanupComplete,elapsedMs:Date.now()-started,diagnostics,candidate:status==='candidate'?final:null});
+   resolve({status,code:code==='cancelled'?null:code,terminalObserved:terminal,cleanupComplete,elapsedMs:Date.now()-started,diagnostics,metrics,candidate:status==='candidate'?final:null});
    stdout=stderr=Buffer.alloc(0);final=null;
   };
   const stop=(code,trigger,details={})=>{
@@ -52,7 +53,7 @@ export function superviseCodexProcess(launch,input,{signal,timeoutMs=CODEX_LIMIT
    const details={eventType:diagnosticEvent(e.type),itemType:diagnosticItem(e.item?.type)};
    if(e.type==='thread.started'){if(thread||turn||terminal||typeof e.thread_id!=='string')return stop('protocol_invalid','event_order',details);thread=true;return;}
    if(e.type==='turn.started'){if(!thread||turn||terminal)return stop('protocol_invalid','event_order',details);turn=true;return;}
-   if(e.type==='turn.completed'){if(!turn||terminal||final===null)return stop('protocol_invalid','event_order',details);terminal=true;return;}
+   if(e.type==='turn.completed'){if(!turn||terminal||final===null)return stop('protocol_invalid','event_order',details);terminal=true;metrics=normalizeTerminalMetrics(e);return;}
    if(['turn.failed','error'].includes(e.type))return stop('uncertain',e.type==='error'?'cli_error':'cli_turn_failed',{...details,reportedErrorCategory:reportedErrorCategory(e.error?.message??e.message)});
    if(e.type==='item.completed'&&e.item?.type==='error'&&!turn&&thread){
     const expected='Failed to read global AGENTS.md instructions from `'+launch.env.CODEX_HOME+'/AGENTS.md`: Operation not permitted (os error 1)';
@@ -116,11 +117,11 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
   if(!owned)return {ok:false,runId,...codexError(e)};
   if(e.scratchRoot)await recordCodexScratch(scope,runId,execution.attemptId,e.scratchRoot).catch(()=>{});
   const trigger={capsule:'capsule_invalid',preflight:'preflight_rejected',launch:'launch_failed',dispatch:'dispatch_failed',process:'supervisor_failed',result_validation:'result_rejected'}[stage]??'supervisor_failed';
-  outcome={status:dispatch||e.cleanupComplete===false?'uncertain':'failed',code:codexError(e).code,terminalObserved:outcome?.terminalObserved??false,cleanupComplete:outcome?.cleanupComplete??(dispatch?false:e.cleanupComplete!==false),diagnostics:{...(outcome?.diagnostics??newDiagnostics()),stage,trigger:stage==='result_validation'?diagnosticBindingTrigger(e.bindingTrigger):trigger}};
+  outcome={metrics:outcome?.metrics,status:dispatch||e.cleanupComplete===false?'uncertain':'failed',code:codexError(e).code,terminalObserved:outcome?.terminalObserved??false,cleanupComplete:outcome?.cleanupComplete??(dispatch?false:e.cleanupComplete!==false),diagnostics:{...(outcome?.diagnostics??newDiagnostics()),stage,trigger:stage==='result_validation'?diagnosticBindingTrigger(e.bindingTrigger):trigger}};
  }
  if(launch&&outcome.cleanupComplete){try{await launch.cleanup();}catch{outcome={...outcome,status:'uncertain',code:'uncertain',cleanupComplete:false,diagnostics:outcome.diagnostics?.trigger?outcome.diagnostics:{...(outcome.diagnostics??newDiagnostics()),stage:'cleanup',trigger:'cleanup_failed'}};}}
  if(signal?.aborted&&outcome.cleanupComplete){outcome={...outcome,status:'cancelled',code:null,diagnostics:outcome.diagnostics?.trigger?outcome.diagnostics:{...(outcome.diagnostics??newDiagnostics()),stage,trigger:'aborted'}};result=null;}
  if(outcome.status!=='succeeded')result=null;
  const receipt={...execution,...(launch?{binaryVersion:launch.binaryVersion,binarySha256:launch.binarySha256,policySha256:launch.policySha256}:{}),status:outcome.status,errorCode:outcome.code,finishedAt:new Date().toISOString(),elapsedMs:Date.now()-started,terminalObserved:outcome.terminalObserved,cleanupComplete:outcome.cleanupComplete,diagnostics:outcome.diagnostics??newDiagnostics(stage),resultSha256:result?.resultSha256??null};
- try{return await completeCodexRun(scope,runId,{execution:receipt,result,signal});}catch(e){return {ok:false,runId,code:codexError(e).code,diagnostics:{...receipt.diagnostics,stage:'publication',trigger:'publication_failed'}};}
+ try{return await completeCodexRun(scope,runId,{execution:receipt,result,metrics:createRunMetrics(receipt,launch,outcome.metrics),signal});}catch(e){return {ok:false,runId,code:codexError(e).code,diagnostics:{...receipt.diagnostics,stage:'publication',trigger:'publication_failed'}};}
 }
