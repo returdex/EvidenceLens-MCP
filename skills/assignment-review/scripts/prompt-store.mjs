@@ -206,7 +206,7 @@ export async function forgetTask(scope,{apply=false}={}){
     const lp=recordPath(c,t,r.runId,'state'),sp=recordPath(c,t,r.runId,'snapshot');
     const lraw=await read(lp),sraw=await read(sp);
     const hp=recordPath(c,t,r.runId,'handoff'),hraw=await read(hp);
-    if(hraw){if(!lraw||!sraw)fail('corrupt_record');validateStoredHandoff(hraw,lraw,sraw);await fs.unlink(hp);}
+    if(hraw){if(!lraw||!sraw)fail('corrupt_record');validateStoredHandoff(hraw,lraw,sraw);const resultRaw=validateResultEnvelope(await read(recordPath(c,t,r.runId,'result')));if(hraw.resultSha256!==resultRaw.resultSha256)fail('corrupt_record');await fs.unlink(hp);}
     const mp=recordPath(c,t,r.runId,'metrics'),mraw=await read(mp,16384);
     if(mraw){if(!lraw)fail('corrupt_record');bindRunMetrics(mraw,await execution(c,t,validateLifecycle(lraw)));await fs.unlink(mp);}
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}

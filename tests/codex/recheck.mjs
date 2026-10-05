@@ -38,3 +38,9 @@ test('ordinary name changes and shared F names never supply task history or reop
  const x=await assessmentFlow(t);x.finding.rationale='Demo name changed; policy remains unknown';const a=createReviewAssessment(x.bundle,[],{requirements:[{...x.requirement,type:'unknown',status:'unknown'}],findings:[{...x.finding,actionDisposition:'deferred'}]});assert.equal(a.findings[0].reopened,false);assert.equal(projectCurrentActions(a).groups.unknown.length,1);assert.throws(()=>createReviewAssessment(x.bundle,[],{requirements:[x.requirement],findings:[{...x.finding,reopened:true}]}));
  const other=await assessmentFlow(t);await assert.rejects(admitPriorSummaries(other.scope,other.bundle,[local(x)]));
 });
+test('retention deletes valid bound annotation and preserves foreign result hash even with fresh annotation digest',async t=>{
+ for(const foreign of [false,true]){const x=await assessmentFlow(t),a=createReviewAssessment(x.bundle,[],{requirements:[x.requirement],findings:[x.finding]});await store.annotateRun(x.scope,{expectedRunId:x.receipt.runId,assessment:a});const p=x.scope.stateRoot+'/'+sha256(x.scope.conversationId)+'/'+sha256(x.scope.taskId)+'/'+x.receipt.runId+'.handoff.json';
+  if(foreign){const {assessmentSha256,...body}=a;body.resultSha256='0'.repeat(64);await fs.writeFile(p,JSON.stringify({...body,assessmentSha256:sha256(JSON.stringify(body))}));}
+  assert.equal((await store.forgetTask(x.scope,{apply:true})).incomplete,foreign);if(foreign)assert.ok(await fs.stat(p));else await assert.rejects(fs.stat(p),{code:'ENOENT'});
+ }
+});
