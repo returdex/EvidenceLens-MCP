@@ -21,3 +21,6 @@ blocking: false
 ## 取用方式
 
 下一里程碑规划或相关模块变更时检查本备忘。被正式安排的事项再建立要求/计划，并在本表记录承接位置；本文件仍有未承接项时保持 `promoted: false`。已完成范围的提醒集中在 [REVIEW-REVISIONS](../REVIEW-REVISIONS.md)，当前纳入范围见 [Phase 21 输入](../phases/21-review-handoff-and-usage-acceptance/21-PLANNING-INPUT.md)。
+
+
+2026-10-05 user-directed update: FM-02 has a completed initial bounded A4 three-reviewer experiment using identical frozen source material, separate captured prompts and no peer conclusions. All three succeeded; core requirements agreed, with one complementary constraint-check reminder and shared visual-rubric limits. Composite mapping/qualifier issues were corrected while preserving originals. No decision accuracy gain was measured. Complete reporting is corrected now in the shared Skill/capture guidance. A reusable multi-agent decision contract, repeated-case evaluations, verified effective-model/usage metrics and independent semantic ground truth remain future non-blocking work; one case does not close FM-02 or establish general superiority.

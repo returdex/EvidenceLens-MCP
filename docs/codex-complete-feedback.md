@@ -1,0 +1,26 @@
+# Complete feedback and bounded multi-reviewer experiment — 0.3.12
+
+## User correction
+
+The user rejected unsolicited shortening after the successful preparation review. The prior independent result contained 16 findings with 2534 claim characters and 731 action characters. The displayed response was 1681 characters including metadata and receipt, and did not present per-finding source text, location or a full report link. Its 38 reference associations reused eight excerpts; they were not 38 independent sources. Runtime and binding success did not establish review quality.
+
+## Narrow correction
+
+Shared Skill, stage templates and capture guidance now request complete substantive feedback. Applicable requirements receive sourced interpretation, evidence/unknowns, checkable assessment basis, applicable high-band obstacles or common errors, validation methods and actions. Every finding, including info/Low, remains visible with its evidence and limitations. Only an explicit user request selects a brief summary; the same-run full report must remain accessible. Long output is segmented or supplied as a private complete artifact rather than silently dropped. Explanations are auditable rationale, not hidden reasoning.
+
+No result schema, authentication, isolation permissions, requested model or reasoning effort changed. Phase 21 D-01 and pending handoff/CLI plans are amended to full-by-default; this prompt/Skill correction does not implement or close those programmatic plans. Product 0.3.12; next accepted phase patch 0.3.13.
+
+## Test design
+
+The user explicitly authorized testing multi-agent decisions on the A4 case. Three separate isolated Codex reviewer processes use the same frozen official material and complete review task, each with its own new begin/capture/run identity. All three captures are prepared before the first inference; no peer conclusions appear in their input. Root verification confirmed identical task bodies, admitted text, excerpts and material metadata across captures. Requested configuration stays GPT-6/low; effective model metadata is independently unavailable. Processes run serially to avoid shared-store transaction contention. Internal CLI multi_agent remains disabled.
+
+The first new full report is the single-reviewer comparator for the union of all three. Host source-backed adjudication preserves reviewer/run/finding provenance, minority findings, disputed interpretations and unresolved issues. Majority agreement and longer output are not accuracy proof. Comparison with the earlier short response changes prompt requirements as well as reviewer count and cannot isolate the effect of agent count. The experiment is one case with three reviewers, not a repeated statistical evaluation or a general multi-agent runtime. All three actual preparation reviews succeeded: 18, 13 and 17 findings; elapsed 243281, 256748 and 253774 ms (total 753803 ms). Claim/action character totals were 8497, 9294 and 8826; finding count and length alone do not establish quality. Independent root checks revalidated each stored v1 result against its immutable capture and execution hash, confirmed all three inputs were captured before the first inference, and verified every finding/claim/action/evidence quote/limitation appears in its private full Markdown report. All terminal events, exit codes (0) and cleanup checks passed. The original conversation completed and delivered three full reports, a full source-backed host comparison and a frozen-source evidence index. Core interpretations agreed; one additional retained reminder was to observe source-table versus copied-table constraints separately. Intermediate rubric time-band boundaries remained unverified from mixed-column text. No decision accuracy gain was measured, and semantic accuracy is not established by structural checks.
+
+## Regression
+
+Fresh build passed. Node Codex/prompt/command/source-boundary checks: 231/231 in 12.381 seconds; six affected Vitest files: 118/118 in 3.74 seconds. No failures or skips. Existing non-fatal PDF/font warnings remain. The optional skill-creator Python validator could not start because PyYAML is absent; installed-link/reference checks passed in the Node suite. No dependency installation or upgrade was needed.
+
+
+## Composite-report verification
+
+Root corrected the composite table's cross-topic reference omissions: combined findings must not be treated as missing coverage because they lack a separate row. The original host comparison was retained privately; all independent model reports and persisted results stayed unchanged. Root also clarified that a gap/unknown mapping adjustment is not evidence the reviewers invented a confirmed assignment defect: their claims already stated missing current materials. One review already warned against deriving time bands from mixed text, so restricting that text is not proof the reviewer had actually assigned an incorrect band. Synthesis must preserve qualifications before claiming a correction. These are exploratory observations for future semantic/handoff work, not completion of a general adjudication engine.

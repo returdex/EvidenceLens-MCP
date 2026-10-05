@@ -20,7 +20,7 @@ export interface ServerOptions {
 }
 
 export function createServer(options: ServerOptions = {}): McpServer {
-  const server = new McpServer({ name: "evidencelens", version: "0.3.11" });
+  const server = new McpServer({ name: "evidencelens", version: "0.3.12" });
 
   let provider = options.provider;
   let providerConfig = options.providerConfig;

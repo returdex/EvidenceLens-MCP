@@ -127,7 +127,7 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 
 ### Phase 21: Review Handoff and Usage Acceptance
 
-**Goal**: 用户完成独立审阅→简洁回传→提示词导出→新版本复查的闭环，并查看真实调用记录。
+**Goal**: 用户完成独立审阅→完整分析回传→提示词导出→新版本复查的闭环，并查看真实调用记录。
 **Depends on**: Phase 20
 **Requirements**: RUN-01, RUN-02, RUN-03, RUN-04, RUN-05
 **Success Criteria**:
@@ -187,3 +187,6 @@ The user explicitly approved all 21 requirements and this four-phase roadmap on 
 ## Deferred Work
 
 Multi-provider comparison, aggregate statistics, incremental indexing, general policy configuration and optional multi-user support remain deferred. Accepted v1.0/v1.1 validation debt remains historical and visible in [v1.1 completion](milestones/v1.1-COMPLETION.md).
+
+
+**Complete-feedback revision (2026-10-05):** The user explicitly rejects default shortening. Phase 21 handoff now defaults to complete analysis, evidence and actions; only user-requested summaries accompany an accessible full report. Product baseline 0.3.12 after the shared Skill/capture correction; next accepted phase patch 0.3.13. A user-authorized three-reviewer A4 experiment is exploratory and does not close the pending phase or expand normal single-review dispatch.

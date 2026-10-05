@@ -38,7 +38,7 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 
 ### 结果回传、用量与验收
 
-- [ ] **RUN-01**: 用户在原作业对话中收到该次运行的简洁结论、要求—证据对应关系、检查范围、未知项和最小行动，并能定位对应运行记录。
+- [ ] **RUN-01**: 用户在原作业对话中收到该次运行的完整分析、要求—证据对应关系、检查范围、未知项和完整行动，并仅在明确请求简版时提供摘要，并能定位对应运行记录。
 - [ ] **RUN-02**: 用户复查新稿后看到按当前证据更新的问题状态；已解决项退出当前行动，普通版本差异不会自动重开旧问题。
 - [ ] **RUN-03**: 用户可查看每次运行的阶段、状态、耗时、关联身份以及真实可得的模型/用量字段；模型或用量未报告时显示不可得。
 - [ ] **RUN-04**: 用户看到的 token 数据保留事件来源与统计范围，不重复累计缓存/推理子项，也不以账号额度变化推算单次用量或金额。
@@ -97,3 +97,6 @@ Phase 20 acceptance is scoped to implemented controls, actual pinned CLI/OS/logi
 **Coverage:** 21 requirements; 21 mapped exactly once; 0 unmapped. Mapping approved on 2026-10-04.
 
 *Last updated: 2026-10-05 after Phase 20 verification and user-directed Phase 21 planning refinements.*
+
+
+**2026-10-05 完整反馈修订（用户直接纠正）：** RUN-01 默认完整分析，不擅自压缩、删除 Low/info 或仅交付内部保存的 JSON；明确请求简版时，摘要附同轮完整报告。长报告可分段或交付 Git 外私有完整文件。该修订优先于前次“简洁回传”措辞，要求总数保持 21。用户同时授权一次三独立审阅者 A4 决策实验；实验不自动增加常规调用数、不关闭 RUN-01–05 或非阻塞语义工作。
