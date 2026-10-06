@@ -23,6 +23,6 @@ Roadmap criteria 1 and 4 pass (diagnostics; frozen baseline/matrix/rubric/budget
 
 ## Checks
 
-33/33 focused Node tests passed; git diff --check passed. Regression npm test result recorded separately when command finishes. No live CLI/provider/auth calls; authorizedRequests=0/inference=NOT_RUN. No phase.complete called; EVA-03/04 and future settings/prompts untouched. Product 0.3.17 retained.
+33/33 focused Node tests passed; git diff --check passed. Regression `npm test`: NOT_COMPLETED. The disabled-provider command remained before Vitest test execution with no output after approximately 4 minutes; the owned test processes were terminated (exit 143). Cause unknown, no auto-retry or environment changes. Focused checks remain valid; no full-suite pass claimed. No live CLI/provider/auth calls; authorizedRequests=0/inference=NOT_RUN. No phase.complete called; EVA-03/04 and future settings/prompts untouched. Product 0.3.17 retained.
 
 Next: `$gsd-plan-phase 22 --gaps`. Partial summaries are checkpoint evidence, not plan/phase completion. Gap plans must reuse existing gate/protocol and frozen old source; no duplicate framework.

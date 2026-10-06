@@ -21,7 +21,7 @@ A2 assessed ZIP user-confirmed, CRC/inner source/feedback hashes verified; priva
 
 ## Checks and boundaries
 
-Combined Node run: 33/33 passed. git diff --check passed. No actual CLI/provider/auth/network dispatch or coursework modification. Product remains 0.3.17. Original manifests and historical receipts preserved. Client completion/activity date is 2026-10-07 Australia/Melbourne.
+Combined Node run: 33/33 passed; strengthened inode/hash-alias gate rerun 1/1 passed. Broad npm test NOT_COMPLETED (no test result after ~4 minutes; owned processes terminated, exit 143; cause unknown). git diff --check passed. No actual CLI/provider/auth/network dispatch or coursework modification. Product remains 0.3.17. Original manifests and historical receipts preserved. Client completion/activity date is 2026-10-07 Australia/Melbourne.
 
 ## Deviations and remaining work
 
