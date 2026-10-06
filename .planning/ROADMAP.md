@@ -8,7 +8,7 @@
 
 ## v1.3 提示词、反馈质量与可配置审阅
 
-**Status:** Approved by user on 2026-10-06; ready for Phase 22 planning.
+**Status:** Approved by user on 2026-10-06; Phase 22 execution has gaps (2026-10-07).
 **Milestone Goal:** 修复实际审阅流程、提示词和完整反馈，通过可配置入口与反馈隔离对照评估验证建议和档位判断。
 
 先保留旧版与冻结评估协议，再修复输出接收、提示词、反馈和设置，最后开展已授权的横向评估。历史阶段目录与证明留在原路径；本次不重开旧阶段、不自动关闭 RR/FM、不自动发布或启动真实模型调用。
@@ -36,7 +36,7 @@
 **Plans**: 3 plans
 
 **Wave 1**
-- [ ] 22-01-PLAN.md — 复现真实流程与失败分类 (OUT-01)
+- [x] 22-01-PLAN.md — 复现真实流程与失败分类 (OUT-01)
 - [ ] 22-02-PLAN.md — 核实作业版本与阶段证据 (EVA-01)
 
 **Wave 2 (blocked on Wave 1 completion)**

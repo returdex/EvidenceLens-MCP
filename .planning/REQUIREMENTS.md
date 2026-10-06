@@ -14,7 +14,7 @@
 
 ### 运行可靠性与兼容接收
 
-- [ ] **OUT-01**: 用户可从已有失败记录及最小复现看到失败层级、实际原因或 unknown，区分运行、格式、来源校验与语义问题。
+- [x] **OUT-01**: 用户可从已有失败记录及最小复现看到失败层级、实际原因或 unknown，区分运行、格式、来源校验与语义问题。
 - [ ] **OUT-02**: 用户的合法回复不会仅因经验证可恢复的展示差异被整体丢弃；兼容处理保留原文和转换说明，不补造事实或静默截断。
 - [ ] **OUT-03**: 用户可区分已验证发现、部分可用内容和未验证诊断；身份、授权、来源或存储安全失败不被降级成成功。
 - [ ] **OUT-04**: 一位审阅者失败时用户仍收到另一位的可用完整报告及明确失败状态；不会静默重试、换模型、补造双模型成功。
@@ -70,7 +70,7 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | PPT-01 | Phase 24 | Pending |
 | PPT-02 | Phase 24 | Pending |
 | PPT-03 | Phase 24 | Pending |
-| OUT-01 | Phase 22 | Pending |
+| OUT-01 | Phase 22 | Complete |
 | OUT-02 | Phase 23 | Pending |
 | OUT-03 | Phase 23 | Pending |
 | OUT-04 | Phase 23 | Pending |
@@ -79,8 +79,8 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | FBK-03 | Phase 25 | Pending |
 | BND-01 | Phase 24 | Pending |
 | BND-02 | Phase 24 | Pending |
-| EVA-01 | Phase 22 | Pending |
-| EVA-02 | Phase 22 | Pending |
+| EVA-01 | Phase 22 | Partial |
+| EVA-02 | Phase 22 | Partial |
 | EVA-03 | Phase 27 | Pending |
 | EVA-04 | Phase 27 | Pending |
 | CFG-01 | Phase 26 | Pending |

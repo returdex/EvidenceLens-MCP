@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
-status: planning
-last_updated: "2026-10-05T17:24:24.422Z"
-last_activity: 2026-10-06 — Phase 22 planning complete (Australia/Melbourne)
+status: gaps_found
+last_updated: "2026-10-06T15:53:27.659Z"
+last_activity: 2026-10-07 -- Phase 22 offline implementation checked; EVA-01/EVA-02 gaps remain
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 33
 ---
 
 # EvidenceLens MCP — Project State
@@ -21,10 +21,10 @@ See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independe
 
 ## Current Position
 
-Phase: 22 of 27 — 真实流程诊断与评估基线 (not started)
-Plan: 0/3 complete; ready for execution
-Status: Ready to execute
-Last activity: 2026-10-06 — Phase 22 planning complete (Australia/Melbourne)
+Phase: 22 (真实流程诊断与评估基线) — GAPS FOUND
+Plan: 1 of 3 complete; 22-02/03 partial checkpoints
+Status: Phase 22 verification gaps found
+Last activity: 2026-10-07 -- Phase 22 offline implementation checked; EVA-01/EVA-02 gaps remain
 
 ## Deferred Items
 
@@ -36,4 +36,4 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Execute `$gsd-execute-phase 22` to run the three checked plans. Planning complete; implementation and provider execution have not started.
+Run `$gsd-plan-phase 22 --gaps` to finish real final-stage source availability and feedback-safe extraction/capsule freezing. A2 exact ZIP user-confirmed; 33/33 focused checks pass. No real model calls. Do not skip partial checkpoints as completed requirements.
