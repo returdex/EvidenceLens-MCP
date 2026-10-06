@@ -39,6 +39,8 @@ Limits: 100 sources/excerpts/findings; final 240 KiB; envelope 256 KiB; event li
 
 Synthetic fixtures only. Run `node --test tests/codex/result.mjs`. The plan's duplicated filename is run once. The new combined v3 control/rejection test checks actual safe codes and diagnostics. Fences/display fields are compatibility candidates for Phase 23; foreign references, identity and coverage cannot be relaxed. No production behavior is changed by Phase 22.
 
+Offline result: 20/20 Node checks passed on 2026-10-07 (client date); no real executable/provider was launched.
+
 ## Unknowns
 
 No current live provider, CLI, auth, billing or host isolation acceptance was run. Offline rejection does not establish any historical root cause. Semantic correctness, grade prediction, all-stage reliability and rejected-response contents remain unknown. Existing fixes do not prove every current feature works.

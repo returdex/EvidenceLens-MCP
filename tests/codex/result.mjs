@@ -9,3 +9,19 @@ for(const [name,mutate] of Object.entries({wrongRun:f=>f.result.runId='00000000-
 test('zero findings and preparation without draft remain bounded',()=>{const f=fixture();for(const obj of [f.snapshot,f.capsule,f.result]){obj.currentSourceId=null;obj.stage='preparation';}f.snapshot.materials=[];f.capsule.sources=[];f.result.coverage=[];f.result.findings=[];f.snapshot.promptText=renderEvidenceCapsule(f.capsule,f.snapshot,[]);f.snapshot.promptSha256=sha256(f.snapshot.promptText);const r=validateBoundCodexResult(f.snapshot,f.result);assert.ok(r.limitations.some(x=>x.includes('No current draft')));});
 test('unknown without quote gets locally required limitation; malformed JSON never binds',()=>{const f=boundFixture();f.result.findings[0].kind='unknown';f.result.findings[0].evidence=[];assert.ok(validateBoundCodexResult(f.snapshot,f.result).limitations.some(x=>x.includes('unverified gap')));assert.throws(()=>validateBoundCodexResult(f.snapshot,'{broken'));});
 test('UTF-8 quote ranges require complete code points',()=>{const f=boundFixture(),e=f.result.findings[0].evidence[0];Object.assign(e,{startByte:2,endByte:5,quote:'中'});assert.ok(validateBoundCodexResult(f.snapshot,f.result));e.endByte=4;assert.throws(()=>validateBoundCodexResult(f.snapshot,f.result),{code:'source_mismatch'});});
+test('diagnostic baseline: v3 control separates presentation and trust failures',()=>{
+ const f=boundFixture();f.result.schemaVersion=3;
+ for(const e of f.result.findings[0].evidence){delete e.quote;delete e.startByte;delete e.endByte;}
+ assert.equal(validateBoundCodexResult(f.snapshot,f.result).modelResponse.schemaVersion,1);
+ const cases=[
+  ['fence',()=> '```json\n'+JSON.stringify(f.result)+'\n```','result_invalid','json_syntax'],
+  ['display',()=>({...structuredClone(f.result),heading:'Review'}),'result_invalid','fields'],
+  ['reference',()=>{const r=structuredClone(f.result);r.findings[0].evidence[0].excerptId='foreign';return r;},'source_mismatch'],
+  ['identity',()=>({...structuredClone(f.result),taskId:'foreign'}),'source_mismatch'],
+  ['coverage',()=>({...structuredClone(f.result),coverage:[]}),'source_mismatch']
+ ];
+ for(const [name,make,code,reason] of cases)assert.throws(()=>validateBoundCodexResult(f.snapshot,make()),e=>{
+  assert.equal(e.code,code,name);if(reason)assert.equal(e.validationFailure.reason,reason,name);
+  else assert.ok(e.bindingTrigger,name);return true;
+ });
+});
