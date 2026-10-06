@@ -33,7 +33,7 @@
 2. 用户能核查调优/测试案例对应的准确提交版本、官方材料、阶段时间截点和反馈来源；A1.3 为已知调优候选，A2 未核实前不称为完整测试记录。
 3. 测试审阅者通过干净上下文和允许清单读取冻结材料，无法读取 feedback、成绩、反馈衍生分析、先前诊断或后续修订；隔离检查保留可审计证据。
 4. 用户能在修复前复核旧版提示词/代码/设置快照、对照矩阵、人工裁决标准和调用预算草案；评估标准在输出前冻结，真实调用仅按明确授权执行。
-**Plans**: 3 plans
+**Plans**: 5 plans (3 original; 2 gap closure)
 
 **Wave 1**
 - [x] 22-01-PLAN.md — 复现真实流程与失败分类 (OUT-01)
@@ -41,6 +41,12 @@
 
 **Wave 2 (blocked on Wave 1 completion)**
 - [ ] 22-03-PLAN.md — 冻结审阅输入与离线泄漏负例 (EVA-02)
+
+**Gap closure (2026-10-07; original partial checkpoints retained)**
+- [ ] 22-04-PLAN.md — 原始案例、rubric与可测final范围 (EVA-01; wave 1)
+- [ ] 22-05-PLAN.md — 干净提取、真实冻结与capsule离线验收 (EVA-02; wave 2, depends on 22-04)
+
+Run only gap plans with `$gsd-execute-phase 22 --gaps-only`. Full historical replay remains unavailable where no original stage evidence exists; submitted-artifact final scope is explicit, without fabricated dates or drafts.
 
 Cross-cutting constraints:
 - 私有作业/反馈/回执不入 Git；历史证据及课程文件保持原样。

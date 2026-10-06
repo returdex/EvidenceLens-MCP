@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
-status: gaps_found
-last_updated: "2026-10-06T16:12:54.326Z"
-last_activity: 2026-10-07 -- Phase 22 offline implementation checked; EVA-01/EVA-02 gaps remain
+status: gap_plans_ready
+last_updated: "2026-10-06T17:21:59.218Z"
+last_activity: 2026-10-07 -- Phase 22 gap plans 22-04/05 verified; EVA-01/EVA-02 execution pending
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 3
+  total_plans: 5
   completed_plans: 1
-  percent: 33
+  percent: 20
 ---
 
 # EvidenceLens MCP — Project State
@@ -22,9 +22,9 @@ See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independe
 ## Current Position
 
 Phase: 22 (真实流程诊断与评估基线) — GAPS FOUND
-Plan: 1 of 3 complete; 22-02/03 partial checkpoints
-Status: Phase 22 verification gaps found
-Last activity: 2026-10-07 -- Phase 22 offline implementation checked; EVA-01/EVA-02 gaps remain
+Plan: 1 of 5 complete; 22-02/03 partial; gap plans 22-04/05 ready
+Status: Gap closure plans verified; execution pending
+Last activity: 2026-10-07 -- Phase 22 gap plans 22-04/05 verified; EVA-01/EVA-02 execution pending
 
 ## Deferred Items
 
@@ -36,4 +36,4 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Run `$gsd-plan-phase 22 --gaps` to finish real final-stage source availability and feedback-safe extraction/capsule freezing. A2 exact ZIP user-confirmed; 33/33 focused checks pass. No real model calls. Do not skip partial checkpoints as completed requirements.
+Run `$gsd-execute-phase 22 --gaps-only` to finish real final-stage source availability and feedback-safe extraction/capsule freezing. A2 exact ZIP user-confirmed; 33/33 focused checks pass. No real model calls. Do not skip partial checkpoints as completed requirements.
