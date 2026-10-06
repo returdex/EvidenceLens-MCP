@@ -5,11 +5,11 @@ import { sha256 } from '../skills/assignment-review/scripts/prompt-contract.mjs'
 import { collectBaselineSources } from '../skills/assignment-review/scripts/baseline-sources.mjs';
 const fail=()=>{throw Error('EVALUATION_INPUT_INVALID');};
 const id=x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(x);
-const time=x=>typeof x==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(x)&&Number.isFinite(Date.parse(x));
+const time=x=>typeof x==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(x)&&Number.isFinite(Date.parse(x))&&new Date(x).toISOString()===x;
 async function metadata(path,roots){
  if(typeof path!=='string'||resolve(path)!==path||!roots.some(r=>path.startsWith(r+sep)))fail();
  for(let p=path;;p=dirname(p)){const s=await lstat(p);if(s.isSymbolicLink()||![0,process.getuid()].includes(s.uid)||(s.mode&0o022)&&!(s.uid===0&&(s.mode&0o1000)))fail();if(dirname(p)===p)break;}
- const s=await lstat(path,{bigint:true});if(!s.isFile()||s.uid!==BigInt(process.getuid())||s.size>1000000n)fail();
+ const s=await lstat(path,{bigint:true});if(!s.isFile()||s.uid!==BigInt(process.getuid()))fail();
  if(await realpath(path)!==path)fail();return s;
 }
 const identity=s=>`${s.dev}:${s.ino}:${s.size}:${s.mtimeNs}:${s.ctimeNs}`;
@@ -45,14 +45,15 @@ export async function freezeEvaluationInputs(input,stage,{roots,onRead=()=>{}}={
  const result=await collectBaselineSources({sources,currentSourceId:st.currentSourceId,reviewMode:'artifact_only'},async k=>{
   const e=entries.get(k),before=stats.get(k);if(identity(await metadata(e.path,roots))!==identity(before))fail();
   const f=await open(e.path,constants.O_RDONLY|constants.O_NOFOLLOW);try{
-   if(identity(await f.stat({bigint:true}))!==identity(before))fail();onRead(k);
+   if(before.size>1000000n||identity(await f.stat({bigint:true}))!==identity(before))fail();onRead(k);
    const bytes=Buffer.alloc(1000001);let size=0;while(size<bytes.length){const r=await f.read(bytes,size,bytes.length-size,size);if(!r.bytesRead)break;size+=r.bytesRead;}
    const content=bytes.subarray(0,size);if(size>1000000||sha256(content)!==e.sha256||identity(await f.stat({bigint:true}))!==identity(before)||identity(await metadata(e.path,roots))!==identity(before))fail();
-   return new TextDecoder('utf-8',{fatal:true}).decode(content);
+   return new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(content);
   }finally{await f.close();}
  });
  const ledger={manifestVersion:1,caseId:m.caseId,stage,cutoff:st.cutoff,manifestSha256:sha256(JSON.stringify(m)),selection:result.selection,items:result.items,unavailable:result.unavailable,
-  sourceIdentity:[...entries.values()].filter(e=>!denied.has(e.sourceId)).map(e=>({sourceId:e.sourceId,path:e.path,sha256:e.sha256,dev:String(stats.get(e.sourceId).dev),ino:String(stats.get(e.sourceId).ino)})),
+  sourceIdentity:[...entries.values()].filter(e=>result.selection.reads.some(r=>r.id===e.sourceId)).map(e=>({sourceId:e.sourceId,path:e.path,sha256:e.sha256,dev:String(stats.get(e.sourceId).dev),ino:String(stats.get(e.sourceId).ino)})),
+  exclusionIdentity:[...denied].map(k=>({sourceId:k,path:entries.get(k).path,dev:String(stats.get(k).dev),ino:String(stats.get(k).ino)})),
   readiness:m.readiness==='verified'&&typeof m.assessedVersion==='string'&&m.assessedVersion.length>0&&(stage==='preparation'||st.currentSourceId!==null)&&result.unavailable.length===0&&result.items.length>0&&['selected','not_provided'].includes(result.selection.currentArtifact.status)?'input_ready':'blocked'};
  return {...ledger,freezeSha256:sha256(JSON.stringify(ledger))};
 }

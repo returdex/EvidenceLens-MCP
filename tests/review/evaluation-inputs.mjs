@@ -19,7 +19,7 @@ test('frozen input gate: exact control; exclusions never reach reader; unsafe pr
   const dest=join(root,'new-ledger');await publish(dest,result);assert.equal((await lstat(dest)).mode&0o777,0o700);assert.equal((await lstat(join(dest,'freeze.json'))).mode&0o777,0o600);await assert.rejects(publish(dest,result));
   await assert.rejects(publish(join(root,'blocked-ledger'),result,{protectedRoots:[root]}));
   const accessor={...m};Object.defineProperty(accessor,'entries',{enumerable:true,get(){throw Error('getter ran');}});await assert.rejects(freeze(accessor,'final',{roots:[root]}),{message:'EVALUATION_INPUT_INVALID'});
-  for(const mutate of [x=>x.entries[0].partition='unknown',x=>x.entries[0].availableAt=null,x=>x.entries[0].derivedFrom=['missing'],x=>{x.entries[0].derivedFrom=['C'];x.entries[2].derivedFrom=['A'];},x=>x.entries.push({...x.entries[0]}),x=>x.entries[0].path=join(root,'..','escape')]){
+  for(const mutate of [x=>x.entries[0].partition='unknown',x=>x.entries[0].availableAt=null,x=>x.entries[0].availableAt='2026-02-31T00:00:00.000Z',x=>x.entries[0].derivedFrom=['missing'],x=>{x.entries[0].derivedFrom=['C'];x.entries[2].derivedFrom=['A'];},x=>x.entries.push({...x.entries[0]}),x=>x.entries[0].path=join(root,'..','escape')]){
    const bad=structuredClone(m);mutate(bad);let n=0;await assert.rejects(freeze(bad,'final',{roots:[root],onRead:()=>n++}));assert.equal(n,0);
   }
   const mismatch=structuredClone(m);mismatch.entries[0].sha256='0'.repeat(64);assert.equal((await freeze(mismatch,'final',{roots:[root]})).readiness,'blocked');
