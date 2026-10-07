@@ -2,7 +2,7 @@
 phase: 22-review-diagnostics-and-evaluation-baseline
 status: gaps_found
 verified: 2026-10-07
-score: 2/4 roadmap success criteria
+score: 3/4 roadmap success criteria
 ---
 
 # Phase 22 goal verification
@@ -10,19 +10,19 @@ score: 2/4 roadmap success criteria
 | Requirement | Result | Evidence |
 |---|---|---|
 | OUT-01 | passed | Four-stage capture/dispatch/shape/binding/store/handoff traced; pinned old hashes; real historical unknowns preserved; 20/20 offline result checks |
-| EVA-01 | partial | A2 version user-confirmed; outer CRC/inner source/feedback hashes verified; two private case inventories; full chronological source/rubric/feedback registry incomplete |
-| EVA-02 | partial | Offline group/ancestry/alias/hardlink/cutoff/path/hash gate with private no-clobber ledger; 13/13 baseline/gate checks; real manifests reject before reader, no ready admitted capsule |
+| EVA-01 | partial | Original artifacts/report aliases, local rubric byte identity and scope verified; A2 raw feedback verified; A1.3 original S-FEEDBACK image unlocated, historical rubric applicability unknown |
+| EVA-02 | passed (Phase-22 offline scope) | Both real final-v5 freezes input_ready; actual capsule/reference/render/snapshot validators accept; registered evaluator reads=0; protocol-freeze-v3 immutable |
 
-Roadmap criteria 1 and 4 pass (diagnostics; frozen baseline/matrix/rubric/budget). Criteria 2 and 3 partial (real stage identity/availability and clean ready reviewer inputs). Exact IDs cover OUT-01/EVA-01/EVA-02; empty generic gap-analysis is not coverage evidence.
+Roadmap criteria 1, 3 and 4 pass within declared partial source-only final scope. Criterion 2 remains partial because original A1.3 feedback identity is unknown. Exact IDs cover OUT-01/EVA-01/EVA-02; empty generic gap-analysis is not coverage evidence.
 
-## Gaps
+## Remaining gaps
 
-- EVA-01: source registry needs official rubric byte identity plus minimally sufficient final-stage availability evidence for A1.3 and confirmed A2; earlier absent drafts remain NOT_COVERED. Do not demand nonexistent stages or remote school login merely to fill fields.
-- EVA-02: build deterministic admitted text from those selected original artifacts; inspect boundaries separating AI history/prior advice and credentials, using whole exclusion if separation cannot be certified. Freeze real allowlist and validate source capsule without running models. If only partial final coverage is possible, document precise limits rather than require fictitious complete history.
-- Private v2 inventories remain blocked. Both tested final manifests returned EVALUATION_INPUT_INVALID with contentReads=0. No test reviewer received them; no hidden clean-context/inference proof claimed.
+- EVA-01 / 22-04: locate original A1.3 S-FEEDBACK marking screenshot and verify bytes; determine historical rubric applicability if evidence exists. Derived evaluation labels/postmortem are evaluator-only and cannot substitute for the raw feedback image. Known-location lookup found no source; user locator question pending.
+- Historical preparation/in_progress/recheck are NOT_COVERED, not blockers for declared submitted_artifact final scope. Report/media/omitted source coverage remains excluded and must not become full-assignment claims.
+- EVA-02 extraction/capsule gap is closed by 22-05. Old blocked inventories and partial summaries retained; both current cases have actual source-only final inputs. No real clean-context/OS isolation proof claimed; that is a future runtime gate.
 
 ## Checks
 
-33/33 focused Node tests passed; git diff --check passed. Regression `npm test`: NOT_COMPLETED. The disabled-provider command remained before Vitest test execution with no output after approximately 4 minutes; the owned test processes were terminated (exit 143). Cause unknown, no auto-retry or environment changes. Focused checks remain valid; no full-suite pass claimed. No live CLI/provider/auth calls; authorizedRequests=0/inference=NOT_RUN. No phase.complete called; EVA-03/04 and future settings/prompts untouched. Product 0.3.17 retained.
+33/33 focused Node tests passed; git diff --check passed. Regression `npm test`: NOT_COMPLETED. The disabled-provider command remained before Vitest test execution with no output after approximately 4 minutes; the owned test processes were terminated (exit 143). Cause unknown, no auto-retry or environment changes. Focused checks remain valid; no full-suite pass claimed. No live CLI/provider/auth calls; authorizedRequests=0/inference=NOT_RUN. Gap closure changed documentation/private data only; code-review gate skipped for no source diff. No phase.complete called; EVA-03/04 and future settings/prompts untouched. Product 0.3.17 retained.
 
-Next: `$gsd-plan-phase 22 --gaps`. Partial summaries are checkpoint evidence, not plan/phase completion. Gap plans must reuse existing gate/protocol and frozen old source; no duplicate framework.
+Next: provide the original A1.3 feedback locator, then verify its identity and reconcile EVA-01. Do not repeat extraction or model calls merely to fill this gap. Phase remains gaps_found; 22-04 partial, 22-05 complete.

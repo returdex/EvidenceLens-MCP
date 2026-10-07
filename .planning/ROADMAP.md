@@ -43,8 +43,8 @@
 - [ ] 22-03-PLAN.md — 冻结审阅输入与离线泄漏负例 (EVA-02)
 
 **Gap closure (2026-10-07; original partial checkpoints retained)**
-- [ ] 22-04-PLAN.md — 原始案例、rubric与可测final范围 (EVA-01; wave 1)
-- [ ] 22-05-PLAN.md — 干净提取、真实冻结与capsule离线验收 (EVA-02; wave 2, depends on 22-04)
+- [ ] 22-04-PLAN.md — PARTIAL: A1.3 原始评分截图未定位；原始案例、rubric与可测final范围 (EVA-01; wave 1)
+- [x] 22-05-PLAN.md — 干净提取、真实冻结与capsule离线验收 (EVA-02; wave 2, depends on 22-04)
 
 Run only gap plans with `$gsd-execute-phase 22 --gaps-only`. Full historical replay remains unavailable where no original stage evidence exists; submitted-artifact final scope is explicit, without fabricated dates or drafts.
 
