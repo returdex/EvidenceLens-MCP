@@ -1,0 +1,7 @@
+# Phase 23 planning basis
+
+2026-10-07. Inline planning from existing user-confirmed milestone requirements and Phase22 runtime diagnosis; no new design context invented. Research disabled by existing config; existing source flow inspected. No frontend/ORM/schema/framework change; UI/AI framework gates not applicable. No standalone CONTEXT.md decisions to drop. No subagents or external model review. Nyquist research artifact gate skipped on configured no-research path; each plan has adjacent offline checks.
+
+Three sequential waves: bounded shared presentation compatibility; private original-response/diagnostic storage; dual failure-safe delivery. Requirements exact IDs OUT-02/03/04 covered. Grade prompts/settings/full merger policy remain Phases24–26. Phase22 EVA-01 raw screenshot identity remains pending. Planning is allowed ahead; execution remains blocked by roadmap dependency absent explicit user exception. STATE preserves Phase22 gaps_found.
+
+Plan review: bounded transformations only, no field invention or JSON extraction; raw originals remain private untrusted diagnostics, no weakening of validated result envelope; all persistent-read/recovery/delete callers enumerated; one failed reviewer cannot erase valid full output or trigger retry. Revision 1 corrected the proposed store test path to actual tests/prompts/store.mjs; no nonexistent test command retained. Structure checks pass 3/3; exact-ID coverage is 3/3. Must-haves and automated structure checks are planning evidence, not implementation acceptance.

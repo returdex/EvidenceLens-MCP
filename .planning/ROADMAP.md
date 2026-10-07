@@ -63,7 +63,19 @@ Cross-cutting constraints:
 1. 用户在可恢复展示差异下仍获得可用内容、原回复和转换说明；不补造缺失事实、不静默截断；兼容范围有可运行正/负例检查。
 2. 用户能区分已验证发现、部分可用内容和未验证诊断；身份、授权、来源与存储安全负例仍拒绝相关成功状态。
 3. 双审阅中一位失败不抹去另一位的有效完整反馈；用户看到真实失败位与恢复动作，没有自动重试、替换模型或伪造双成功。
-**Plans**: TBD
+**Plans**: 3 plans; planned ahead, execution dependency remains Phase22.
+
+**Wave 1**
+- [ ] 23-01-PLAN.md — 统一受限展示兼容 (OUT-02)
+
+**Wave 2 (blocked on Wave 1 completion)**
+- [ ] 23-02-PLAN.md — 私有原回复和未验证诊断接收 (OUT-02/03)
+
+**Wave 3 (blocked on Wave 2 completion)**
+- [ ] 23-03-PLAN.md — 双审阅部分失败完整交付 (OUT-03/04)
+
+Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自动重试或模型替换；原回复只在Git外私有存储。Phase22 EVA-01仍partial；前置依赖未关闭，不因提前规划而标记可执行。
+
 
 ### Phase 24: 四阶段提示词与档位证据
 **Goal**: 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
