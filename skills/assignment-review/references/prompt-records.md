@@ -71,3 +71,7 @@ Deletion recognizes the added provider sidecar and refuses any dispatched attemp
 `review-records.mjs show/full/annotate` 的完整 stdin 示例及四阶段路径见[共享命令](command-entrypoints.md#完整回传主对话评估与只读记录)。读取须明确 expectedRunId 或 historicalRunId，不能猜 latest、读原作业或启动模型。完整有效结果保留所有 finding IDs；默认全报告。metrics v1 只保存 CLI 实报数字与 provenance，缺失/无效不补零，requested model 不等于 reported model，不推算账单。失败/取消可能消耗远端用量。
 
 新增私有 `<runId>.metrics.json` 和 `<runId>.handoff.json`，沿用所有者/0600/no-follow/限额/事务和身份摘要约束。旧记录缺 sidecar 明确 not_recorded。present corrupt metrics 是记录错误；corrupt handoff 显示比较不可验证且保留有效原始结果。handoff 是 host_review 的当前证据 R/F 语义评估，结构验证不证明语义正确。相同首次记录幂等，不同覆写拒绝。只删除已识别且身份/摘要匹配的本任务文件；未知/损坏/链接保留并报告 incomplete。不自动过期、重试或恢复。
+
+## Original terminal reply (Phase 23)
+
+New runner/provider completions may store `<runId>.reply.json` privately (0600, exclusive, same transaction). It binds schemaVersion=1, run/task/conversation/prompt identity, exact text and UTF8 SHA256; it is untrusted model data, never source evidence or host assessment. Only complete bounded terminal final replies are captured; reasoning, stderr and error HTTP bodies are excluded. Old records without it show not_recorded. Cancellation/rejection can retain it as diagnostic, with no validated result. Corruption/links fail reads; deletion dry-run recognizes it, apply validates identity/hash and preserves unsafe records. Partial publication remains locked under existing explicit recovery policy. No old records are migrated.

@@ -14,8 +14,6 @@ test('diagnostic baseline: v3 control separates presentation and trust failures'
  for(const e of f.result.findings[0].evidence){delete e.quote;delete e.startByte;delete e.endByte;}
  assert.equal(validateBoundCodexResult(f.snapshot,f.result).modelResponse.schemaVersion,1);
  const cases=[
-  ['fence',()=> '```json\n'+JSON.stringify(f.result)+'\n```','result_invalid','json_syntax'],
-  ['display',()=>({...structuredClone(f.result),heading:'Review'}),'result_invalid','fields'],
   ['reference',()=>{const r=structuredClone(f.result);r.findings[0].evidence[0].excerptId='foreign';return r;},'source_mismatch'],
   ['identity',()=>({...structuredClone(f.result),taskId:'foreign'}),'source_mismatch'],
   ['coverage',()=>({...structuredClone(f.result),coverage:[]}),'source_mismatch']
@@ -24,4 +22,16 @@ test('diagnostic baseline: v3 control separates presentation and trust failures'
   assert.equal(e.code,code,name);if(reason)assert.equal(e.validationFailure.reason,reason,name);
   else assert.ok(e.bindingTrigger,name);return true;
  });
+});
+
+test('bounded presentation compatibility preserves facts and conversions',()=>{
+ const f=boundFixture(),raw=JSON.stringify({...f.result,heading:'审阅'});
+ const r=validateBoundCodexResult(f.snapshot,'```json\n'+raw+'\n```');
+ assert.deepEqual(r.modelResponse.findings,f.result.findings);
+ assert.ok(r.limitations.some(x=>x.includes('code fence')));
+ assert.ok(r.limitations.some(x=>x.includes('heading')));
+ assert.deepEqual(validateBoundCodexResult(f.snapshot,r.modelResponse),r);
+ for(const bad of ['preface '+raw,raw+' tail','```json\n'+raw+'\n```\n```json\n'+raw+'\n```',JSON.stringify({...f.result,other:'text'}),' '.repeat(250000)+raw])assert.throws(()=>validateBoundCodexResult(f.snapshot,bad));
+ const wrong=JSON.stringify({...f.result,taskId:'foreign',heading:'Review'});
+ assert.throws(()=>validateBoundCodexResult(f.snapshot,'```json\n'+wrong+'\n```'),{code:'source_mismatch'});
 });

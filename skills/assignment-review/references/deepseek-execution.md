@@ -22,3 +22,5 @@ provider/result 文件沿用 Git 外状态根、0700 目录／0600 文件、排�
 `$el-prompt` 仍导出同任务最新实际捕获的一位，通常是第二份 Codex 输入。两位先捕获再执行，完成时间不改 latest；不拼造双模型合并提示词。
 
 JSON 模式的请求形状按 [DeepSeek 官方说明](https://api-docs.deepseek.com/guides/json_mode/)核对；它保证 JSON 格式，不保证本项目的结构或证据有效，本地验证继续必要。新接线的离线检查不等于真实双模型作业验收，历史 A4 三位 Codex 记录不改写。
+
+Phase 23 shares bounded presentation compatibility with Codex. The existing nonstandard kind→unknown conversion also retains its original label in conversion notes and exact terminal reply. Provider HTTP/terminal checks, once-only claim, full source binding and cancellation remain required; raw rejected replies are only unverified diagnostics. Inspect the valid peer report when this provider fails; never replace it or claim dual success.

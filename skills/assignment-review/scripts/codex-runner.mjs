@@ -96,7 +96,7 @@ const productionAdapter=Object.freeze({preflight:preflightCodex,createLaunch:cre
 export const runCapturedCodex=(scope,runId,options={})=>executeCapturedWithAdapter(scope,runId,options,productionAdapter);
 // Trusted in-process test seam. Production CLI never accepts adapters or launch overrides.
 export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter=productionAdapter){
- let owned,launch,execution,result=null,outcome,dispatch=false,stage='preparing';
+ let owned,launch,execution,result=null,reply=null,outcome,dispatch=false,stage='preparing';
  const started=Date.now();
  const cancelled=()=>({status:'cancelled',code:null,terminalObserved:false,cleanupComplete:true,diagnostics:newDiagnostics(stage,'aborted')});
  try {
@@ -111,7 +111,7 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
    else {
     stage='dispatch';const saved=await readForDispatch(scope,runId,{attemptId:execution.attemptId});dispatch=true;
     stage='process';outcome=await adapter.supervise(launch,Buffer.from(saved.promptText,'utf8'),{signal});
-    if(outcome.status==='candidate'){stage='result_validation';result=validateBoundCodexResult(owned.snapshot,outcome.candidate);outcome={...outcome,status:'succeeded',candidate:null};}
+    if(outcome.status==='candidate'){reply=outcome.candidate;stage='result_validation';result=validateBoundCodexResult(owned.snapshot,outcome.candidate);outcome={...outcome,status:'succeeded',candidate:null};}
    }
   }
  }catch(e){
@@ -124,5 +124,5 @@ export async function executeCapturedWithAdapter(scope,runId,{signal}={},adapter
  if(signal?.aborted&&outcome.cleanupComplete){outcome={...outcome,status:'cancelled',code:null,diagnostics:outcome.diagnostics?.trigger?outcome.diagnostics:{...(outcome.diagnostics??newDiagnostics()),stage,trigger:'aborted'}};result=null;}
  if(outcome.status!=='succeeded')result=null;
  const receipt={...execution,...(launch?{binaryVersion:launch.binaryVersion,binarySha256:launch.binarySha256,policySha256:launch.policySha256}:{}),status:outcome.status,errorCode:outcome.code,finishedAt:new Date().toISOString(),elapsedMs:Date.now()-started,terminalObserved:outcome.terminalObserved,cleanupComplete:outcome.cleanupComplete,diagnostics:outcome.diagnostics??newDiagnostics(stage),resultSha256:result?.resultSha256??null};
- try{return await completeCodexRun(scope,runId,{execution:receipt,result,metrics:createRunMetrics(receipt,launch,outcome.metrics),signal});}catch(e){return {ok:false,runId,code:codexError(e).code,diagnostics:{...receipt.diagnostics,stage:'publication',trigger:'publication_failed'}};}
+ try{return await completeCodexRun(scope,runId,{execution:receipt,result,reply,metrics:createRunMetrics(receipt,launch,outcome.metrics),signal});}catch(e){return {ok:false,runId,code:codexError(e).code,diagnostics:{...receipt.diagnostics,stage:'publication',trigger:'publication_failed'}};}
 }

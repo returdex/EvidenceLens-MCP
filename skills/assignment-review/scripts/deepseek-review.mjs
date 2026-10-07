@@ -3,7 +3,7 @@ import { realpath } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { captureEvidencePrompt } from './codex-review.mjs';
 import { parseEvidenceCapsule, CODEX_LIMITS } from './codex-contract.mjs';
-import { validateBoundCodexResult } from './codex-result.mjs';
+import { validateBoundCodexResult, normalizeReviewReply } from './codex-result.mjs';
 import { safeValidationFailure } from './codex-diagnostics.mjs';
 import { claimHostProviderRun, completeHostProviderRun, readHostProviderRun } from './prompt-store.mjs';
 import { fields, array, text, uuid, id, decode, LIMITS, fail, safeError } from './prompt-contract.mjs';
@@ -30,22 +30,14 @@ export async function preflightDeepSeek() {
 export const captureDeepSeekPrompt=(scope,runId,input)=>captureEvidencePrompt(scope,runId,input,'host_skill');
 // JSON mode does not constrain enum labels. Retain content; classify unfamiliar labels conservatively.
 export function normalizeDeepSeekLabels(content){
- let value;try{value=JSON.parse(content);}catch{return content;}
- if(value?.schemaVersion!==3||!Array.isArray(value.findings)||!Array.isArray(value.limitations))return content;
- for(const [index,f] of value.findings.entries()){
-  if(!f||typeof f!=='object'||typeof f.kind!=='string'||['observation','gap','conflict','unknown'].includes(f.kind))continue;
-  try{text(f.kind,80);}catch{continue;}
-  f.kind='unknown';
-  value.limitations.push('Finding '+(index+1)+': nonstandard DeepSeek kind label normalized locally to unknown; original claim/action retained and host classification required.');
- }
- return JSON.stringify(value);
+ try{return JSON.stringify(normalizeReviewReply(content,{deepseek:true}).input);}catch{return content;}
 }
 // Trusted in-process seam only; CLI accepts no endpoint, model, credential, or adapter.
 export async function runCapturedDeepSeek(scope,runId,{signal}={},adapter) {
  const snapshot=await claimHostProviderRun(scope,runId);
  const started=Date.now(),controller=new AbortController();
  const abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});
- let timeout,expired=false,result=null;
+ let timeout,expired=false,result=null,reply=null;
  const execution={schemaVersion:2,validationFailure:null,provider:'deepseek',runId,taskId:snapshot.taskId,conversationId:snapshot.conversationId,promptSha256:snapshot.promptSha256,status:'failed',errorCode:null,model:null,reportedModel:null,elapsedMs:0,observedRequests:0,httpStatus:null,trigger:null,resultSha256:null};
  let stage='preflight';
  try {
@@ -71,7 +63,8 @@ export async function runCapturedDeepSeek(scope,runId,{signal}={},adapter) {
   // Discard reasoning_content. Length/tool/error finishes never promote partial JSON.
   if(!Array.isArray(body?.choices)||body.choices.length!==1||choice.finish_reason!=='stop'||choice.message?.tool_calls||typeof choice.message?.content!=='string'||!choice.message.content.trim())fail('result_invalid');
   if(typeof body.model==='string'&&/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.model))execution.reportedModel=body.model;
-  stage='validation';result=validateBoundCodexResult(snapshot,normalizeDeepSeekLabels(choice.message.content));
+  if(Buffer.byteLength(choice.message.content)>CODEX_LIMITS.final)fail('result_invalid');
+  reply=choice.message.content;stage='validation';result=validateBoundCodexResult(snapshot,normalizeDeepSeekLabels(choice.message.content));
   if(controller.signal.aborted)throw new Error('aborted');
   execution.status='succeeded';execution.resultSha256=result.resultSha256;
  } catch(e) {
@@ -82,7 +75,7 @@ export async function runCapturedDeepSeek(scope,runId,{signal}={},adapter) {
   execution.trigger=signal?.aborted?'aborted':expired?'deadline_exceeded':execution.trigger??e.trigger??({request:'network_error',response:'response_invalid',validation:'result_rejected'}[stage]??'configuration_unavailable');
  } finally {clearTimeout(timeout);signal?.removeEventListener('abort',abort);execution.elapsedMs=Date.now()-started;}
  // Store the validated result and safe provider receipt before advertising success.
- return completeHostProviderRun(scope,runId,{execution,result,signal});
+ return completeHostProviderRun(scope,runId,{execution,result,reply,signal});
 }
 async function readInput(){let n=0;const chunks=[];for await(const chunk of process.stdin){n+=chunk.length;if(n>LIMITS.stdin)fail('store_limit');chunks.push(chunk);}try{return JSON.parse(decode(Buffer.concat(chunks)));}catch{fail('corrupt_record');}}
 export async function main(args){

@@ -1,13 +1,35 @@
-import { validateSnapshot,sha256,decode } from './prompt-contract.mjs';
+import { validateSnapshot,sha256,decode,text } from './prompt-contract.mjs';
 import { parseEvidenceCapsule,validateCodexResultShape,validateCitationResultShape,validateReferenceResultShape,validateResultEnvelope,CODEX_LIMITS,codexFail } from './codex-contract.mjs';
 function rejectBinding(trigger){const e=new Error('source_mismatch');e.code='source_mismatch';e.bindingTrigger=trigger;throw e;}
+// Only whole-response presentation wrappers are recoverable. Never search prose for JSON.
+export function normalizeReviewReply(raw,{deepseek=false}={}){
+ const reject=reason=>{const e=new Error('result_invalid');e.code='result_invalid';e.validationFailure={reason,field:'result'};throw e;};
+ if(typeof raw!=='string')reject('json_syntax');
+ if(Buffer.byteLength(raw)>CODEX_LIMITS.final)reject('byte_limit');
+ const conversions=[];let body=raw.trim();
+ const fenced=/^```(?:json)?\r?\n([\s\S]*?)\r?\n```$/.exec(body);
+ if(fenced){body=fenced[1];conversions.push('Removed one whole-response JSON code fence.');}
+ let input;try{input=JSON.parse(body);}catch{reject('json_syntax');}
+ if(input&&typeof input==='object'&&!Array.isArray(input)){
+  if(Object.hasOwn(input,'heading')){
+   try{text(input.heading,1024);}catch{reject('fields');}
+   conversions.push('Presentation heading retained in original reply; omitted from validated schema.');delete input.heading;
+  }
+  if(deepseek&&input.schemaVersion===3&&Array.isArray(input.findings))for(const [i,f] of input.findings.entries()){
+   if(f&&typeof f.kind==='string'&&!['observation','gap','conflict','unknown'].includes(f.kind)&&f.kind.length<=80){
+    try{text(f.kind,80);}catch{continue;}
+    conversions.push('Finding '+(i+1)+': nonstandard DeepSeek kind '+JSON.stringify(f.kind)+' normalized locally to unknown; original claim/action retained and host classification required.');f.kind='unknown';
+   }
+  }
+  if(conversions.length){if(!Array.isArray(input.limitations))reject('fields');input.limitations.push(...conversions);}
+ }
+ return {input,conversions,rawSha256:sha256(raw)};
+}
 export function validateBoundCodexResult(snapshot,modelResponse){
  const s=validateSnapshot(snapshot),capsule=parseEvidenceCapsule(s);
  let input=modelResponse;
  if(typeof input==='string'){
-  const reject=reason=>{const e=new Error('result_invalid');e.code='result_invalid';e.validationFailure={reason,field:'result'};throw e;};
-  if(Buffer.byteLength(input)>CODEX_LIMITS.final)reject('byte_limit');
-  try{input=JSON.parse(input);}catch{reject('json_syntax');}
+  input=normalizeReviewReply(input).input;
  }
  const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;
  const citationOnly=version===2,referenceOnly=version===3;

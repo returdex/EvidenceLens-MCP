@@ -113,3 +113,5 @@ CLI 0.160.0 在目录 ETag 与服务端 `x-models-etag` 相同时，可能输出
 `review-records.mjs show/full/annotate` 的完整 stdin 示例及四阶段路径见[共享命令](command-entrypoints.md#完整回传主对话评估与只读记录)。读取须明确 expectedRunId 或 historicalRunId，不能猜 latest、读原作业或启动模型。完整有效结果保留所有 finding IDs；默认全报告。metrics v1 只保存 CLI 实报数字与 provenance，缺失/无效不补零，requested model 不等于 reported model，不推算账单。失败/取消可能消耗远端用量。
 
 新增私有 `<runId>.metrics.json` 和 `<runId>.handoff.json`，沿用所有者/0600/no-follow/限额/事务和身份摘要约束。旧记录缺 sidecar 明确 not_recorded。present corrupt metrics 是记录错误；corrupt handoff 显示比较不可验证且保留有效原始结果。handoff 是 host_review 的当前证据 R/F 语义评估，结构验证不证明语义正确。相同首次记录幂等，不同覆写拒绝。只删除已识别且身份/摘要匹配的本任务文件；未知/损坏/链接保留并报告 incomplete。不自动过期、重试或恢复。
+
+Phase 23 accepts only one whole-response JSON code fence and bounded top-level presentation heading through the shared validator. Original terminal reply and conversion limitations are retained privately. Malformed/foreign identity/source/coverage responses remain rejected; full/show can display their exact raw diagnostic as unverified, never confirmed findings. Nonterminal/oversize failures have no complete captured reply. No automatic retry.

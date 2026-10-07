@@ -94,3 +94,7 @@
 Codex 用量只来自实际 turn.completed.usage：input_tokens/cached_input_tokens/output_tokens/reasoning_output_tokens，各自 reported/missing/invalid，缺值 null、合法零为零；缓存/推理不重复加总，不推算账单。requestedModel 来自本次 launch -m，reportedModel 未有已验证字段即不可得。DeepSeek 现有安全 provider 回执保留请求/返回模型及耗时，token sidecar 未记录即 unavailable；不能挪用 Codex 用量。失败/取消/uncertain 也可能已消耗远端工作。
 
 help/export/show/full/annotate 不启动审阅、不再读作业原件。记录留存在 Git 外私有状态根；[记录协议](prompt-records.md)的 forget-task 先 dry-run，再按用户明确删除请求 apply，识别 metrics/handoff 文件并保留未知/损坏/外来链接。默认双模型仍各自保存完整回执，不额外调用模型来总结、修 JSON 或补用量。
+
+## Explicit dual report inspection
+
+After both selected reviewers finish, inspect each show/full even if one failed. A failure does not erase the peer report. `review-records.mjs pair` accepts stdin `{"taskId":"T-example","runIds":["explicit Codex UUID","explicit DeepSeek UUID"]}`. Both IDs must come from this review's actual receipts; explicit selection is shown as historical and does not search for an older success. The pair preserves full reports and failure diagnostics, checks same task/conversation and actual stage/material/source equivalence, and marks differing inputs not_comparable. It does not infer semantic agreements, grades, retry, replacement or dual success. Full original replies remain escaped untrusted data; only explicit summary omits them with same-run full-record identity/hash.

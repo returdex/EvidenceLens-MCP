@@ -2,8 +2,8 @@ import { admitPriorSummaries,validateReviewAssessment } from './review-recheck.m
 import { bindRunMetrics } from './codex-metrics.mjs';
 import { newDiagnostics,validateValidationFailure } from './codex-diagnostics.mjs';
 import fs from 'node:fs/promises';
-import { validateBoundCodexResult } from './codex-result.mjs';
-import { validateExecutionRecord,validateResultEnvelope } from './codex-contract.mjs';
+import { validateBoundCodexResult,normalizeReviewReply } from './codex-result.mjs';
+import { validateExecutionRecord,validateResultEnvelope,CODEX_LIMITS } from './codex-contract.mjs';
 import { constants as C } from 'node:fs';
 import { dirname, join, resolve, isAbsolute, sep } from 'node:path';
 import { homedir } from 'node:os';
@@ -148,7 +148,19 @@ function providerReceipt(v,l){
  if(r.status==='succeeded'&&(r.observedRequests!==1||r.httpStatus!==200||r.trigger!==null||r.resultSha256===null)||r.status!=='succeeded'&&r.resultSha256!==null)fail('corrupt_record');
  return r;
 }
-export async function completeHostProviderRun(scope,runId,{execution:input,result=null,signal}){return transaction(scope,false,async tx=>{
+function replyRecord(raw,l){
+ const v=fields(raw,['schemaVersion','runId','taskId','conversationId','promptSha256','text','sha256']);
+ if(v.schemaVersion!==1||['runId','taskId','conversationId','promptSha256'].some(k=>v[k]!==l[k])||typeof v.text!=='string'||Buffer.byteLength(v.text)>CODEX_LIMITS.final||v.sha256!==sha256(v.text))fail('corrupt_record');
+ return v;
+}
+async function saveReply(tx,t,l,text,result){
+ if(text===null)return;
+ const v=replyRecord({schemaVersion:1,runId:l.runId,taskId:l.taskId,conversationId:l.conversationId,promptSha256:l.promptSha256,text,sha256:sha256(text)},l);
+ if(result){const parsed=l.executionKind==='host_skill'?normalizeReviewReply(text,{deepseek:true}).input:text;
+  if(JSON.stringify(validateBoundCodexResult(await snapshot(tx.c,t,l),parsed))!==JSON.stringify(result))fail('corrupt_record');}
+ tx.dirty();await writeExclusive(recordPath(tx.c,t,l.runId,'reply'),v);
+}
+export async function completeHostProviderRun(scope,runId,{execution:input,result=null,reply=null,signal}){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId);
  if(l.executionKind!=='host_skill'||l.status!=='dispatched')fail('unsupported');
  const e=providerReceipt(input,l);
@@ -160,6 +172,7 @@ export async function completeHostProviderRun(scope,runId,{execution:input,resul
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');
  if(signal?.aborted){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.trigger='aborted';e.resultSha256=null;if(e.schemaVersion===2)e.validationFailure=null;}
+ await saveReply(tx,t,l,reply,result);
  const next=transition(l,e.status,{errorCode:e.errorCode});
  tx.dirty();await writeExclusive(recordPath(c,t,runId,'provider'),e);await replace(recordPath(c,t,runId,'state'),next);await tx.publish();
  return {...receipt(next),execution:e,...(result?{result}:{})};
@@ -187,10 +200,10 @@ export async function exportLatest(scope,{expectedRunId}={}){
 }
 async function deletionPreview(c,t){
  await dirs(taskDir(c,t),false,c.root);
- const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider','metrics','handoff'].map(k=>r.runId+'.'+k+'.json')));
+ const recognized=new Set(t.runs.flatMap(r=>['state','snapshot','execution','result','scratch','provider','metrics','handoff','reply'].map(k=>r.runId+'.'+k+'.json')));
  let preservedUnknownCount=0,count=0;
  const d=await fs.opendir(taskDir(c,t));
- for await(const e of d){if(++count>LIMITS.runs*8+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
+ for await(const e of d){if(++count>LIMITS.runs*9+100)fail('store_limit');if(!recognized.has(e.name))preservedUnknownCount++;}
  return {mode:'dry-run',taskId:t.taskId,runs:t.runs.length,preservedUnknownCount};
 }
 export async function forgetTask(scope,{apply=false}={}){
@@ -212,10 +225,11 @@ export async function forgetTask(scope,{apply=false}={}){
     const mp=recordPath(c,t,r.runId,'metrics'),mraw=await read(mp,16384);
     if(mraw){if(!lraw)fail('corrupt_record');bindRunMetrics(mraw,await execution(c,t,validateLifecycle(lraw)));await fs.unlink(mp);}
     if(lraw){const l=validateLifecycle(lraw);if(l.runId!==r.runId||l.sequence!==r.sequence||l.taskId!==t.taskId||l.conversationId!==scope.conversationId)fail('corrupt_record');}
-    for(const kind of ['execution','result','scratch','provider']){
+    for(const kind of ['execution','result','scratch','provider','reply']){
      const p=recordPath(c,t,r.runId,kind),v=await read(p);if(!v)continue;
      if(!lraw||v.runId!==r.runId||v.taskId!==t.taskId||v.conversationId!==scope.conversationId)fail('corrupt_record');
-     if(kind==='provider'){if(lraw.executionKind!=='host_skill')fail('corrupt_record');providerReceipt(v,validateLifecycle(lraw));}
+     if(kind==='reply'){replyRecord(v,validateLifecycle(lraw));}
+     else if(kind==='provider'){if(lraw.executionKind!=='host_skill')fail('corrupt_record');providerReceipt(v,validateLifecycle(lraw));}
      else if(kind==='result')validateResultEnvelope(v);
      else {if(lraw.executionKind!=='codex_exec')fail('corrupt_record');if(kind==='execution')validateExecutionRecord(v);else validateScratch(v);}
      await fs.unlink(p);
@@ -250,7 +264,7 @@ export async function recordCodexScratch(scope,runId,attemptId,root){return tran
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),e=await execution(c,t,l);if(!e||e.attemptId!==attemptId||e.status!=='preparing')fail('busy');
  const v=validateScratch({schemaVersion:1,runId,taskId:l.taskId,conversationId:l.conversationId,attemptId,root});tx.dirty();await writeExclusive(recordPath(c,t,runId,'scratch'),v);await tx.publish();
 });}
-export async function completeCodexRun(scope,runId,{execution:input,result=null,metrics=null,signal}){return transaction(scope,false,async tx=>{
+export async function completeCodexRun(scope,runId,{execution:input,result=null,metrics=null,reply=null,signal}){return transaction(scope,false,async tx=>{
  const {c,index}=tx,t=taskFor(index,scope.taskId),l=await state(c,t,runId),old=await execution(c,t,l),e=validateExecutionRecord(input);
  if(!old||old.status!=='preparing'||['attemptId','runId','taskId','conversationId','promptSha256','startedAt'].some(k=>e[k]!==old[k])||e.status==='preparing')fail('uncertain');
  const m=metrics===null?null:bindRunMetrics(metrics,e);
@@ -262,6 +276,7 @@ export async function completeCodexRun(scope,runId,{execution:input,result=null,
  }else if(result!==null)fail('corrupt_record');
  await boundary(c,'before_terminal_commit');
  if(signal?.aborted&&e.cleanupComplete){if(result){await fs.unlink(recordPath(c,t,runId,'result'));result=null;}e.status='cancelled';e.errorCode=null;e.resultSha256=null;if(e.schemaVersion===2&&!e.diagnostics.trigger)e.diagnostics={...e.diagnostics,stage:'publication',trigger:'aborted'};}
+ await saveReply(tx,t,l,reply,result);
  const next=transition(l,e.status,{errorCode:e.errorCode});
  if(m){tx.dirty();await writeExclusive(recordPath(c,t,runId,'metrics'),m);await boundary(c,'after_metrics');}
  tx.dirty();await replace(recordPath(c,t,runId,'execution'),e);await boundary(c,'after_execution');await replace(recordPath(c,t,runId,'state'),next);await tx.publish();return {...receipt(next),execution:e,metrics:m,...(result?{result}:{} )};
@@ -311,8 +326,15 @@ export async function readRunRecord(scope,{expectedRunId,historicalRunId}={},dep
   const raw=validateResultEnvelope(await read(recordPath(c,t,runId,'result'))),bound=validateBoundCodexResult(s,raw.modelResponse);
   if(JSON.stringify(raw)!==JSON.stringify(bound)||raw.resultSha256!==(e??provider).resultSha256)fail('corrupt_record');result=bound;
  }
+ const replyRaw=await read(recordPath(c,t,runId,'reply'));
+ const reply=replyRaw?replyRecord(replyRaw,l):null;
+ if(reply&&(!(e||provider)||!['succeeded','failed','uncertain','cancelled'].includes(l.status)))fail('corrupt_record');
+ let conversions=[];
+ if(reply){try{conversions=normalizeReviewReply(reply.text,{deepseek:Boolean(provider)}).conversions;}catch{}}
+ if(reply&&result){const parsed=provider?normalizeReviewReply(reply.text,{deepseek:true}).input:reply.text;
+  if(JSON.stringify(validateBoundCodexResult(s,parsed))!==JSON.stringify(result))fail('corrupt_record');}
  await boundary(c,'record_read');await unlocked(c);if(JSON.stringify(await loadIndex(c))!==JSON.stringify(index))fail('busy');
- const bundle={metadata:{...receipt(l),selection:historicalRunId?'historical':'latest'},snapshot:s,execution:e,provider,metrics,metricsAvailability:metrics?'recorded':'not_recorded',result,assessment:null,assessmentAvailability:'not_recorded'};
+ const bundle={metadata:{...receipt(l),selection:historicalRunId?'historical':'latest'},snapshot:s,execution:e,provider,metrics,metricsAvailability:metrics?'recorded':'not_recorded',result,reply,replyAvailability:reply?'recorded':'not_recorded',conversions,assessment:null,assessmentAvailability:'not_recorded'};
  trustedBundles.add(bundle);
  try{
   const raw=await read(recordPath(c,t,runId,'handoff'));

@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 import { realpath } from 'node:fs/promises';import { pathToFileURL } from 'node:url';
 import { readRunRecord,annotateRun } from './prompt-store.mjs';
-import { buildReviewHandoff,renderReviewHandoff } from './review-handoff.mjs';
+import { buildReviewHandoff,renderReviewHandoff,buildReviewPair,renderReviewPair } from './review-handoff.mjs';
 import { fields,fail,safeError,uuid,id,decode,LIMITS } from './prompt-contract.mjs';
 export async function main(args){
  try{
-  const [action,...flags]=args;if(!['show','full','annotate'].includes(action)||flags.length)fail('unsupported');
+  const [action,...flags]=args;if(!['show','full','annotate','pair'].includes(action)||flags.length)fail('unsupported');
   let size=0;const chunks=[];for await(const c of process.stdin){size+=c.length;if(size>LIMITS.stdin)fail('store_limit');chunks.push(c);}
   let raw;try{raw=JSON.parse(decode(Buffer.concat(chunks)));}catch{fail('corrupt_record');}
-  const keys=action==='annotate'?['taskId','expectedRunId','admittedPriorSummaries','assessment']:['taskId','expectedRunId','historicalRunId',...(action==='show'?['view','maxSummaryFindings']:[])];
+  const keys=action==='pair'?['taskId','runIds','view','maxSummaryFindings']:action==='annotate'?['taskId','expectedRunId','admittedPriorSummaries','assessment']:['taskId','expectedRunId','historicalRunId',...(action==='show'?['view','maxSummaryFindings']:[])];
   const v=fields(raw,Object.keys(raw));if(Object.keys(v).some(k=>!keys.includes(k)))fail('corrupt_record');
   const conversationId=process.env.CODEX_THREAD_ID;if(!uuid(conversationId)||!id(v.taskId))fail('identity_required');const scope={taskId:v.taskId,conversationId};
   let result;
-  if(action==='annotate'){
+  if(action==='pair'){
+   if(!Array.isArray(v.runIds)||v.runIds.length!==2||!v.runIds.every(uuid))fail('identity_required');
+   const bundles=[];for(const runId of v.runIds)bundles.push(await readRunRecord(scope,{historicalRunId:runId}));
+   const pair=buildReviewPair(...bundles,{view:v.view??'full',maxSummaryFindings:v.maxSummaryFindings??5});result={pair,markdown:renderReviewPair(pair)};
+  }else if(action==='annotate'){
    if(!uuid(v.expectedRunId)||!Object.hasOwn(v,'assessment')||!Object.hasOwn(v,'admittedPriorSummaries'))fail('identity_required');
    result=await annotateRun(scope,v);
   }else{
