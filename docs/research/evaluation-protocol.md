@@ -1,4 +1,4 @@
-# Evaluation protocol v1
+# Evaluation protocol v2
 
 ## Baseline
 
@@ -22,7 +22,9 @@ Predeclare: supported requirement/finding hits; tutor-feedback omissions; unsupp
 
 ## Freeze ledger
 
-Git-external private inventories created with 0700/0600 and exclusive writes. Case manifest original byte hashes were computed using O_NOFOLLOW and same-handle stat checks. A2 feedback hash was rechecked against registered metadata; no feedback text entered Git. Both real manifests remain blocked: historical cutoffs and admitted text extraction unknown (A2 assessed version now user-confirmed). Offline gate therefore rejects both BEFORE content-reader invocation; no source capsule can honestly be certified ready. Private ledger records baseline file hashes, manifest/protocol hashes, createdAt, NOT_COVERED and authorizedRequests=0. No released runtime behavior changed.
+Git-external final-v5 manifests and freezes are exclusive 0700/0600 records; previous blocked v1/v2 and interrupted extraction records remain preserved. Original ZIP/member/PDF/image byte identities are separate from deterministic UTF8 extraction hashes. Scope is submitted_artifact: current observation/extraction and later freeze timestamps constrain original-artifact allowlists; historical_replay remains NOT_COVERED. Both real final inputs are input_ready, partial source-only, using Solution/Brief/Rubric. Reports are excluded whole; no unverified page19 split. A1.3 admits 18 source members, excludes 2 sensitive-pattern files; A2 admits 12 members. Pattern detection has bounded coverage and is not exhaustive credential proof.
+
+Actual existing freeze/capsule/reference/render/snapshot validators accepted A1.3 (14 excerpts, 68,976 prompt bytes) and A2 (29 excerpts, 126,382 bytes), with zero registered evaluator-only reader invocations. Host original-container extraction is separate from this reader count. Capsules have explicitly offline identities; no begin, dispatch, provider or isolated-launch execution. Private receipts preserve source ranges, extraction versions, manifests, freeze hashes and prompt hashes. A new protocol-freeze-v3 ledger seals this protocol, registry, existing helper and pinned baseline identities before any model output. These checks certify input boundaries only; future real clean-context/OS isolation still needs runtime acceptance.
 
 ## Budget
 
@@ -30,4 +32,6 @@ For K proven stages per case: old/new single each K, old/new dual each 2K; maxim
 
 ## Coverage gaps
 
-A1.3 known tuning case is partial; reconstructed blind fixture is not raw-code discovery input. A2 assessed ZIP is user-confirmed; remote submission receipt remains uninspected. Its 36-page report includes AI/prior-advice history; exact clean extraction boundaries remain uncertified. Alternate FIT5152 A1 has multiple draft names and no verified assessed-file identity. All four historical stages currently NOT_COVERED. Need exact assessed report/ZIP and credible stage availability before EVA-01/EVA-02 real-case acceptance; Phase 27 cannot start from these blocked inventories. No EVA-03/EVA-04 completion claimed.
+Both final cases have usable source-only inputs; preparation/in_progress/recheck are NOT_COVERED. Reports, images, media, omitted source files and historical dialogue cannot be evaluated from these capsules. K=1 per case, at most 6 planned reviewer invocations per case (12 combined), authorizedRequests=0, every matrix cell NOT_RUN. Phase 27 may use only this declared partial scope after its separate authorization/runtime gates; it cannot claim complete-assignment evaluation.
+
+EVA-01 remains partial: the A1.3 original S-FEEDBACK marking screenshot is unlocated; derived oracle/postmortem byte identities cannot replace it. A1.3 historical rubric applicability remains unknown. A2 feedback PDF identity is verified and excluded. No school submission receipt or historical availability inferred, no EVA-03/EVA-04 completion claimed.
