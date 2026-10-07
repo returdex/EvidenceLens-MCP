@@ -41,3 +41,7 @@ Locate and byte-verify the original A1.3 S-FEEDBACK screenshot; historical rubri
 ## Planning ahead
 
 Phase23 has three verified plan structures covering OUT-02/03/04 (3/3), created from confirmed requirements and inspected existing source. No implementation or execution readiness claimed; current Phase22 gaps_found remains authoritative. Next after raw-feedback identity closure: execute Phase23; absent that, execution needs an explicit bounded dependency exception.
+
+## Phase23 local repair checkpoint (2026-10-08)
+
+Three plans implemented in e661bef; offline 40/40 and final recovery 5/5 pass, inline source review complete. Phase23 gaps_found: actual pinned CLI binary drift rejects two host fixtures before launch; result+DeepSeek suite NOT_COMPLETED. No certified-host or full-suite claim; OUT-02/03/04 acceptance remains pending. Phase22 EVA-01 still partial; its original screenshot is not replaced by derived labels. User continuation authorized independent local repairs only. No phase.complete, release or push; product0.3.17 retained.
