@@ -69,3 +69,7 @@ User authorized a real sample: one Codex invocation, frozen source-only A2, no e
 ## A2 post-fix live checkpoint (2026-10-08)
 
 Fresh user-authorized single Codex invocation at e2e8f7f succeeded in 267786 ms; no automatic retry/evaluator reads. Bound result 541730 bytes, 24 findings (19 warning/5 info), 124 exact references, 12 limitations; eight export/hash/full-report/readback checks pass. Complete private report linked in27-SAMPLE-SMOKE. Original uncertain run preserved. Actual sample reception/persistence repair verified; full semantic/tutor comparison, old-new/dual matrix and broader acceptance remain pending Phase27. Phase22 A1.3 feedback gap retained; no grade/phase-complete/release/push claim.
+
+## FIT5137 A2 input checkpoint (2026-10-08)
+
+User confirmed tutor feedback corresponds to final ZIP; report/video members match standalone artifacts. New private final-freeze-v2 admits complete final-report text plus official Brief/Rubric,53571 bytes, three-source reader allowlist and zero evaluator reader calls. Report29-page boundary inspection complete; no AI/prior-review appendix observed. Historical drafts not chronologically proven, visual/video and reviewer capsule/live/comparison pending. Original v1 metadata-path failure preserved; exact immutable Git feedback restored evaluator-only for v2. No inference or Phase27 completion.
