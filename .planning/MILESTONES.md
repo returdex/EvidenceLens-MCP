@@ -1,5 +1,29 @@
 # Project Milestones: EvidenceLens MCP
 
+## v1.3 提示词、反馈质量与可配置审阅 (Locally completed: 2026-10-09)
+
+**Delivered:** Stage-aware prompts, bounded recoverable reply reception, complete transparent review synthesis and persistent conservative `$el-settings`, with actual frozen evaluation and private tutor reconciliation.
+
+**Phases:** 22–27, six goals /18 plans with summaries /20 requirements. There are22 XML task blocks plus one bounded prose gap-selection task; original22-02/03/04 partial checkpoint outcomes remain historical, current requirements closed by22-05/06. No fabricated original task success.
+
+**Accomplishments:**
+
+- Four-stage task/current/official rubric instructions with minimum P distinct from optional D.
+- Exact original reply retention, bounded recovery and valid-peer full delivery through failures.
+- Exhaustive source-linked synthesis preserving every minority/info finding and host disagreement/unknown.
+- User/project/instruction settings, default singleCodex/full/retry0 and consistent eight installed entries.
+- Frozen exact old/new actual matrix plus one seen repair regression, evaluator-only feedback and explicit semantic errors/coverage limits.
+
+**Evidence:** Build passed; Node261/261; selected58 former timeout tests pass; actual newCodex25 and repairedDeepSeek38 findings, exhaustive63-finding pair. Full broad Vitest NOT_COMPLETED, native localGit clone stall and one pre-existing proof-harness timeout retained; no full pass claimed.
+
+**Stats:** Through audit d4d1f40:44 commits after frozen pre-milestone3462c30,113 changed files/2951 insertions/172 deletions; archive commits separate. Timeline2026-10-06→2026-10-09 Melbourne. Product remains0.3.17; local planning tagv1.3 is not a release/push.
+
+**Known debt:** Existing RR/FM, missing22/23 formal Nyquist and partial27 semantic assurance; unavailable originalA1.3 feedback/oldCodex baseline; absent historical/visual/course/receipt coverage; one-case model errors and no population-quality claim. Open artifact scan0; no confirmed requirement waived.
+
+**Archives:** [completion](milestones/v1.3-COMPLETION.md), [roadmap](milestones/v1.3-ROADMAP.md), [requirements](milestones/v1.3-REQUIREMENTS.md), [audit](milestones/v1.3-MILESTONE-AUDIT.md).
+
+---
+
 ## v1.2 快捷指令与 Codex 独立审阅 (Shipped: 2026-10-05)
 
 **Delivered:** Installed stage commands through immutable independent review, full source-backed feedback, exact prompt export and revised-source recheck. Product [0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17) at 2026-10-05T11:43:34Z.

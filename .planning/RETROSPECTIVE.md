@@ -137,6 +137,18 @@ The approved synthetic pair used two real Codex calls; exact per-run usage is in
 
 ---
 
+## Milestone: v1.3 — 提示词、反馈质量与可配置审阅
+
+**Locally completed:** 2026-10-09 | **Phases:**6 | **Plans:**18 | **Requirements:**20/20
+
+Stage/current-aware captures, bounded reply recovery, exhaustive synthesis and conservative persistent settings completed. Actual one-shot source-only matrix exposed both expanded quote-budget and unreferenced-info reception problems; preserving exact original failures enabled diagnosis without faking success. Independent candidate-first binary certification maintained the trust gate.
+
+What worked: frozen plans/source identities before dispatch, zero retries, evaluator-only feedback, full minority/info preservation and explicit case role transitions. What was inefficient: repeated cold dependency/source loading and native localGit clone stalls; exact cache restoration solved dependency imports but not broad proof-harness Git operations. Full-suite pass remains unclaimed.
+
+Lessons: code/source presence cannot settle tutor report/visual/course-convention criticism. Downgrading unsupported info to unknown preserves delivery without endorsing its truth. Missing captured files are not missing ZIP files. Keep five/six-source scopes, grade targets and mandatory/optional requirements separate; real outputs still misstate arithmetic and recommendations. A seen regression and changed-input diagram transcript do not demonstrate blind prompt-quality gain.
+
+Cost: actual requested/reported models and per-run usage preserved privately; no billing estimates/session-wide token claim. No new dependency, automatic retry, release or course edit. ExistingRR/FM and formal/manual semantic validation debt retained.
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

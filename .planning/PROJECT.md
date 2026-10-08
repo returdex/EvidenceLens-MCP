@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A controlled read-only evidence-review service with one shared assignment-review Skill and six installed stage/utility entry Skills. Ordinary review uses one DeepSeek and one Codex independent reviewer with source-backed host comparison; explicit single-provider review remains supported. Preparation, progress, final and recheck preserve the designated current artifact, full feedback, source limitations and truthful disclosure. Help/export/inspection do not launch review.
+A controlled read-only evidence-review service with one shared assignment-review Skill and seven installed stage/settings/utility entry Skills. Default review uses one Codex and full output with zero automatic retries; explicit Codex+DeepSeek selection produces source-backed host comparison with complete originals and transparent failure/disagreement states. Preparation, progress, final and recheck preserve the designated current artifact, full feedback, source limitations and truthful disclosure. Help/export/inspection do not launch review.
 
 ## Core Value
 
@@ -10,7 +10,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Milestone **v1.2 complete 2026-10-05**, product **[0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17)**. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
+Milestone **v1.3 locally complete 2026-10-09**, 20/20 requirements, Phases22–27. [v1.3 completion](milestones/v1.3-COMPLETION.md), [scoped evaluation](../docs/research/evaluation-results-v1.3.md), [audit](milestones/v1.3-MILESTONE-AUDIT.md). Product remains **[0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17)**. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
 
 Actual authorized synthetic initial/recheck Codex pair succeeded with exact exports and reported CLI token provenance. Separate A4 DeepSeek/Codex evidence is recorded, not repeated here. Inline host semantic judgments and source binding do not certify grade bands, submission, universal model accuracy or other platforms. Supported actual boundary is the pinned macOS arm64 CLI/Skill host; GUI selector observation is unavailable.
 
@@ -46,19 +46,19 @@ Actual authorized synthetic initial/recheck Codex pair succeeded with exact expo
 
 - ✓ Complete default feedback, source-bound host requirement/finding annotations, current actions and actual run/model/usage records — Phase 21 / v1.2 (RUN-01–05); explicitly authorized successful synthetic live pair and scoped host semantics.
 
+- ✓ Four-stage source/current-aware prompts and exact exports with official criterion/band instructions and separate minimum/planning goals — v1.3 (PPT-01–03, BND-01–02); actual outputs still require host semantic correction.
+- ✓ Bounded compatibility, full original reply/conversion retention and reliable single/partial-dual delivery — v1.3 (OUT-01–04).
+- ✓ Exhaustive full feedback and source-linked host synthesis decisions retaining minority/info/unknowns — v1.3 (FBK-01–03).
+- ✓ Verified selected cases, frozen source-only actual old/new matrix and post-seal tutor/source adjudication — v1.3 (EVA-01–04); immutable old Codex unavailable, historical/visual scope excluded, no general quality-gain claim.
+- ✓ `$el-settings` project/user/instruction precedence with conservative defaults and consistent eight installed entries — v1.3 (CFG-01–04).
+
 ### Active
 
-Milestone v1.3 scope approved by the user on 2026-10-06; 20 detailed requirements confirmed by the user on 2026-10-06; roadmap approved 2026-10-06.
-
-- [ ] Repair preparation, in-progress, final and recheck prompts and their full-feedback delivery.
-- [ ] Diagnose real execution failures; accept recoverable presentation differences without weakening authorization, identity or evidence validation.
-- [ ] Provide criterion-level grade-band assessments and separate minimum goals from optional planning margins.
-- [ ] Evaluate old/new behavior on a tuning assignment and a separate frozen assignment, withholding tutor feedback and feedback-derived material from reviewers.
-- [ ] Add `$el-settings` with project/user persistence, per-call overrides, a single-Codex/full-response default and transparent multi-reviewer comparison.
+None. Next milestone not selected.
 
 ### Deferred
 
-Three partial Nyquist/manual-semantic entries (Phases 18–20); DeepSeek generic show Markdown provider-model display (full receipt retains fields); [RR-01–08](REVIEW-REVISIONS.md) and [FM-01–06](notes/2026-10-05-review-quality-future.md). These remain non-blocking and are not closed by source/JSON checks. General disagreement-quality evaluation, repeated blind cases, criterion grade contracts, A1.3 semantic evaluation and missing Claude evidence remain future work. Incremental indexing, general server policy configuration and optional multi-user access remain unselected.
+Three partial Nyquist/manual-semantic entries (Phases 18–20); DeepSeek generic show Markdown provider-model display (full receipt retains fields); [RR-01–08](REVIEW-REVISIONS.md) and [FM-01–06](notes/2026-10-05-review-quality-future.md). These remain non-blocking and are not closed by source/JSON checks. General disagreement-quality automation, repeated fresh blind cases, tutor-equivalent visual/course evaluation, A1.3 original feedback recovery and missing Claude evidence remain future work. Broad offline proof-harness regression did not complete at local Git clone and one timeout; affected review contracts/build and selected failed-test replay pass. Phase22/23 formal Nyquist documents remain missing; Phase27 manual semantic assurance remains partial. Incremental indexing, general server policy configuration and optional multi-user access remain unselected.
 
 ### Out of Scope
 
@@ -66,7 +66,7 @@ Autonomous assignment writing/editing/signing/submission, unrestricted indexing,
 
 ## Context and Constraints
 
-Current tracked TS/MJS source/tests/helpers: 21,454 lines across 132 files at a6ab604. Existing TypeScript MCP and DeepSeek runtime plus stdlib Node Skill helpers; no new runtime dependency during closing. Private immutable prompt/result/metrics/annotation records stay outside Git with explicit task/conversation/run identity and conservative manual retention. Evidence is selected before read, then locally bound by excerpt identity/hash/UTF-8 range. Codex manages authentication; strict timeout/cancel/tool/context and result-validation boundaries remain. Model selection, schema validity and agreeing reviewers do not establish semantic accuracy.
+Current implementation retains the existing TypeScript MCP and DeepSeek runtime plus stdlib Node Skill helpers; no new runtime dependency during closing. Private immutable prompt/result/metrics/annotation records stay outside Git with explicit task/conversation/run identity and conservative manual retention. Evidence is selected before read, then locally bound by excerpt identity/hash/UTF-8 range. Codex manages authentication; strict timeout/cancel/tool/context and result-validation boundaries remain. Model selection, schema validity and agreeing reviewers do not establish semantic accuracy.
 
 ## Key Decisions and Outcomes
 
@@ -77,12 +77,12 @@ Current tracked TS/MJS source/tests/helpers: 21,454 lines across 132 files at a6
 | Codex-owned ChatGPT login and sealed independent context | Good within pinned host scope; no new auth service |
 | Default full reports, retaining every info/Low finding | Good: complete same-run records and optional requested summary |
 | Separate host assessment from raw model findings | Good: source-bound closing, deferral and action retirement; semantics still manual |
-| Ordinary DeepSeek/Codex pair with explicit one-provider override | Good: independent captures/results; accuracy gain not measured |
+| SingleCodex/full/no retry default, explicit dual selection | Good: installed defaults and actual complete pair; no measured accuracy gain |
 | Truthful event usage and requested/reported model split | Good: missing is unavailable, no billing estimates |
 | Preserve original proof and phase paths | Good: exact snapshots/audit copies; no paid replay |
 | Semantic automation and deeper quality evaluation | Revisit: retained Nyquist/RR/FM debt |
 
-## Current Milestone: v1.3 提示词、反馈质量与可配置审阅
+## Completed Milestone: v1.3 提示词、反馈质量与可配置审阅
 
 **Goal:** Make staged reviews usable, complete and evidence-grounded, with configurable reviewers and feedback-withheld evaluation of advice and grade-band judgments.
 
@@ -92,9 +92,9 @@ Current tracked TS/MJS source/tests/helpers: 21,454 lines across 132 files at a6
 
 **Grade goals:** Minimum acceptable band and optional planning target are distinct. A P request does not silently become D; D planning is an opt-in margin, not a guarantee of passing. Official rubric wording and mandatory gates remain authoritative.
 
-**Evaluation:** FIT5032 A1.3 is a tuning/regression candidate and is already known. FIT5046 A2 is a held-out candidate, pending verification of the exact assessed submission and historical stage records. The host has seen its feedback summary; test reviewers must use fresh isolated contexts. Tutor feedback, marks, feedback-derived plans, prior diagnoses and later revisions are evaluator-only for the frozen test. Freeze inputs, prompt/config/model identities and outputs before feedback comparison. Do not claim two cases establish general accuracy or automatically authorize provider calls.
+**Evaluation:** Verified selected tuning FIT5137 A2 and separately frozen FIT5046 A2 original assessed versions, official standards and evaluator-only feedback. Original A1.3 marking screenshot remains unavailable. Four original formal positions retain actual failures; repair regression is separately planned/seen. All63 valid paired findings retained with source-backed host judgments; actual unsupported claims and tutor-covered material exclusions remain visible. Original case outputs/feedback stay private, no grades promised. Historical preparation/in_progress/recheck NOT_COVERED; current helper stage behavior locally tested.
 
-**Planning boundaries:** Continue phase numbering at 22. Ecosystem research is skipped using the existing default; implementation/failure investigation remains required. Product version remains 0.3.17 during initialization. Historical phase directories and receipts remain at their original paths, as required by the recorded preservation decision. RR/FM items close only with new evidence; no blanket debt closure.
+**Planning boundaries:** Continue phase numbering at 22. Ecosystem research is skipped using the existing default; implementation/failure investigation remains required. Product version remains0.3.17; no remote publication at local completion. Historical phase directories and receipts remain at their original paths, as required by the recorded preservation decision. RR/FM items close only with new evidence; no blanket debt closure.
 
 ## Evolution
 
@@ -108,4 +108,4 @@ At phase transitions, move verified requirements to Validated, record invalidate
 </details>
 
 ---
-*Last updated: 2026-10-06 after user approval of v1.3 milestone goals; requirements confirmed; roadmap approved 2026-10-06.*
+*Last updated: 2026-10-09 after v1.3 local completion and full project evolution review.*
