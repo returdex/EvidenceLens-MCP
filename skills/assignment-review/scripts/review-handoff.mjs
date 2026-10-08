@@ -33,12 +33,17 @@ export function buildReviewPair(left,right,options={}){
  if(!isTrustedRunBundle(left)||!isTrustedRunBundle(right))fail('corrupt_record');
  const a=left.metadata,b=right.metadata;
  if(a.runId===b.runId||a.taskId!==b.taskId||a.conversationId!==b.conversationId||a.executionKind===b.executionKind)fail('identity_required');
- const signature=bundle=>{
-  const s=bundle.snapshot;if(!s)return null;
-  return JSON.stringify({stage:s.stage,currentSourceId:s.currentSourceId,reviewMode:s.reviewMode,sources:parseEvidenceCapsule(s).sources,materials:s.materials.map(({observedAt,...m})=>m)});
- };
- const x=signature(left),y=signature(right),comparable=x!==null&&x===y;
+ const x=reviewInputSignature(left),y=reviewInputSignature(right),comparable=x!==null&&x===y;
  const reports=[buildReviewHandoff(left,options),buildReviewHandoff(right,options)];
  return {reports,comparison:comparable?'same_materials_semantics_unverified':'not_comparable',status:reports.every(r=>r.resultAvailability==='validated')?'both_validated':reports.some(r=>r.resultAvailability==='validated')?'one_validated':'none_validated',agreements:[],disagreements:[],judgment:'No automatic semantic consensus or grade endorsement; review original findings and source coverage.',recovery:'Inspect the failed run diagnostics. Any new attempt needs explicit authorization; no automatic retry or replacement.'};
 }
 export function renderReviewPair(pair){return [pair.status,pair.comparison,pair.judgment,pair.recovery,...pair.reports.map(renderReviewHandoff)].join('\n\n');}
+
+// Compare the captured task (including stage/goal guide) as well as admitted source bytes.
+export function reviewInputSignature(bundle){
+ if(!isTrustedRunBundle(bundle))fail('corrupt_record');
+ const s=bundle.snapshot;if(!s)return null;
+ const markers=['<evidencelens-output-v3>','<evidencelens-evidence-v1>'].map(m=>s.promptText.lastIndexOf(m)).filter(n=>n>=0);
+ if(!markers.length)return null;
+ return JSON.stringify({task:s.promptText.slice(0,Math.min(...markers)),stage:s.stage,currentSourceId:s.currentSourceId,reviewMode:s.reviewMode,sources:parseEvidenceCapsule(s).sources,materials:s.materials.map(({observedAt,...m})=>m)});
+}
