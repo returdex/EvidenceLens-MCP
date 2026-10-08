@@ -77,3 +77,7 @@ User confirmed tutor feedback corresponds to final ZIP; report/video members mat
 ## FIT5137 A2 live/evaluator checkpoint (2026-10-09 Melbourne)
 
 Single full Codex text sample succeeded266166ms,21 findings/75 references/12 limitations; eight persistence/export checks pass. Output sealed before evaluator-only tutor feedback read; private16-point host comparison records concrete modelling misses plus scope-dependent unknowns. No prompt tuning or follow-up model calls. Case feedback now host-seen; if tuning occurs relabel seen regression. Formal old-new/dual/visual/video/stage acceptance pending, no grade or Phase27-complete claim. See27-FIT5137-A2-SAMPLE.
+
+## FIT5137 A2 diagram regression checkpoint (2026-10-09 Melbourne)
+
+User sustained authorization: new four-source seen-regression freeze with original diagram host transcription; no native vision or feedback to reviewer. Fresh single Codex succeeded179302ms,23 findings/76 references; eight persistence checks pass. New field-source conflict supported by original diagram spotcheck; five tutor modelling groups still not concretely matched, grain interpretation remains unresolved. Case now tuning/seen_regression; prior held-out candidate status is historical. No prompt/source implementation change or repeated retry; formal independent matrix and image-runtime certification pending. See27-FIT5137-A2-REGRESSION.
