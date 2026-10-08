@@ -15,12 +15,12 @@
 
 ## Phases
 
-- [ ] **Phase 22: 真实流程诊断与评估基线** — 核实可用作业记录、建立反馈隔离和冻结对照协议，定位现有运行失败。
+- [x] **Phase 22: 真实流程诊断与评估基线** — 核实可用作业记录、建立反馈隔离和冻结对照协议，定位现有运行失败。
 - [x] **Phase 23: 可恢复输出与可靠结果接收** — 接收可恢复的合法输出并保留部分成果，同时保持信任边界。
 - [x] **Phase 24: 四阶段提示词与档位证据** — 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
 - [x] **Phase 25: 完整反馈与透明综合判断** — 将有效独立报告合并成完整、可追溯的判断与行动。
 - [x] **Phase 26: 设置指令与安装入口一致性** — 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
-- [ ] **Phase 27: 冻结横向评估与实际验收** — 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
+- [x] **Phase 27: 冻结横向评估与实际验收** — 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
 
 ## Phase Details
 
@@ -37,14 +37,15 @@
 
 **Wave 1**
 - [x] 22-01-PLAN.md — 复现真实流程与失败分类 (OUT-01)
-- [ ] 22-02-PLAN.md — 核实作业版本与阶段证据 (EVA-01)
+- [x] 22-02-PLAN.md — 核实作业版本与阶段证据 (EVA-01)
 
 **Wave 2 (blocked on Wave 1 completion)**
-- [ ] 22-03-PLAN.md — 冻结审阅输入与离线泄漏负例 (EVA-02)
+- [x] 22-03-PLAN.md — 冻结审阅输入与离线泄漏负例 (EVA-02)
 
 **Gap closure (2026-10-07; original partial checkpoints retained)**
 - [ ] 22-04-PLAN.md — PARTIAL: A1.3 原始评分截图未定位；原始案例、rubric与可测final范围 (EVA-01; wave 1)
 - [x] 22-05-PLAN.md — 干净提取、真实冻结与capsule离线验收 (EVA-02; wave 2, depends on 22-04)
+- [x] 22-06-PLAN.md — Verified FIT5137 tuning case replaces unavailable A1.3 selection; original22-04 remains historical partial
 
 Run only gap plans with `$gsd-execute-phase 22 --gaps-only`. Full historical replay remains unavailable where no original stage evidence exists; submitted-artifact final scope is explicit, without fabricated dates or drafts.
 
@@ -129,7 +130,11 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 3. 用户能查看逐项人工裁决、分歧与反馈覆盖限制；评分反馈不是穷尽真值，调优案例结果不冒充未见测试，小样本不宣称普遍准确率。
 4. 各阶段没有对应历史材料的测试明确标未覆盖；结构检查、来源校验、实际入口验收与语义评估分别报告。
 5. 真实执行只使用明确批准的调用计划和预算；测试结果不得反向调优仍宣称同一案例未见。修复后重测记为已见回归，新的未见测试需另选。
-**Plans**: TBD
+**Plans**: 3
+
+- [x] 27-01-PLAN.md — Frozen matrix and exact dispatch
+- [x] 27-02-PLAN.md — Actual comparison and feedback adjudication
+- [x] 27-03-PLAN.md — Host verification and milestone audit
 
 ## Progress
 
@@ -137,12 +142,12 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |---|---|---|---|---|
-| 22. 真实流程诊断与评估基线 | v1.3 | 2/5 | Gap retained (EVA-01) | — |
+| 22. 真实流程诊断与评估基线 | v1.3 | 6/6 summaries; 22-04 historical partial | Complete via 22-06 selection | 2026-10-09 |
 | 23. 可恢复输出与可靠结果接收 | v1.3 | 3/3 | Complete (local) | 2026-10-08 |
 | 24. 四阶段提示词与档位证据 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 25. 完整反馈与透明综合判断 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 26. 设置指令与安装入口一致性 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
-| 27. 冻结横向评估与实际验收 | v1.3 | 0/TBD | Not started | — |
+| 27. 冻结横向评估与实际验收 | v1.3 | 3/3 | Complete (bounded actual evaluation) | 2026-10-09 |
 
 **Coverage:** 20/20 confirmed requirements mapped exactly once; no unmapped requirements.
 **Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–26 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.

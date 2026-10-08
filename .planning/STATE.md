@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
-status: ready
+status: milestone_audit_ready
 last_updated: "2026-10-08T09:55:04.328972+00:00"
 last_activity: 2026-10-08 -- Phase26 locally passed; Phase22 provenance gap retained
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_phases: 6
+  total_plans: 18
+  completed_plans: 18
+  percent: 100
 ---
 
 # EvidenceLens MCP — Project State
@@ -81,3 +81,7 @@ Single full Codex text sample succeeded266166ms,21 findings/75 references/12 lim
 ## FIT5137 A2 diagram regression checkpoint (2026-10-09 Melbourne)
 
 User sustained authorization: new four-source seen-regression freeze with original diagram host transcription; no native vision or feedback to reviewer. Fresh single Codex succeeded179302ms,23 findings/76 references; eight persistence checks pass. New field-source conflict supported by original diagram spotcheck; five tutor modelling groups still not concretely matched, grain interpretation remains unresolved. Case now tuning/seen_regression; prior held-out candidate status is historical. No prompt/source implementation change or repeated retry; formal independent matrix and image-runtime certification pending. See27-FIT5137-A2-REGRESSION.
+
+## Autonomous completion checkpoint — 2026-10-09
+
+Phase27 actual frozen comparison/sealed evaluator ledger and post-fix seen regression complete. EVA-01 case selection22-06 closes generic identity requirement while original22-04 stays historical partial. All20 exact requirements pass bounded verification; audit-open zero open artifacts. Build passes, Node261/261, previous58 Vitest timeout cases pass. Final broad suite and targeted remaining scripts outcomes will be recorded before archival. No remote publication or coursework changes.

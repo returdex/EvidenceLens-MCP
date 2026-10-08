@@ -32,10 +32,10 @@
 
 ### 反馈隔离评估
 
-- [ ] **EVA-01**: 用户获得已核实身份的调优与冻结测试案例清单，包括准确提交版本、rubric、阶段可用材料及 tutor feedback 来源；不完整候选不被称为完整记录。
+- [x] **EVA-01**: 用户获得已核实身份的调优与冻结测试案例清单，包括准确提交版本、rubric、阶段可用材料及 tutor feedback 来源；不完整候选不被称为完整记录。
 - [x] **EVA-02**: 测试审阅者使用干净上下文及允许清单，只接收对应时间截点材料；feedback、成绩、衍生分析和后续修订仅供隔离评估，输入冻结并可审计。
-- [ ] **EVA-03**: 用户可复核相同冻结输入上的旧版/新版、单审阅/所选多审阅对照；记录实际提示词、设置、请求/可核验模型、输出和运行状态；真实调用按明确授权和预算执行。
-- [ ] **EVA-04**: 用户获得与 tutor feedback 和原始记录逐项对账的评估：遗漏、无依据新增、档位过度背书、建议可执行性和发现丢失；注明反馈覆盖局限、人工裁决和小样本限制。
+- [x] **EVA-03**: 用户可复核相同冻结输入上的旧版/新版、单审阅/所选多审阅对照；记录实际提示词、设置、请求/可核验模型、输出和运行状态；真实调用按明确授权和预算执行。
+- [x] **EVA-04**: 用户获得与 tutor feedback 和原始记录逐项对账的评估：遗漏、无依据新增、档位过度背书、建议可执行性和发现丢失；注明反馈覆盖局限、人工裁决和小样本限制。
 
 ### 可配置指令
 
@@ -79,10 +79,10 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | FBK-03 | Phase 25 | Complete (local synthesis implementation; semantic acceptance Phase 27) |
 | BND-01 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
 | BND-02 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
-| EVA-01 | Phase 22 | Partial |
+| EVA-01 | Phase 22 | Complete (22-06 verified case selection; original A1.3 remains partial) |
 | EVA-02 | Phase 22 | Complete (offline inputs; runtime acceptance Phase 27) |
-| EVA-03 | Phase 27 | Pending |
-| EVA-04 | Phase 27 | Pending |
+| EVA-03 | Phase 27 | Complete (actual availability bounded matrix) |
+| EVA-04 | Phase 27 | Complete (manual scoped feedback adjudication) |
 | CFG-01 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
 | CFG-02 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
 | CFG-03 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
@@ -96,3 +96,5 @@ A1.3 is a known tuning/regression candidate. FIT5046 A2 is a held-out candidate 
 
 ---
 *Last updated: 2026-10-06 after confirmed milestone scope; detailed requirements confirmed; roadmap approved 2026-10-06.*
+
+Acceptance 2026-10-09: all20 generic requirements met within documented text/host/availability boundaries; evaluation quality errors and exclusions retained. Selected tuning FIT5137 A2 and separately frozen FIT5046 A2 identities verified. Original A1.3 missing feedback remains historical partial, not recovered. Further use of either evaluated case is seen regression. No broad accuracy, achieved grade, full historical record or remote submission acceptance.

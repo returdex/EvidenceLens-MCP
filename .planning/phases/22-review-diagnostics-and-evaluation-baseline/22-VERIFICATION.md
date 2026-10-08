@@ -1,28 +1,20 @@
 ---
 phase: 22-review-diagnostics-and-evaluation-baseline
-status: gaps_found
-verified: 2026-10-07
-score: 3/4 roadmap success criteria
+status: passed
+verified: 2026-10-09
+score: 4/4 roadmap success criteria within declared submitted-artifact scope
 ---
 
 # Phase 22 goal verification
 
 | Requirement | Result | Evidence |
 |---|---|---|
-| OUT-01 | passed | Four-stage capture/dispatch/shape/binding/store/handoff traced; pinned old hashes; real historical unknowns preserved; 20/20 offline result checks |
-| EVA-01 | partial | Original artifacts/report aliases, local rubric byte identity and scope verified; A2 raw feedback verified; A1.3 original S-FEEDBACK image unlocated, historical rubric applicability unknown |
-| EVA-02 | passed (Phase-22 offline scope) | Both real final-v5 freezes input_ready; actual capsule/reference/render/snapshot validators accept; registered evaluator reads=0; protocol-freeze-v3 immutable |
+| OUT-01 | passed | Four-stage failure-layer trace, immutable old baseline, offline negatives and actual Phase27 failures distinguish runtime, reply shape, source binding and semantics |
+| EVA-01 | passed, selected-case scope | 22-06 selects verified FIT5137 A2 tuning and FIT5046 A2 frozen final candidate; explicit user assessed-ZIP confirmations, original bytes and standards/feedback identities retained |
+| EVA-02 | passed | Actual final-v5 freezes/capsules, allowlist negative tests, zero evaluator reader admissions, and separate real current-host source-only captures |
 
-Roadmap criteria 1, 3 and 4 pass within declared partial source-only final scope. Criterion 2 remains partial because original A1.3 feedback identity is unknown. Exact IDs cover OUT-01/EVA-01/EVA-02; empty generic gap-analysis is not coverage evidence.
+## Preserved limitations
 
-## Remaining gaps
+The earlier verification (2026-10-07) correctly reported EVA-01 partial for the original A1.3 selection. Original 22-04 remains partial; no original screenshot was recovered. 22-06 changes the selected tuning case within the user's any-assignment instruction and closes the generic case-list requirement, not that historical task. FIT5137 is seen_regression. Complete original artifact bytes do not imply complete reviewer coverage.
 
-- EVA-01 / 22-04: locate original A1.3 S-FEEDBACK marking screenshot and verify bytes; determine historical rubric applicability if evidence exists. Derived evaluation labels/postmortem are evaluator-only and cannot substitute for the raw feedback image. Known-location lookup found no source; user locator question pending.
-- Historical preparation/in_progress/recheck are NOT_COVERED, not blockers for declared submitted_artifact final scope. Report/media/omitted source coverage remains excluded and must not become full-assignment claims.
-- EVA-02 extraction/capsule gap is closed by 22-05. Old blocked inventories and partial summaries retained; both current cases have actual source-only final inputs. No real clean-context/OS isolation proof claimed; that is a future runtime gate.
-
-## Checks
-
-33/33 focused Node tests passed; git diff --check passed. Regression `npm test`: NOT_COMPLETED. The disabled-provider command remained before Vitest test execution with no output after approximately 4 minutes; the owned test processes were terminated (exit 143). Cause unknown, no auto-retry or environment changes. Focused checks remain valid; no full-suite pass claimed. No live CLI/provider/auth calls; authorizedRequests=0/inference=NOT_RUN. Gap closure changed documentation/private data only; code-review gate skipped for no source diff. No phase.complete called; EVA-03/04 and future settings/prompts untouched. Product 0.3.17 retained.
-
-Next: provide the original A1.3 feedback locator, then verify its identity and reconcile EVA-01. Do not repeat extraction or model calls merely to fill this gap. Phase remains gaps_found; 22-04 partial, 22-05 complete.
+Preparation/in_progress/recheck historical replay is NOT_COVERED. FIT5046 reviewer excludes reports, diagrams, images/media, omitted source/build/test files and receipts. FIT5137 text/host-derived diagram transcript excludes native vision/video acceptance. Source binding never proves semantic correctness or grade. Earlier 33-test and stalled-suite receipts remain historical; current Phase27 checks supersede neither their timestamps nor their scopes.

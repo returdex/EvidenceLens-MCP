@@ -55,3 +55,9 @@ Local A2 Git history contains a full-workspace backup and the later feedback add
 ## FIT5137 A2 role transition — 2026-10-09 Melbourne
 
 After the sealed first sample was compared with evaluator feedback, user authorized continued diagnosis. This case is now seen_regression/tuning, not a new held-out proof. New regression-freeze-v3 adds an explicitly host-derived transcript of original report Figure9/11; host feedback exposure is declared. New isolated reviewer received four admitted sources but no feedback/prior answer. This is changed-input regression, not native vision or same-input prompt comparison. Private original and new full outputs/evaluator ledgers preserved. Formal independent held-out testing needs another case.
+
+## Selected evaluation cases — 2026-10-09
+
+EVA-01 now selects FIT5137 A2 (verified user-confirmed final ZIP, tuning/seen_regression, official brief/rubric and exact evaluator-only feedback) and FIT5046 A2 (verified user-confirmed final ZIP, separately frozen final-source candidate, official brief/rubric and exact evaluator-only feedback). Both source identities are in preserved private manifests. FIT5046 formal old/new reviewer inputs were captured before outputs and sealed before the current evaluator read. After that read it is a seen regression case for any further tuning; never call a repair replay unseen.
+
+This selection supersedes the unavailable A1.3 tuning selection for generic case-list acceptance, using the user's any-assignment scope. Original A1.3 screenshot absence and historical rubric uncertainty remain unresolved historical limitations. Neither selected case supplies independently dated preparation/in_progress/recheck history. FIT5137 original report+video+ZIP completeness and FIT5046 original ZIP/report alias identity are distinct from limited admitted text coverage and remote receipt absence.
