@@ -21,9 +21,9 @@
 
 ### 完整交付与合并
 
-- [ ] **FBK-01**: 用户默认收到全部发现、严重程度、证据、建议和限制；简版仅按明确请求提供，并链接同轮完整报告。
-- [ ] **FBK-02**: 多审阅者使用相同获准材料独立首审后，用户收到共同发现、单方新增、分歧、未决项及综合判断；每项可追溯到原报告。
-- [ ] **FBK-03**: 用户可核查发现的合并、驳回、延期、关闭和重开依据；少数意见及 Low/info 不因摘要或多数一致而静默消失。
+- [x] **FBK-01**: 用户默认收到全部发现、严重程度、证据、建议和限制；简版仅按明确请求提供，并链接同轮完整报告。
+- [x] **FBK-02**: 多审阅者使用相同获准材料独立首审后，用户收到共同发现、单方新增、分歧、未决项及综合判断；每项可追溯到原报告。
+- [x] **FBK-03**: 用户可核查发现的合并、驳回、延期、关闭和重开依据；少数意见及 Low/info 不因摘要或多数一致而静默消失。
 
 ### 档位与目标
 
@@ -74,9 +74,9 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | OUT-02 | Phase 23 | Complete (local implementation) |
 | OUT-03 | Phase 23 | Complete (local implementation) |
 | OUT-04 | Phase 23 | Complete (local implementation) |
-| FBK-01 | Phase 25 | Pending |
-| FBK-02 | Phase 25 | Pending |
-| FBK-03 | Phase 25 | Pending |
+| FBK-01 | Phase 25 | Complete (local synthesis implementation; semantic acceptance Phase 27) |
+| FBK-02 | Phase 25 | Complete (local synthesis implementation; semantic acceptance Phase 27) |
+| FBK-03 | Phase 25 | Complete (local synthesis implementation; semantic acceptance Phase 27) |
 | BND-01 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
 | BND-02 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
 | EVA-01 | Phase 22 | Partial |

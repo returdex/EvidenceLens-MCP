@@ -18,7 +18,7 @@
 - [ ] **Phase 22: 真实流程诊断与评估基线** — 核实可用作业记录、建立反馈隔离和冻结对照协议，定位现有运行失败。
 - [x] **Phase 23: 可恢复输出与可靠结果接收** — 接收可恢复的合法输出并保留部分成果，同时保持信任边界。
 - [x] **Phase 24: 四阶段提示词与档位证据** — 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
-- [ ] **Phase 25: 完整反馈与透明综合判断** — 将有效独立报告合并成完整、可追溯的判断与行动。
+- [x] **Phase 25: 完整反馈与透明综合判断** — 将有效独立报告合并成完整、可追溯的判断与行动。
 - [ ] **Phase 26: 设置指令与安装入口一致性** — 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
 - [ ] **Phase 27: 冻结横向评估与实际验收** — 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
 
@@ -100,7 +100,10 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 2. 多审阅首轮不接收对方结论；用户看到共同发现、单方新增、意见分歧、未决项和宿主综合判断，每项关联 run/finding 及原证据。
 3. 用户能核查每个发现的保留、合并、驳回、延期、关闭及重开依据；Low/info 和少数意见不会因摘要或多数一致消失。
 4. 单审阅、双成功及一位失败的交付都能核对完整报告和最终行动；格式通过、来源绑定和模型一致不被宣称为语义正确。
-**Plans**: TBD
+**Plans**: 2/2 complete (local implementation; actual semantic acceptance Phase27)
+- [x] 25-01 — Complete source-bound synthesis ledger
+- [x] 25-02 — Installed CLI and transparent delivery
+**Waves**: 1→2; no extra provider calls or source reads.
 
 ### Phase 26: 设置指令与安装入口一致性
 **Goal**: 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
@@ -134,12 +137,12 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 | 22. 真实流程诊断与评估基线 | v1.3 | 2/5 | Gap retained (EVA-01) | — |
 | 23. 可恢复输出与可靠结果接收 | v1.3 | 3/3 | Complete (local) | 2026-10-08 |
 | 24. 四阶段提示词与档位证据 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
-| 25. 完整反馈与透明综合判断 | v1.3 | 0/TBD | Not started | — |
+| 25. 完整反馈与透明综合判断 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 26. 设置指令与安装入口一致性 | v1.3 | 0/TBD | Not started | — |
 | 27. 冻结横向评估与实际验收 | v1.3 | 0/TBD | Not started | — |
 
 **Coverage:** 20/20 confirmed requirements mapped exactly once; no unmapped requirements.
-**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–24 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.
+**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–25 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.
 
 ---
-*Last updated: 2026-10-08 (Australia/Melbourne), Phase24 local verification.*
+*Last updated: 2026-10-08 (Australia/Melbourne), Phase25 local verification.*

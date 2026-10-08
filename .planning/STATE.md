@@ -3,28 +3,28 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
 status: ready
-last_updated: "2026-10-08T06:02:53.168226+00:00"
-last_activity: 2026-10-08 -- Phase24 locally passed; Phase22 provenance gap retained
+last_updated: "2026-10-08T09:29:37.231605+00:00"
+last_activity: 2026-10-08 -- Phase25 locally passed; Phase22 provenance gap retained
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 7
-  percent: 70
+  completed_phases: 3
+  total_plans: 12
+  completed_plans: 9
+  percent: 75
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 24 completed locally; Phase25 next; released product remains 0.3.17.
+See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 25 completed locally; Phase26 next; released product remains 0.3.17.
 
 ## Current Position
 
-Phase: 24 — locally complete; next Phase25 planning
-Plan: 24-01/02 complete
-Status: Ready for Phase25; Phase22 EVA-01 raw-feedback gap retained
-Last activity: 2026-10-08 — 46/46 focused checks; no remote inference
+Phase: 25 — locally complete; next Phase26 planning
+Plan: 25-01/02 complete
+Status: Ready for Phase26; Phase22 EVA-01 raw-feedback gap retained
+Last activity: 2026-10-08 — 32/32 focused checks; no remote inference
 
 ## Deferred Items
 
@@ -36,7 +36,7 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Plan Phase25 完整反馈与透明综合判断. Phase26 handles conservative settings defaults; Phase27 handles actual held-out semantic acceptance. Separately locate and byte-verify original A1.3 S-FEEDBACK; do not substitute derived labels or infer Phase22 completion.
+Plan Phase26 设置指令与安装入口一致性, with conservative single-Codex/full/no-retry default; Phase27 handles actual held-out semantic acceptance. Separately locate and byte-verify original A1.3 S-FEEDBACK; do not substitute derived labels or infer Phase22 completion.
 
 ## Phase23 local repair checkpoint (2026-10-08)
 
@@ -53,3 +53,7 @@ Phase23 passed for local implementation: OUT-02/03/04 complete. Exact current CL
 ## Phase24 authoritative checkpoint (2026-10-08)
 
 Plans0a947dd; implementation0fe6a50; instruction alignment96e2ab7. PPT-01/02/03,BND-01/02 locally implemented,46/46 focused Node22 checks and inline source/instruction review passed. Four-stage captured task guide and separate minimum/planning goals; five-task depth retained. Actual model grades/completeness remain unverified Phase27; host grade not_assessed. No release/push/provider request;0.3.17 retained. Next Phase25, with Phase22 EVA-01 still partial.
+
+## Phase25 authoritative checkpoint (2026-10-08)
+
+Planning675bb23, source/CLI/testsa289b34, instructionsc3f155b. FBK-01/02/03 locally complete;32/32 targeted checks, inline plan/source/instruction reviews and diff-check passed. Full original reports, complete host decision ledger and readonly synthesize export. Missing assessment remains unresolved; semantic judgment and first-review isolation not certified. Phase22 EVA-01 partial retained; Phase27 actual semantics pending. Next Phase26 configuration command and conservative defaults. No release/push/real provider request.
