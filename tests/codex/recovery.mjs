@@ -6,12 +6,13 @@ import {executeCapturedWithAdapter} from '../../skills/assignment-review/scripts
 import {captureCodexPrompt} from '../../skills/assignment-review/scripts/codex-review.mjs';
 import {buildReviewHandoff,renderReviewHandoff,buildReviewPair} from '../../skills/assignment-review/scripts/review-handoff.mjs';
 import {sha256} from '../../skills/assignment-review/scripts/prompt-contract.mjs';
-async function run(t,{invalid=false,fence=false,cancel=false}={}){
+async function run(t,{invalid=false,fence=false,cancel=false,unreferenced=null}={}){
  const root=await fs.mkdtemp('/private/tmp/el23-');await fs.chmod(root,0o700);t.after(()=>fs.rm(root,{recursive:true,force:true}));
  const f=fixture(),scope={stateRoot:root+'/state',conversationId:f.snapshot.conversationId,taskId:f.snapshot.taskId};
  const receipt=await store.beginRun(scope);for(const x of [f.snapshot,f.capsule,f.result])x.runId=receipt.runId;f.snapshot.sequence=receipt.sequence;
  await captureDeepSeekPrompt(scope,receipt.runId,{snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted});
  const value={...f.result,schemaVersion:3,findings:f.result.findings.map(x=>({...x,evidence:x.evidence.map(({sourceId,excerptId})=>({sourceId,excerptId}))}))};
+ if(unreferenced)value.findings.push({...value.findings[0],findingId:'F2',kind:unreferenced.kind,severity:unreferenced.severity,evidence:[]});
  if(invalid)value.taskId='foreign';if(fence)value.heading='完整审阅';
  const raw=fence?'```json\n'+JSON.stringify(value)+'\n```':JSON.stringify(value);let calls=0;const c=new AbortController();
  const adapter={loadConfig:()=>({apiKey:'SYNTHETIC',baseUrl:'https://synthetic.invalid',model:'synthetic'}),readJson:async r=>r.json(),fetch:async()=>{calls++;if(cancel)c.abort();return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:raw}}]}),{status:200});}};
@@ -60,4 +61,16 @@ test('Codex raw reply, two valid results, different materials and two failures s
  assert.equal(buildReviewPair(x.bundle,await store.readRunRecord(other.scope,{expectedRunId:other.receipt.runId})).comparison,'not_comparable');
  const bad=await run(t,{invalid:true}),failed=await capturedFlow(t,{scope:bad.scope});await store.finishRun(failed.scope,failed.receipt.runId,{status:'failed',errorCode:'uncertain'});
  assert.equal(buildReviewPair(bad.bundle,await store.readRunRecord(failed.scope,{expectedRunId:failed.receipt.runId})).status,'none_validated');
+});
+
+test('DeepSeek unreferenced info remains visible as unknown with exact original reply',async t=>{
+ const x=await run(t,{unreferenced:{kind:'observation',severity:'info'}});
+ assert.equal(x.result.status,'succeeded');assert.equal(x.bundle.reply.text,x.raw);
+ const findings=x.bundle.result.modelResponse.findings;assert.equal(findings.length,2);assert.equal(findings[0].kind,'observation');assert.equal(findings[1].kind,'unknown');
+ assert.equal(findings[1].claim,JSON.parse(x.raw).findings[1].claim);assert.deepEqual(findings[1].evidence,[]);assert.ok(x.bundle.conversions.some(v=>v.includes('unverified unknown')));assert.equal(x.calls(),1);
+});
+test('missing references on conflicts and warning observations still reject the whole reply',async t=>{
+ for(const unreferenced of [{kind:'conflict',severity:'info'},{kind:'observation',severity:'warning'},{kind:'observation',severity:'error'}]){
+ const x=await run(t,{unreferenced});assert.equal(x.result.status,'uncertain');assert.equal(x.bundle.result,null);assert.equal(x.bundle.reply.text,x.raw);assert.equal(x.calls(),1);
+ }
 });

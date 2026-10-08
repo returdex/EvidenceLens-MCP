@@ -16,6 +16,9 @@ export function normalizeReviewReply(raw,{deepseek=false}={}){
    conversions.push('Presentation heading retained in original reply; omitted from validated schema.');delete input.heading;
   }
   if(deepseek&&input.schemaVersion===3&&Array.isArray(input.findings))for(const [i,f] of input.findings.entries()){
+   if(f?.kind==='observation'&&f.severity==='info'&&Array.isArray(f.evidence)&&f.evidence.length===0){
+    conversions.push('Finding '+(i+1)+': unreferenced DeepSeek info observation downgraded to unverified unknown; original claim/action retained, no source evidence invented.');f.kind='unknown';
+   }
    if(f&&typeof f.kind==='string'&&!['observation','gap','conflict','unknown'].includes(f.kind)&&f.kind.length<=80){
     try{text(f.kind,80);}catch{continue;}
     conversions.push('Finding '+(i+1)+': nonstandard DeepSeek kind '+JSON.stringify(f.kind)+' normalized locally to unknown; original claim/action retained and host classification required.');f.kind='unknown';
