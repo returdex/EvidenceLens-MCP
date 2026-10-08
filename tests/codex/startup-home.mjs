@@ -1,3 +1,4 @@
+import {CODEX_VERSION} from '../../skills/assignment-review/scripts/codex-profile.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -30,7 +31,7 @@ for(const name of ['view_image','apply_patch'])test('forced '+name+' cannot leak
  assert.notEqual(r.outcome.status,'candidate');assert.equal(r.outcome.cleanupComplete,true);assert.equal(r.authUnchanged,true);assert.equal(r.installationUnchanged,true);assert.ok(!JSON.stringify(r.requests).includes(r.authSentinel));
 });
 test('actual installed home crosses startup into a turn with network explicitly denied',async()=>{
- const launch=await createIsolatedLaunch({executableReceipt:{...await executableIdentity('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'),version:'0.160.0'},runId:randomUUID()});
+ const launch=await createIsolatedLaunch({executableReceipt:{...await executableIdentity('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'),version:CODEX_VERSION},runId:randomUUID()});
  try{
   assert.ok(launch.env.CODEX_HOME.startsWith(launch.root+'/control/'));assert.equal(launch.env.HOME,launch.env.CODEX_HOME);assert.ok((await fs.lstat(launch.env.CODEX_HOME+'/auth.json')).isSymbolicLink());
   const raw=await fs.readFile(launch.args[1],'utf8');assert.ok(!raw.includes('(literal '+JSON.stringify(process.env.HOME+'/.codex/installation_id')+')'));

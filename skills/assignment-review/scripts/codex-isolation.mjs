@@ -53,7 +53,7 @@ export function toolAttempt(stdout,stderr) {
  return /"type"\s*:\s*"(?:todo_list|file_change|command_execution|mcp_tool_call|tool_call|web_search|agent_tool_call|image_view)"/.test(stdout);
 }
 export function isolationContractDigest(){return sha256([isolationPolicy.toString(),isolatedArgs.toString(),createReviewHome.toString(),createIsolatedLaunch.toString(),toolAttempt.toString(),rejectedToolCall.toString(),JSON.stringify([CODEX_VERSION,CODEX_MODEL,CODEX_BINARY_SHA256]),JSON.stringify(DISABLED_FEATURES),boundModelReferenceSchema.toString(),JSON.stringify(MODEL_REFERENCE_SCHEMA),DYLD_SHA256].join('\n'));}
-const CONTRACT_SHA256='82b34c0d5202b69d1a4fbafe3744b138fbe166e8eb4ca0150f14ff4a27b28c33';
+const CONTRACT_SHA256='f267a6f646c25c37b34bfc6d4b4a5459a50af240bc068471b6fe3103a8024227';
 async function regular(p,{max=1024*1024,privateOnly=false}={}){
  const s=await fs.lstat(p);
  if(!s.isFile()||s.isSymbolicLink()||s.uid!==process.getuid()||s.nlink!==1||s.mode&0o022||privateOnly&&s.mode&0o077||s.size>max)codexFail('unsafe_path');

@@ -15,7 +15,8 @@ import { spawn,spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { executableIdentity } from '../../skills/assignment-review/scripts/codex-preflight.mjs';
 import { MODEL_RESULT_SCHEMA,MODEL_CITATION_SCHEMA,MODEL_REFERENCE_SCHEMA } from '../../skills/assignment-review/scripts/codex-contract.mjs';
-export const PINNED_BINARY_SHA256='6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201';
+export { CODEX_BINARY_SHA256 as PINNED_BINARY_SHA256 } from '../../skills/assignment-review/scripts/codex-profile.mjs';
+import { CODEX_BINARY_SHA256 as PINNED_BINARY_SHA256 } from '../../skills/assignment-review/scripts/codex-profile.mjs';
 import { isolationPolicy,isolatedArgs,createReviewHome,toolAttempt } from '../../skills/assignment-review/scripts/codex-isolation.mjs';
 export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,supervise=false}={}) {
  return new Promise((resolve,reject)=>{
@@ -33,13 +34,13 @@ export function runChild(executable,args,{env,cwd,input='',timeoutMs=15000,super
 export function candidatePolicy({binary,scratch,auth,control,extraRead=[],installation}) {
  return isolationPolicy({binary,scratch,auth,control,extraRead,installation})+'\n(allow network-outbound (remote ip "localhost:*"))';
 }
-export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false,responseHeaders={},catalogEtag=null,citationOnly=false,referenceOnly=false,outputSchema,responseResult}={}) {
+export async function protocolFixture(mode='success',{permitInstallationMetadata=false,tool,supervise=false,useRunner=false,configOverrides={},homeEntries=[],homeDirectories=[],isolatedHome=true,isolateUserHome=true,globalSkills=true,denyPreferencesSync=false,responseHeaders={},catalogEtag=null,citationOnly=false,referenceOnly=false,outputSchema,responseResult,candidateBinarySha256=PINNED_BINARY_SHA256}={}) {
  const base=await mkdtemp('/private/tmp/el20-host-');await chmod(base,0o700);
  const home=base+'/home',codexHome=home+'/.codex',scratch=base+'/scratch',control=base+'/control';
  for(const p of [home,codexHome,scratch,control])await mkdir(p,{mode:0o700});
  const binary=await realpath('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex');
  const identity=await executableIdentity(binary);
- if(identity.binarySha256!==PINNED_BINARY_SHA256){await rm(base,{recursive:true,force:true});throw new Error('Pinned binary changed: gate must be reviewed');}
+ if(identity.binarySha256!==candidateBinarySha256){await rm(base,{recursive:true,force:true});throw new Error('Pinned binary changed: gate must be reviewed');}
  const claims={'https://api.openai.com/auth':{chatgpt_account_id:'synthetic-account',chatgpt_plan_type:'plus',chatgpt_user_id:'synthetic-user'},email:'synthetic@example.invalid',exp:4102444800};
  const token=[{alg:'none'},claims].map(v=>Buffer.from(JSON.stringify(v)).toString('base64url')).join('.')+'.synthetic';
  const auth=codexHome+'/auth.json',authSentinel='AUTH_SYNTHETIC_SENTINEL_20';
