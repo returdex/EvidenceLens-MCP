@@ -11,7 +11,7 @@
 ## 调用
 
 1. `prompt-records.mjs begin` 使用 `executionKind:"host_skill"`，保留实际身份。Codex 的另一次 begin 仍用 codex_exec。
-2. 两位各自 `capture`：DeepSeek 输入 `{taskId,runId,snapshot,capsule,admitted,evidenceRoots?}`，复用捕获、摘录拆分和模型 v3 输出协议。两份在首次模型调用前完成，保持相同原材料／任务，无同伴结论。
+2. 两位各自 `capture`：DeepSeek 输入 `{taskId,runId,snapshot,capsule,admitted,reviewIntent?,evidenceRoots?}`，reviewIntent 及阶段／目标指南使用 [共享捕获约定](codex-execution.md#阶段与目标捕获phase-24)，复用捕获、摘录拆分和模型 v3 输出协议。两份在首次模型调用前完成，保持相同原材料／任务，无同伴结论。
 3. `deepseek-review.mjs preflight` 输入 `{}`；只验证运行库和配置，不发 HTTP，报告 `inference:not_run`。这不能证明远端 key/model 可用。
 4. `deepseek-review.mjs run` 输入 `{taskId,runId,evidenceRoots?}`。生命周期 captured → dispatched 原子认领防重放；只发送一次 /chat/completions，重试固定为零，无模型替换／fallback／工具。每位审阅默认期限 600 秒，覆盖请求及正文读取；宿主继续等待同一运行。阶段任务完整保存，没有沿用 MCP 的四条简短发现限制。
 5. HTTP 200、单个 choice、finish_reason=stop、有效 JSON v3、实际身份／coverage／来源绑定全部通过，才保存私有 result 和 provider 回执并标 succeeded。JSON 模式不能约束分类枚举：短且通过安全文本校验的非标准 kind 可在本地保守改为 unknown，正文／行动保持原样，在 limitations 明确标注待宿主归类。这不修复身份、coverage 或引用，不把无证据判断升级为事实；源绑定照常验证。length、工具调用、空正文、错引用、取消及未验证内容均不发布审阅结果。reasoning_content 丢弃。绑定保证引用来自捕获内容，不证明语义推理正确。

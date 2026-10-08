@@ -46,7 +46,7 @@ ChatGPT 返回 auth=chatgpt；未登录是 login_required，API-key 登录是 au
 
 从 assignment-review 的安装目录定位 `scripts/codex-review.mjs`，支持 preflight/capture/run/diagnose，均仅接受 stdin JSON。preflight 输入 `{}`，只做版本、登录及隔离检查，不推理。先用 prompt-records.mjs begin 的 `executionKind:"codex_exec"` 保存回执，再由父助手筛选材料和组装六节正文。
 
-- capture 输入 `{taskId,runId,snapshot,capsule,admitted}`；snapshot 的 promptText 为六节正文、promptSha256 对应该正文，身份/sequence 来自 begin。capsule 见上文；admitted 为已获准 `{sourceId,text}` 数组。助手校验并追加唯一证据区块，保存最终原文及哈希。
+- capture 输入 `{taskId,runId,snapshot,capsule,admitted,reviewIntent?}`；snapshot 的 promptText 为六节正文、promptSha256 对应该正文，身份/sequence 来自 begin。capsule 见上文；admitted 为已获准 `{sourceId,text}` 数组。助手校验并追加唯一证据区块，保存最终原文及哈希。
 - run 输入 `{taskId,runId,evidenceRoots?}`；只运行同一已捕获尝试，返回状态、执行回执和经过本地校验的 result。无可覆盖的可执行文件、模型、endpoint、配置或测试参数。CODEX_THREAD_ID 决定宿主身份，不读取历史聊天。
 - diagnose 输入 `{taskId,runId}`（可附 evidenceRoots）；只读当前对话内明确指定的运行回执，返回 metadata、execution 和 diagnosticAvailability。不读提示词、结果或作业原件，不预检、不启动子进程，不改变 latest。旧 execution v1 返回 `not_recorded`；未认领返回 `not_started`；已认领未完成返回 `pending`；v2 终态返回 `recorded`。这是指定旧 run 的诊断，不代表最新审阅。
 - export 继续使用 prompt-records.mjs export；不会预检或启动 Codex。帮助仅阅读命令表，也不启动进程。
@@ -115,3 +115,9 @@ CLI 0.160.0 在目录 ETag 与服务端 `x-models-etag` 相同时，可能输出
 新增私有 `<runId>.metrics.json` 和 `<runId>.handoff.json`，沿用所有者/0600/no-follow/限额/事务和身份摘要约束。旧记录缺 sidecar 明确 not_recorded。present corrupt metrics 是记录错误；corrupt handoff 显示比较不可验证且保留有效原始结果。handoff 是 host_review 的当前证据 R/F 语义评估，结构验证不证明语义正确。相同首次记录幂等，不同覆写拒绝。只删除已识别且身份/摘要匹配的本任务文件；未知/损坏/链接保留并报告 incomplete。不自动过期、重试或恢复。
 
 Phase 23 accepts only one whole-response JSON code fence and bounded top-level presentation heading through the shared validator. Original terminal reply and conversion limitations are retained privately. Malformed/foreign identity/source/coverage responses remain rejected; full/show can display their exact raw diagnostic as unverified, never confirmed findings. Nonterminal/oversize failures have no complete captured reply. No automatic retry.
+
+### 阶段与目标捕获（Phase 24）
+
+共享 capture 在最终保存前加入 `<evidencelens-stage-v1>`：实际 stage/currentSourceId、阶段任务和目标边界。可选 reviewIntent 的完整形状为 `{minimumGoal:"P",planningGoal:null,recheck:false}`；用户选择 D 作为规划目标时仅 planningGoal 为 "D"。未传时两个目标均 null，旧任务的明确复查指令仍有效。目标标签限 40 个字符、80 UTF-8 字节及文字／数字／基本标签标点；未知字段或无效形状拒绝，不截断。
+
+指南、输出约定和获准证据共同计算最终哈希，两 provider 派发／导出使用同一已保存原文。旧捕获记录保持原字节，不追补指南。模型按实际 descriptor 提出档位分析，宿主 gradeBandAssessment 仍为 not_assessed；流程验证不转换为成绩认证。
