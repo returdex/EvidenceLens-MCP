@@ -73,3 +73,7 @@ Fresh user-authorized single Codex invocation at e2e8f7f succeeded in 267786 ms;
 ## FIT5137 A2 input checkpoint (2026-10-08)
 
 User confirmed tutor feedback corresponds to final ZIP; report/video members match standalone artifacts. New private final-freeze-v2 admits complete final-report text plus official Brief/Rubric,53571 bytes, three-source reader allowlist and zero evaluator reader calls. Report29-page boundary inspection complete; no AI/prior-review appendix observed. Historical drafts not chronologically proven, visual/video and reviewer capsule/live/comparison pending. Original v1 metadata-path failure preserved; exact immutable Git feedback restored evaluator-only for v2. No inference or Phase27 completion.
+
+## FIT5137 A2 live/evaluator checkpoint (2026-10-09 Melbourne)
+
+Single full Codex text sample succeeded266166ms,21 findings/75 references/12 limitations; eight persistence/export checks pass. Output sealed before evaluator-only tutor feedback read; private16-point host comparison records concrete modelling misses plus scope-dependent unknowns. No prompt tuning or follow-up model calls. Case feedback now host-seen; if tuning occurs relabel seen regression. Formal old-new/dual/visual/video/stage acceptance pending, no grade or Phase27-complete claim. See27-FIT5137-A2-SAMPLE.
