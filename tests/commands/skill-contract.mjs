@@ -8,7 +8,7 @@ import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const source = fileURLToPath(new URL('../../skills/', import.meta.url));
-const commands = ['el-help', 'el-prepare', 'el-check', 'el-final', 'el-recheck', 'el-prompt'];
+const commands = ['el-help', 'el-settings', 'el-prepare', 'el-check', 'el-final', 'el-recheck', 'el-prompt'];
 // This checks packaging/link integrity only, not model routing or language semantics.
 async function inspect(root) {
   assert.deepEqual((await readdir(root)).filter(n => n.startsWith('el-')).sort(), [...commands].sort());
@@ -36,10 +36,10 @@ async function inspect(root) {
     assert.doesNotMatch(text, /\/(?:Users|home)\/|[A-Z]:\\/);
     await visit(path);
   }
-  assert.equal(descriptions.size, 6);
+  assert.equal(descriptions.size, 7);
   for (const name of ['baseline-sources','prompt-contract','prompt-store','prompt-records','codex-contract','codex-preflight','codex-isolation','codex-runner','codex-result','codex-review']) await readFile(join(root, `assignment-review/scripts/${name}.mjs`));
 }
-test('six distinct entry manifests have a complete local reference graph', () => inspect(source));
+test('seven distinct entry manifests have a complete local reference graph', () => inspect(source));
 test('installed sibling symlinks work outside the checkout; missing shared dependency fails', async () => {
   const root = await mkdtemp(join(tmpdir(), 'el-command-contract-'));
   try {

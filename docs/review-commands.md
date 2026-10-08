@@ -1,6 +1,6 @@
 # EvidenceLens 快捷检查命令
 
-六个命令复用 `assignment-review`。四个阶段检查通过隔离的独立 Codex CLI 执行，当前支持经验证的 macOS arm64 / Codex 0.141.0，并复用 Codex 自己的 ChatGPT 登录。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
+七个命令复用 `assignment-review`。四个阶段检查通过隔离的独立 Codex CLI 执行，当前支持本机已认证的 macOS arm64 / Codex 0.162.0-alpha.2，并复用 Codex 自己的 ChatGPT 登录。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
 
 安装后供命令读取的权威路由／帮助是[共享命令表](../skills/assignment-review/references/command-entrypoints.md)。本页补充安装与操作说明。
 
@@ -20,7 +20,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/.agents/skills" --apply
 ```
 
-不带 `--apply` 的检查不会创建目录或文件。安装为七个同级目录符号链接：六个 `el-*` 和共享的 `assignment-review`。CLI 不修改 Codex 配置、不安装依赖、不读取作业、不启动模型。链接持续引用此仓库的文件，所以仓库后续更新会影响已安装指令。
+不带 `--apply` 的检查不会创建目录或文件。安装为八个同级目录符号链接：七个 `el-*` 和共享的 `assignment-review`。CLI 不修改 Codex 配置、不安装依赖、不读取作业、不启动模型。链接持续引用此仓库的文件，所以仓库后续更新会影响已安装指令。
 
 | 状态 | 含义 |
 |---|---|
@@ -32,7 +32,7 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 | rolled_back | 创建失败后已撤销本次链接 |
 | changed_preserved / rollback_unverified | 回滚时身份改变或无法核实；保留现状供检查，不能声称已完整回滚 |
 
-先检查全部七项再创建；无 `--force`。目标根及父路径必须是真实目录，不能用符号链接将安装重定向。若系统目录本身是别名，请明确选择并检查其真实路径。重复安装同一来源不会改动已有链接。并发文件替换不是事务隔离；遇到失败，先检查实际状态再处理。
+先检查全部八项再创建；无 `--force`。目标根及父路径必须是真实目录，不能用符号链接将安装重定向。若系统目录本身是别名，请明确选择并检查其真实路径。重复安装同一来源不会改动已有链接。并发文件替换不是事务隔离；遇到失败，先检查实际状态再处理。
 
 ## 发现与使用
 
@@ -40,7 +40,8 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 
 | 命令 | 所需材料 | 实际输出与示例 |
 |---|---|---|
-| `$el-help` | 不需要作业材料 | 六个动作、材料、输出、示例及已知宿主支持。`$el-help` |
+| `$el-help` | 不需要作业材料 | 七个动作、材料、输出、示例及已知宿主支持。`$el-help` |
+| `$el-settings` | 人的设置请求 | 值、来源与保存位置。`$el-settings 用 Codex 和 DeepSeek 合并审查，最低 P，规划 D` |
 | `$el-prepare` | 已知要求，允许没有稿件 | 要求分析、证据需求、工作顺序、未知项。`$el-prepare 仅使用附上的简报，规划任务 T18` |
 | `$el-check` | 指定当前稿与可用要求 | 过程检查矩阵和最小修正。`$el-check 当前稿 current-v1，重点检查选择理由` |
 | `$el-final` | 当前交付材料与可用要求 | final 收尾检查、修正交接与待核验项。`$el-final 当前稿 current-v2，仅检查文字内容` |
@@ -66,9 +67,9 @@ node scripts/install-review-skills.mjs --target-root "/absolute/path/to/project/
 
 ## 更新、冲突与移除
 
-保留仓库位置，更新后重新运行 dry-run 检查七项。搬动／删除仓库会使链接失效。出现同名 Skill 时，核对宿主显示的实际来源；不同安装根的同名项不会自动合并。本安装器只检查给定目标，不扫描所有个人项目。
+保留仓库位置，更新后重新运行 dry-run 检查八项。搬动／删除仓库会使链接失效。出现同名 Skill 时，核对宿主显示的实际来源；不同安装根的同名项不会自动合并。本安装器只检查给定目标，不扫描所有个人项目。
 
-移除时先逐项用 `ls -ld` / `readlink` 核对七个确切条目。只对确认指向本仓库的符号链接使用 `unlink`；不要使用递归删除，不删除已有真实目录或来源不同的条目。需要迁移时先确认新来源和旧链接身份，再移除自己的旧链接并重跑安装。安装器不会代替用户覆盖冲突。
+移除时先逐项用 `ls -ld` / `readlink` 核对八个确切条目。只对确认指向本仓库的符号链接使用 `unlink`；不要使用递归删除，不删除已有真实目录或来源不同的条目。需要迁移时先确认新来源和旧链接身份，再移除自己的旧链接并重跑安装。安装器不会代替用户覆盖冲突。
 
 ## 验证范围
 
@@ -100,3 +101,7 @@ help/export 均不预检、不启动 Codex、不读取来源。失败但已捕�
 ## 完整回传与复查
 
 四阶段继续沿用同一安装路径：run → review-records show/full → 主对话当前证据 R/F 评估 → annotate。默认完整报告；简版须明确请求并附同轮全报告。JSON 输入与字段见 [共享指令](../skills/assignment-review/references/command-entrypoints.md#完整回传主对话评估与只读记录)。show/full/annotate、help/export 均不调用模型、不读作业原件。运行 succeeded 不是成绩/提交验收。缺 token 显示 unavailable，合法零保留，requested/reported model 分列，不估算账单；失败也可能消耗用量。旧轮明确标 historical。私有 metrics/handoff 由同任务 forget-task 验证后删除，未知/损坏文件保留。
+
+## 当前设置入口（Phase26）
+
+未配置为单 Codex、完整反馈、无自动重试。四审阅入口在 begin 前调用已安装设置助手 plan，按本次指令→项目→用户→内置逐字段解析。设置语法、精确路径、恢复与来源显示见[设置操作](../skills/assignment-review/references/review-settings.md)。选择双 agent 时使用[完整透明综合](../skills/assignment-review/references/review-synthesis.md)。设置操作不运行模型。前述 Phase18 宿主发现记录为历史六入口证据，不能证明新增 el-settings 已被 GUI 发现；Phase26 单独记录当前本机链接和隔离安装测试。

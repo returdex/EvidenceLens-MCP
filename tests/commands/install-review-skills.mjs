@@ -15,7 +15,7 @@ async function fixture(t) {
 test('dry-run writes nothing; apply and repeat install resolve shared files outside cwd', async t => {
   const { root, target } = await fixture(t);
   const dry = await installSkills(target);
-  assert.ok(dry.ok); assert.equal(dry.entries.length, 7);
+  assert.ok(dry.ok); assert.equal(dry.entries.length, 8);
   await assert.rejects(fs.stat(target), { code: 'ENOENT' });
   const applied = await installSkills(target, { apply: true });
   assert.ok(applied.ok); assert.ok(applied.entries.every(e => e.status === 'created'));

@@ -4,7 +4,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const skillNames = Object.freeze([
-  'assignment-review', 'el-help', 'el-prepare', 'el-check', 'el-final', 'el-recheck', 'el-prompt',
+  'assignment-review', 'el-help', 'el-settings', 'el-prepare', 'el-check', 'el-final', 'el-recheck', 'el-prompt',
 ]);
 const defaultSource = fileURLToPath(new URL('../skills/', import.meta.url));
 async function statOrMissing(path) {

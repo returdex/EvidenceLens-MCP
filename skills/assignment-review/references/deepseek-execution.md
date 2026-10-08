@@ -1,6 +1,6 @@
 # DeepSeek 阶段审阅
 
-四个 review 入口默认一位 DeepSeek 加一位 Codex；本路径发送获准的同一阶段提示词，不调用四角色 MCP 工具。准备阶段可以只有要求和 rubric：无稿仍是无稿，不伪造 solution 或 teacher_instructions。没有视觉输入，本路径只能审阅捕获的文本摘录。
+四个 review 入口默认单 Codex；人的本次选择或项目／用户设置包含 DeepSeek 时使用本路径；本路径发送获准的同一阶段提示词，不调用四角色 MCP 工具。准备阶段可以只有要求和 rubric：无稿仍是无稿，不伪造 solution 或 teacher_instructions。没有视觉输入，本路径只能审阅捕获的文本摘录。
 
 ## 安装与配置
 
@@ -19,7 +19,7 @@
 
 provider/result 文件沿用 Git 外状态根、0700 目录／0600 文件、排除路径及事务检查。取消后已发请求可能消耗用量，不能承诺服务端撤回。进程突然消失且未保存终态时保留 dispatched 为未完成；不自行重发或伪造成功。删除 dry-run/--apply 沿用记录助手；运行中 dispatched 不允许删除。
 
-`$el-prompt` 仍导出同任务最新实际捕获的一位，通常是第二份 Codex 输入。两位先捕获再执行，完成时间不改 latest；不拼造双模型合并提示词。
+`$el-prompt` 仍导出同任务最新实际捕获的一位，例如按设置计划先 Codex 后 DeepSeek 时，通常是第二份 DeepSeek 输入。两位先捕获再执行，完成时间不改 latest；不拼造双模型合并提示词。
 
 JSON 模式的请求形状按 [DeepSeek 官方说明](https://api-docs.deepseek.com/guides/json_mode/)核对；它保证 JSON 格式，不保证本项目的结构或证据有效，本地验证继续必要。新接线的离线检查不等于真实双模型作业验收，历史 A4 三位 Codex 记录不改写。
 
