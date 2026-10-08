@@ -39,10 +39,10 @@
 
 ### 可配置指令
 
-- [ ] **CFG-01**: 用户通过 `$el-settings` 用自然语言查看、修改和恢复审阅者组合、完整/简版输出及最低/规划档位；查看设置不启动审阅。
-- [ ] **CFG-02**: 用户设置持久保存到明确的用户或项目配置，显示本次指令→项目设置→用户默认的有效值和来源；无效设置不覆盖原配置，配置不保存凭据。
-- [ ] **CFG-03**: 未配置时用户获得单 Codex、完整回复、无自动重试；明确选择 Codex+DeepSeek 后使用合并交付方式，不隐瞒各运行的成功/失败、分歧及完整报告。
-- [ ] **CFG-04**: 用户在仓库与安装后的快捷入口/help 中获得一致的设置和审阅行为；旧配置及历史记录仍可读取，跨项目验证不污染课程文件。
+- [x] **CFG-01**: 用户通过 `$el-settings` 用自然语言查看、修改和恢复审阅者组合、完整/简版输出及最低/规划档位；查看设置不启动审阅。
+- [x] **CFG-02**: 用户设置持久保存到明确的用户或项目配置，显示本次指令→项目设置→用户默认的有效值和来源；无效设置不覆盖原配置，配置不保存凭据。
+- [x] **CFG-03**: 未配置时用户获得单 Codex、完整回复、无自动重试；明确选择 Codex+DeepSeek 后使用合并交付方式，不隐瞒各运行的成功/失败、分歧及完整报告。
+- [x] **CFG-04**: 用户在仓库与安装后的快捷入口/help 中获得一致的设置和审阅行为；旧配置及历史记录仍可读取，跨项目验证不污染课程文件。
 
 ## Future Requirements
 
@@ -83,10 +83,10 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | EVA-02 | Phase 22 | Complete (offline inputs; runtime acceptance Phase 27) |
 | EVA-03 | Phase 27 | Pending |
 | EVA-04 | Phase 27 | Pending |
-| CFG-01 | Phase 26 | Pending |
-| CFG-02 | Phase 26 | Pending |
-| CFG-03 | Phase 26 | Pending |
-| CFG-04 | Phase 26 | Pending |
+| CFG-01 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
+| CFG-02 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
+| CFG-03 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
+| CFG-04 | Phase 26 | Complete (local settings/installed CLI; actual host acceptance Phase 27) |
 
 **Coverage:** 20 requirements; 20 mapped exactly once; 0 unmapped. Roadmap approved 2026-10-06.
 

@@ -19,7 +19,7 @@
 - [x] **Phase 23: 可恢复输出与可靠结果接收** — 接收可恢复的合法输出并保留部分成果，同时保持信任边界。
 - [x] **Phase 24: 四阶段提示词与档位证据** — 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
 - [x] **Phase 25: 完整反馈与透明综合判断** — 将有效独立报告合并成完整、可追溯的判断与行动。
-- [ ] **Phase 26: 设置指令与安装入口一致性** — 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
+- [x] **Phase 26: 设置指令与安装入口一致性** — 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
 - [ ] **Phase 27: 冻结横向评估与实际验收** — 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
 
 ## Phase Details
@@ -114,7 +114,10 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 2. 用户能查看本次明确指令→项目配置→用户默认的生效值、来源和保存位置；配置不写凭据，无效修改保留原值。
 3. 未配置时实际运行采用单 Codex、完整反馈和无自动重试；选择 Codex+DeepSeek 后交付 Phase 25 的透明综合报告及各运行状态。
 4. 仓库与安装后的入口/help 行为一致，旧配置和记录可读取；跨项目验证保存并恢复原设置，不修改课程作业内容。
-**Plans**: TBD
+**Plans**: 2/2 complete (local settings and installed CLI)
+- [x] 26-01 — Strict persisted preferences and resolved execution plan
+- [x] 26-02 — Natural-language settings, installed entries/help
+**Waves**: 1→2; no provider credentials/history rewrites or real inference.
 
 ### Phase 27: 冻结横向评估与实际验收
 **Goal**: 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
@@ -138,11 +141,11 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 | 23. 可恢复输出与可靠结果接收 | v1.3 | 3/3 | Complete (local) | 2026-10-08 |
 | 24. 四阶段提示词与档位证据 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 25. 完整反馈与透明综合判断 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
-| 26. 设置指令与安装入口一致性 | v1.3 | 0/TBD | Not started | — |
+| 26. 设置指令与安装入口一致性 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 27. 冻结横向评估与实际验收 | v1.3 | 0/TBD | Not started | — |
 
 **Coverage:** 20/20 confirmed requirements mapped exactly once; no unmapped requirements.
-**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–25 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.
+**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–26 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.
 
 ---
-*Last updated: 2026-10-08 (Australia/Melbourne), Phase25 local verification.*
+*Last updated: 2026-10-08 (Australia/Melbourne), Phase26 local verification.*

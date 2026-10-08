@@ -3,28 +3,28 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
 status: ready
-last_updated: "2026-10-08T09:29:37.231605+00:00"
-last_activity: 2026-10-08 -- Phase25 locally passed; Phase22 provenance gap retained
+last_updated: "2026-10-08T09:55:04.328972+00:00"
+last_activity: 2026-10-08 -- Phase26 locally passed; Phase22 provenance gap retained
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 11
+  percent: 79
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 25 completed locally; Phase26 next; released product remains 0.3.17.
+See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 26 completed locally; Phase27 next; released product remains 0.3.17.
 
 ## Current Position
 
-Phase: 25 — locally complete; next Phase26 planning
-Plan: 25-01/02 complete
-Status: Ready for Phase26; Phase22 EVA-01 raw-feedback gap retained
-Last activity: 2026-10-08 — 32/32 focused checks; no remote inference
+Phase: 26 — locally complete; next Phase27 planning
+Plan: 26-01/02 complete
+Status: Ready for Phase27; Phase22 EVA-01 raw-feedback gap retained
+Last activity: 2026-10-08 — 38/38 focused checks, installed el-settings; no remote inference
 
 ## Deferred Items
 
@@ -36,7 +36,7 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Plan Phase26 设置指令与安装入口一致性, with conservative single-Codex/full/no-retry default; Phase27 handles actual held-out semantic acceptance. Separately locate and byte-verify original A1.3 S-FEEDBACK; do not substitute derived labels or infer Phase22 completion.
+Plan Phase27 冻结横向评估与实际验收; local settings default single-Codex/full/no-retry, actual held-out semantics and host acceptance remain unverified. Separately locate and byte-verify original A1.3 S-FEEDBACK; do not substitute derived labels or infer Phase22 completion.
 
 ## Phase23 local repair checkpoint (2026-10-08)
 
@@ -57,3 +57,7 @@ Plans0a947dd; implementation0fe6a50; instruction alignment96e2ab7. PPT-01/02/03,
 ## Phase25 authoritative checkpoint (2026-10-08)
 
 Planning675bb23, source/CLI/testsa289b34, instructionsc3f155b. FBK-01/02/03 locally complete;32/32 targeted checks, inline plan/source/instruction reviews and diff-check passed. Full original reports, complete host decision ledger and readonly synthesize export. Missing assessment remains unresolved; semantic judgment and first-review isolation not certified. Phase22 EVA-01 partial retained; Phase27 actual semantics pending. Next Phase26 configuration command and conservative defaults. No release/push/real provider request.
+
+## Phase26 authoritative checkpoint (2026-10-08)
+
+Planning6f542a9, settings/testsd7317d4, entry/install89531da. CFG-01/02/03/04 locally complete;38/38 checks and inline source/instruction review passed. Actual user-root el-settings link installed,8 unchanged on repeat; installed show confirms builtin single Codex/full/null goals/no retries, no saved preferences. GUI discovery/live model acceptance not verified. Phase22 raw feedback remains partial. Next Phase27 actual comparison planning,0.3.17 retained,no release/push/real provider request.
