@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .evidencelens.local.json
+.evidencelens/review-settings.json
+.evidencelens/.review-settings.lock/
+.evidencelens/.review-settings-*.tmp

@@ -89,7 +89,7 @@ export async function protocolFixture(mode='success',{permitInstallationMetadata
 }
 
 // Trusted library adapter fixture; this is never a production CLI option.
-export async function capturedFlow(t,{stage='in_progress',current=true,sourceId='S1',installed=false,scope:providedScope,transform}={}){
+export async function capturedFlow(t,{stage='in_progress',current=true,sourceId='S1',installed=false,scope:providedScope,transform,reviewIntent}={}){
  const fs=await import('node:fs/promises');const store=await import('../../skills/assignment-review/scripts/prompt-store.mjs');const {captureCodexPrompt}=await import('../../skills/assignment-review/scripts/codex-review.mjs');
  const root=await fs.mkdtemp('/private/tmp/el20-flow-');await fs.chmod(root,0o700);t.after(()=>fs.rm(root,{recursive:true,force:true}));
  const f=fixture(),scope=providedScope??{stateRoot:root+'/state',taskId:f.snapshot.taskId,conversationId:f.snapshot.conversationId};
@@ -101,7 +101,7 @@ export async function capturedFlow(t,{stage='in_progress',current=true,sourceId=
  f.snapshot.sequence=receipt.sequence;
  if(!current){f.snapshot.materials=[];f.capsule.sources=[];f.admitted=[];f.result.coverage=[];f.result.findings=[];}
  transform?.(f);
- const captureInput={snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted};
+ const captureInput={snapshot:f.snapshot,capsule:f.capsule,admitted:f.admitted,...(reviewIntent===undefined?{}:{reviewIntent})};
  if(installed)cli('codex-review','capture',{taskId:scope.taskId,runId:receipt.runId,...captureInput});else await captureCodexPrompt(scope,receipt.runId,captureInput);
  const exportPrompt=()=>installed?cli('prompt-records','export',{taskId:scope.taskId,expectedRunId:receipt.runId}):store.exportLatest(scope,{expectedRunId:receipt.runId});
  const exported=await exportPrompt();let calls=0;
