@@ -65,3 +65,7 @@ Planning6f542a9, settings/testsd7317d4, entry/install89531da. CFG-01/02/03/04 lo
 ## A2 sample execution checkpoint (2026-10-08)
 
 User authorized a real sample: one Codex invocation, frozen source-only A2, no evaluator content reads. Terminal/exit0/cleanup pass but original run uncertain/result_invalid:33398-byte wire response became501972bytes after115 exact quote expansions. Local wire/bound budgets separated;60/60 focused checks pass. Same reply revalidated offline504565bytes,25 findings retained in private recovered report. No second model call, original receipt unchanged; post-fix live/old-new/dual/feedback-grounded acceptance still pendingPhase27. See27-SAMPLE-SMOKE. Phase22 raw A1.3 feedback gap retained.
+
+## A2 post-fix live checkpoint (2026-10-08)
+
+Fresh user-authorized single Codex invocation at e2e8f7f succeeded in 267786 ms; no automatic retry/evaluator reads. Bound result 541730 bytes, 24 findings (19 warning/5 info), 124 exact references, 12 limitations; eight export/hash/full-report/readback checks pass. Complete private report linked in27-SAMPLE-SMOKE. Original uncertain run preserved. Actual sample reception/persistence repair verified; full semantic/tutor comparison, old-new/dual matrix and broader acceptance remain pending Phase27. Phase22 A1.3 feedback gap retained; no grade/phase-complete/release/push claim.

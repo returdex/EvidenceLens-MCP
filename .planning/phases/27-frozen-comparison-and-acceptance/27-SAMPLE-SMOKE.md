@@ -15,3 +15,15 @@ Final Node22 result/recovery/DeepSeek/handoff/recheck/records-cli/quote-expansio
 Offline same-reply validation after repair passed; result504565bytes,SHA4988e72c728d4c4ca6fd1215b93ddc15245e688910959bcd9bdcd213e167b3cb. Private offline-recovery.json,revalidated-result.json,recovered-report.md preserve25 findings/115 quotes/all limitations. No new model call and original run remainsuncertain; no fabricated succeeded receipt. Original prompt/run/full/reply/metrics unchanged. Host read all claims and spot-checked two code-consistency claims against bound snippets; not full semantic certification.
 
 EVA-03/EVA-04 remain pending. Actual end-to-end post-fix inference, dual/old-new cells, evaluator feedback comparison and broader stage/visual/host acceptance not run. A1.3 raw feedback gap retained. No course modifications/release/push; product0.3.17.
+
+## Post-fix actual sample — 2026-10-08
+
+User continuation explicitly authorized a fresh invocation; this is not an automatic retry or a rewrite of the original uncertain receipt. Source commit e2e8f7f; same final-v5 three-source allowlist, fresh task/run/prompt freeze, one Codex invocation, zero automatic retries, zero evaluator-content reads.
+
+Private root: /Users/yifeng/.local/state/evidencelens/sample-a2-2026-10-08T10-27-10-031Z-890cc03a. Run b68db25f-fe53-446c-9429-479fff1ff020. Prompt 128574 bytes, SHA a8fcadf80a0b8de8a741034e19ee2b7470d092d038d68b270c866eeec6e1e7de. Actual certified CLI 0.162.0-alpha.2, same certified binary SHA. Started 10:27:10.119Z, finished 10:31:37.898Z, elapsed 267786 ms; succeeded, exit 0, terminal observed and cleanup complete, zero refused tool calls. Requested gpt-6.1-sol; effective model unavailable. CLI-turn usage input 42207, cached 0, output 10507, reasoning 41; not billing or total request counts.
+
+Original reply 36784 bytes, SHA 3bbafe552aac1fada2e45395ac90420ae5264c64be39044b3f17246a6030fdd4. Bound result 541730 bytes, SHA 3fb9dd83ef1f8828ebd5ba339d6a0c1000953ad0246e250f906a9b0bfc106ca1. All 24 findings (19 warning, 5 info), 124 exact references and 12 limitations preserved. Private post-run-verification.json records eight passing checks: succeeded state, identical trusted readback, identical captured prompt export, prompt hash, original reply hash, full finding IDs, zero omissions, byte-identical regenerated full report. This closes actual end-to-end acceptance for this sample's quote-expansion repair.
+
+Host read all 24 claims/actions. Output distinguishes A2 skeleton from future A4 implementation; report, visuals, build and submission remain unknown; goals remain unset and grade not_assessed. Static code issues are presented with bounds and optional improvements separated from official requirements. This is host plausibility inspection, not independent certification of every claim or evaluator-feedback comparison. Earlier uncertain run remains unchanged.
+
+Formal Phase27 old/new, single/dual and evaluator-only feedback comparison remain pending, as do broader stage/host/visual acceptance and A1.3 original feedback. No coursework edits, release or push.
