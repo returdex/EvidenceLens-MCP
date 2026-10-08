@@ -5,15 +5,15 @@ import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
 import {captureRun,diagnoseCodexRun} from './prompt-store.mjs';
 import {sha256,uuid,id,fields,array,text,decode,LIMITS,fail,safeError} from './prompt-contract.mjs';
-import {renderEvidenceCapsule,parseEvidenceCapsule,renderCodexOutputGuide,validateEvidenceCapsule,prepareReferenceCapsule} from './codex-contract.mjs';
+import {renderEvidenceCapsule,parseEvidenceCapsule,renderCodexOutputGuide,renderStageReviewGuide,validateEvidenceCapsule,prepareReferenceCapsule} from './codex-contract.mjs';
 import {preflightCodex} from './codex-preflight.mjs';
 import {createIsolatedLaunch} from './codex-isolation.mjs';
 import {runCapturedCodex} from './codex-runner.mjs';
 export async function captureEvidencePrompt(scope,runId,input,executionKind){
- const v=fields(input,['snapshot','capsule','admitted']);
+ const v=fields(input,['snapshot','capsule','admitted',...(Object.hasOwn(input,'reviewIntent')?['reviewIntent']:[])]);
  const capsule=prepareReferenceCapsule(validateEvidenceCapsule(v.capsule,v.snapshot,v.admitted));
  const block=renderEvidenceCapsule(capsule,v.snapshot,v.admitted);
- const promptText=v.snapshot.promptText+'\n\n'+renderCodexOutputGuide(v.snapshot,capsule)+'\n\n'+block,snapshot={...v.snapshot,promptText,promptSha256:sha256(promptText)};
+ const promptText=v.snapshot.promptText+'\n\n'+renderStageReviewGuide(v.snapshot,v.reviewIntent)+'\n\n'+renderCodexOutputGuide(v.snapshot,capsule)+'\n\n'+block,snapshot={...v.snapshot,promptText,promptSha256:sha256(promptText)};
  parseEvidenceCapsule(snapshot);
  return captureRun(scope,runId,snapshot,{executionKind});
 }
@@ -28,7 +28,7 @@ export async function main(args){
  const abort=new AbortController(),cancel=()=>abort.abort();let runId;
  try{
   const [action,...rest]=args;if(rest.length||!['preflight','capture','run','diagnose'].includes(action))fail('unsupported');
-  const raw=await readInput(),common=['taskId','conversationId','evidenceRoots'],specific={preflight:[],capture:['runId','snapshot','capsule','admitted'],run:['runId'],diagnose:['runId']};
+  const raw=await readInput(),common=['taskId','conversationId','evidenceRoots'],specific={preflight:[],capture:['runId','snapshot','capsule','admitted','reviewIntent'],run:['runId'],diagnose:['runId']};
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>![...common,...specific[action]].includes(k)))fail('corrupt_record');
   const v=fields(raw,Object.keys(raw));runId=v.runId;
   let result;
@@ -37,7 +37,7 @@ export async function main(args){
    const conversationId=process.env.CODEX_THREAD_ID;
    if(!uuid(conversationId)||v.conversationId!==undefined&&v.conversationId!==conversationId||!id(v.taskId)||!uuid(v.runId))fail('identity_required');
    const scope={conversationId,taskId:v.taskId,evidenceRoots:v.evidenceRoots===undefined?[]:array(v.evidenceRoots,100,x=>text(x))};
-   if(action==='capture')result=await captureCodexPrompt(scope,v.runId,{snapshot:v.snapshot,capsule:v.capsule,admitted:v.admitted});
+   if(action==='capture')result=await captureCodexPrompt(scope,v.runId,{snapshot:v.snapshot,capsule:v.capsule,admitted:v.admitted,...(Object.hasOwn(v,'reviewIntent')?{reviewIntent:v.reviewIntent}:{})});
    else if(action==='diagnose')result=await diagnoseCodexRun(scope,v.runId);
    else {process.on('SIGINT',cancel);process.on('SIGTERM',cancel);result=await runCapturedCodex(scope,v.runId,{signal:abort.signal});}
   }

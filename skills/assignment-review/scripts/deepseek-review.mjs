@@ -82,7 +82,7 @@ export async function main(args){
  const controller=new AbortController(),cancel=()=>controller.abort();let runId;
  try {
   const [action,...rest]=args;if(rest.length||!['preflight','capture','run','diagnose'].includes(action))fail('unsupported');
-  const raw=await readInput(),keys={preflight:[],capture:['taskId','runId','snapshot','capsule','admitted','evidenceRoots','conversationId'],run:['taskId','runId','evidenceRoots','conversationId'],diagnose:['taskId','runId','evidenceRoots','conversationId']};
+  const raw=await readInput(),keys={preflight:[],capture:['taskId','runId','snapshot','capsule','admitted','reviewIntent','evidenceRoots','conversationId'],run:['taskId','runId','evidenceRoots','conversationId'],diagnose:['taskId','runId','evidenceRoots','conversationId']};
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>!keys[action].includes(k)))fail('corrupt_record');
   const v=fields(raw,Object.keys(raw));runId=v.runId;let result;
   if(action==='preflight')result=await preflightDeepSeek();
@@ -90,7 +90,7 @@ export async function main(args){
    const conversationId=process.env.CODEX_THREAD_ID;
    if(!uuid(conversationId)||v.conversationId!==undefined&&v.conversationId!==conversationId||!id(v.taskId)||!uuid(runId))fail('identity_required');
    const scope={conversationId,taskId:v.taskId,evidenceRoots:v.evidenceRoots===undefined?[]:array(v.evidenceRoots,100,x=>text(x))};
-   if(action==='capture')result=await captureDeepSeekPrompt(scope,runId,{snapshot:v.snapshot,capsule:v.capsule,admitted:v.admitted});
+   if(action==='capture')result=await captureDeepSeekPrompt(scope,runId,{snapshot:v.snapshot,capsule:v.capsule,admitted:v.admitted,...(Object.hasOwn(v,'reviewIntent')?{reviewIntent:v.reviewIntent}:{})});
    else if(action==='diagnose')result=await readHostProviderRun(scope,runId);
    else {process.on('SIGINT',cancel);process.on('SIGTERM',cancel);result=await runCapturedDeepSeek(scope,runId,{signal:controller.signal});}
   }
