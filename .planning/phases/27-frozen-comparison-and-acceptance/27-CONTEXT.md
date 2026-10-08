@@ -1,0 +1,9 @@
+# Phase27 context — autonomous, 2026-10-09
+
+User explicitly directs autonomous work through milestone end. Existing requirements apply; no blind feedback leakage, retry, grade promise, coursework changes or automatic publication. Plan/execute/check inline because subagents not explicitly requested. Local implementation Phases23–26 exists; samples show full reception works but semantics bounded.
+
+Formal scope: same frozen FIT5046 A2 final-v5 Solution/Brief/Rubric across old/new capture and providers. Old source3462c30; new frozen revision after matrix harness. Actual old Codex pin remains0.160.0 and must fail closed if unavailable; preserve failure instead of repinning old code. Provider shared TS source unchanged since baseline; external harness may record exact raw HTTP reply/usage without changing request/decision behavior. New explicit test selection Codex+DeepSeek does not change defaults. Max4 dispatch positions (old/new each2), at most3 live provider requests expected with old Codex preflight rejection; one per position,zero automatic retry.
+
+Current installed defaults remain singleCodex/full/null goals. Test task explicitly distinguishes minimumP/planningD without claiming achieved grade. Four historical stages not reconstructable. FIT5137 now seen tuning/regression; FIT5046 candidate untouched by semantic tuning. Original A1.3 feedback missing and excluded; close case-list requirement using verified FIT5137 tuning and FIT5046 candidate identities while preserving original partial history. Scope adjustment is case selection within user's any-assignment instruction, not pretending recovered screenshot.
+
+Canonical refs: docs/research/evaluation-protocol.md, review-runtime-baseline.md, evaluation-case-registry.md; .planning/REQUIREMENTS.md; current store/capture/isolation/synthesis modules. Native image extension deferred outside this text-only milestone.
