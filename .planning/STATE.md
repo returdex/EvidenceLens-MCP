@@ -49,3 +49,7 @@ Three plans implemented in e661bef; offline 40/40 and final recovery 5/5 pass, i
 ## Follow-up check (2026-10-08)
 
 DeepSeek loading gap closed: exact integrity-verified cached dependencies restored, old dataless directories retained, package-lock unchanged; 13/13 provider adapter checks pass. Current Codex0.162.0-alpha.2 differs from certified0.160.0; actual SHA recorded in23-VERIFICATION. Fail-closed pre-launch refusals preserved. Next: certify candidate executable/OS policy with bounded synthetic loopback and negative isolation proofs before any allowlist change; do not use real credentials or live inference. Phase22 raw feedback remains unknown.
+
+## Current authoritative checkpoint (2026-10-08)
+
+Phase23 passed for local implementation: OUT-02/03/04 complete. Exact current CLI certification723bb6c,54/54 targeted checks pass; dependency gap closed13/13, source review/diff-check pass. No full suite/remote review/semantic grade acceptance, no release/push. Phase22 EVA-01 raw screenshot remains partial and is not a phase-complete claim. Next authorized workflow step: plan Phase24 四阶段提示词与档位证据. Earlier executing/gaps text is historical checkpoint material.

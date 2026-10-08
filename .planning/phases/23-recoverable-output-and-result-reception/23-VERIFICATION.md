@@ -1,6 +1,6 @@
 ---
 phase: 23-recoverable-output-and-result-reception
-status: gaps_found
+status: passed
 verified: 2026-10-08
 ---
 
@@ -21,3 +21,11 @@ Current app-bundled Codex verified by O_NOFOLLOW/same-handle hash/stat and a bou
 Loading investigation: zod/v4 timed out while 668 package files were macOS dataless; after exact package-lock SHA512-verified cache restoration, standalone import completed in 0.06s. Remaining import trace reached @napi-rs/canvas; 5 canvas files and one native-arm64 package file were dataless. Restored existing zod4.4.3, canvas1.0.7 and canvas-darwin-arm641.0.7 from exact locally cached tarballs, validating SHA512, member types/paths, bounded sizes and declared package version. No network fetch, version/lock changes or install scripts. Old directories retained as node_modules/.el23-zod-dataless-20261008 and corresponding @napi-rs/.el23-*-dataless-20261008 backups.
 
 DeepSeek test suite now passes 13/13 (actual bounded synthetic adapter reception, source/identity refusal, HTTP error no-retry, cancellation/publication/deletion/once-only checks). This supersedes prior NOT_COMPLETED for that suite only. Existing 40/40 focused result/storage/delivery checks remain applicable; no full npm-suite or real provider acceptance inferred. CLI recertification and Phase22 raw feedback provenance remain open.
+
+## Final Phase23 acceptance (2026-10-08)
+
+CLI drift gap closed by candidate-first certification and723bb6c. 54/54 targeted Node22 checks pass (preflight, runner, startup-home, isolation, candidate-certification, recovery); source review complete and git diff --check pass. Previously passed40/40 result/storage/delivery and13/13 DeepSeek checks retained; no aggregate independent-test total invented. Exact binary/version/contract admission updated after bounded synthetic and deny-network host proofs, policy unchanged. See docs/codex-0162-isolation-certification.md for identities, intermediate failures and practical scope.
+
+OUT-02 passed: whole-response bounded presentation recovery retains original reply and transformations. OUT-03 passed: trusted bound result distinct from unverified raw diagnostic, old absence explicit, unsafe identity/source/store still reject. OUT-04 passed: explicit dual pair keeps valid complete report in both failure directions, separate statuses, no retry/model replacement or inferred semantic consensus. Phase23 implementation acceptance passed within local scope; no real provider quality or full assignment coverage inferred.
+
+Phase22 EVA-01 still partial. Historical summaries below refer to earlier checkpoints and are superseded only for the Phase23 runtime/loading gaps. Next: plan Phase24 from confirmed prompt/grade requirements; keep original feedback gap open for Phase27 evaluation.
