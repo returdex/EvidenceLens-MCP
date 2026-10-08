@@ -1,0 +1,3 @@
+# Phase24 context
+
+Source: user milestone requirements, confirmed scope and subsequent “就行/继续”.2026-10-08. Preparation/check/final/recheck use stage/current-source scope. Preserve criterion analysis and source uncertainty, exact captured exports and cross-provider material parity. Minimum P and optional D planning target separate; no automatic target upgrade or grade guarantee. Phase23 local acceptance passed; Phase22 original feedback identity remains unresolved and evaluator-only. No external inference authorized in this phase. No grade model/schema framework. Current source, safe reply and prompt-store paths reused.
