@@ -1,5 +1,5 @@
 import { validateSnapshot,sha256,decode,text } from './prompt-contract.mjs';
-import { parseEvidenceCapsule,validateCodexResultShape,validateCitationResultShape,validateReferenceResultShape,validateResultEnvelope,CODEX_LIMITS,codexFail } from './codex-contract.mjs';
+import { parseEvidenceCapsule,validateBoundResultShape,validateCitationResultShape,validateReferenceResultShape,validateResultEnvelope,CODEX_LIMITS,codexFail } from './codex-contract.mjs';
 function rejectBinding(trigger){const e=new Error('source_mismatch');e.code='source_mismatch';e.bindingTrigger=trigger;throw e;}
 // Only whole-response presentation wrappers are recoverable. Never search prose for JSON.
 export function normalizeReviewReply(raw,{deepseek=false}={}){
@@ -33,7 +33,7 @@ export function validateBoundCodexResult(snapshot,modelResponse){
  }
  const version=input&&Object.getOwnPropertyDescriptor(input,'schemaVersion')?.value;
  const citationOnly=version===2,referenceOnly=version===3;
- const r=referenceOnly?validateReferenceResultShape(input):citationOnly?validateCitationResultShape(input):validateCodexResultShape(input);
+ const r=referenceOnly?validateReferenceResultShape(input):citationOnly?validateCitationResultShape(input):validateBoundResultShape(input);
  if(citationOnly||referenceOnly)r.schemaVersion=1;
  if(['runId','taskId','stage','currentSourceId'].some(k=>r[k]!==s[k]))rejectBinding('binding_identity_mismatch');
  const sources=new Map(capsule.sources.map(x=>[x.sourceId,x])),coverage=new Map(r.coverage.map(x=>[x.sourceId,x]));
@@ -71,6 +71,6 @@ export function validateBoundCodexResult(snapshot,modelResponse){
  }
  if(s.currentSourceId===null)local.push('No current draft was captured; this is a bounded requirements/preparation review.');
  else if(coverage.get(s.currentSourceId)?.status!=='covered')local.push('Current draft evidence is incomplete; older drafts cannot establish its state.');
- const body={schemaVersion:1,runId:s.runId,taskId:s.taskId,conversationId:s.conversationId,promptSha256:s.promptSha256,modelResponse:validateCodexResultShape(r),limitations:[...new Set([...local,...r.limitations])]};
+ const body={schemaVersion:1,runId:s.runId,taskId:s.taskId,conversationId:s.conversationId,promptSha256:s.promptSha256,modelResponse:validateBoundResultShape(r),limitations:[...new Set([...local,...r.limitations])]};
  return validateResultEnvelope({...body,resultSha256:sha256(JSON.stringify(body))});
 }

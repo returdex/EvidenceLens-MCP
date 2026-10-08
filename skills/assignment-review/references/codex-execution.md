@@ -121,3 +121,7 @@ Phase 23 accepts only one whole-response JSON code fence and bounded top-level p
 共享 capture 在最终保存前加入 `<evidencelens-stage-v1>`：实际 stage/currentSourceId、阶段任务和目标边界。可选 reviewIntent 的完整形状为 `{minimumGoal:"P",planningGoal:null,recheck:false}`；用户选择 D 作为规划目标时仅 planningGoal 为 "D"。未传时两个目标均 null，旧任务的明确复查指令仍有效。目标标签限 40 个字符、80 UTF-8 字节及文字／数字／基本标签标点；未知字段或无效形状拒绝，不截断。
 
 指南、输出约定和获准证据共同计算最终哈希，两 provider 派发／导出使用同一已保存原文。旧捕获记录保持原字节，不追补指南。模型按实际 descriptor 提出档位分析，宿主 gradeBandAssessment 仍为 not_assessed；流程验证不转换为成绩认证。
+
+### 原回复与本地引文扩展限额
+
+模型原回复仍限240KiB。来源绑定后会补入完整获准摘录，多个发现引用同一摘录可能重复增加大小；本地 bound result/envelope 单独限1MiB，与私有记录存储上限一致。完整字段、身份、覆盖与原文区间校验保留；移除本地补入的引用文本后，核心模型内容仍须符合240KiB预算。超限明确拒绝并保留完整原回复，不裁剪发现或引用。已有失败回执不会因离线重新验证而改写为成功。

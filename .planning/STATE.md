@@ -61,3 +61,7 @@ Planning675bb23, source/CLI/testsa289b34, instructionsc3f155b. FBK-01/02/03 loca
 ## Phase26 authoritative checkpoint (2026-10-08)
 
 Planning6f542a9, settings/testsd7317d4, entry/install89531da. CFG-01/02/03/04 locally complete;38/38 checks and inline source/instruction review passed. Actual user-root el-settings link installed,8 unchanged on repeat; installed show confirms builtin single Codex/full/null goals/no retries, no saved preferences. GUI discovery/live model acceptance not verified. Phase22 raw feedback remains partial. Next Phase27 actual comparison planning,0.3.17 retained,no release/push/real provider request.
+
+## A2 sample execution checkpoint (2026-10-08)
+
+User authorized a real sample: one Codex invocation, frozen source-only A2, no evaluator content reads. Terminal/exit0/cleanup pass but original run uncertain/result_invalid:33398-byte wire response became501972bytes after115 exact quote expansions. Local wire/bound budgets separated;60/60 focused checks pass. Same reply revalidated offline504565bytes,25 findings retained in private recovered report. No second model call, original receipt unchanged; post-fix live/old-new/dual/feedback-grounded acceptance still pendingPhase27. See27-SAMPLE-SMOKE. Phase22 raw A1.3 feedback gap retained.

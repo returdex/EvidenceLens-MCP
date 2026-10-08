@@ -1,7 +1,7 @@
 import { validateDiagnostics } from './codex-diagnostics.mjs';
 import { fields,array,text,id,uuid,hash,sha256,decode,validateSnapshot } from './prompt-contract.mjs';
 
-export const CODEX_LIMITS=Object.freeze({sources:100,excerpts:100,findings:100,final:240*1024,envelope:256*1024,line:512*1024,output:2*1024*1024,preflightMs:10000,reviewMs:600000,graceMs:2000});
+export const CODEX_LIMITS=Object.freeze({sources:100,excerpts:100,findings:100,final:240*1024,envelope:1024*1024,line:512*1024,output:2*1024*1024,preflightMs:10000,reviewMs:600000,graceMs:2000});
 export const CODEX_CODES=Object.freeze(['codex_missing','codex_incompatible','login_required','auth_mode_unsupported','isolation_unverified','recursive_call','protocol_invalid','output_limit','timed_out','result_invalid','source_mismatch','uncertain','unsafe_path','unsupported']);
 export function codexFail(code){const error=new Error(code);error.code=code;throw error;}
 export function codexError(error){return {code:CODEX_CODES.includes(error?.code)?error.code:'uncertain'};}
@@ -177,11 +177,11 @@ function check(value,schema,field='result'){
  if(schema.enum&&!schema.enum.includes(value))shapeFail('enum',field);
  return value;
 }
-function validateModelShape(input,schema){
+function validateModelShape(input,schema,maxBytes=CODEX_LIMITS.final){
  try{
   const r=check(input,schema);
   if(!uuid(r.runId)||!id(r.taskId)||!stage(r.stage))codexFail('result_invalid');
-  if(Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.final)shapeFail('byte_limit','result');
+  if(Buffer.byteLength(JSON.stringify(r))>maxBytes)shapeFail('byte_limit','result');
   if(!unique(r.findings.map(f=>f.findingId))||!unique(r.coverage.map(c=>c.sourceId)))codexFail('result_invalid');
   for(const c of r.coverage)if(!unique(c.excerptIds))codexFail('result_invalid');
   for(const f of r.findings)for(const e of f.evidence)if(schema===MODEL_RESULT_SCHEMA&&!bytesRange(e.startByte,e.endByte))codexFail('result_invalid');
@@ -190,6 +190,12 @@ function validateModelShape(input,schema){
 }
 
 export const validateCodexResultShape=input=>validateModelShape(input,MODEL_RESULT_SCHEMA);
+// Local quote expansion has its own bounded budget. Compact model content keeps the wire cap.
+export function validateBoundResultShape(input){
+ const r=validateModelShape(input,MODEL_RESULT_SCHEMA,CODEX_LIMITS.envelope);
+ validateReferenceResultShape({...r,schemaVersion:3,findings:r.findings.map(f=>({...f,evidence:f.evidence.map(e=>({sourceId:e.sourceId,excerptId:e.excerptId}))}))});
+ return r;
+}
 export const validateCitationResultShape=input=>validateModelShape(input,MODEL_CITATION_SCHEMA);
 export const validateReferenceResultShape=input=>validateModelShape(input,MODEL_REFERENCE_SCHEMA);
 
@@ -210,7 +216,7 @@ export function validateExecutionRecord(input){
 export function validateResultEnvelope(input){
  const r=fields(input,['schemaVersion','runId','taskId','conversationId','promptSha256','modelResponse','limitations','resultSha256']);
  if(r.schemaVersion!==1||!uuid(r.runId)||!uuid(r.conversationId)||!id(r.taskId)||!hash(r.promptSha256)||!hash(r.resultSha256))codexFail('result_invalid');
- r.modelResponse=validateCodexResultShape(r.modelResponse);r.limitations=check(r.limitations,list(str(),300),'limitations');
+ r.modelResponse=validateBoundResultShape(r.modelResponse);r.limitations=check(r.limitations,list(str(),300),'limitations');
  const {resultSha256,...body}=r;
  if(sha256(JSON.stringify(body))!==resultSha256||r.modelResponse.runId!==r.runId||r.modelResponse.taskId!==r.taskId)codexFail('result_invalid');
  if(Buffer.byteLength(JSON.stringify(r))>CODEX_LIMITS.envelope)shapeFail('byte_limit','result');return r;
