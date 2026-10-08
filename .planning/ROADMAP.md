@@ -17,7 +17,7 @@
 
 - [ ] **Phase 22: 真实流程诊断与评估基线** — 核实可用作业记录、建立反馈隔离和冻结对照协议，定位现有运行失败。
 - [x] **Phase 23: 可恢复输出与可靠结果接收** — 接收可恢复的合法输出并保留部分成果，同时保持信任边界。
-- [ ] **Phase 24: 四阶段提示词与档位证据** — 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
+- [x] **Phase 24: 四阶段提示词与档位证据** — 修复四阶段任务/输出契约，提供有依据的档位与目标判断。
 - [ ] **Phase 25: 完整反馈与透明综合判断** — 将有效独立报告合并成完整、可追溯的判断与行动。
 - [ ] **Phase 26: 设置指令与安装入口一致性** — 交付持久化 el-settings 与保守默认，并贯通实际安装入口。
 - [ ] **Phase 27: 冻结横向评估与实际验收** — 在冻结材料上比较新旧与单/多审阅，给出反馈对账和明确质量局限。
@@ -87,7 +87,9 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 3. 每个适用 criterion 的反馈包含官方档位限定、支持证据、反证、缺口/覆盖、不确定性和行动；无稿准备不冒充已达标。
 4. 用户可分别表达最低 P 与可选规划 D，看到必过项、目标缺口和额外余量建议；无档位来源时保持 unknown，不保证成绩。
 5. 复查依据当前证据更新发现、保留有效历史依据，不把正常版本差异当回归；阶段内容完整性经人工语义检查，而非只验 JSON。
-**Plans**: TBD
+**Plans**: 2/2 complete (local implementation; semantic acceptance Phase27)
+- [x] 24-01 — Shared stage capture and independent targets
+- [x] 24-02 — Criterion evidence and instruction alignment
 
 ### Phase 25: 完整反馈与透明综合判断
 **Goal**: 将有效独立报告合并成完整、可追溯的判断与行动。
@@ -129,15 +131,15 @@ Cross-cutting constraints: 不削弱身份/来源/授权/存储校验；无自�
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |---|---|---|---|---|
-| 22. 真实流程诊断与评估基线 | v1.3 | 0/3 | Not started | — |
-| 23. 可恢复输出与可靠结果接收 | v1.3 | 0/TBD | Not started | — |
-| 24. 四阶段提示词与档位证据 | v1.3 | 0/TBD | Not started | — |
+| 22. 真实流程诊断与评估基线 | v1.3 | 2/5 | Gap retained (EVA-01) | — |
+| 23. 可恢复输出与可靠结果接收 | v1.3 | 3/3 | Complete (local) | 2026-10-08 |
+| 24. 四阶段提示词与档位证据 | v1.3 | 2/2 | Complete (local) | 2026-10-08 |
 | 25. 完整反馈与透明综合判断 | v1.3 | 0/TBD | Not started | — |
 | 26. 设置指令与安装入口一致性 | v1.3 | 0/TBD | Not started | — |
 | 27. 冻结横向评估与实际验收 | v1.3 | 0/TBD | Not started | — |
 
 **Coverage:** 20/20 confirmed requirements mapped exactly once; no unmapped requirements.
-**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. No phase execution or provider calls have started.
+**Approval:** User confirmed requirements and approved this roadmap on 2026-10-06. Phases23–24 locally implemented; Phase22 raw-feedback gap retained. Actual held-out provider evaluation remains Phase27.
 
 ---
-*Last updated: 2026-10-06 (Australia/Melbourne) after user approval of requirements and roadmap.*
+*Last updated: 2026-10-08 (Australia/Melbourne), Phase24 local verification.*

@@ -8,9 +8,9 @@
 
 ### 阶段提示词
 
-- [ ] **PPT-01**: 用户在准备、检查、最终审阅、复查中获得符合该阶段任务、当前稿和读取范围的提示词；重复或冲突条款经实际流程审计后修复。
-- [ ] **PPT-02**: 用户可导出与实际发送内容一致的提示词，包含适用的基本输出约定；不同 provider 的任务内容和获准来源可核对。
-- [ ] **PPT-03**: 用户获得逐适用 criterion 的完整分析、证据缺口与可执行建议；无稿准备不冒充完成度，复查只按当前证据更新发现。
+- [x] **PPT-01**: 用户在准备、检查、最终审阅、复查中获得符合该阶段任务、当前稿和读取范围的提示词；重复或冲突条款经实际流程审计后修复。
+- [x] **PPT-02**: 用户可导出与实际发送内容一致的提示词，包含适用的基本输出约定；不同 provider 的任务内容和获准来源可核对。
+- [x] **PPT-03**: 用户获得逐适用 criterion 的完整分析、证据缺口与可执行建议；无稿准备不冒充完成度，复查只按当前证据更新发现。
 
 ### 运行可靠性与兼容接收
 
@@ -27,8 +27,8 @@
 
 ### 档位与目标
 
-- [ ] **BND-01**: 用户按官方 rubric 的实际档位逐 criterion 查看支持、反证、覆盖和不确定性；未知档位不被虚构，运行成功不等于档位达标。
-- [ ] **BND-02**: 用户可分别指定最低目标和可选规划目标；P 不自动升级为 D，必过项、目标缺口与额外余量建议分别展示且不保证成绩。
+- [x] **BND-01**: 用户按官方 rubric 的实际档位逐 criterion 查看支持、反证、覆盖和不确定性；未知档位不被虚构，运行成功不等于档位达标。
+- [x] **BND-02**: 用户可分别指定最低目标和可选规划目标；P 不自动升级为 D，必过项、目标缺口与额外余量建议分别展示且不保证成绩。
 
 ### 反馈隔离评估
 
@@ -67,9 +67,9 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 
 | Requirement | Phase | Status |
 |---|---|---|
-| PPT-01 | Phase 24 | Pending |
-| PPT-02 | Phase 24 | Pending |
-| PPT-03 | Phase 24 | Pending |
+| PPT-01 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
+| PPT-02 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
+| PPT-03 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
 | OUT-01 | Phase 22 | Complete |
 | OUT-02 | Phase 23 | Complete (local implementation) |
 | OUT-03 | Phase 23 | Complete (local implementation) |
@@ -77,8 +77,8 @@ Requirements and roadmap approved. Each requirement maps exactly once to Phases 
 | FBK-01 | Phase 25 | Pending |
 | FBK-02 | Phase 25 | Pending |
 | FBK-03 | Phase 25 | Pending |
-| BND-01 | Phase 24 | Pending |
-| BND-02 | Phase 24 | Pending |
+| BND-01 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
+| BND-02 | Phase 24 | Complete (local prompt implementation; semantic acceptance Phase 27) |
 | EVA-01 | Phase 22 | Partial |
 | EVA-02 | Phase 22 | Complete (offline inputs; runtime acceptance Phase 27) |
 | EVA-03 | Phase 27 | Pending |

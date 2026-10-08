@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 提示词、反馈质量与可配置审阅
-status: gaps_found
+status: ready
 last_updated: "2026-10-08T06:02:53.168226+00:00"
-last_activity: 2026-10-08 -- Phase23 passed; Phase22 feedback provenance gap retained
+last_activity: 2026-10-08 -- Phase24 locally passed; Phase22 provenance gap retained
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_phases: 2
+  total_plans: 10
+  completed_plans: 7
+  percent: 70
 ---
 
 # EvidenceLens MCP — Project State
 
 ## Project Reference
 
-See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 22 — 真实流程诊断与评估基线; released product remains 0.3.17.
+See [PROJECT](PROJECT.md), updated 2026-10-06. Core value: trustworthy independently checked findings grounded in controlled local evidence. Current focus: Phase 24 completed locally; Phase25 next; released product remains 0.3.17.
 
 ## Current Position
 
-Phase: 22 (真实流程诊断与评估基线 gap closure) — GAPS_FOUND
-Plan: 22-04 partial / 22-05 complete (2 of 5 fully accepted; historical partial summaries retained)
-Status: Gaps found; raw A1.3 feedback identity unknown
-Last activity: 2026-10-07 -- Gap execution: 22-05 complete; 22-04 feedback identity partial
+Phase: 24 — locally complete; next Phase25 planning
+Plan: 24-01/02 complete
+Status: Ready for Phase25; Phase22 EVA-01 raw-feedback gap retained
+Last activity: 2026-10-08 — 46/46 focused checks; no remote inference
 
 ## Deferred Items
 
@@ -36,11 +36,7 @@ Pre-close SDK audit-open: zero items/errors at 2026-10-05T11:37:41.261Z. Four ph
 
 ## Next Action
 
-Locate and byte-verify the original A1.3 S-FEEDBACK screenshot; historical rubric applicability remains unknown. Two actual partial source-only final freezes/capsules ready, protocol sealed; 33/33 focused checks passed. No real model calls. EVA-02 offline acceptance complete, EVA-01 partial; do not phase.complete from summary file counts.
-
-## Planning ahead
-
-Phase23 has three verified plan structures covering OUT-02/03/04 (3/3), created from confirmed requirements and inspected existing source. No implementation or execution readiness claimed; current Phase22 gaps_found remains authoritative. Next after raw-feedback identity closure: execute Phase23; absent that, execution needs an explicit bounded dependency exception.
+Plan Phase25 完整反馈与透明综合判断. Phase26 handles conservative settings defaults; Phase27 handles actual held-out semantic acceptance. Separately locate and byte-verify original A1.3 S-FEEDBACK; do not substitute derived labels or infer Phase22 completion.
 
 ## Phase23 local repair checkpoint (2026-10-08)
 
@@ -53,3 +49,7 @@ DeepSeek loading gap closed: exact integrity-verified cached dependencies restor
 ## Current authoritative checkpoint (2026-10-08)
 
 Phase23 passed for local implementation: OUT-02/03/04 complete. Exact current CLI certification723bb6c,54/54 targeted checks pass; dependency gap closed13/13, source review/diff-check pass. No full suite/remote review/semantic grade acceptance, no release/push. Phase22 EVA-01 raw screenshot remains partial and is not a phase-complete claim. Next authorized workflow step: plan Phase24 四阶段提示词与档位证据. Earlier executing/gaps text is historical checkpoint material.
+
+## Phase24 authoritative checkpoint (2026-10-08)
+
+Plans0a947dd; implementation0fe6a50; instruction alignment96e2ab7. PPT-01/02/03,BND-01/02 locally implemented,46/46 focused Node22 checks and inline source/instruction review passed. Four-stage captured task guide and separate minimum/planning goals; five-task depth retained. Actual model grades/completeness remain unverified Phase27; host grade not_assessed. No release/push/provider request;0.3.17 retained. Next Phase25, with Phase22 EVA-01 still partial.
