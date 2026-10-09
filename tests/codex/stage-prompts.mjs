@@ -24,6 +24,7 @@ for(const stage of ['preparation','in_progress','final'])for(const recheck of [f
   const s={...f.snapshot,promptText:saved.promptText,promptSha256:sha256(saved.promptText)};
   assert.equal(parseEvidenceCapsule(s).sources[0].excerpts[0].text,f.content);
   assert.match(guide,/counterevidence/);assert.match(guide,/not_assessed/);assert.match(guide,/never upgrade P/);
+  assert.match(guide,/conservative per-criterion score ranges/);assert.match(guide,/do not assign zero to unknown/);assert.match(guide,/Do not guarantee grades/);assert.doesNotMatch(guide,/Do not predict totals/);
   if(recheck)assert.match(guide,/resolved\/no_longer_applicable/);
   if(stage==='preparation')assert.match(guide,/Without a draft/);
   if(old)assert.equal((await readRunRecord(scope,{historicalRunId:old.runId})).snapshot.promptText,old.promptText);
@@ -51,4 +52,16 @@ test('capture rejects excluded evidence and preserves missing-current final scop
  const saved=await exportLatest(scope,{expectedRunId:r.runId});assert.match(saved.promptText,/pending-check list, not final acceptance/);
  assert.equal(parseEvidenceCapsule({...f.snapshot,promptText:saved.promptText,promptSha256:sha256(saved.promptText)}).sources.length,0);
  assert.ok(!saved.promptText.includes(f.content));
+});
+
+test('score estimation distinguishes sufficient current evidence, partial coverage and hypothetical plans',()=>{
+ const f=fixture();
+ for(const stage of ['preparation','in_progress','final'])for(const recheck of [false,true]){
+  const g=renderStageReviewGuide({...f.snapshot,stage},{minimumGoal:'P',planningGoal:'D',recheck});
+  assert.match(g,/official band-to-score mapping, criterion weights and deduction rules/);
+  assert.match(g,/aggregate total range only when/);assert.match(g,/covered-criteria subtotal/);
+  assert.match(g,/not statistical confidence intervals/);assert.match(g,/actual later marker score/);
+  assert.match(g,/Without a readable current draft/);assert.match(g,/conditional planning outcomes/);
+  assert.match(g,/Tutor feedback, marks and feedback-derived materials remain evaluator-only/);
+ }
 });

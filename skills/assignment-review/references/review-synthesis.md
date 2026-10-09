@@ -34,3 +34,5 @@ runIds 支持一个，或同任务同对话、不同 executionKind 的两个。�
 输出含报告、所有 group、综合 judgment、prompt/result 身份哈希和 synthesisSha256。命令只读，不修改原报告或保存新状态；需要留档时将完整 JSON/Markdown 交付到 Git 外私有报告，并与同轮完整原报告一起保留。已有按 run 保存的 annotate 复查记录仍按原协议管理。
 
 匹配输入证明任务／材料一致，不证明语义正确或首审隔离。firstReviewIndependence 保持 not_verified：现有记录没有权威的双输入预派发时序证明，不能用调用者提供的 capturedAt 冒充认证。宿主依上述流程核对实际顺序并披露未核验范围。综合 categories、理由及判断始终标 host_judgment_not_independently_verified；gradeBandAssessment=not_assessed，提交状态 not_verified。档位分析仍遵循实际 rubric、最低目标与可选规划目标规则。
+
+评分区间合并时，保留每位审阅者的逐项依据、覆盖、原始估分及分歧，不把两个总分取平均当作正确成绩。材料充分的未验证模型估分可在 findings 和综合判断中呈现；缺少关键材料只评已覆盖项，未知不按零分或外推总分。gradeBandAssessment=not_assessed 是等级达成未认证，不代表禁止模型估分。模型估分、目标与封存后的老师实际评分分开；无稿建议是有条件规划，不能冒充当前成绩。
