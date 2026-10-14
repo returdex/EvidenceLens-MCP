@@ -12,6 +12,17 @@ for(const [status,code] of [['Not logged in','login_required'],['Logged in using
 test('missing executable and unsupported platforms fail before spawn',async()=>{assert.equal((await preflightCodex(options('/no/such/codex'))).code,'codex_missing');assert.equal((await preflightCodex({...options('/no/such/codex'),platform:'linux'})).code,'unsupported');});
 test('recursive child is rejected before any executable access',async()=>{assert.equal((await preflightCodex({...options('/no/such/codex'),environment:{EVIDENCELENS_CHILD:'1'}})).code,'recursive_call');});
 test('untrusted executable mode and changed version are rejected',async()=>{await fake(script('Logged in using ChatGPT').replace(CODEX_VERSION,'0.140.0'),async exe=>assert.equal((await preflightCodex(options(exe))).code,'codex_incompatible'));await fake(script('Logged in using ChatGPT'),async exe=>{await chmod(exe,0o777);assert.equal((await preflightCodex(options(exe))).code,'unsafe_path');});});
+test('compatibility failure distinguishes certified-version drift from missing flags without raw output',async()=>{
+ await fake(script('Logged in using ChatGPT').replace(CODEX_VERSION,'0.999.0'),async exe=>{
+  const r=await preflightCodex(options(exe));assert.equal(r.code,'codex_incompatible');assert.equal(r.compatibilityReason,'version_mismatch');assert.equal(r.observedVersion,'0.999.0');assert.equal(r.certifiedVersion,CODEX_VERSION);
+ });
+ await fake(script('Logged in using ChatGPT').replace('--ignore-rules',''),async exe=>{
+  const r=await preflightCodex(options(exe));assert.equal(r.compatibilityReason,'required_flags_missing');assert.deepEqual(r.missingFlags,['--ignore-rules']);
+ });
+ await fake(script('Logged in using ChatGPT').replace('codex-cli '+CODEX_VERSION,'PRIVATE_TOKEN_SENTINEL'),async exe=>{
+  const r=await preflightCodex(options(exe));assert.equal(r.observedVersion,null);assert.doesNotMatch(JSON.stringify(r),/PRIVATE_TOKEN/);
+ });
+});
 test('deadline reaps owned hanging preflight group',()=>fake('sleep 30',async exe=>{const at=Date.now(),r=await preflightCodex({...options(exe),timeoutMs:80});assert.equal(r.code,'timed_out');assert.ok(Date.now()-at<4500);assert.equal(r.cleanupComplete,true);}));
 test('oversize output stops process without leaking text',()=>fake('while true; do echo outputflood; done',async exe=>{const r=await preflightCodex(options(exe));assert.equal(r.code,'output_limit');assert.equal(r.cleanupComplete,true);}));
 test('child environment excludes credentials, proxies and parent identity',()=>{const env=childEnvironment({HOME:'/home/user',CODEX_HOME:'/home/user/codex',OPENAI_API_KEY:'secret',CODEX_THREAD_ID:'parent',HTTPS_PROXY:'secret',SHELL:'/bin/zsh'},'/private/tmp/scratch');assert.deepEqual(Object.keys(env).sort(),['CODEX_HOME','EVIDENCELENS_CHILD','HOME','LANG','PATH','TMPDIR']);assert.equal(env.EVIDENCELENS_CHILD,'1');assert.equal(env.OPENAI_API_KEY,undefined);});

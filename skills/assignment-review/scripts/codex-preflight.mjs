@@ -72,10 +72,14 @@ export async function preflightCodex({executable,environment=process.env,platfor
   };
   const version=await probe(['--version']);
   if(version.code)return {ok:false,code:version.code,cleanupComplete:version.cleanupComplete};
-  if(version.exitCode!==0||version.output.trim()!=='codex-cli '+CODEX_VERSION)codexFail('codex_incompatible');
+  if(version.exitCode!==0||version.output.trim()!=='codex-cli '+CODEX_VERSION){
+   const observed=/^codex-cli (\d{1,5}\.\d{1,5}\.\d{1,5}(?:-(?:alpha|beta|rc|dev)(?:\.\d{1,5}){0,4})?)$/.exec(version.output.trim())?.[1]??null;
+   return {ok:false,code:'codex_incompatible',compatibilityReason:'version_mismatch',observedVersion:observed,certifiedVersion:CODEX_VERSION};
+  }
   const help=await probe(['exec','--help']);
   if(help.code)return {ok:false,code:help.code,cleanupComplete:help.cleanupComplete};
-  if(help.exitCode!==0||['--json','--output-schema','--ephemeral','--ignore-user-config','--ignore-rules','--strict-config','--skip-git-repo-check'].some(flag=>!help.output.includes(flag)))codexFail('codex_incompatible');
+  const missingFlags=['--json','--output-schema','--ephemeral','--ignore-user-config','--ignore-rules','--strict-config','--skip-git-repo-check'].filter(flag=>!help.output.includes(flag));
+  if(help.exitCode!==0||missingFlags.length)return {ok:false,code:'codex_incompatible',compatibilityReason:'required_flags_missing',missingFlags,certifiedVersion:CODEX_VERSION};
   const login=await probe(['login','status']);
   if(login.code)return {ok:false,code:login.code,cleanupComplete:login.cleanupComplete};
   if(/\b(?:not logged in|logged out)\b/i.test(login.output))codexFail('login_required');

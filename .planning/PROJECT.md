@@ -10,7 +10,7 @@ Produce trustworthy, independently checked findings grounded in controlled local
 
 ## Current State
 
-Milestone **v1.3 locally complete 2026-10-09**, 20/20 requirements, Phases22–27. [v1.3 completion](milestones/v1.3-COMPLETION.md), [scoped evaluation](../docs/research/evaluation-results-v1.3.md), [audit](milestones/v1.3-MILESTONE-AUDIT.md). Product remains **[0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17)**. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
+Milestone **v1.3 locally complete 2026-10-09**, 20/20 requirements, Phases22–27. [v1.3 completion](milestones/v1.3-COMPLETION.md), [scoped evaluation](../docs/research/evaluation-results-v1.3.md), [audit](milestones/v1.3-MILESTONE-AUDIT.md). At local milestone completion, product remained **[0.3.17 published](https://github.com/returdex/EvidenceLens-MCP/releases/tag/v0.3.17)**. Phases 18–21: 4 phases, 21 plans, 44 tasks, 21/21 requirements. [Completion authority](milestones/v1.2-COMPLETION.md), [audit](v1.2-MILESTONE-AUDIT.md), [archived requirements](milestones/v1.2-REQUIREMENTS.md). Earlier milestones and phase reports retain their original source/host/proof scopes.
 
 Actual authorized synthetic initial/recheck Codex pair succeeded with exact exports and reported CLI token provenance. Separate A4 DeepSeek/Codex evidence is recorded, not repeated here. Inline host semantic judgments and source binding do not certify grade bands, submission, universal model accuracy or other platforms. Supported actual boundary is the pinned macOS arm64 CLI/Skill host; GUI selector observation is unavailable.
 
@@ -109,3 +109,8 @@ At phase transitions, move verified requirements to Validated, record invalidate
 
 ---
 *Last updated: 2026-10-09 after v1.3 local completion and full project evolution review.*
+
+
+## Current product compatibility fix — 2026-10-15
+
+Development product 0.3.18 recertifies the installed macOS arm64 Codex CLI 0.162.0-alpha.17.2 for the existing gpt-6.1-sol review path. Strict binary/isolation/source guards and historical receipts remain; new preflight diagnostics explain version drift separately from missing flags. This does not open a new planning milestone or revise archived evaluation results.

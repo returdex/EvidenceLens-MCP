@@ -198,3 +198,17 @@ Authorized real pair and scoped host judgments: see ../.planning/phases/21-revie
 ## v1.2 archival compatibility — 2026-10-05
 
 Archive safety commit 77b1b83 precedes requirements removal. Exact snapshots/audit preservation, 21 archived completed requirements and 42 derived relative links checked. Runtime/source/package/lock/version unchanged from a6ab604. Offline proof-chain suite after removal: 81/81, exit 0, 5.98 s, no skips/failures. No model or provider request. See [completion](../.planning/milestones/v1.2-COMPLETION.md).
+
+
+## Desktop CLI compatibility repair (2026-10-15, product 0.3.18)
+
+Installed Codex changed from certified 0.162.0-alpha.2 to 0.162.0-alpha.17.2. The installed-host regression test first failed on this exact mismatch; required CLI flags and installed Skill linkage remained compatible. The new binary passed an actual loopback protocol candidate with fabricated auth and unchanged auth/installation/outside sentinels before recertification. Refreshed current profile SHA-256 and reviewed launch-contract digest; model remains gpt-6.1-sol. Historical receipt versions remain accepted, unknown executables/versions still reject, and failed runs are not replayed. Preflight now distinguishes safe observed/certified version drift from a fixed missing-flag list, without raw CLI errors or credentials.
+
+Targeted native protocol/isolation/preflight/source/receipt checks passed149/149 in27.232 seconds. A new explicitly requested requirements-only preparation succeeded in295626ms with25 complete findings. Root reviewed all findings, retained source-backed corrections in a25-group host ledger, and independently revalidated the saved bound result/receipt. This uses one Codex and no DeepSeek, no previous result substitution, and no other-chat message; private course files, source text and run identifiers are excluded here. Source binding and host review do not certify grades or submission completion.
+
+Initial build/validation stalled on local dataless dependency placeholders. Existing local npm cache archives were SHA-512 verified against the unchanged lock;667 declaration and1585 runtime placeholder files were restored, originals preserved in ignored dependency recovery directories. Files absent from a verified archive were skipped. No dependency upgrades, fresh downloads or fabricated type declarations. Fresh npm run build then passed. Native Git stalled on local diff inspection; bundled Git was used for review/synchronization. These are local environment limitations, separate from the certified CLI behavior.
+
+
+The six-file Vitest batch returned103/118 passes and15 timeouts in73.95s; the timed-out cases read local tracked README/image/PDF/review fixtures that still have dataless flags. This is not a full regression pass and no fixture was replaced with synthetic data. A bounded Git-HEAD fixture recovery preflight also timed out on an existing image blob before changing any tracked fixture. The independent CLI149-test gate and real preparation result above are separately verified.
+
+Final rerun of the same six affected Vitest files returned117/118 passes in10.32s. One existing end-to-end case, "reviews four real fixtures through an injected provider without network or absolute-path leakage", timed out at5000ms while reading a tracked image fixture. This remains an unresolved local fixture-read limitation; full-suite success is not claimed. Installed seven Skill links also passed the existing installer dry-run with all entries unchanged.

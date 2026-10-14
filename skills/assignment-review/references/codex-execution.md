@@ -133,3 +133,8 @@ Phase 23 accepts only one whole-response JSON code fence and bounded top-level p
 估分区间不是经校准的统计置信区间，不以任意宽区间掩盖不确定性。模型估分、用户最低/规划目标和老师实际分数分开；不保证成绩。估分通过现有 findings claim/action 与 limitations 完整交付，不增加 wire 字段。gradeBandAssessment=not_assessed 表示宿主尚未认证达成等级，不禁止明确标注的未验证模型估分。
 
 获准课件/实验材料可作为课程方法的引用依据，示例或偏好不自动成为强制要求；没有新增文件读取授权。Tutor feedback、成绩及其衍生材料仍仅供输出封存后的评估。旧捕获、冻结输入和 v1.3 样本保持原字节；新规则只适用于后续捕获。预测误差须另用封存后的真实评分对账，本次修改不证明任何误差上限。
+
+
+## 2026-10-15 installed CLI certification
+
+Current certified desktop CLI: 0.162.0-alpha.17.2 on macOS arm64; model remains gpt-6.1-sol. The current executable SHA-256 and reviewed launcher digest are refreshed only after actual protocol/isolation checks. Older execution receipts remain readable at their original versions. Preflight reports safe observed/certified versions for version_mismatch and a fixed missingFlags list for required_flags_missing. An app update does not automatically authorize an unverified executable. Preserve failed attempts and create a new begin/capture after recertification; do not substitute host analysis.

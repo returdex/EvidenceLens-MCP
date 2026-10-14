@@ -1,6 +1,6 @@
 # EvidenceLens 快捷检查命令
 
-七个命令复用 `assignment-review`。四个阶段检查通过隔离的独立 Codex CLI 执行，当前支持本机已认证的 macOS arm64 / Codex 0.162.0-alpha.2，并复用 Codex 自己的 ChatGPT 登录。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
+七个命令复用 `assignment-review`。四个阶段检查通过隔离的独立 Codex CLI 执行，当前支持本机已认证的 macOS arm64 / Codex 0.162.0-alpha.17.2，并复用 Codex 自己的 ChatGPT 登录。阶段指令在检查前保存实际任务提示词，`$el-prompt` 只导出同一任务最近一次尝试的已捕获原文，状态和材料说明分开呈现。
 
 安装后供命令读取的权威路由／帮助是[共享命令表](../skills/assignment-review/references/command-entrypoints.md)。本页补充安装与操作说明。
 
@@ -105,3 +105,8 @@ help/export 均不预检、不启动 Codex、不读取来源。失败但已捕�
 ## 当前设置入口（Phase26）
 
 未配置为单 Codex、完整反馈、无自动重试。四审阅入口在 begin 前调用已安装设置助手 plan，按本次指令→项目→用户→内置逐字段解析。设置语法、精确路径、恢复与来源显示见[设置操作](../skills/assignment-review/references/review-settings.md)。选择双 agent 时使用[完整透明综合](../skills/assignment-review/references/review-synthesis.md)。设置操作不运行模型。前述 Phase18 宿主发现记录为历史六入口证据，不能证明新增 el-settings 已被 GUI 发现；Phase26 单独记录当前本机链接和隔离安装测试。
+
+
+### CLI update recovery
+
+`codex_incompatible` can mean the desktop CLI changed after the last certification. `codex-review.mjs preflight` now returns `compatibilityReason`, safe `observedVersion` and `certifiedVersion`, or the fixed list of missing required flags. Repair requires certifying the installed binary through isolation/protocol checks; do not remove the gate or replay a failed run. After repair, use a new begin/capture in the intended conversation; private records remain conversation scoped.
